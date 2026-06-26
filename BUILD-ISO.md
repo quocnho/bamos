@@ -1,29 +1,51 @@
 # Hướng dẫn Build BamOS ISO & Test VM
 
-## Yêu cầu
+> ⚠️ **Môi trường hiện tại**: Laptop chạy **RakuOS** (Fedora Atomic / bootc-based)
+> — immutable OS, cài package qua `rakuos install` (overlay) hoặc `rpm-ostree install` (layer).
+> Công cụ VM đã được cài sẵn (xem mục 0).
+
+---
+
+## 0. Môi trường đã có sẵn
+
+| Công cụ | Trạng thái | Ghi chú |
+|---------|-----------|---------|
+| `bluebuild` CLI | ✅ Đã cài | `/usr/local/bin/bluebuild` |
+| `podman` | ✅ Có sẵn | Base image |
+| `qemu-kvm` | ✅ Đã cài | Qua `rakuos install` |
+| `virt-manager` | ✅ Đã cài | GUI tạo VM |
+| `virt-install` | ✅ Đã cài | CLI tạo VM |
+| `gnome-boxes` | ✅ Đã cài | GUI đơn giản |
+| KVM acceleration | ✅ Intel VT-x | `/dev/kvm` available |
+| `libvirtd` | ✅ Đã enable | `sudo systemctl enable --now libvirtd` |
+| Default network | ✅ Đã autostart | `virsh net-autostart default` |
+| Disk space | ~459 GB trên `/var` | Cho VM images |
+
+> **Lưu ý**: Re-login sau khi thêm vào nhóm `libvirt`:
+> ```bash
+> newgrp libvirt
+> ```
+> Hoặc đăng xuất / đăng nhập lại.
+
+### Cài thêm công cụ nếu thiếu
 
 ```bash
-# BlueBuild CLI
-sudo dnf copr enable xyny/bluebuild
-sudo dnf install bluebuild
+# Trên RakuOS (immutable) — dùng rakuos install (overlay, không cần reboot)
+sudo rakuos install qemu-kvm virt-manager virt-install gnome-boxes
 
-# Podman
-sudo dnf install podman podman-docker
-
-# Công cụ tạo ISO
-sudo dnf install lorax-lmc-novirt  # Anaconda live ISO creator
-
-# 15GB+ dung lượng trống cho mỗi lần build
+# Hoặc dùng rpm-ostree (layer, cần reboot)
+sudo rpm-ostree install qemu-kvm virt-manager virt-install gnome-boxes
+sudo systemctl reboot
 ```
 
 ---
 
 ## 1. Build Image
 
-### Build toàn bộ (đầy đủ packages)
+### Build toàn bộ
 
 ```bash
-# Build KDE edition (lần đầu mất ~20-40 phút)
+# Build KDE edition (lần đầu mất ~20-40 phút, tuỳ internet)
 sudo bluebuild build recipes/bamos-kde.yml
 
 # Build GNOME edition
@@ -33,7 +55,7 @@ sudo bluebuild build recipes/bamos-gnome.yml
 sudo bluebuild build recipes/bamos-cosmic.yml
 ```
 
-### Build nhanh (skip validation nếu cần)
+### Build nhanh (skip validation)
 
 ```bash
 sudo bluebuild build --skip-validation recipes/bamos-kde.yml
@@ -61,7 +83,7 @@ Dùng `bluebuild generate-iso`:
 # ISO từ image đã build local
 sudo bluebuild generate-iso \
     --iso-name BamOS-KDE-$(date +%Y%m%d).iso \
-    image ghcr.io/quocnho/bamos-kde:latest
+    image localhost/bamos-kde:latest
 
 # ISO từ recipe (build + generate cùng lúc)
 sudo bluebuild generate-iso \
@@ -69,17 +91,14 @@ sudo bluebuild generate-iso \
     recipe recipes/bamos-kde.yml
 ```
 
-### Build ISO thủ công (nếu cần tinh chỉnh)
-
-Phương pháp này cho phép chạy `installer/configure-iso.sh` để tuỳ biến:
+### Build ISO thủ công (nếu cần chạy configure-iso.sh riêng)
 
 ```bash
-# Bước 1: Export image từ local storage
+# Bước 1: Export image
 IMAGE_NAME="bamos-kde"
 IMAGE_TAG="latest"
-sudo podman pull localhost/$IMAGE_NAME:$IMAGE_TAG
 
-# Bước 2: Mount image và chạy configure-iso
+# Bước 2: Mount image và chạy configure-iso.sh
 CONTAINER=$(sudo podman create localhost/$IMAGE_NAME:$IMAGE_TAG)
 sudo podman cp installer $CONTAINER:/tmp/
 sudo podman start -a $CONTAINER \
@@ -87,11 +106,11 @@ sudo podman start -a $CONTAINER \
 sudo podman commit $CONTAINER $IMAGE_NAME:iso-ready
 sudo podman rm $CONTAINER
 
-# Bước 3: Dùng lorax để tạo live ISO
-# (Tham khảo: https://github.com/ublue-os/titanoboa)
+# Bước 3: Dùng lorax + titanoboa để tạo live ISO
+# Tham khảo: https://github.com/ublue-os/titanoboa
 ```
 
-> **Lưu ý:** `bluebuild generate-iso` tự động chạy `configure-iso.sh`. Chỉ cần dùng lệnh trên nếu bạn muốn custom thêm.
+> **Lưu ý:** `bluebuild generate-iso` tự động chạy `configure-iso.sh`. Chỉ cần dùng phương pháp thủ công nếu bạn muốn custom thêm.
 
 ---
 
@@ -100,21 +119,29 @@ sudo podman rm $CONTAINER
 ### Test với GNOME Boxes (đơn giản nhất)
 
 ```bash
-# Cài GNOME Boxes
-sudo dnf install gnome-boxes
+# Mở Boxes từ menu ứng dụng
+# Hoặc chạy từ terminal:
+gnome-boxes &
 
-# Mở Boxes → Chọn ISO → Tạo VM
+# Chọn ISO → Tạo VM
 # Khuyến nghị: 4GB RAM, 2 CPU, 32GB disk
 ```
 
 ### Test với virt-manager (chi tiết hơn)
 
 ```bash
-# Cài virt-manager
-sudo dnf install virt-manager virt-install
+# Mở virt-manager
+virt-manager &
 
+# Tạo VM mới: File → New VM → Local install media
+# Chọn ISO, để lại 4GB RAM, 2 CPU, 32GB disk
+```
+
+### Test với virt-install (CLI)
+
+```bash
 # Tạo VM từ ISO
-virt-install \
+sudo virt-install \
     --name bamos-test \
     --memory 4096 \
     --vcpus 2 \
@@ -142,54 +169,35 @@ qemu-system-x86_64 \
 
 ---
 
-## 4. Test Image trực tiếp (Container, không cần ISO)
+## 4. Test Image trực tiếp (Container) — Nhanh nhất
 
-Nhanh hơn nhiều so với ISO:
+Không cần ISO, chạy thẳng container từ image vừa build:
 
 ```bash
-# Chạy container từ image
+# Chạy container tương tác
 podman run --rm -it \
     --name bamos-test \
     localhost/bamos-kde:latest \
     /bin/bash
 
-# Kiểm tra packages đã cài
-rpm -qa | grep -i bamos
+# Trong container, kiểm tra:
 cat /etc/os-release
-
-# Kiểm tra kernel
 uname -r
-
-# Kiểm tra services
-systemctl list-units --type=service | grep bamos
-```
-
-### Test với bootc (rebase thật trên máy ảo)
-
-Nếu có VM chạy Fedora Atomic:
-
-```bash
-# Trong VM
-sudo bootc switch ghcr.io/quocnho/bamos-kde:latest
-sudo systemctl reboot
-
-# Kiểm tra
-bootc status
-cat /etc/os-release
+rpm -qa | grep -i cachyos
 ```
 
 ---
 
-## 5. Workflow nhanh (Dev loop)
+## 5. Workflow phát triển nhanh (Dev loop)
 
 ```bash
 # 1. Sửa code
 vim files/scripts/00-build-setup.sh
 
-# 2. Build nhanh (chỉ rebuild, không push)
+# 2. Build (chỉ rebuild local, không push)
 sudo bluebuild build recipes/bamos-kde.yml
 
-# 3. Test container
+# 3. Test nhanh trong container
 podman run --rm -it localhost/bamos-kde:latest /bin/bash
 
 # 4. Nếu OK, generate ISO
@@ -197,9 +205,18 @@ sudo bluebuild generate-iso \
     --iso-name BamOS-KDE-$(date +%Y%m%d).iso \
     image localhost/bamos-kde:latest
 
-# 5. Push lên GitHub
+# 5. Test ISO trong VM
+sudo virt-install \
+    --name bamos-test \
+    --memory 4096 \
+    --vcpus 2 \
+    --disk size=32 \
+    --cdrom ./BamOS-KDE-*.iso \
+    --os-variant fedora-unknown &
+
+# 6. Commit & push
 git add -A
-git commit -m "fix: update package"
+git commit -m "feat: update packages"
 git push origin develop
 ```
 
@@ -210,32 +227,45 @@ git push origin develop
 ### Build chậm / hết dung lượng
 
 ```bash
+# Kiểm tra dung lượng
+df -h /var
+
 # Dọn cache podman
 podman system prune -af
 
-# Kiểm tra dung lượng
-df -h /
-
 # Xoá images cũ
-podman images | grep bamos | awk '{print $3}' | xargs podman rmi
+podman images | grep bamos | awk '{print $3}' | xargs sudo podman rmi
 ```
 
-### Lỗi "No space left on device"
+### Lỗi quyền libvirt
 
 ```bash
-# Xem dung lượng
-podman system df
+# Nếu virt-manager báo "No KVM"
+sudo usermod -aG libvirt,qemu $(whoami)
+# Sau đó đăng xuất / đăng nhập lại
+```
 
-# Xoá cache build
-sudo rm -rf /var/lib/containers/storage/vfs-* /var/lib/containers/storage/overlay-* 2>/dev/null || true
+### Lỗi "Cannot access storage file" (Permission denied)
+
+```bash
+# VM images trong /var/lib/libvirt/images cần quyền
+sudo chown -R $(whoami):libvirt /var/lib/libvirt/images
 ```
 
 ### Lỗi Anaconda khi generate ISO
 
 ```bash
-# Cài đủ dependencies
-sudo dnf install lorax-lmc-novirt pykickstart
+# Cài đủ dependencies (nếu chưa có)
+sudo rakuos install lorax-lmc-novirt pykickstart
 
 # Kiểm tra kickstart syntax
 ksvalidator installer/shared/usr/share/anaconda/post-scripts/install-flatpaks.ks
+```
+
+### Cần xoá VM cũ trước khi tạo lại
+
+```bash
+sudo virsh destroy bamos-test 2>/dev/null || true
+sudo virsh undefine bamos-test 2>/dev/null || true
+sudo rm -f /var/lib/libvirt/images/bamos-test.qcow2
 ```
