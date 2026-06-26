@@ -115,26 +115,7 @@ jobs:
           retention-days: 7
           compression-level: 0
 
-      - name: Upload ISO to Cloudflare R2
-        if: github.ref_name == 'main'
-        env:
-          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
-        run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq rclone
-          rclone config create r2 s3 \
-            provider Cloudflare \
-            access_key_id $R2_ACCESS_KEY_ID \
-            secret_access_key $R2_SECRET_ACCESS_KEY \
-            region auto \
-            endpoint $R2_ENDPOINT
-          rclone copy ${{ github.workspace }} r2:bamos-iso \
-            --include "*.iso" --include "CHECKSUM-*.txt" \
-            --verbose
-          echo "ISO uploaded to Cloudflare R2: bamos-iso bucket"
-
-  # ── Job 3: Create GitHub Release with all ISOs (main branch only) ──────────
+  # ── Job 3: Release to GitHub Releases + Cloudflare R2 ───────────────────
   release:
     if: github.ref_name == 'main' && github.event_name != 'pull_request'
     needs: build-isos
@@ -147,6 +128,30 @@ jobs:
         with:
           path: iso-artifacts
           merge-multiple: true
+
+      - name: Upload to Cloudflare R2 (xoá cũ, upload mới)
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq rclone
+          rclone config create r2 s3 \
+            provider Cloudflare \
+            access_key_id $R2_ACCESS_KEY_ID \
+            secret_access_key $R2_SECRET_ACCESS_KEY \
+            region auto \
+            endpoint $R2_ENDPOINT
+
+          # Xoá toàn bộ ISOs + checksums cũ
+          echo "=== Deleting old files from R2 ==="
+          rclone delete r2:bamos-iso --include "*.iso" --verbose
+          rclone delete r2:bamos-iso --include "CHECKSUM-*.txt" --verbose 2>/dev/null || true
+
+          # Upload 6 ISOs mới
+          echo "=== Uploading new ISOs to R2 ==="
+          rclone copy iso-artifacts r2:bamos-iso --verbose
+          echo "✅ All 6 ISOs uploaded to Cloudflare R2."
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
