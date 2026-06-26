@@ -58,7 +58,49 @@ jobs:
           pr_event_number: ${{ github.event.number }}
           maximize_build_space: true
 
-  # ── Job 2: Generate ISOs (weekly or manual) ─────────────────────────────────
+  # ── Job 2: Push to Quay.io ────────────────────────────────────────────────
+  push-to-quay:
+    if: github.event_name != 'pull_request'
+    needs: build-images
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        edition:
+          - bamos-kde
+          - bamos-kde-nvidia
+          - bamos-gnome
+          - bamos-gnome-nvidia
+          - bamos-cosmic
+          - bamos-cosmic-nvidia
+    steps:
+      - name: Login to Quay.io
+        env:
+          QUAY_TOKEN: ${{ secrets.QUAY_TOKEN }}
+        run: |
+          if [ -z "$QUAY_TOKEN" ]; then
+            echo "⚠️ QUAY_TOKEN not set — skipping Quay push"
+            exit 0
+          fi
+          echo "$QUAY_TOKEN" | podman login quay.io -u "${{ secrets.QUAY_USERNAME }}" --password-stdin
+
+      - name: Pull from GHCR
+        run: |
+          SRC="ghcr.io/quocnho/${{ matrix.edition }}:latest"
+          echo "Pulling $SRC..."
+          podman pull "$SRC"
+
+      - name: Tag and push to Quay.io
+        run: |
+          SRC="ghcr.io/quocnho/${{ matrix.edition }}:latest"
+          DST="quay.io/quocnho/bamos:${{ matrix.edition }}"
+          echo "Tagging: $SRC → $DST"
+          podman tag "$SRC" "$DST"
+          echo "Pushing $DST..."
+          podman push "$DST"
+
+  # ── Job 3: Generate ISOs (weekly or manual) ─────────────────────────────────
   build-isos:
     if: |
       always() && (
