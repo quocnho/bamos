@@ -38,8 +38,6 @@ modules:
           - com.system76.CosmicFiles
           - com.system76.CosmicSettings
           - com.system76.CosmicAppLibrary
-          - runtime/org.gtk.Gtk3theme.adw-gtk3
-          - runtime/org.gtk.Gtk3theme.adw-gtk3-dark
       - scope: user
 
   - type: signing

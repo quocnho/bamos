@@ -53,8 +53,6 @@ modules:
           - org.gnome.Loupe
           - org.gnome.TextEditor
           - org.gnome.clocks
-          - runtime/org.gtk.Gtk3theme.adw-gtk3
-          - runtime/org.gtk.Gtk3theme.adw-gtk3-dark
       - scope: user
 
   - type: signing
