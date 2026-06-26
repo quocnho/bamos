@@ -1,0 +1,50 @@
+name: bamos-gnome
+description: BamOS GNOME Edition — Atomic Fedora with CachyOS kernel
+
+base-image: ghcr.io/ublue-os/silverblue-main
+image-version: 44
+
+modules:
+  - type: files
+    files:
+      - source: system
+        destination: /
+
+  - type: files
+    files:
+      - source: gnome-system
+        destination: /
+
+  - type: script
+    scripts:
+      - 00-build-setup.sh
+
+  - type: script
+    scripts:
+      - 01-install-packages.sh
+
+  - type: dnf
+    remove:
+      - firefox
+      - firefox-langpacks
+    install:
+      - nautilus-gsconnect
+      - gnome-tweaks
+
+  - type: script
+    scripts:
+      - 02-post-build.sh
+
+  - type: default-flatpaks
+    configurations:
+      - scope: system
+        notify: true
+        install:
+          - org.mozilla.firefox
+          - org.gnome.Loupe
+          - org.gnome.Calculator
+          - org.gnome.baobab
+          - org.gnome.Characters
+          - org.gnome.clocks
+
+  - type: signing

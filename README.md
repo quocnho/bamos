@@ -1,43 +1,54 @@
-# zinos &nbsp; [![bluebuild build badge](https://github.com/quocnho/zinos/actions/workflows/build.yml/badge.svg)](https://github.com/quocnho/zinos/actions/workflows/build.yml)
+# BamOS Linux &nbsp; [![bluebuild build badge](https://github.com/quocnho/bamos/actions/workflows/build.yml/badge.svg)](https://github.com/quocnho/bamos/actions/workflows/build.yml)
 
-See the [BlueBuild docs](https://blue-build.org/how-to/setup/) for quick setup instructions for setting up your own repository based on this template.
+**BamOS** is an atomic, image-based Linux distribution built on Fedora Atomic. It combines the stability of immutable infrastructure with the flexibility of native package management.
 
-After setup, it is recommended you update this README to describe your custom image.
+Built with [BlueBuild](https://blue-build.org/). Design inspired by [RakuOS](https://rakuos.org/).
+
+## Editions
+
+| Edition | Desktop | GPU Support | Image |
+|---------|---------|-------------|-------|
+| BamOS KDE | KDE Plasma | AMD/Intel | `ghcr.io/quocnho/bamos-kde` |
+| BamOS KDE NVIDIA | KDE Plasma | NVIDIA | `ghcr.io/quocnho/bamos-kde-nvidia` |
+| BamOS GNOME | GNOME | AMD/Intel | `ghcr.io/quocnho/bamos-gnome` |
+| BamOS GNOME NVIDIA | GNOME | NVIDIA | `ghcr.io/quocnho/bamos-gnome-nvidia` |
+| BamOS COSMIC | COSMIC | AMD/Intel | `ghcr.io/quocnho/bamos-cosmic` |
+| BamOS COSMIC NVIDIA | COSMIC | NVIDIA | `ghcr.io/quocnho/bamos-cosmic-nvidia` |
+
+## Features
+
+- 🚀 **Atomic updates** via `bootc` — instant rollback, no partial upgrades
+- ⚡ **CachyOS kernel** — optimized performance and responsiveness
+- 📦 **Native package management** — install RPMs directly, no layering
+- 🎮 **Gaming ready** — Steam, Lutris, MangoHud, GameMode
+- 🛡️ **Immutable base** — system integrity protected at all times
+- 🔄 **Daily builds** — always up to date with the latest security patches
 
 ## Installation
 
-> [!WARNING]  
-> [This is an experimental feature](https://www.fedoraproject.org/wiki/Changes/OstreeNativeContainerStable), try at your own discretion.
+> [!WARNING]
+> This is an experimental feature. Try at your own discretion.
 
-To rebase an existing atomic Fedora installation to the latest build:
+To rebase an existing Fedora Atomic installation:
 
-- First rebase to the unsigned image, to get the proper signing keys and policies installed:
-  ```
-  rpm-ostree rebase ostree-unverified-registry:ghcr.io/quocnho/zinos:latest
-  ```
-- Reboot to complete the rebase:
-  ```
-  systemctl reboot
-  ```
-- Then rebase to the signed image, like so:
-  ```
-  rpm-ostree rebase ostree-image-signed:docker://ghcr.io/quocnho/zinos:latest
-  ```
-- Reboot again to complete the installation
-  ```
-  systemctl reboot
-  ```
+```bash
+# First rebase to unsigned image (for signing keys and policies)
+sudo bootc switch ghcr.io/quocnho/bamos-kde:latest
+sudo systemctl reboot
 
-The `latest` tag will automatically point to the latest build. That build will still always use the Fedora version specified in `recipe.yml`, so you won't get accidentally updated to the next major version.
-
-## ISO
-
-If build on Fedora Atomic, you can generate an offline ISO with the instructions available [here](https://blue-build.org/how-to/generate-iso/#_top). These ISOs cannot unfortunately be distributed on GitHub for free due to large sizes, so for public projects something else has to be used for hosting.
+# After reboot, switch to signed image
+sudo bootc switch ostree-image-signed:docker://ghcr.io/quocnho/bamos-kde:latest
+sudo systemctl reboot
+```
 
 ## Verification
 
-These images are signed with [Sigstore](https://www.sigstore.dev/)'s [cosign](https://github.com/sigstore/cosign). You can verify the signature by downloading the `cosign.pub` file from this repo and running the following command:
+These images are signed with [Sigstore](https://www.sigstore.dev/)'s [cosign](https://github.com/sigstore/cosign):
 
 ```bash
-cosign verify --key cosign.pub ghcr.io/quocnho/zinos
+cosign verify --key cosign.pub ghcr.io/quocnho/bamos-kde
 ```
+
+## Development
+
+See [DEVELOPMENT.md](DEVELOPMENT.md) for detailed setup instructions.

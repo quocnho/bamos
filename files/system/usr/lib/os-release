@@ -1,0 +1,17 @@
+NAME="BamOS Linux"
+VERSION="44"
+RELEASE_TYPE=stable
+ID=bamos
+ID_LIKE="fedora"
+VERSION_ID=44
+PRETTY_NAME="BamOS Linux 44"
+ANSI_COLOR="0;38;2;0;150;136"
+LOGO=bamos-logo
+CPE_NAME="cpe:/o:bamos:bamos:44"
+DEFAULT_HOSTNAME="bamos"
+HOME_URL="https://github.com/quocnho/bamos"
+SUPPORT_URL="https://github.com/quocnho/bamos/issues"
+BUG_REPORT_URL="https://github.com/quocnho/bamos/issues"
+PLATFORM_ID="platform:f44"
+VARIANT="bootc"
+VARIANT_ID=bamos

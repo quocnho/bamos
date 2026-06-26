@@ -1,0 +1,55 @@
+name: bamos-kde
+description: BamOS KDE Plasma Edition — Atomic Fedora with CachyOS kernel
+
+base-image: ghcr.io/ublue-os/kinoite-main
+image-version: 44
+
+modules:
+  - type: files
+    files:
+      - source: system
+        destination: /
+
+  - type: files
+    files:
+      - source: kde-system
+        destination: /
+
+  - type: script
+    scripts:
+      - 00-build-setup.sh
+
+  - type: script
+    scripts:
+      - 01-install-packages.sh
+
+  - type: dnf
+    remove:
+      - firefox
+      - firefox-langpacks
+    install:
+      - kdeconnectd
+      - plasma-systemmonitor
+      - kate
+      - gwenview
+      - kdenlive
+      - krdp
+      - kdeplasma-addons
+
+  - type: script
+    scripts:
+      - 02-post-build.sh
+
+  - type: default-flatpaks
+    configurations:
+      - scope: system
+        notify: true
+        install:
+          - org.mozilla.firefox
+          - org.kde.kdenlive
+          - org.kde.gwenview
+          - org.kde.kate
+          - org.kde.kcalc
+          - org.kde.okular
+
+  - type: signing

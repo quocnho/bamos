@@ -1,3 +1,11 @@
-cosign.key
-cosign.private
-/Containerfile
+*.iso
+*.iso-CHECKSUM
+.DS_Store
+*.swp
+*.swo
+*~
+*.pyc
+__pycache__/
+.vscode/
+.idea/
+*.log

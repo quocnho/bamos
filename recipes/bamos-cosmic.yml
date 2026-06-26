@@ -1,0 +1,47 @@
+name: bamos-cosmic
+description: BamOS COSMIC Edition — Atomic Fedora with CachyOS kernel
+
+base-image: ghcr.io/ublue-os/cosmic-main
+image-version: 44
+
+modules:
+  - type: files
+    files:
+      - source: system
+        destination: /
+
+  - type: files
+    files:
+      - source: cosmic-system
+        destination: /
+
+  - type: script
+    scripts:
+      - 00-build-setup.sh
+
+  - type: script
+    scripts:
+      - 01-install-packages.sh
+
+  - type: dnf
+    remove:
+      - firefox
+      - firefox-langpacks
+
+  - type: script
+    scripts:
+      - 02-post-build.sh
+
+  - type: default-flatpaks
+    configurations:
+      - scope: system
+        notify: true
+        install:
+          - org.mozilla.firefox
+          - com.system76.CosmicStore
+          - com.system76.CosmicTerminal
+          - com.system76.CosmicFiles
+          - com.system76.CosmicSettings
+          - com.system76.CosmicAppLibrary
+
+  - type: signing

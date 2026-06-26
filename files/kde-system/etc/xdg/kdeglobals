@@ -1,0 +1,6 @@
+[General]
+XftAntialias=true
+XftHinting=1
+XftHintStyle=hintslight
+XftSubPixel=none
+font=Noto Sans,10,-1,5,50,0,0,0,0,0
