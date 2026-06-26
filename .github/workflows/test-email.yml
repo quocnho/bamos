@@ -1,0 +1,26 @@
+name: Test Email
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-mail:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send test email
+        uses: dawidd6/action-send-mail@v4
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.GMAIL_USERNAME }}
+          password: ${{ secrets.GMAIL_APP_PASSWORD }}
+          subject: "Test - BamOS CI Email Works!"
+          to: quocnho@gmail.com
+          from: BamOS CI
+          body: |
+            This is a test email from BamOS CI.
+
+            If you receive this, email notifications are working.
+
+            ---
+            BamOS CI
