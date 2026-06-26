@@ -57,9 +57,11 @@ jobs:
 
   # ── Job 2: Generate ISOs (weekly or manual) ─────────────────────────────────
   build-isos:
-    if: >
-      (github.event_name == 'schedule') ||
-      (github.event_name == 'workflow_dispatch' && inputs.build_iso == 'true')
+    if: |
+      always() && (
+        (github.event_name == 'schedule') ||
+        (github.event_name == 'workflow_dispatch' && inputs.build_iso == 'true')
+      )
     needs: build-images
     runs-on: ubuntu-latest
     permissions:
