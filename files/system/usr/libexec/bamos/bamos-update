@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Checking for updates..."
+
+# Update layered packages
+if rpm-ostree status 2>/dev/null | grep -q "LayeredPackages"; then
+    echo "Updating layered packages..."
+    rpm-ostree update -y 2>/dev/null || true
+fi
+
+# Check for bootc image updates
+echo "Checking system image updates..."
+if bootc upgrade --check 2>&1 | grep -q "No changes"; then
+    echo "System is up to date."
+else
+    echo "System image update available. Run 'sudo bamos system-upgrade' to apply."
+fi

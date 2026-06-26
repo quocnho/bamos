@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "=== BamOS System Status ==="
+echo ""
+
+# OS info
+if [[ -f /etc/os-release ]]; then
+    . /etc/os-release
+    echo "OS:       $PRETTY_NAME"
+fi
+
+# Kernel
+echo "Kernel:   $(uname -r)"
+
+# Booted image
+if command -v bootc &>/dev/null; then
+    bootc status --json 2>/dev/null | python3 -c "
+import sys, json
+try:
+    d = json.load(sys.stdin)
+    s = d.get('status', {}).get('booted', {})
+    img = s.get('image', {}).get('image', {}).get('image', 'N/A')
+    ver = s.get('image', {}).get('version', 'N/A')
+    print(f'Image:    {img}')
+    print(f'Version:  {ver}')
+except: pass
+" 2>/dev/null || echo "Image:    N/A"
+fi
+
+# Disk
+echo "Disk:     $(df -h / | tail -1 | awk '{print $3 \" used / \" $2 \" total\"}')"
+
+# Updates
+if command -v bootc &>/dev/null; then
+    if bootc upgrade --check 2>&1 | grep -q "No changes"; then
+        echo "Updates:  None (system up to date)"
+    else
+        echo "Updates:  Available (run 'bamos system-upgrade')"
+    fi
+fi
+echo ""
+echo "For package management:  bamos install/remove/list"
+echo "For system upgrade:      bamos system-upgrade"

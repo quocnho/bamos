@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Installed packages (layered on base image):"
+rpm-ostree status 2>/dev/null | grep -A999 "LayeredPackages:" | tail -n +2 || echo "  No layered packages."
+echo ""
+echo "To see all system packages, use: rpm -qa | sort"

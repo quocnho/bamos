@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "=== BamOS Virtualization Setup ==="
+
+echo "Installing virtualization packages..."
+rpm-ostree install -y \
+    @virtualization \
+    virt-manager \
+    libvirt-daemon-config-network \
+    2>/dev/null || {
+        rpm-ostree install -y \
+            qemu-kvm libvirt-daemon-kvm virt-manager virt-install \
+            libvirt-daemon-config-network 2>/dev/null || true
+    }
+
+echo ""
+echo "Enabling libvirtd service..."
+systemctl enable libvirtd 2>/dev/null || true
+echo ""
+echo "=== Virtualization setup initiated ==="
+echo "Reboot to apply: systemctl reboot"
+echo ""
+echo "After reboot:"
+echo "  1. Add yourself to libvirt group: sudo usermod -aG libvirt \$USER"
+echo "  2. Start virt-manager or gnome-boxes"
+echo "  3. Create your first VM!"

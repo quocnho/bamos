@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "=== BamOS Gaming Setup ==="
+
+echo "Installing gaming packages..."
+rpm-ostree install -y \
+    steam \
+    lutris \
+    mangohud \
+    mangohud.i686 \
+    vkBasalt \
+    vkBasalt.i686 \
+    goverlay \
+    protonplus \
+    protontricks \
+    steam-devices \
+    gamemode \
+    gamemode.i686 \
+    2>/dev/null || {
+        echo "Some packages may not be available. Installing what's possible..."
+        rpm-ostree install -y steam lutris mangohud mangohud.i686 \
+            gamemode gamemode.i686 steam-devices 2>/dev/null || true
+    }
+
+# Install Flatpak gaming apps
+echo "Installing gaming Flatpaks..."
+flatpak install -y flathub \
+    net.lutris.Lutris \
+    com.heroicgameslauncher.hgl \
+    com.discordapp.Discord \
+    org.prismlauncher.PrismLauncher \
+    2>/dev/null || true
+
+echo ""
+echo "=== Gaming setup initiated ==="
+echo "Reboot to apply system packages: systemctl reboot"
+echo "Flatpak apps are available immediately."

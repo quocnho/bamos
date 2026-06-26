@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+set -e
+
+COMMAND="${1:-}"
+
+case "$COMMAND" in
+    install)
+        shift
+        /usr/libexec/bamos/bamos-install "$@"
+        ;;
+    update)
+        shift
+        /usr/libexec/bamos/bamos-update "$@"
+        ;;
+    remove)
+        shift
+        /usr/libexec/bamos/bamos-remove "$@"
+        ;;
+    system-upgrade)
+        shift
+        exec bootc upgrade "$@"
+        ;;
+    list)
+        /usr/libexec/bamos/bamos-list
+        ;;
+    status)
+        /usr/libexec/bamos/bamos-status
+        ;;
+    setup-gaming)
+        /usr/libexec/bamos/bamos-setup-gaming
+        ;;
+    setup-virtualization)
+        /usr/libexec/bamos/bamos-setup-virtualization
+        ;;
+    help|--help|-h)
+        echo "BamOS Helper"
+        echo ""
+        echo "Usage:"
+        echo "  bamos install <package> [pkg2...]     Install packages"
+        echo "  bamos update                          Update all packages"
+        echo "  bamos remove <package> [pkg2...]      Remove packages"
+        echo "  bamos list                            List installed packages"
+        echo "  bamos status                          Show system status"
+        echo "  bamos system-upgrade                  Upgrade system image via bootc"
+        echo "  bamos setup-gaming                    Install gaming packages"
+        echo "  bamos setup-virtualization            Install KVM/QEMU"
+        ;;
+    *)
+        echo "BamOS Helper"
+        echo ""
+        echo "Usage: bamos <command> [options]"
+        echo ""
+        echo "Commands:"
+        echo "  install              Install packages"
+        echo "  update               Update packages"
+        echo "  remove               Remove packages"
+        echo "  list                 List installed packages"
+        echo "  status               Show system information"
+        echo "  system-upgrade       Upgrade system image"
+        echo "  setup-gaming         Install gaming packages"
+        echo "  setup-virtualization Install virtualization packages"
+        echo ""
+        echo "Run 'bamos help' for more details."
+        exit 1
+        ;;
+esac

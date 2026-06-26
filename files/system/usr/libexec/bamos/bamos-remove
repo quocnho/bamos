@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${#@}" -eq 0 ]]; then
+    echo "Usage: bamos remove <package> [package2...]"
+    exit 1
+fi
+
+if [[ "$EUID" -ne 0 ]]; then
+    echo "ERROR: bamos remove must be run as root"
+    exit 1
+fi
+
+echo "Removing packages..."
+rpm-ostree uninstall -y "$@"
+echo ""
+echo "Packages removed. Reboot to apply:"
+echo "  systemctl reboot"

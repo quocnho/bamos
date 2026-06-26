@@ -1,7 +1,15 @@
 # BamOS — passwordless sudo for wheel group
 
+# Package management
+%wheel ALL=(ALL) NOPASSWD: /usr/bin/bamos install
+%wheel ALL=(ALL) NOPASSWD: /usr/bin/bamos remove
+%wheel ALL=(ALL) NOPASSWD: /usr/bin/bamos update
+
+# Flatpak system-wide operations
 %wheel ALL=(ALL) NOPASSWD: /usr/bin/flatpak install --bundle --noninteractive -y *
 %wheel ALL=(ALL) NOPASSWD: /usr/bin/flatpak install --from --noninteractive -y *
+
+# bootc image operations
 %wheel ALL=(ALL) NOPASSWD: /usr/bin/bootc status --json
 %wheel ALL=(ALL) NOPASSWD: /usr/bin/bootc upgrade --check
 %wheel ALL=(ALL) NOPASSWD: /usr/bin/bootc upgrade
