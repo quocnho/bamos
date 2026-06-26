@@ -25,16 +25,18 @@ modules:
 
   - type: dnf
     remove:
-      - firefox
-      - firefox-langpacks
+      packages:
+        - firefox
+        - firefox-langpacks
     install:
-      - kdeconnectd
-      - plasma-systemmonitor
-      - kate
-      - gwenview
-      - kdenlive
-      - krdp
-      - kdeplasma-addons
+      packages:
+        - kdeconnectd
+        - plasma-systemmonitor
+        - kate
+        - gwenview
+        - kdenlive
+        - krdp
+        - kdeplasma-addons
 
   - type: script
     scripts:

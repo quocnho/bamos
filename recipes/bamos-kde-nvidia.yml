@@ -25,23 +25,26 @@ modules:
 
   - type: dnf
     remove:
-      - firefox
-      - firefox-langpacks
+      packages:
+        - firefox
+        - firefox-langpacks
     install:
-      - kdeconnectd
-      - plasma-systemmonitor
-      - kate
-      - gwenview
-      - kdenlive
-      - krdp
-      - kdeplasma-addons
+      packages:
+        - kdeconnectd
+        - plasma-systemmonitor
+        - kate
+        - gwenview
+        - kdenlive
+        - krdp
+        - kdeplasma-addons
 
   - type: dnf
     install:
-      - akmod-nvidia
-      - xorg-x11-drv-nvidia-cuda
-      - nvidia-vaapi-driver
-      - nvidia-persistenced
+      packages:
+        - akmod-nvidia
+        - xorg-x11-drv-nvidia-cuda
+        - nvidia-vaapi-driver
+        - nvidia-persistenced
 
   - type: script
     scripts:

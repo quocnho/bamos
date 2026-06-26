@@ -25,15 +25,17 @@ modules:
 
   - type: dnf
     remove:
-      - firefox
-      - firefox-langpacks
+      packages:
+        - firefox
+        - firefox-langpacks
 
   - type: dnf
     install:
-      - akmod-nvidia
-      - xorg-x11-drv-nvidia-cuda
-      - nvidia-vaapi-driver
-      - nvidia-persistenced
+      packages:
+        - akmod-nvidia
+        - xorg-x11-drv-nvidia-cuda
+        - nvidia-vaapi-driver
+        - nvidia-persistenced
 
   - type: script
     scripts:

@@ -25,11 +25,13 @@ modules:
 
   - type: dnf
     remove:
-      - firefox
-      - firefox-langpacks
+      packages:
+        - firefox
+        - firefox-langpacks
     install:
-      - nautilus-gsconnect
-      - gnome-tweaks
+      packages:
+        - nautilus-gsconnect
+        - gnome-tweaks
 
   - type: script
     scripts:
