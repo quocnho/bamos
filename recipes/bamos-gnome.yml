@@ -1,5 +1,5 @@
 name: bamos-gnome
-description: BamOS GNOME Edition — Minimal Atomic Fedora
+description: BamOS GNOME Edition — Clean, modern, productivity-focused
 
 base-image: ghcr.io/ublue-os/silverblue-main
 image-version: 44
@@ -19,6 +19,12 @@ modules:
     scripts:
       - 00-build-setup.sh
 
+  - type: dnf
+    remove:
+      packages:
+        - gnome-software-rpm-ostree
+        - gnome-tour
+
   - type: script
     scripts:
       - 01-install-packages.sh
@@ -33,5 +39,13 @@ modules:
         notify: true
         install:
           - org.mozilla.firefox
+          - org.gnome.Calculator
+          - org.gnome.Calendar
+          - org.gnome.Loupe
+          - org.gnome.TextEditor
+          - org.gnome.clocks
+          - runtime/org.gtk.Gtk3theme.adw-gtk3
+          - runtime/org.gtk.Gtk3theme.adw-gtk3-dark
+      - scope: user
 
   - type: signing

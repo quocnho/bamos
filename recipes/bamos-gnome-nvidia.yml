@@ -19,6 +19,12 @@ modules:
     scripts:
       - 00-build-setup.sh
 
+  - type: dnf
+    remove:
+      packages:
+        - gnome-software-rpm-ostree
+        - gnome-tour
+
   - type: script
     scripts:
       - 01-install-packages.sh
@@ -37,5 +43,13 @@ modules:
         notify: true
         install:
           - org.mozilla.firefox
+          - org.gnome.Calculator
+          - org.gnome.Calendar
+          - org.gnome.Loupe
+          - org.gnome.TextEditor
+          - org.gnome.clocks
+          - runtime/org.gtk.Gtk3theme.adw-gtk3
+          - runtime/org.gtk.Gtk3theme.adw-gtk3-dark
+      - scope: user
 
   - type: signing

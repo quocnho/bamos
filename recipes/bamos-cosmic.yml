@@ -1,5 +1,5 @@
 name: bamos-cosmic
-description: BamOS COSMIC Edition — Minimal Atomic Fedora
+description: BamOS COSMIC Edition — Next-gen desktop from System76
 
 base-image: ghcr.io/ublue-os/cosmic-main
 image-version: 44
@@ -33,5 +33,13 @@ modules:
         notify: true
         install:
           - org.mozilla.firefox
+          - com.system76.CosmicStore
+          - com.system76.CosmicTerminal
+          - com.system76.CosmicFiles
+          - com.system76.CosmicSettings
+          - com.system76.CosmicAppLibrary
+          - runtime/org.gtk.Gtk3theme.adw-gtk3
+          - runtime/org.gtk.Gtk3theme.adw-gtk3-dark
+      - scope: user
 
   - type: signing

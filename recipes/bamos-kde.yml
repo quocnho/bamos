@@ -1,5 +1,5 @@
 name: bamos-kde
-description: BamOS KDE Plasma Edition — Minimal Atomic Fedora
+description: BamOS KDE Plasma Edition — Flagship atomic desktop, CachyOS kernel
 
 base-image: ghcr.io/ublue-os/kinoite-main
 image-version: 44
@@ -19,6 +19,15 @@ modules:
     scripts:
       - 00-build-setup.sh
 
+  - type: dnf
+    remove:
+      packages:
+        - plasma-discover
+        - plasma-discover-offline-updates
+        - plasma-discover-packagekit
+        - plasma-welcome
+        - plasma-welcome-fedora
+
   - type: script
     scripts:
       - 01-install-packages.sh
@@ -33,5 +42,9 @@ modules:
         notify: true
         install:
           - org.mozilla.firefox
+          - org.kde.gwenview
+          - org.kde.kcalc
+          - org.kde.okular
+      - scope: user
 
   - type: signing

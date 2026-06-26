@@ -19,6 +19,15 @@ modules:
     scripts:
       - 00-build-setup.sh
 
+  - type: dnf
+    remove:
+      packages:
+        - plasma-discover
+        - plasma-discover-offline-updates
+        - plasma-discover-packagekit
+        - plasma-welcome
+        - plasma-welcome-fedora
+
   - type: script
     scripts:
       - 01-install-packages.sh
@@ -37,5 +46,9 @@ modules:
         notify: true
         install:
           - org.mozilla.firefox
+          - org.kde.gwenview
+          - org.kde.kcalc
+          - org.kde.okular
+      - scope: user
 
   - type: signing

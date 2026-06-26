@@ -12,33 +12,18 @@ IS_COSMIC=false
 [[ "$IMAGE_NAME" == *-gnome* ]] && IS_GNOME=true
 [[ "$IMAGE_NAME" == *-cosmic* ]] && IS_COSMIC=true
 
-# RakuOS approach: minimal DE packages
-# Base images from ublue (kinoite/silverblue/cosmic) already include DE + GPU support.
-# We only need to install missing components and remove bloat.
-
-if [[ "$IS_KDE" == "true" ]]; then
-    echo "Installing KDE Plasma packages..."
-    # Remove bloat from base kinoite image
-    dnf5 -y remove \
-        plasma-discover plasma-discover-offline-updates \
-        plasma-discover-packagekit plasma-welcome plasma-welcome-fedora \
-        firefox firefox-langpacks 2>/dev/null || true
-fi
-
+# DE-specific post-install steps (actual package removal is in recipe YAML)
 if [[ "$IS_GNOME" == "true" ]]; then
-    echo "Installing GNOME packages..."
-    # Remove bloat from base silverblue image
-    dnf5 -y remove \
-        gnome-software-rpm-ostree gnome-tour \
-        firefox firefox-langpacks 2>/dev/null || true
-
-    # Compile GSettings schemas (picks up zz-bamos-gnome.gschema.override)
+    # Compile GSettings schemas (picks up BamOS GNOME overrides)
     glib-compile-schemas /usr/share/glib-2.0/schemas/ 2>/dev/null || true
+    echo "GSettings schemas compiled for GNOME."
 fi
 
 if [[ "$IS_COSMIC" == "true" ]]; then
-    echo "COSMIC edition — using base cosmic-main image."
-    dnf5 -y remove firefox firefox-langpacks 2>/dev/null || true
+    # COSMIC uses its own Flatpak repo for some apps
+    flatpak remote-add --if-not-exists cosmic \
+        https://apt.pop-os.org/cosmic/cosmic.flatpakrepo 2>/dev/null || true
+    echo "COSMIC Flatpak repo added."
 fi
 
 echo "=== BamOS: DE Package Installation Complete ==="
