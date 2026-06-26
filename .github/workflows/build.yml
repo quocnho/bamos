@@ -115,6 +115,25 @@ jobs:
           retention-days: 7
           compression-level: 0
 
+      - name: Upload ISO to Cloudflare R2
+        if: github.ref_name == 'main'
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq rclone
+          rclone config create r2 s3 \
+            provider Cloudflare \
+            access_key_id $R2_ACCESS_KEY_ID \
+            secret_access_key $R2_SECRET_ACCESS_KEY \
+            region auto \
+            endpoint $R2_ENDPOINT
+          rclone copy ${{ github.workspace }} r2:bamos-iso \
+            --include "*.iso" --include "CHECKSUM-*.txt" \
+            --verbose
+          echo "ISO uploaded to Cloudflare R2: bamos-iso bucket"
+
   # ── Job 3: Create GitHub Release with all ISOs (main branch only) ──────────
   release:
     if: github.ref_name == 'main' && github.event_name != 'pull_request'

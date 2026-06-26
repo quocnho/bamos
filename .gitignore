@@ -9,4 +9,13 @@ __pycache__/
 .vscode/
 .idea/
 *.log
+
+# Environment files (secrets)
+.env
+.env.r2
+.env.*
+
+# Cosign private key (never commit)
+cosign.key
+cosign.private
 /.bluebuild-scripts_*
