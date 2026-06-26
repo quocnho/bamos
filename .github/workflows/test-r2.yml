@@ -22,24 +22,24 @@ jobs:
             region auto \
             endpoint $R2_ENDPOINT
 
-          echo "=== List buckets ==="
-          rclone lsd r2:
-
-          echo ""
-          echo "=== List files in bamos-iso ==="
-          rclone ls r2:bamos-iso || echo "Bucket empty or not found"
+          echo "=== Check bucket bamos-iso ==="
+          rclone ls r2:bamos-iso && echo "Bucket exists and readable" || echo "Bucket check done (may be empty)"
 
           echo ""
           echo "=== Test upload ==="
-          echo "hello from github actions" | rclone rcat r2:bamos-iso/test-connection.txt
-          echo "Upload OK"
+          echo "hello from github actions $(date)" > /tmp/test-r2.txt
+          rclone copy /tmp/test-r2.txt r2:bamos-iso/
+          echo "✅ Upload OK"
 
           echo ""
           echo "=== Test download ==="
-          rclone cat r2:bamos-iso/test-connection.txt
-          echo "Download OK"
+          rclone cat r2:bamos-iso/test-r2.txt
+          echo "✅ Download OK"
 
           echo ""
           echo "=== Cleanup ==="
-          rclone delete r2:bamos-iso/test-connection.txt
+          rclone delete r2:bamos-iso/test-r2.txt
+          echo "✅ Cleanup OK"
+
+          echo ""
           echo "✅ R2 connection successful!"
