@@ -1,0 +1,45 @@
+name: Test R2 Connection
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-r2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test Cloudflare R2 connectivity
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq rclone
+
+          rclone config create r2 s3 \
+            provider Cloudflare \
+            access_key_id $R2_ACCESS_KEY_ID \
+            secret_access_key $R2_SECRET_ACCESS_KEY \
+            region auto \
+            endpoint $R2_ENDPOINT
+
+          echo "=== List buckets ==="
+          rclone lsd r2:
+
+          echo ""
+          echo "=== List files in bamos-iso ==="
+          rclone ls r2:bamos-iso || echo "Bucket empty or not found"
+
+          echo ""
+          echo "=== Test upload ==="
+          echo "hello from github actions" | rclone rcat r2:bamos-iso/test-connection.txt
+          echo "Upload OK"
+
+          echo ""
+          echo "=== Test download ==="
+          rclone cat r2:bamos-iso/test-connection.txt
+          echo "Download OK"
+
+          echo ""
+          echo "=== Cleanup ==="
+          rclone delete r2:bamos-iso/test-connection.txt
+          echo "✅ R2 connection successful!"
