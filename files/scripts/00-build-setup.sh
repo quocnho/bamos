@@ -73,6 +73,12 @@ dnf5 -y install \
     google-noto-sans-cjk-fonts google-noto-sans-mono-cjk-vf-fonts \
     bibata-cursor-theme adw-gtk3-theme
 
+# ── Install EFI/GRUB boot packages (for Titanoboa ISO generation) ────────────
+dnf5 -y install \
+    grub2-efi-x64 shim-x64 \
+    grub2-pc grub2-pc-modules \
+    2>/dev/null || true
+
 # ── Remove unwanted packages ──────────────────────────────────────────────────
 dnf5 -y remove firefox* nss 2>/dev/null || true
 
