@@ -1,0 +1,27 @@
+name: Test Push to Quay.io
+
+on:
+  workflow_dispatch:
+
+env:
+  IMAGE: ghcr.io/quocnho/bamos-gnome-nvidia:latest
+
+jobs:
+  test-quay:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to Quay.io
+        env:
+          QUAY_TOKEN: ${{ secrets.QUAY_TOKEN }}
+        run: |
+          echo "$QUAY_TOKEN" | podman login quay.io -u "${{ secrets.QUAY_USERNAME }}" --password-stdin
+
+      - name: Pull image from GHCR
+        run: podman pull ${{ env.IMAGE }}
+
+      - name: Tag and push to Quay.io
+        run: |
+          podman tag ${{ env.IMAGE }} quay.io/quocnho/bamos:test-push
+          podman push quay.io/quocnho/bamos:test-push
+          echo "✅ Push thành công!"
+          echo "Xem tại: https://quay.io/repository/quocnho/bamos?tab=tags"
