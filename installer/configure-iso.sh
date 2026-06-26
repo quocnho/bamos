@@ -158,24 +158,24 @@ fi
 # ── DE-specific installer system files ───────────────────────────────────────
 case "$desktop_env" in
     gnome)
-        if [[ -d /installer/gnome ]]; then
+        if [[ -d /installer/bamos-gnome ]]; then
             echo "Copying GNOME-specific installer files..."
-            cp -af /installer/gnome/. / 2>/dev/null || true
+            cp -af /installer/bamos-gnome/. / 2>/dev/null || true
         fi
         # Hide Fedora welcome screen
         sed -i 's@\[Desktop Entry\]@\[Desktop Entry\]\nHidden=true@g' \
             /usr/share/anaconda/gnome/org.fedoraproject.welcome-screen.desktop 2>/dev/null || :
         ;;
     kde)
-        if [[ -d /installer/kde ]]; then
+        if [[ -d /installer/bamos-kde ]]; then
             echo "Copying KDE-specific installer files..."
-            cp -af /installer/kde/. / 2>/dev/null || true
+            cp -af /installer/bamos-kde/. / 2>/dev/null || true
         fi
         ;;
     cosmic)
-        if [[ -d /installer/cosmic ]]; then
+        if [[ -d /installer/bamos-cosmic ]]; then
             echo "Copying COSMIC-specific installer files..."
-            cp -af /installer/cosmic/. / 2>/dev/null || true
+            cp -af /installer/bamos-cosmic/. / 2>/dev/null || true
         fi
         ;;
 esac

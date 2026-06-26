@@ -27,14 +27,10 @@ if [[ "$IS_COSMIC" == "true" ]]; then
     echo "COSMIC Flatpak repo added."
 fi
 
-# ── NVIDIA: Additional setup shared across all DEs ───────────────────────────
+# ── NVIDIA: Reinstall nouveau for compatibility (driver details in 03-nvidia-setup.sh) ──
 if [[ "$IS_NVIDIA" == "true" ]]; then
-    echo "Applying NVIDIA-specific system configuration..."
-
-    # Reinstall nouveau drivers alongside NVIDIA
+    echo "Preparing NVIDIA system..."
     dnf5 -y reinstall --allowerasing nvidia-gpu-firmware mesa-vulkan-drivers 2>/dev/null || true
-
-    # Symlink nvidia-ml for compatibility
     ln -sf libnvidia-ml.so.1 /usr/lib64/libnvidia-ml.so 2>/dev/null || true
 fi
 

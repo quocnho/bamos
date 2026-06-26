@@ -62,7 +62,7 @@ dnf5 -y install \
     git flatpak libxcrypt-compat rsync \
     podman distrobox mokutil lm_sensors \
     sqlite3 openssl libnotify inotify-tools podman-compose \
-    python3-pip python3-setuptools \
+    python3-pip python3-setuptools jq \
     appstream appstream-data fwupd \
     fuse squashfuse v4l-utils unzip \
     google-noto-sans-cjk-fonts google-noto-sans-mono-cjk-vf-fonts \
@@ -85,7 +85,7 @@ systemctl enable podman-prune.timer 2>/dev/null || true
 
 # ── NVIDIA setup ──────────────────────────────────────────────────────────────
 if [[ "$IS_NVIDIA" == "true" ]]; then
-    dnf5 install -y --setopt=tsflags=noscripts dkms-nvidia nvidia-driver nvidia-persistenced 2>/dev/null || true
+    dnf5 -y install --setopt=tsflags=noscripts dkms-nvidia nvidia-driver nvidia-persistenced 2>/dev/null || true
 
     NVIDIA_VER=$(rpm -q --queryformat '%{VERSION}\n' dkms-nvidia 2>/dev/null || echo "")
     if [[ -n "$NVIDIA_VER" ]]; then

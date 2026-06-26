@@ -13,15 +13,17 @@ fi
 echo "Configuring NVIDIA driver integration..."
 
 # ── Ensure nouveau Vulkan ICDs exist (for compatibility) ─────────────────────
-if ! ls /usr/share/vulkan/icd.d/nouveau_icd.*.json &>/dev/null; then
+(
+    shopt -u nullglob
+    ls /usr/share/vulkan/icd.d/nouveau_icd.*.json &>/dev/null
+) || {
     echo "WARNING: No nouveau Vulkan ICDs found. Mesa may need reinstall."
     dnf5 -y reinstall mesa-vulkan-drivers 2>/dev/null || true
-fi
+}
 
-# ── NVIDIA DRM nodedev for XWayland ──────────────────────────────────────────
+# ── NVIDIA udev rules ────────────────────────────────────────────────────────
 mkdir -p /etc/udev/rules.d
 cat > /etc/udev/rules.d/80-nvidia-pm.rules << 'EOF'
-# Remove NVIDIA USB devices early to prevent conflicts with nouveau
 ACTION=="add", DEVPATH=="/bus/pci/drivers/nvidia", RUN+="/sbin/modprobe nvidia-drm"
 ACTION=="add", DEVPATH=="/bus/pci/drivers/nvidia", RUN+="/sbin/modprobe nvidia-uvm"
 EOF

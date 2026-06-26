@@ -3,7 +3,7 @@ on:
   schedule:
     - cron: "00 06 * * *"
   push:
-    branches: [main]
+    branches: [main, develop]
     paths-ignore:
       - "**.md"
   pull_request:

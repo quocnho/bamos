@@ -15,17 +15,14 @@ echo "Kernel:   $(uname -r)"
 
 # Booted image
 if command -v bootc &>/dev/null; then
-    bootc status --json 2>/dev/null | python3 -c "
-import sys, json
-try:
-    d = json.load(sys.stdin)
-    s = d.get('status', {}).get('booted', {})
-    img = s.get('image', {}).get('image', {}).get('image', 'N/A')
-    ver = s.get('image', {}).get('version', 'N/A')
-    print(f'Image:    {img}')
-    print(f'Version:  {ver}')
-except: pass
-" 2>/dev/null || echo "Image:    N/A"
+    bootc status --json 2>/dev/null | jq -r '
+        .status.booted.image.image.image // "N/A",
+        .status.booted.image.version // "N/A"
+    ' 2>/dev/null | {
+        read -r img; read -r ver
+        echo "Image:    $img"
+        echo "Version:  $ver"
+    } || echo "Image:    N/A"
 fi
 
 # Disk
