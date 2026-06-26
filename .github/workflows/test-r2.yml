@@ -7,34 +7,31 @@ jobs:
   test-r2:
     runs-on: ubuntu-latest
     steps:
-      - name: Test with awscli
+      - name: Test Cloudflare R2
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           AWS_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT }}
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq awscli
+          pip install awscli -q && echo "awscli installed"
 
           echo "=== List files in bucket ==="
           aws s3 ls s3://bamos-iso \
             --endpoint-url $AWS_ENDPOINT_URL \
             --region auto 2>&1
 
-          echo ""
           echo "=== Test upload ==="
           echo "hello from gh actions $(date)" > /tmp/test.txt
           aws s3 cp /tmp/test.txt s3://bamos-iso/test.txt \
             --endpoint-url $AWS_ENDPOINT_URL \
             --region auto 2>&1
 
-          echo ""
           echo "=== Test download ==="
           aws s3 cp s3://bamos-iso/test.txt /tmp/test-down.txt \
             --endpoint-url $AWS_ENDPOINT_URL \
             --region auto 2>&1
           cat /tmp/test-down.txt
 
-          echo ""
           echo "=== Cleanup ==="
           aws s3 rm s3://bamos-iso/test.txt \
             --endpoint-url $AWS_ENDPOINT_URL \
