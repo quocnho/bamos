@@ -1,0 +1,7 @@
+# Web browsers
+app/org.mozilla.firefox
+
+# KDE apps
+app/org.kde.gwenview
+app/org.kde.kcalc
+app/org.kde.okular

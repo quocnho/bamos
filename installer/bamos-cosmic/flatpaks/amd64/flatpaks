@@ -1,0 +1,13 @@
+# Web browsers
+app/org.mozilla.firefox
+
+# COSMIC apps
+app/com.system76.CosmicStore
+app/com.system76.CosmicTerminal
+app/com.system76.CosmicFiles
+app/com.system76.CosmicSettings
+app/com.system76.CosmicAppLibrary
+
+# Themes
+runtime/org.gtk.Gtk3theme.adw-gtk3
+runtime/org.gtk.Gtk3theme.adw-gtk3-dark
