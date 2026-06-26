@@ -1,0 +1,3 @@
+# BamOS NVIDIA — GNOME mutter experimental features for Wayland
+[org.gnome.mutter]
+experimental-features=['kms-modifiers']

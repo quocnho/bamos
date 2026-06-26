@@ -1,0 +1,10 @@
+{
+  "policies": {
+    "Preferences": {
+      "widget.dmabuf.force-enabled": {
+        "Value": true,
+        "Status": "locked"
+      }
+    }
+  }
+}
