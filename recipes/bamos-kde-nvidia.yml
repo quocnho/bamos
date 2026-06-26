@@ -15,6 +15,11 @@ modules:
       - source: kde-system
         destination: /
 
+  - type: files
+    files:
+      - source: nvidia-system
+        destination: /
+
   - type: script
     scripts:
       - 00-build-setup.sh
