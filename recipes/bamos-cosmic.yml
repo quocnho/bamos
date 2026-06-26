@@ -33,11 +33,6 @@ modules:
         notify: true
         install:
           - org.mozilla.firefox
-          - com.system76.CosmicStore
-          - com.system76.CosmicTerminal
-          - com.system76.CosmicFiles
-          - com.system76.CosmicSettings
-          - com.system76.CosmicAppLibrary
       - scope: user
 
   - type: signing

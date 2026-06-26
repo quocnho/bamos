@@ -49,6 +49,13 @@ if [[ "$IS_COSMIC" == "true" ]]; then
     # Add COSMIC Flatpak repo
     flatpak remote-add --if-not-exists cosmic \
         https://apt.pop-os.org/cosmic/cosmic.flatpakrepo 2>/dev/null || true
+
+    # Install COSMIC Flatpak apps (from cosmic repo, NOT Flathub)
+    flatpak install -y --noninteractive cosmic com.system76.CosmicStore 2>/dev/null || true
+    flatpak install -y --noninteractive cosmic com.system76.CosmicTerminal 2>/dev/null || true
+    flatpak install -y --noninteractive cosmic com.system76.CosmicFiles 2>/dev/null || true
+    flatpak install -y --noninteractive cosmic com.system76.CosmicSettings 2>/dev/null || true
+    flatpak install -y --noninteractive cosmic com.system76.CosmicAppLibrary 2>/dev/null || true
     echo "COSMIC desktop installed."
 fi
 
