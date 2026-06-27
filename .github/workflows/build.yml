@@ -48,7 +48,7 @@ jobs:
           - bamos-cosmic.yml
           - bamos-cosmic-nvidia.yml
     steps:
-      - name: Build Custom Image (local only, no push)
+      - name: Build Custom Image
         id: build
         uses: blue-build/github-action@v1.11
         with:
@@ -60,7 +60,6 @@ jobs:
           registry_token: ${{ secrets.QUAY_TOKEN }}
           pr_event_number: ${{ github.event.number }}
           maximize_build_space: true
-          push: "false"
 
       - name: Login to Quay.io
         env:
@@ -68,17 +67,18 @@ jobs:
         run: |
           echo "$QUAY_TOKEN" | sudo podman login quay.io -u "${{ secrets.QUAY_USERNAME }}" --password-stdin
 
-      - name: Tag and push to Quay.io (quay.io/quocnho/bamos:<edition>)
+      - name: Pull, tag and push to quay.io/quocnho/bamos:<edition>
         run: |
           RECIPE="${{ matrix.recipe }}"
           NAME="${RECIPE%.yml}"
           EDITION="${NAME#bamos-}"
-          IMAGE="quay.io/quocnho/bamos:${EDITION}"
-          echo "Tagging local image as $IMAGE..."
-          # BlueBuild tags locally as quay.io/quocnho/<name>:latest
-          sudo podman tag "quay.io/quocnho/${NAME}:latest" "$IMAGE"
-          echo "Pushing $IMAGE..."
-          sudo podman push "$IMAGE"
+          SRC="quay.io/quocnho/${NAME}:latest"
+          DST="quay.io/quocnho/bamos:${EDITION}"
+          echo "Pulling $SRC..."
+          sudo podman pull "$SRC"
+          sudo podman tag "$SRC" "$DST"
+          echo "Pushing $DST..."
+          sudo podman push "$DST"
 
   # ── Job 2: Generate ISOs (weekly or manual) ─────────────────────────────────
   build-isos:
