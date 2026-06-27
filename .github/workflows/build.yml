@@ -61,6 +61,18 @@ jobs:
           pr_event_number: ${{ github.event.number }}
           maximize_build_space: true
 
+      - name: Tag and push with short names (quay.io/quocnho/bamos:<edition>)
+        run: |
+          # Extract: bamos-gnome-nvidia.yml → gnome-nvidia
+          RECIPE="${{ matrix.recipe }}"
+          NAME="${RECIPE%.yml}"
+          EDITION="${NAME#bamos-}"
+          SRC="quay.io/quocnho/${NAME}:latest"
+          DST="quay.io/quocnho/bamos:${EDITION}"
+          echo "Tagging: $SRC → $DST"
+          sudo podman tag "$SRC" "$DST"
+          sudo podman push "$DST"
+
   # ── Job 2: Generate ISOs (weekly or manual) ─────────────────────────────────
   build-isos:
     if: |
