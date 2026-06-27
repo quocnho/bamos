@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: "00 06 * * *"
   push:
-    branches: [main, develop]
+    branches: [main]
     paths-ignore:
       - "docs/**"
       - "README.md"
