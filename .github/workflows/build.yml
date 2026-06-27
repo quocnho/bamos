@@ -60,7 +60,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Restore podman cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: /var/lib/containers/storage
           key: podman-${{ matrix.edition.name }}-${{ matrix.nvidia }}-${{ hashFiles('files/scripts/*.sh', 'recipes/*.yml', 'files/system/**', 'files/kde-system/**', 'files/gnome-system/**', 'files/cosmic-system/**', '.github/workflows/build.yml') }}
