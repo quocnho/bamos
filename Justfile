@@ -329,7 +329,7 @@ iso-gnome TAG="bamos-gnome:local":
         -v /var/lib/containers/storage:/var/lib/containers/storage \
         quay.io/centos-bootc/bootc-image-builder:latest \
         --type anaconda-iso \
-        --rootfs xfs \
+        --rootfs btrfs \
         {{ TAG }}
     @echo "📀 ISO at ./output/bootiso/"
     @ls -lh ./output/bootiso/ 2>/dev/null || echo "Check ./output/ for the ISO"
@@ -343,7 +343,7 @@ iso-kde TAG="bamos-kde:local":
         -v /var/lib/containers/storage:/var/lib/containers/storage \
         quay.io/centos-bootc/bootc-image-builder:latest \
         --type anaconda-iso \
-        --rootfs xfs \
+        --rootfs btrfs \
         {{ TAG }}
     @echo "📀 ISO at ./output/bootiso/"
 
@@ -356,7 +356,7 @@ iso-gnome-nvidia TAG="bamos-gnome-nvidia:local":
         -v /var/lib/containers/storage:/var/lib/containers/storage \
         quay.io/centos-bootc/bootc-image-builder:latest \
         --type anaconda-iso \
-        --rootfs xfs \
+        --rootfs btrfs \
         {{ TAG }}
     @echo "📀 ISO at ./output/bootiso/"
 
@@ -369,7 +369,7 @@ iso-kde-nvidia TAG="bamos-kde-nvidia:local":
         -v /var/lib/containers/storage:/var/lib/containers/storage \
         quay.io/centos-bootc/bootc-image-builder:latest \
         --type anaconda-iso \
-        --rootfs xfs \
+        --rootfs btrfs \
         {{ TAG }}
     @echo "📀 ISO at ./output/bootiso/"
 
@@ -382,7 +382,7 @@ iso-registry VARIANT="bamos-gnome" TAG="latest":
         -v /var/lib/containers/storage:/var/lib/containers/storage \
         quay.io/centos-bootc/bootc-image-builder:latest \
         --type anaconda-iso \
-        --rootfs xfs \
+        --rootfs btrfs \
         ghcr.io/quocnho/{{ VARIANT }}:{{ TAG }}
     @echo "📀 ISO generated at ./output/bootiso/"
 
