@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# bamos-list — List user-installed layered packages
+
+set -euo pipefail
+
+echo "BamOS Layered Packages:"
+echo "========================"
+
+rpm-ostree status --json 2>/dev/null | python3 -c "
+import json, sys
+try:
+    d = json.load(sys.stdin)
+    deployments = d.get('deployments', [])
+    if deployments:
+        req = deployments[0].get('requested-packages', [])
+        local = deployments[0].get('layered-packages', [])
+        if req:
+            print('Requested packages:')
+            for p in sorted(req):
+                print(f'  + {p}')
+        if local:
+            print('Layered packages:')
+            for p in sorted(local):
+                print(f'  * {p}')
+except Exception as e:
+    print(f'Could not parse rpm-ostree status: {e}')
+" 2>/dev/null || rpm-ostree status

@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# bamos-reset — Reset all rpm-ostree layered packages
+
+set -euo pipefail
+
+echo "============================================="
+echo "  WARNING: Reset Layered Packages"
+echo "============================================="
+echo ""
+echo "This will remove ALL rpm-ostree layered packages."
+echo "Base system packages will NOT be affected."
+echo ""
+
+if [ "${1:-}" != "--confirm" ]; then
+    echo "To confirm, run: bamos reset-overlay --confirm"
+    exit 1
+fi
+
+echo "Resetting all layered packages..."
+sudo rpm-ostree reset
+
+echo ""
+echo "All layered packages have been removed."
+echo "Please reboot to apply: systemctl reboot"

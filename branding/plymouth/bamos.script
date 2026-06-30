@@ -1,0 +1,37 @@
+// BamOS Plymouth Boot Script
+// Displays the BamOS bamboo logo with a progress indicator
+
+logo_image = Image("logo-bamos.png");
+logo_sprite = Sprite(logo_image);
+
+logo_sprite.SetX(Window.GetWidth() / 2 - logo_image.GetWidth() / 2);
+logo_sprite.SetY(Window.GetHeight() / 2 - logo_image.GetHeight() / 2);
+logo_sprite.SetZ(-10);
+
+// Progress indicator — spinning dots below logo
+progress_dots = Image.Text("● ● ● ● ●", 2, 2, 2, 2);
+progress_sprite = Sprite(progress_dots);
+progress_sprite.SetX(Window.GetWidth() / 2 - progress_image.GetWidth() / 2);
+progress_sprite.SetY(logo_sprite.GetY() + logo_image.GetHeight() + 4);
+
+fun refresh_callback()
+{
+    // Fade out logo when nearly done
+    if (Plymouth.GetMode() == "boot" && Plymouth.GetProgress() > 0.9)
+    {
+        logo_sprite.SetOpacity(1.0 - (Plymouth.GetProgress() - 0.9) * 10);
+    }
+}
+
+fun progress_callback(duration, progress)
+{
+    // Rotate progress dots slowly
+    progress_sprite.SetOpacity(0.3 + (progress % 0.2) * 3);
+
+    // Pulse logo slightly
+    scale = 1.0 + Math.Sin(progress * 6.28) * 0.02;
+    logo_sprite.SetScale(scale, scale);
+}
+
+Plymouth.SetRefreshFunction(refresh_callback);
+Plymouth.SetBootProgressFunction(progress_callback);

@@ -1,0 +1,14 @@
+[Unit]
+Description=BamOS System Setup (first boot)
+After=network.target
+Before=display-manager.service
+ConditionPathExists=!/var/lib/bamos/system-setup-done
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/bamos/bamos-system-setup
+RemainAfterExit=yes
+TimeoutStartSec=120
+
+[Install]
+WantedBy=multi-user.target

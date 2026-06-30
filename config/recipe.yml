@@ -1,0 +1,134 @@
+# BamOS Build Recipes
+
+# =============================================================================
+# Base Image Configuration
+# =============================================================================
+
+# GNOME variant
+images:
+  bamos-gnome:
+    image-name: bamos-gnome
+    base-image: ghcr.io/ublue-os/silverblue-main:latest
+    arch: x86_64
+
+  bamos-kde:
+    image-name: bamos-kde
+    base-image: ghcr.io/ublue-os/kinoite-main:latest
+    arch: x86_64
+
+  bamos-gnome-nvidia:
+    image-name: bamos-gnome-nvidia
+    base-image: ghcr.io/ublue-os/silverblue-nvidia:latest
+    arch: x86_64
+
+  bamos-kde-nvidia:
+    image-name: bamos-kde-nvidia
+    base-image: ghcr.io/ublue-os/kinoite-nvidia:latest
+    arch: x86_64
+
+# =============================================================================
+# Package Modules
+# =============================================================================
+
+modules:
+  # Core Vietnamese packages
+  - type: rpm-ostree
+    repos:
+      - https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-${releasever}.noarch.rpm
+      - https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-${releasever}.noarch.rpm
+    install:
+      # Vietnamese Input
+      - ibus-bamboo
+      - hunspell-vi
+      # Locale
+      - glibc-langpack-vi
+      # Fonts
+      - google-noto-sans-vietnamese-fonts
+      - google-noto-serif-vietnamese-fonts
+      - google-noto-sans-mono-vietnamese-fonts
+      # Printing
+      - cups
+      - cups-pdf
+      - system-config-printer
+      - hplip
+      # Smart Card / Token
+      - opensc
+      - pcsc-lite
+      - pcsc-lite-ccid
+      - pcsc-tools
+      # Multimedia
+      - @multimedia
+      - @printing
+      # Utilities
+      - curl
+      - wget
+      - unzip
+      - p7zip
+
+  # GNOME-specific packages
+  - type: rpm-ostree
+    install:
+      - gnome-tweaks
+      - gnome-extensions-app
+      - gnome-shell-extension-appindicator
+      - gnome-shell-extension-dash-to-dock
+      - gnome-shell-extension-blur-my-shell
+      - gnome-shell-extension-caffeine
+      - gnome-shell-extension-no-overview
+
+  # KDE-specific packages
+  - type: rpm-ostree
+    install:
+      - latte-dock
+      - kwin-bismuth
+      - konsave
+
+  # Scripts
+  - type: script
+    scripts:
+      # Vietnamese input setup
+      - build_files/setup-vn-input.sh
+      # Font configuration
+      - build_files/setup-fonts.sh
+      # WPS Office installer
+      - build_files/install-wps.sh
+      # Printer setup
+      - build_files/setup-printing.sh
+      # USB Token setup
+      - build_files/setup-token.sh
+      # Zalo setup
+      - build_files/setup-zalo.sh
+      # BamOS Portal (GTK4 setup wizard)
+      - build_files/install-portal.sh
+      # BamOS Store (GNOME app store)
+      - build_files/install-store.sh
+      # Kernel modules (Xbox, Broadcom, v4l2loopback)
+      - build_files/install-kmods.sh
+      # Image info & metadata
+      - build_files/image-info.sh
+      # Final image cleanup
+      - build_files/finalize.sh
+
+  # Files
+  - type: files
+    files:
+      # KDE config
+      - system_files/kde/: /etc/skel/.config/
+      # Fonts
+      - system_files/fonts/: /usr/share/fonts/bamos/
+      # Web apps
+      - system_files/webapps/: /usr/share/bamos/webapps/
+      # Office config
+      - system_files/office/: /usr/share/bamos/office/
+      # Branding
+      - branding/: /usr/share/bamos/branding/
+      # ISO/USB GRUB config
+      - branding/iso-grub.cfg: /usr/share/bamos/iso-grub.cfg
+      # Live environment os-release
+      - branding/live-os-release: /usr/share/bamos/live-os-release
+      # Secure Boot certificate
+      - branding/bamos-mok.cer: /usr/share/bamos/secureboot/bamos-sb.der
+      # BamOS Portal
+      - system_files/shared/usr/share/applications/io.bamos.Portal.desktop: /usr/share/applications/io.bamos.Portal.desktop
+      - system_files/shared/usr/share/metainfo/io.bamos.Portal.metainfo.xml: /usr/share/metainfo/io.bamos.Portal.metainfo.xml
+      - system_files/shared/usr/share/bamos/portal/portal.yml: /usr/share/bamos/portal/portal.yml

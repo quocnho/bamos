@@ -1,0 +1,64 @@
+---
+name: Bug Report (Báo cáo lỗi)
+description: Báo cáo lỗi để giúp cải thiện BamOS
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Cảm ơn bạn đã báo cáo lỗi! / Thank you for reporting a bug!
+
+        Vui lòng cung cấp càng nhiều thông tin càng tốt / Please provide as much information as possible.
+
+  - type: dropdown
+    id: variant
+    attributes:
+      label: Phiên bản BamOS | BamOS Variant
+      options:
+        - bamos-gnome
+        - bamos-kde
+        - bamos-gnome-nvidia
+        - bamos-kde-nvidia
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Phiên bản | Version
+      description: Kết quả của `rpm-ostree status`
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Mô tả lỗi | Bug Description
+      description: Mô tả chi tiết về lỗi bạn gặp phải
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Các bước tái hiện | Steps to Reproduce
+      description: |
+        1. Mở '...'
+        2. Nhấn vào '...'
+        3. Xảy ra lỗi
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Kết quả mong đợi | Expected Behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs (nếu có | if any)
+      render: shell

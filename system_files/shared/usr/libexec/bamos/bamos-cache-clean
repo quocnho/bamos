@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# bamos-cache-clean — Cache cleaner for BamOS
+set -euo pipefail
+
+echo "[bamos] Cleaning package caches..."
+
+# Clean dnf5 cache (keep last 2 versions)
+if command -v dnf5 &>/dev/null; then
+    dnf5 clean packages --cacheonly 2>/dev/null || true
+fi
+
+# Clean rpm-ostree cache
+if [ -d /var/cache/rpm-ostree ]; then
+    find /var/cache/rpm-ostree -type f -mtime +30 -delete 2>/dev/null || true
+fi
+
+# Clean downloaded RPMs in /var/cache
+if [ -d /var/cache/libdnf5 ]; then
+    find /var/cache/libdnf5 -name '*.rpm' -mtime +7 -delete 2>/dev/null || true
+fi
+
+echo "[bamos] Cache cleaning complete."

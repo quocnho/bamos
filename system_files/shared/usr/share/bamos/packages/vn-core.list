@@ -1,0 +1,5 @@
+# Vietnamese core packages for BamOS
+ibus-bamboo
+ibus-bamboo-autostart
+hunspell-vi
+glibc-langpack-vi

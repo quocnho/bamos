@@ -1,0 +1,14 @@
+[Unit]
+Description=BamOS Secure Boot Key Enrollment
+Documentation=https://github.com/quocnho/bamos
+ConditionPathExists=/sys/firmware/efi
+ConditionPathExists=/usr/share/bamos/secureboot/bamos-sb.der
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/bamos/bamos-enroll-secureboot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

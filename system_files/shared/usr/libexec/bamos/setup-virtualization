@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# setup-virtualization — Install KVM/QEMU for BamOS (inspired by RakuOS)
+set -euo pipefail
+
+echo "============================================="
+echo "  BamOS Virtualization Setup"
+echo "============================================="
+
+echo "Installing virtualization packages..."
+rpm-ostree install \
+    @virtualization \
+    virt-manager \
+    virt-viewer \
+    qemu-kvm \
+    libvirt \
+    edk2-ovmf \
+    || echo "Some packages may need manual install."
+
+echo ""
+echo "Adding user to libvirt group..."
+sudo usermod -aG libvirt "$USER" 2>/dev/null || echo "  Could not add to libvirt group (will take effect on next login)."
+
+echo ""
+echo "Virtualization setup complete!"
+echo "Launch 'virt-manager' to create VMs."
+echo "Note: Reboot required for package changes to apply."

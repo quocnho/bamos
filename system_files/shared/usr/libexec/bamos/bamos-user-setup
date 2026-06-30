@@ -1,0 +1,169 @@
+#!/usr/bin/env bash
+# bamos-user-setup — Per-user first login setup (inspired by RakuOS rakuos-user)
+# Themes synchronization, GTK flatpak overrides, fish shell migration, watchers
+
+set -euo pipefail
+
+echo "[bamos] Running user setup..."
+
+MARKER_FILE="$HOME/.config/bamos/.firstrun-done"
+mkdir -p "$(dirname "$MARKER_FILE")"
+
+# =============================================================================
+# 1. First-run: Create icon symlink and Flatpak overrides
+# =============================================================================
+
+if [ ! -f "$MARKER_FILE" ]; then
+    mkdir -p "$HOME/.local/share/icons"
+
+    # Create symlink safely
+    if [ ! -e "$HOME/.icons" ]; then
+        ln -s "$HOME/.local/share/icons" "$HOME/.icons"
+    fi
+
+    # Setup Initial Flatpak Overrides (theme + icon access)
+    OVERRIDE="$HOME/.local/share/flatpak/overrides/global"
+    mkdir -p "$(dirname "$OVERRIDE")"
+
+    cat > "$OVERRIDE" <<'EOF'
+[Context]
+filesystems=xdg-config/gtk-3.0:ro;xdg-config/gtk-4.0:ro;~/.themes;~/.icons;xdg-data/icons
+EOF
+
+    touch "$MARKER_FILE"
+fi
+
+# =============================================================================
+# 2. Sync system themes to user home (so Flatpak apps can access)
+# =============================================================================
+
+SYSTEM_THEMES="/usr/share/themes"
+USER_THEMES="$HOME/.themes"
+mkdir -p "$USER_THEMES"
+
+rsync -a --copy-links \
+  --exclude="Clearlooks" \
+  --exclude="Crux" \
+  --exclude="HighContrast" \
+  --exclude="Industrial" \
+  --exclude="Mist" \
+  --exclude="Raleigh" \
+  --exclude="ThinIce" \
+  "$SYSTEM_THEMES/" "$USER_THEMES/" 2>/dev/null || true
+
+echo "[bamos] Setting correct permissions for $USER_THEMES..."
+chown -R "$USER:$USER" "$USER_THEMES" 2>/dev/null || true
+
+# =============================================================================
+# 3. GTK3/4 theme management (RakuOS pattern)
+# =============================================================================
+
+GTK4_CSS="$HOME/.config/gtk-4.0/gtk.css"
+GTK3_CFG="$HOME/.config/gtk-3.0/settings.ini"
+mkdir -p "$HOME/.config/gtk-4.0" "$HOME/.config/gtk-3.0"
+
+_apply_theme() {
+    local theme="$1"
+    [[ -z "$theme" ]] && return
+
+    # GTK4: symlink our gtk.css into place
+    local gtk4_src="$HOME/.themes/${theme}/gtk-4.0/gtk.css"
+    if [[ -f "$gtk4_src" ]]; then
+        ln -sf "$gtk4_src" "$GTK4_CSS"
+    elif [[ -L "$GTK4_CSS" ]]; then
+        rm -f "$GTK4_CSS"
+    fi
+
+    # GTK3: keep settings.ini in sync
+    if [[ -f "$GTK3_CFG" ]]; then
+        if grep -q '^gtk-theme-name=' "$GTK3_CFG"; then
+            sed -i "s/^gtk-theme-name=.*/gtk-theme-name=${theme}/" "$GTK3_CFG"
+        elif grep -q '^\[Settings\]' "$GTK3_CFG"; then
+            sed -i '/^\[Settings\]/a gtk-theme-name='"${theme}" "$GTK3_CFG"
+        else
+            echo "gtk-theme-name=${theme}" >> "$GTK3_CFG"
+        fi
+    else
+        printf '[Settings]\ngtk-theme-name=%s\n' "$theme" > "$GTK3_CFG"
+    fi
+}
+
+# Derive GTK theme from GNOME settings
+if command -v gsettings &>/dev/null; then
+    ACTIVE_THEME=$(gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null | tr -d "'" || true)
+    COLOR_SCHEME=$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null | tr -d "'" || true)
+
+    # Auto-switch theme variant based on color scheme
+    if [[ "$ACTIVE_THEME" == OrigamiPaper* ]] && [[ "$COLOR_SCHEME" == "prefer-dark" ]]; then
+        ACTIVE_THEME="OrigamiPaper"
+    elif [[ "$ACTIVE_THEME" == OrigamiPaper* ]]; then
+        ACTIVE_THEME="OrigamiPaperLight"
+    fi
+
+    _apply_theme "${ACTIVE_THEME:-}"
+fi
+
+# =============================================================================
+# 4. Set fish as default shell (RakuOS pattern)
+# =============================================================================
+
+if [[ -f "/etc/fish/conf.d/bamos-aliases.fish" ]] && [[ -x "/usr/bin/fish" ]]; then
+    if [[ ! -f "$HOME/.config/bamos/keep-shell" ]]; then
+        CURRENT_SHELL=$(getent passwd "$USER" | cut -d: -f7)
+        if [[ "$CURRENT_SHELL" != "/usr/bin/fish" ]]; then
+            chsh -s /usr/bin/fish 2>/dev/null || true
+        fi
+    fi
+fi
+
+# =============================================================================
+# 5. Starship prompt setup
+# =============================================================================
+
+if command -v starship &>/dev/null && [ ! -f "$HOME/.config/starship.toml" ]; then
+    mkdir -p "$HOME/.config"
+    starship preset plain-text-symbols -o "$HOME/.config/starship.toml" 2>/dev/null || true
+fi
+
+# =============================================================================
+# 6. Fastfetch config link
+# =============================================================================
+
+if command -v fastfetch &>/dev/null && [ ! -f "$HOME/.config/fastfetch/config.jsonc" ]; then
+    mkdir -p "$HOME/.config/fastfetch"
+    ln -sf /usr/share/fastfetch/presets/bamos/bamos-fastfetch.jsonc "$HOME/.config/fastfetch/config.jsonc" 2>/dev/null || true
+fi
+
+# =============================================================================
+# 7. Git default config
+# =============================================================================
+
+if command -v git &>/dev/null && [ ! -f "$HOME/.gitconfig" ]; then
+    git config --global init.defaultBranch main 2>/dev/null || true
+    git config --global pull.rebase false 2>/dev/null || true
+fi
+
+# =============================================================================
+# 8. Create default directories
+# =============================================================================
+
+mkdir -p "$HOME/.local/share/fonts"
+mkdir -p "$HOME/.local/share/icons"
+mkdir -p "$HOME/.local/share/themes"
+mkdir -p "$HOME/.config/autostart"
+
+# =============================================================================
+# 9. Live environment: disable KWallet on KDE
+# =============================================================================
+
+if grep -q 'rd.live' /proc/cmdline 2>/dev/null && [[ -d "$HOME/.config" ]]; then
+    if command -v plasmashell >/dev/null 2>&1 || [[ -f "/usr/share/plasma/plasmoids/org.kde.plasma.taskmanager/metadata.json" ]]; then
+        mkdir -p "$HOME/.config"
+        cat > "$HOME/.config/kwalletrc" <<'EOF'
+[Wallet]
+Enabled=false
+EOF
+    fi
+fi
+
+echo "[bamos] User setup complete."

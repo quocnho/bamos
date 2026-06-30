@@ -1,0 +1,5 @@
+# Office & Productivity packages
+# WPS Office is installed via script (proprietary)
+libreoffice
+libreoffice-langpack-vi
+hunspell-vi

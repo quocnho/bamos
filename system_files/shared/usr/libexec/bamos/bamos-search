@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# bamos-search — Package search for BamOS
+
+set -euo pipefail
+
+if [ $# -eq 0 ]; then
+    echo "Usage: bamos search <query>"
+    exit 1
+fi
+
+echo "Searching for: $*"
+echo ""
+rpm-ostree search "$@" 2>/dev/null || dnf5 search "$@"

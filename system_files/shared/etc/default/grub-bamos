@@ -1,0 +1,23 @@
+# BamOS Kernel Parameters (CachyOS-inspired)
+# Optimized for desktop responsiveness and Vietnamese office workloads
+#
+# Applied at build time via /etc/default/grub
+# Managed by bootc/rpm-ostree — survives system updates
+
+# Full kernel preemption — critical for desktop responsiveness
+preempt=full
+
+# Transparent Hugepages — always enabled
+transparent_hugepage=always
+
+# Disable NMI watchdog — reduce latency for desktop workloads
+nowatchdog
+
+# Zswap memory compression — reduce RAM pressure
+zswap.enabled=1 zswap.compressor=lz4 zswap.max_pool_percent=20
+
+# IO Scheduler — handled by udev rules, not kernel cmdline
+# See /usr/lib/udev/rules.d/60-ioschedulers.rules
+
+# Quiet boot with splash
+quiet splash

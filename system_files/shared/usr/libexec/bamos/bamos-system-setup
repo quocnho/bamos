@@ -1,0 +1,175 @@
+#!/usr/bin/env bash
+# bamos-system-setup — First-boot system setup (adapted from RakuOS system-setup)
+# Fixes permissions, seeds Flatpak, migrates shells, configures defaults
+
+set -euo pipefail
+
+echo "[bamos] Running system setup..."
+
+# =============================================================================
+# 1. Fix /etc permissions (RakuOS pattern)
+# =============================================================================
+
+echo "[bamos] Fixing /etc permissions..."
+chown root:root /etc
+chmod 0755 /etc
+
+# Strip world-write from regular files in /etc
+find /etc -maxdepth 1 -type f -perm /o+w -exec chmod o-w {} \; 2>/dev/null || true
+
+# Ensure sudoers.d has correct permissions
+if [[ -d /etc/sudoers.d ]]; then
+    chown root:root /etc/sudoers.d
+    chmod 0750 /etc/sudoers.d
+    for f in /etc/sudoers.d/*; do
+        [[ -f "$f" ]] || continue
+        chown root:root "$f"
+        chmod 0440 "$f"
+    done
+fi
+
+# =============================================================================
+# 2. Migrate real users to fish shell (RakuOS pattern)
+# =============================================================================
+
+FISH_CONFIG="/etc/fish/conf.d/bamos-aliases.fish"
+FISH_BIN="/usr/bin/fish"
+
+if [[ -f "$FISH_CONFIG" ]] && [[ -x "$FISH_BIN" ]]; then
+    while IFS=: read -r uname _ uid _ _ uhome ushell; do
+        [[ "$uid" -ge 1000 ]] && [[ "$uid" -le 60000 ]] || continue
+        [[ "$ushell" == "$FISH_BIN" ]] && continue
+        [[ -f "${uhome}/.config/bamos/keep-shell" ]] && continue
+        echo "[bamos] Migrating $uname shell to fish..."
+        usermod -s "$FISH_BIN" "$uname" 2>/dev/null || true
+    done < /etc/passwd
+fi
+
+# =============================================================================
+# 3. Seed Flatpak remotes and repair
+# =============================================================================
+
+FLATHUB_FIXED="/var/lib/bamos/flathub_fixed"
+
+if [[ ! -f "$FLATHUB_FIXED" ]]; then
+    echo "[bamos] Configuring Flatpak remotes..."
+
+    # Save currently installed apps before potential wipe
+    mapfile -t SAVED_FLATPAKS < <(
+        flatpak list --app --columns=application 2>/dev/null || true
+    )
+
+    # Remove Fedora Flatpak remote (use Flathub directly)
+    flatpak remote-delete --system fedora 2>/dev/null || true
+
+    # Ensure Flathub is configured
+    flatpak remote-add --if-not-exists --system \
+        flathub https://dl.flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
+
+    # Reinstall previously installed apps
+    if [[ ${#SAVED_FLATPAKS[@]} -gt 0 ]]; then
+        echo "[bamos] Reinstalling ${#SAVED_FLATPAKS[@]} saved Flatpak app(s)..."
+        for app_id in "${SAVED_FLATPAKS[@]}"; do
+            echo "  → $app_id"
+            flatpak install -y --noninteractive --system flathub "$app_id" 2>/dev/null \
+                || flatpak install -y --noninteractive --system "$app_id" 2>/dev/null \
+                || echo "  WARNING: could not reinstall $app_id"
+        done
+    else
+        # Seed Flatpak store so Software Center works without CLI first install
+        echo "[bamos] Seeding Flatpak store for Software Center..."
+        if flatpak install -y --noninteractive --system flathub com.github.tchx84.Flatseal 2>/dev/null; then
+            flatpak uninstall -y --noninteractive --system com.github.tchx84.Flatseal 2>/dev/null || true
+            echo "[bamos] Flatpak store seeded."
+        fi
+    fi
+
+    mkdir -p /var/lib/bamos
+    touch "$FLATHUB_FIXED"
+fi
+
+# =============================================================================
+# 4. Configure uutils coreutils (Rust replacements)
+# =============================================================================
+
+UUTILS_MARKER="/var/lib/bamos/user-uutils"
+
+if [[ ! -f "$UUTILS_MARKER" ]]; then
+    if command -v uu_ls &>/dev/null; then
+        echo "[bamos] Setting up uutils-coreutils as default..."
+        if command -v bamos &>/dev/null; then
+            bamos setup-uutils uutils
+        fi
+    fi
+fi
+
+# =============================================================================
+# 5. Create default directories for new users
+# =============================================================================
+
+if [[ -f /etc/default/useradd ]]; then
+    mkdir -p /etc/skel/.local/share/fonts
+    mkdir -p /etc/skel/.local/share/icons
+    mkdir -p /etc/skel/.local/share/themes
+    mkdir -p /etc/skel/.config/autostart
+    mkdir -p /etc/skel/.config/fastfetch
+    mkdir -p /etc/skel/.config/bamos
+fi
+
+# =============================================================================
+# 6. Create default flatpak-command-overrides.conf
+# =============================================================================
+
+if [[ ! -f /usr/share/bamos/flatpak-command-overrides.conf ]]; then
+    mkdir -p /usr/share/bamos
+    cat > /usr/share/bamos/flatpak-command-overrides.conf <<'EOF'
+# BamOS Flatpak command overrides
+# Format: AppID=desired_command_name
+# Lines starting with # are comments.
+org.mozilla.firefox=firefox
+org.libreoffice.LibreOffice=libreoffice
+org.gimp.GIMP=gimp
+org.videolan.VLC=vlc
+EOF
+fi
+
+# =============================================================================
+# 7. Font cache & desktop database
+# =============================================================================
+
+echo "[bamos] Rebuilding font cache..."
+fc-cache -fv 2>/dev/null || true
+
+if command -v update-desktop-database &>/dev/null; then
+    update-desktop-database /usr/share/applications 2>/dev/null || true
+fi
+
+# =============================================================================
+# 8. Create home directory for UID 1000 if missing
+# =============================================================================
+
+HOME_SEED_MARKER="/var/lib/bamos/install-user-home-fixed"
+if [[ ! -f "$HOME_SEED_MARKER" ]]; then
+    install_user_entry=$(getent passwd 1000 || true)
+    if [[ -n "$install_user_entry" ]]; then
+        IFS=: read -r install_user_name _ install_user_uid install_user_gid _ install_user_home _ \
+            <<< "$install_user_entry"
+        if [[ -n "$install_user_home" ]] && [[ ! -d "$install_user_home" ]]; then
+            echo "[bamos] Creating missing home directory for $install_user_name at $install_user_home"
+            mkdir -p "$install_user_home"
+            chown "${install_user_uid}:${install_user_gid}" "$install_user_home"
+            chmod 700 "$install_user_home"
+        fi
+        mkdir -p /var/lib/bamos
+        touch "$HOME_SEED_MARKER"
+    fi
+fi
+
+# =============================================================================
+# 9. Mark setup as done
+# =============================================================================
+
+mkdir -p /var/lib/bamos
+echo "$(date -Iseconds)" > /var/lib/bamos/system-setup-done
+
+echo "[bamos] System setup complete."

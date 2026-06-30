@@ -1,0 +1,11 @@
+[Unit]
+Description=BamOS User Setup (first login)
+After=default.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/bamos/bamos-user-setup
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target

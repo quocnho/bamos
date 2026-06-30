@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# nvidia-switch-legacy — Switch to NVIDIA closed driver for legacy GPUs
+set -euo pipefail
+
+echo "Switching to NVIDIA closed-source driver (for Maxwell/Pascal GPUs)..."
+echo "This will remove nvidia-open and install nvidia (closed)."
+echo "Reboot required after completion."
+echo ""
+
+sudo rpm-ostree override remove \
+    kmod-nvidia-open \
+    xorg-x11-drv-nvidia-open \
+    --install kmod-nvidia \
+    --install xorg-x11-drv-nvidia
+
+echo ""
+echo "Driver switch staged. Please reboot: systemctl reboot"

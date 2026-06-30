@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+# bamos-setup-uutils — Coreutils switcher (adapted from RakuOS setup-uutils)
+# Switches between Rust uutils and GNU coreutils
+
+set -euo pipefail
+
+CHOICE="${1:-}"
+
+show_help() {
+    echo "BamOS Coreutils Switcher"
+    echo ""
+    echo "Usage: bamos setup-uutils <choice>"
+    echo ""
+    echo "Choices:"
+    echo "  uutils   Use Rust uutils coreutils (modern, fast)"
+    echo "  gnu      Use GNU coreutils (traditional, compatible)"
+    echo ""
+    # Show current state
+    if readlink /usr/bin/ls 2>/dev/null | grep -q uu_ls; then
+        echo "Current: uutils (Rust)"
+    else
+        echo "Current: GNU"
+    fi
+}
+
+if [[ -z "$CHOICE" ]]; then
+    show_help
+    exit 1
+fi
+
+if [[ "$(id -u)" -ne 0 ]]; then
+    echo "This command must be run as root."
+    echo "Use: sudo bamos setup-uutils <choice>"
+    exit 1
+fi
+
+# Coreutils that have uutils equivalents
+UU_TOOLS=(
+    basename cat chgrp chmod chown chroot cksum comm cp csplit cut date dd df dir
+    dircolors dirname du echo env expand expr factor false fmt fold groups
+    head hostid hostname id install join kill link ln logname ls md5sum mkdir
+    mkfifo mknod mktemp more mv nice nl nohup nproc numfmt od paste pathchk
+    pinky pr printenv printf ptx pwd readlink realpath rm rmdir seq sha1sum
+    sha224sum sha256sum sha384sum sha512sum shred shuf sleep sort split stat
+    stdbuf stty sum sync tac tail tee test timeout touch tr true truncate tsort
+    tty uname unexpand uniq unlink uptime users vdir wc who whoami yes
+)
+
+case "$CHOICE" in
+    uutils)
+        echo "Switching to Rust uutils coreutils..."
+        if ! command -v uu_ls &>/dev/null; then
+            echo "✗ uutils-coreutils is not installed."
+            echo "  Install with: sudo rpm-ostree install uutils-coreutils"
+            exit 1
+        fi
+
+        switched=0
+        for tool in "${UU_TOOLS[@]}"; do
+            uu_name="uu_${tool}"
+            gnu_name="gnu_${tool}"
+
+            # Only switch if uutils provides this tool
+            if command -v "$uu_name" &>/dev/null; then
+                # Save GNU version if not already saved
+                if [[ -f "/usr/bin/${tool}" && ! -L "/usr/bin/${tool}" && ! -f "/usr/bin/${gnu_name}" ]]; then
+                    cp -a "/usr/bin/${tool}" "/usr/bin/${gnu_name}" 2>/dev/null || true
+                fi
+
+                # Create symlink
+                ln -sf "/usr/bin/${uu_name}" "/usr/local/bin/${tool}" 2>/dev/null && ((switched++)) || true
+            fi
+        done
+
+        # Special: lsd → ls, bat → cat
+        if command -v lsd &>/dev/null; then
+            ln -sf /usr/bin/lsd /usr/local/bin/ls 2>/dev/null || true
+        fi
+        if command -v bat &>/dev/null; then
+            ln -sf /usr/bin/bat /usr/local/bin/cat 2>/dev/null || true
+        fi
+
+        echo "✓ Switched $switched tools to uutils. Restart shell to apply."
+        ;;
+    gnu)
+        echo "Switching to GNU coreutils..."
+
+        # Remove uutils symlinks from /usr/local/bin
+        switched=0
+        for tool in "${UU_TOOLS[@]}"; do
+            uu_name="uu_${tool}"
+            gnu_name="gnu_${tool}"
+
+            if [[ -L "/usr/local/bin/${tool}" ]]; then
+                rm -f "/usr/local/bin/${tool}"
+
+                # Restore GNU version if saved
+                if [[ -f "/usr/bin/${gnu_name}" ]]; then
+                    ln -sf "/usr/bin/${gnu_name}" "/usr/local/bin/${tool}" 2>/dev/null || true
+                fi
+                ((switched++)) || true
+            fi
+        done
+
+        echo "✓ Restored $switched tools to GNU. Restart shell to apply."
+        ;;
+    *)
+        show_help
+        exit 1
+        ;;
+esac
+
+# Save preference
+mkdir -p /var/lib/bamos
+echo "$CHOICE" > /var/lib/bamos/user-uutils

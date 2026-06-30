@@ -1,0 +1,13 @@
+# BamOS signing public key (placeholder)
+# Replace with actual cosign public key generated during key setup
+#
+# To generate:
+#   cosign generate-key-pair
+# This will create cosign.key (private) and cosign.pub (public)
+#
+# Store cosign.key as a GitHub Secret named COSIGN_PRIVATE_KEY
+
+-----BEGIN PUBLIC KEY-----
+# PLACEHOLDER - Replace with actual cosign public key
+# Generate with: cosign generate-key-pair
+-----END PUBLIC KEY-----

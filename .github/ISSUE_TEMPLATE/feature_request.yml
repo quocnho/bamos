@@ -1,0 +1,45 @@
+---
+name: Feature Request (Đề xuất tính năng)
+description: Đề xuất tính năng mới cho BamOS
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Cảm ơn bạn đã đề xuất tính năng! / Thank you for suggesting a feature!
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Vấn đề cần giải quyết | Problem to Solve
+      description: Mô tả vấn đề mà tính năng này sẽ giải quyết
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Giải pháp đề xuất | Proposed Solution
+      description: Mô tả giải pháp bạn đề xuất
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Giải pháp thay thế | Alternatives Considered
+      description: Các giải pháp khác bạn đã cân nhắc
+
+  - type: dropdown
+    id: target
+    attributes:
+      label: Áp dụng cho | Applies to
+      multiple: true
+      options:
+        - GNOME variant
+        - KDE variant
+        - Cả hai / Both
+        - Cơ sở hạ tầng / Infrastructure
+    validations:
+      required: true

@@ -1,0 +1,8 @@
+[Unit]
+Description=Flatpak Unused Runtime Cleanup
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/flatpak uninstall --unused -y --noninteractive
+IOSchedulingClass=idle
+Nice=19

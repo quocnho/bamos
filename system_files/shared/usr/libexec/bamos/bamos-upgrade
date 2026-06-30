@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# bamos-upgrade — System image upgrader via bootc
+
+set -euo pipefail
+
+echo "Upgrading BamOS base image..."
+echo ""
+
+if ! command -v bootc &>/dev/null; then
+    echo "bootc not found. This system may not be a bootc-based image."
+    exit 1
+fi
+
+# Check current version
+echo "Current image:"
+sudo bootc status --json 2>/dev/null | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+try:
+    img=d.get('status',{}).get('booted',{}).get('image',{}).get('image',{}).get('image','unknown')
+    print(f'  {img}')
+except: print('  unknown')
+" 2>/dev/null || sudo bootc status
+
+echo ""
+echo "Checking for updates..."
+sudo bootc upgrade --check
+
+echo ""
+echo "Applying upgrade..."
+sudo bootc upgrade
+
+echo ""
+echo "============================================="
+echo "  System upgraded!"
+echo "============================================="
+echo "Please reboot to boot into the new image:"
+echo "  systemctl reboot"

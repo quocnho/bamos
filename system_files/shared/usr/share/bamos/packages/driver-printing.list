@@ -1,0 +1,9 @@
+# Printer drivers
+@printing
+cups
+cups-pdf
+system-config-printer
+hplip
+hplip-gui
+gutenprint
+foomatic-db

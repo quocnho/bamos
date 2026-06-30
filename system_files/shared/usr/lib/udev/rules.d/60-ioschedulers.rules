@@ -1,0 +1,23 @@
+# BamOS IO Scheduler Rules (CachyOS-inspired)
+# Overrides default IO scheduler for optimal desktop performance
+#
+# Strategy (RakuOS/CachyOS approach):
+#   HDD   → bfq    (Budget Fair Queueing — best for spinning disks)
+#   SSD   → kyber  (Latency-targeted — best for SATA SSDs)
+#   NVMe  → none   (No scheduler — NVMe is fast enough)
+
+# HDD — Rotational media
+ACTION=="add|change", KERNEL=="sd[a-z]*", ATTR{queue/rotational}=="1", \
+    ATTR{queue/scheduler}="bfq"
+
+# SATA SSD — Non-rotational, non-NVMe
+ACTION=="add|change", KERNEL=="sd[a-z]*", ATTR{queue/rotational}=="0", \
+    ATTR{queue/scheduler}="kyber"
+
+# NVMe SSD — PCIe-attached flash
+ACTION=="add|change", KERNEL=="nvme[0-9]*", ATTR{queue/rotational}=="0", \
+    ATTR{queue/scheduler}="none"
+
+# MMC/SD cards
+ACTION=="add|change", KERNEL=="mmcblk[0-9]*", ATTR{queue/rotational}=="0", \
+    ATTR{queue/scheduler}="kyber"

@@ -1,0 +1,39 @@
+# Package and build artifacts
+*.rpm
+*.tar.gz
+*.zip
+
+# Build outputs
+output/
+build/
+dist/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Podman/Docker
+podman-build-*/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Temporary files
+/tmp/
+*.log
+
+# Environment files
+.env
+.env.local
+
+# OS files
+Thumbs.db
+.DS_Store

@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+# bamos-flatpak-watcher — Flatpak install/uninstall event monitor (adapted from RakuOS)
+# Watches Flatpak exports and regenerates CLI wrappers + runs per-app fixes
+
+set -euo pipefail
+
+WATCH_DIR="/var/lib/flatpak/exports/bin"
+WRAPPER_GEN="/usr/libexec/bamos/bamos-flatpak-wrapper-gen"
+FIX_DIR="/usr/libexec/bamos/internal/flatpak-fixes"
+DEBOUNCE_SEC=3
+LAST_EVENT=0
+
+echo "[bamos-flatpak-watcher] Starting Flatpak event monitor..."
+
+# Ensure we have inotifywait
+if ! command -v inotifywait &>/dev/null; then
+    echo "[bamos-flatpak-watcher] inotifywait not available — exiting."
+    exit 1
+fi
+
+if [[ ! -d "$WATCH_DIR" ]]; then
+    echo "[bamos-flatpak-watcher] Watch directory $WATCH_DIR does not exist — exiting."
+    exit 1
+fi
+
+# Regenerate wrappers once at startup
+if [[ -x "$WRAPPER_GEN" ]]; then
+    echo "[bamos-flatpak-watcher] Generating initial Flatpak CLI wrappers..."
+    "$WRAPPER_GEN"
+fi
+
+# Track known apps to detect install/uninstall
+declare -A KNOWN_APPS
+for f in "$WATCH_DIR"/*; do
+    [[ -e "$f" ]] || continue
+    base=$(basename "$f")
+    [[ "$base" == .* ]] && continue
+    KNOWN_APPS["$base"]=1
+done
+
+echo "[bamos-flatpak-watcher] Tracking ${#KNOWN_APPS[@]} Flatpak app(s)."
+
+# Watch for create/delete events
+inotifywait -m -q \
+    -e create -e delete -e moved_to -e moved_from \
+    --format '%e %f' "$WATCH_DIR" 2>/dev/null | while read -r event file; do
+
+    # Ignore hidden/temp files
+    [[ "$file" == .* ]] && continue
+    [[ "$file" == .export-symlink-* ]] && continue
+
+    APPID="$file"
+
+    case "$event" in
+        CREATE*|MOVED_TO*)
+            if [[ -z "${KNOWN_APPS[$APPID]:-}" ]]; then
+                echo "[bamos-flatpak-watcher] Flatpak installed: $APPID"
+                KNOWN_APPS["$APPID"]=1
+
+                # Run per-app fix script if exists
+                if [[ -x "$FIX_DIR/$APPID.sh" ]]; then
+                    echo "[bamos-flatpak-watcher] Running fix for $APPID..."
+                    "$FIX_DIR/$APPID.sh" install 2>/dev/null || true
+                fi
+
+                # Regenerate CLI wrappers
+                if [[ -x "$WRAPPER_GEN" ]]; then
+                    "$WRAPPER_GEN"
+                fi
+            fi
+            ;;
+
+        DELETE*|MOVED_FROM*)
+            if [[ -n "${KNOWN_APPS[$APPID]:-}" ]]; then
+                echo "[bamos-flatpak-watcher] Flatpak uninstalled: $APPID"
+                unset "KNOWN_APPS[$APPID]"
+
+                # Run per-app fix script for cleanup
+                if [[ -x "$FIX_DIR/$APPID.sh" ]]; then
+                    echo "[bamos-flatpak-watcher] Cleaning up $APPID..."
+                    "$FIX_DIR/$APPID.sh" uninstall 2>/dev/null || true
+                fi
+
+                # Regenerate CLI wrappers
+                if [[ -x "$WRAPPER_GEN" ]]; then
+                    "$WRAPPER_GEN"
+                fi
+            fi
+            ;;
+    esac
+done

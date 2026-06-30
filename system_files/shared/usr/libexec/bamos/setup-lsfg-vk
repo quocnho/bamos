@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# setup-lsfg-vk — Set up Lossless Scaling Frame Gen (Vulkan interop layer)
+# Adapted from RakuOS setup-lsfg-vk
+# Installs the LSFG Vulkan capture library for frame generation in games.
+
+set -euo pipefail
+
+echo "Cài đặt Lossless Scaling Frame Gen (Vulkan)..."
+echo "Setting up Lossless Scaling Frame Gen (Vulkan)..."
+
+LSFG_DIR="/usr/lib/lsfg-vk"
+LSFG_REPO="https://github.com/ishitatsuyuki/LatentFusion"
+
+# Install Vulkan development headers if not present
+if ! rpm -q vulkan-headers &>/dev/null; then
+    echo "Cài đặt Vulkan development headers..."
+    rpm-ostree install vulkan-headers vulkan-loader-devel
+    echo "Vui lòng khởi động lại trước khi tiếp tục: systemctl reboot"
+    echo "Please reboot before continuing: systemctl reboot"
+    exit 0
+fi
+
+# Clone and build the LSFG Vulkan library
+mkdir -p "$LSFG_DIR"
+
+if [[ ! -f "$LSFG_DIR/liblfg_vk.so" ]]; then
+    echo "Đang tải và build LSFG Vulkan library..."
+    tmpdir=$(mktemp -d)
+    trap 'rm -rf "$tmpdir"' EXIT
+
+    git clone --depth 1 "$LSFG_REPO" "$tmpdir" 2>/dev/null || {
+        echo "LỖI: Không thể tải LSFG repository."
+        echo "ERROR: Failed to clone LSFG repository."
+        exit 1
+    }
+
+    cd "$tmpdir"
+    mkdir -p build && cd build
+    cmake .. -DCMAKE_BUILD_TYPE=Release 2>/dev/null || {
+        echo "LỖI: CMake configuration failed."
+        exit 1
+    }
+
+    make -j$(nproc) 2>/dev/null || {
+        echo "LỖI: Build failed."
+        exit 1
+    }
+
+    cp liblfg_vk.so "$LSFG_DIR/"
+    echo "LSFG Vulkan library installed to $LSFG_DIR"
+else
+    echo "LSFG Vulkan library already installed."
+fi
+
+# Configure LD_LIBRARY_PATH for Vulkan layer
+cat > /etc/profile.d/lsfg-vk.sh <<'EOF'
+# LSFG Vulkan Frame Generation
+export VK_INSTANCE_LAYERS=VK_LAYER_LFG
+export LD_LIBRARY_PATH=/usr/lib/lsfg-vk:$LD_LIBRARY_PATH
+EOF
+chmod 644 /etc/profile.d/lsfg-vk.sh
+
+echo ""
+echo "LSFG Vulkan Frame Gen đã được thiết lập!"
+echo "LSFG Vulkan Frame Gen setup complete!"
+echo ""
+echo "Sử dụng với MangoHud:"
+echo "  MANGOHUD_CONFIG=lsfg mangohud %command%"
+echo ""
+echo "LƯU Ý: Yêu cầu Lossless Scaling đang chạy trên máy Windows qua network."
+echo "NOTE: Requires Lossless Scaling running on a Windows machine over network."

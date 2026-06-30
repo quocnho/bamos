@@ -1,0 +1,199 @@
+#!/usr/bin/env bash
+# bamos — BamOS Package & System Manager (inspired by RakuOS CLI)
+# Main entry point for all bamos CLI commands.
+# Routes to /usr/libexec/bamos/ and /usr/libexec/bamos/internal/
+
+set -euo pipefail
+
+COMMAND="${1:-}"
+shift 2>/dev/null || true
+
+case "$COMMAND" in
+    # ── Package Management ──────────────────────────────────────────────────
+    install)
+        exec /usr/libexec/bamos/bamos-install "$@"
+        ;;
+    remove|uninstall)
+        exec /usr/libexec/bamos/bamos-remove "$@"
+        ;;
+    update)
+        exec /usr/libexec/bamos/bamos-update "$@"
+        ;;
+    upgrade|system-upgrade)
+        exec /usr/libexec/bamos/bamos-upgrade "$@"
+        ;;
+    list|packages)
+        exec /usr/libexec/bamos/bamos-list "$@"
+        ;;
+    search)
+        exec /usr/libexec/bamos/bamos-search "$@"
+        ;;
+    reset-overlay)
+        exec /usr/libexec/bamos/bamos-reset "$@"
+        ;;
+
+    # ── Setup Wizards ──────────────────────────────────────────────────────
+    setup-gaming)
+        exec /usr/libexec/bamos/setup-gaming "$@"
+        ;;
+    setup-virt|setup-virtualization)
+        exec /usr/libexec/bamos/setup-virtualization "$@"
+        ;;
+    setup-nvidia)
+        exec /usr/libexec/bamos/nvidia-setup.sh "$@"
+        ;;
+    setup-fonts-proprietary|setup-fonts-vn)
+        exec /usr/libexec/bamos/setup-fonts-proprietary.sh "$@"
+        ;;
+    setup-fonts-ms)
+        exec /usr/libexec/bamos/setup-fonts-ms.sh "$@"
+        ;;
+    setup-ollama)
+        exec /usr/libexec/bamos/setup-ollama "$@"
+        ;;
+    setup-lsfg-vk)
+        exec /usr/libexec/bamos/setup-lsfg-vk "$@"
+        ;;
+    setup-store|install-store)
+        exec /usr/libexec/bamos/install-store.sh "$@"
+        ;;
+    setup-sudo)
+        exec /usr/libexec/bamos/bamos-setup-sudo "$@"
+        ;;
+    setup-uutils)
+        exec /usr/libexec/bamos/bamos-setup-uutils "$@"
+        ;;
+
+    # ── NVIDIA Switching ───────────────────────────────────────────────────
+    switch-nvidia-legacy)
+        exec /usr/libexec/bamos/nvidia-switch-legacy "$@"
+        ;;
+    switch-nvidia-open)
+        exec /usr/libexec/bamos/nvidia-switch-open "$@"
+        ;;
+
+    # ── Security ───────────────────────────────────────────────────────────
+    enroll-secureboot-key)
+        exec /usr/libexec/bamos/bamos-enroll-secureboot
+        ;;
+
+    # ── Applications ───────────────────────────────────────────────────────
+    portal|welcome)
+        exec /usr/libexec/bamos/bamos-portal.py
+        ;;
+    store|appstore)
+        if command -v io.github.bazaar_org.bazaar &>/dev/null; then
+            exec flatpak run io.github.bazaar_org.bazaar
+        elif command -v bamstore &>/dev/null; then
+            exec bamstore
+        else
+            echo "BamOS Store chưa được cài đặt."
+            echo "Cài đặt: bamos setup-store hoặc flatpak install flathub io.github.bazaar_org.bazaar"
+            exit 1
+        fi
+        ;;
+
+    # ── Flatpak Management ─────────────────────────────────────────────────
+    flatpak-wrapper-gen)
+        exec /usr/libexec/bamos/bamos-flatpak-wrapper-gen
+        ;;
+
+    # ── Shell Management ───────────────────────────────────────────────────
+    shell)
+        SHELL_NAME="${1:-}"
+        case "$SHELL_NAME" in
+            fish) SHELL_BIN="/usr/bin/fish" ;;
+            bash) SHELL_BIN="/usr/bin/bash" ;;
+            zsh)  SHELL_BIN="/usr/bin/zsh"  ;;
+            *)
+                CURRENT_SHELL=$(getent passwd "$USER" | cut -d: -f7)
+                echo "Usage: bamos shell <fish|bash|zsh>"
+                echo ""
+                echo "Current shell: $CURRENT_SHELL"
+                echo ""
+                echo "Available:"
+                for s in fish bash zsh; do
+                    BIN="/usr/bin/$s"
+                    [[ -x "$BIN" ]] && echo "  $s" || echo "  $s  (chưa cài đặt)"
+                done
+                exit 1
+                ;;
+        esac
+        if [[ ! -x "$SHELL_BIN" ]]; then
+            echo "Error: $SHELL_BIN chưa được cài đặt."
+            exit 1
+        fi
+        mkdir -p "$HOME/.config/bamos"
+        touch "$HOME/.config/bamos/keep-shell"
+        chsh -s "$SHELL_BIN"
+        echo "Login shell set to $SHELL_NAME. Có hiệu lực sau lần đăng nhập tiếp theo."
+        ;;
+
+    # ── Info ───────────────────────────────────────────────────────────────
+    info|version)
+        echo "🐉 BamOS - Hệ điều hành Linux dành cho người Việt"
+        echo ""
+        if command -v bootc &>/dev/null; then
+            echo "Image: $(bootc status --json 2>/dev/null | jq -r '.status.booted.image.image.image // "unknown"')"
+        fi
+        if [[ -f /usr/share/bamos/version ]]; then
+            echo "Build:  $(cat /usr/share/bamos/version)"
+        fi
+        echo ""
+        echo "Commands: install, remove, update, upgrade, list, search, reset-overlay"
+        echo "Setup:    setup-gaming, setup-virt, setup-ollama, setup-lsfg-vk"
+        echo "Config:   setup-sudo, setup-uutils, setup-fonts-proprietary, setup-fonts-ms"
+        echo "Security: enroll-secureboot-key"
+        echo "Flatpak:  flatpak-wrapper-gen"
+        echo "Shell:    shell <fish|bash|zsh>"
+        echo "Apps:     portal, store"
+        ;;
+    help|--help|-h|"")
+        cat <<'EOF'
+🐉 BamOS — Hệ điều hành Linux cho người Việt
+
+Usage: bamos <command> [args...]
+
+Package Management:
+  install <pkg...>      Install packages (rpm-ostree layer)
+  remove <pkg...>       Remove packages
+  update                Update packages + flatpaks + check system image
+  upgrade               Upgrade base system image (bootc)
+  list                  List user-installed layered packages
+  search <query>        Search for packages
+  reset-overlay         Reset all layered packages
+
+Setup Wizards:
+  setup-gaming          Install Steam, Lutris, gaming tools
+  setup-virt            Install KVM/QEMU virtualization
+  setup-nvidia          Configure NVIDIA GPU drivers
+  setup-ollama          Install Ollama local AI/LLM (GPU accelerated)
+  setup-lsfg-vk         Set up Lossless Scaling Frame Gen (Vulkan)
+  setup-fonts-proprietary  Import Vietnamese proprietary fonts (VNI, VN-Times)
+  setup-fonts-ms         Import Microsoft fonts (Times New Roman, Arial...)
+
+System Configuration:
+  setup-sudo <sudo-rs|sudo|doas|run0>  Switch privilege escalation tool
+  setup-uutils <uutils|gnu>            Switch between Rust/GNU coreutils
+  enroll-secureboot-key                Enroll BamOS Secure Boot key (MOK)
+  flatpak-wrapper-gen                  Regenerate Flatpak CLI wrappers
+  shell <fish|bash|zsh>               Set login shell
+
+NVIDIA GPU:
+  switch-nvidia-legacy  Switch to NVIDIA closed driver (legacy GPUs)
+  switch-nvidia-open    Switch to NVIDIA open driver (modern GPUs)
+
+Applications:
+  portal                Open BamOS Portal (first-boot setup wizard)
+  store                 Open BamOS Store (app store)
+  setup-store           Install BamOS Store from Flatpak/source
+EOF
+        ;;
+    *)
+        if [ -n "$COMMAND" ]; then
+            echo "bamos: lệnh không xác định '$COMMAND'"
+            echo "Chạy 'bamos help' để xem hướng dẫn."
+            exit 1
+        fi
+        ;;
+esac

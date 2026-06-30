@@ -1,0 +1,15 @@
+[Unit]
+Description=Flatpak repair and metadata cleanup
+Documentation=https://github.com/quocnho/bamos
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/flatpak repair --system
+ExecStart=/usr/bin/flatpak update --appstream --system -y
+IOSchedulingClass=idle
+Nice=19
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,8 @@
+[Unit]
+Description=Podman Container and Image Prune
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/podman system prune -f
+IOSchedulingClass=idle
+Nice=19

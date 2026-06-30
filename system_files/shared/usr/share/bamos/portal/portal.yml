@@ -1,0 +1,341 @@
+# BamOS Portal Configuration
+# Tabbed setup wizard for first-boot system configuration
+# Format adapted from Bazzite Portal (ublue-os/yafti-gtk) with Vietnamese integration
+# KDE configuration inspired by Aurora (ublue-os/aurora)
+#
+# Structure:
+#   screens:
+#     - title: Tab title
+#       icon: GTK icon name
+#       description: Tab description
+#       actions:
+#         - id: unique-action-id
+#           title: Action button label
+#           description: Action description
+#           default: false  (auto-run on first boot if true)
+#           status_script: command to check if installed  (optional)
+#           options:  (radio button selection — optional)
+#             - id: option-id
+#               label: Option label
+#               script: command to run
+#           script: command to run (if no options)
+
+title: BamOS Portal
+screens:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Tab 1: Welcome & BamOS Store
+  # ═══════════════════════════════════════════════════════════════════════════
+  - title: "Chào mừng / Welcome"
+    icon: "emblem-default-symbolic"
+    description: "Bắt đầu với BamOS — hệ điều hành Linux cho người Việt. Get started with BamOS, your Vietnamese Linux distribution."
+    actions:
+      - id: "bamos-docs"
+        title: "📖 Đọc tài liệu BamOS"
+        description: "Tìm hiểu cách sử dụng BamOS, cài đặt ứng dụng và cấu hình hệ thống."
+        default: false
+        script: "xdg-open https://github.com/quocnho/bamos/wiki"
+
+      - id: "bamstore"
+        title: "🏪 Mở BamOS Store"
+        description: "Kho ứng dụng của bạn! Cài đặt Discord, Zalo, LibreOffice và nhiều ứng dụng khác."
+        default: false
+        script: |
+          if flatpak list --system 2>/dev/null | grep -q io.github.bazaar_org.bazaar; then
+              nohup flatpak run io.github.bazaar_org.bazaar >&/dev/null &
+          elif command -v bamstore &>/dev/null; then
+              nohup bamstore >&/dev/null &
+          else
+              zenity --info --title="BamOS Store" --width=400 \
+                  --text="BamOS Store chưa được cài đặt.\n\nCài đặt: <b>bamos setup-store</b>\n\nhoặc dùng GNOME Software / Discover để cài ứng dụng."
+          fi
+
+      - id: "bamos-portal-autostart"
+        title: "🔄 Mở Portal khi khởi động"
+        description: "Bật/tắt tự động mở BamOS Portal mỗi khi đăng nhập."
+        default: true
+        options:
+          - id: "enable"
+            label: "Bật tự động mở"
+            script: |
+              mkdir -p ~/.config/autostart
+              cp /usr/share/applications/io.bamos.Portal.desktop ~/.config/autostart/
+              echo "Đã bật tự động mở BamOS Portal."
+          - id: "disable"
+            label: "Tắt tự động mở"
+            script: |
+              rm -f ~/.config/autostart/io.bamos.Portal.desktop
+              echo "Đã tắt tự động mở BamOS Portal."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Tab 2: Vietnamese Language & Office
+  # ═══════════════════════════════════════════════════════════════════════════
+  - title: "🇻🇳 Tiếng Việt & Văn phòng"
+    icon: "input-keyboard-symbolic"
+    description: "Thiết lập bộ gõ tiếng Việt, fonts, WPS Office, Zalo và chữ ký số."
+    actions:
+      - id: "vn-input"
+        title: "⌨️ Bộ gõ tiếng Việt (ibus-bamboo)"
+        description: "Cài đặt bộ gõ tiếng Việt hỗ trợ Wayland, tương thích mọi ứng dụng."
+        default: true
+        script: "/usr/libexec/bamos/setup-vn-input.sh"
+
+      - id: "vn-fonts"
+        title: "🔤 Fonts tiếng Việt"
+        description: "Cài đặt fonts Noto Sans Vietnamese, Inter, Maple, và cấu hình font system."
+        default: true
+        script: "/usr/libexec/bamos/setup-fonts.sh"
+
+      - id: "ms-fonts"
+        title: "📝 Fonts Microsoft (Times New Roman, Arial...)"
+        description: "Import fonts Microsoft thường dùng trong văn bản hành chính."
+        default: false
+        script: "/usr/libexec/bamos/setup-fonts-ms.sh"
+
+      - id: "vni-fonts"
+        title: "📜 Fonts VNI, VN-Times"
+        description: "Import fonts VNI và VN-Times từ phân vùng Windows hoặc tải về."
+        default: false
+        script: "/usr/libexec/bamos/setup-fonts-proprietary.sh"
+
+      - id: "wps-office"
+        title: "📄 WPS Office"
+        description: "Cài đặt bộ office WPS tương thích Microsoft Office, có sẵn fonts và giao diện tiếng Việt."
+        default: true
+        script: "/usr/libexec/bamos/install-wps.sh"
+
+      - id: "zalo"
+        title: "💬 Zalo"
+        description: "Cài đặt Zalo — nhắn tin, gọi video, gửi file cho người Việt."
+        default: true
+        script: "/usr/libexec/bamos/setup-zalo.sh"
+
+      - id: "usb-token"
+        title: "🔐 USB Token / Chữ ký số"
+        description: "Cài driver và thư viện cho USB Token kế toán, thuế, ngân hàng."
+        default: false
+        script: "/usr/libexec/bamos/setup-token.sh"
+
+      - id: "printing"
+        title: "🖨️ Driver máy in"
+        description: "Cài đặt driver cho HP, Canon, Brother, Epson và các máy in phổ biến."
+        default: true
+        script: "/usr/libexec/bamos/setup-printing.sh"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Tab 3: GNOME Desktop Customization (Bazzite-inspired)
+  # ═══════════════════════════════════════════════════════════════════════════
+  - title: "🖥️ GNOME Desktop"
+    icon: "preferences-desktop-display-symbolic"
+    description: "Tùy chỉnh giao diện GNOME theo phong cách RakuOS với theme tối, WhiteSur icons, extensions."
+    actions:
+      - id: "gnome-theme"
+        title: "🎨 Áp dụng theme BamOS (WhiteSur + Bibata)"
+        description: "Theme tối OrigamiPaper, WhiteSur icons, Bibata Modern Classic cursors — giống RakuOS."
+        default: true
+        script: |
+          echo "Đang áp dụng GNOME theme BamOS..."
+          gsettings set org.gnome.desktop.interface gtk-theme 'OrigamiPaper' 2>/dev/null || true
+          gsettings set org.gnome.desktop.interface icon-theme 'WhiteSur-dark' 2>/dev/null || true
+          gsettings set org.gnome.desktop.interface cursor-theme 'Bibata-Modern-Classic' 2>/dev/null || true
+          gsettings set org.gnome.desktop.interface font-name 'Inter 10' 2>/dev/null || true
+          gsettings set org.gnome.desktop.interface document-font-name 'Inter 11' 2>/dev/null || true
+          gsettings set org.gnome.desktop.interface monospace-font-name 'Maple Mono 10' 2>/dev/null || true
+          gsettings set org.gnome.desktop.wm.preferences button-layout 'close,minimize,maximize:appmenu' 2>/dev/null || true
+          echo "GNOME theme đã được áp dụng!"
+
+      - id: "gnome-extensions"
+        title: "🧩 Bật GNOME Extensions"
+        description: "Bật các extensions: Dash to Dock, Blur my Shell, AppIndicator, Caffeine."
+        default: true
+        script: |
+          echo "Đang bật GNOME extensions..."
+          for ext in dash-to-dock@micxgx.gmail.com blur-my-shell@aunetx appindicatorsupport@rgcjonas.gmail.com caffeine@patapon.info; do
+              gnome-extensions enable "$ext" 2>/dev/null && echo "  ✓ $ext" || echo "  ✗ $ext (không có sẵn)"
+          done
+          echo "GNOME extensions đã được bật!"
+
+      - id: "gnome-dock"
+        title: "📌 Cấu hình Dash to Dock"
+        description: "Đặt dock ở dưới, tự động ẩn, icon size 48px — giống macOS/RakuOS."
+        default: false
+        script: |
+          echo "Đang cấu hình Dash to Dock..."
+          gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'BOTTOM' 2>/dev/null || true
+          gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 48 2>/dev/null || true
+          gsettings set org.gnome.shell.extensions.dash-to-dock autohide true 2>/dev/null || true
+          gsettings set org.gnome.shell.extensions.dash-to-dock extend-height false 2>/dev/null || true
+          echo "Dash to Dock đã được cấu hình!"
+
+      - id: "gnome-dark"
+        title: "🌙 Bật Dark Mode toàn hệ thống"
+        description: "Bật giao diện tối cho GNOME và tất cả ứng dụng GTK4/Libadwaita."
+        default: true
+        script: |
+          echo "Đang bật Dark Mode..."
+          gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' 2>/dev/null || true
+          gsettings set org.gnome.shell.ubuntu color-scheme 'prefer-dark' 2>/dev/null || true
+          echo "Dark Mode đã được bật!"
+
+      - id: "gnome-night-light"
+        title: "🔅 Cấu hình Night Light (bảo vệ mắt)"
+        description: "Tự động giảm ánh sáng xanh từ 21:00 đến 06:00."
+        default: true
+        script: |
+          gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled true
+          gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-from 21.0
+          gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-to 6.0
+          gsettings set org.gnome.settings-daemon.plugins.color night-light-temperature 3500
+          echo "Night Light đã được cấu hình (21:00 - 06:00)!"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Tab 4: KDE Plasma Desktop Customization (Aurora-inspired)
+  # ═══════════════════════════════════════════════════════════════════════════
+  - title: "🖥️ KDE Plasma Desktop"
+    icon: "preferences-desktop-theme-symbolic"
+    description: "Tùy chỉnh KDE Plasma theo phong cách Windows 11 với taskbar trung tâm, theme Bamboo Green."
+    actions:
+      - id: "kde-layout"
+        title: "🪟 Áp dụng layout Windows 11"
+        description: "Taskbar trung tâm, menu Start kiểu Windows 11, system tray bên phải."
+        default: true
+        script: |
+          echo "Đang áp dụng layout Windows 11 cho KDE Plasma..."
+          # Center the panel
+          if command -v kwriteconfig5 &>/dev/null; then
+              kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc \
+                  --group Plasma --group Containments --group 1 \
+                  --group General --key location 4
+              # Restart plasmashell to apply
+              plasmashell --replace &>/dev/null &
+          fi
+          echo "Layout Windows 11 đã được áp dụng! Khởi động lại Plasmashell để thấy thay đổi."
+
+      - id: "kde-theme"
+        title: "🎨 Áp dụng theme BamOS (Bamboo Green)"
+        description: "Màu accent xanh tre (Bamboo Green #4CAF50) cho toàn bộ giao diện KDE."
+        default: true
+        script: |
+          echo "Đang áp dụng theme màu BamOS cho KDE..."
+          if command -v kwriteconfig5 &>/dev/null; then
+              # Set color scheme to BamOS dark
+              kwriteconfig5 --file kdeglobals \
+                  --group General --key ColorScheme BamOSDark 2>/dev/null || true
+              # Set accent color
+              kwriteconfig5 --file kdeglobals \
+                  --group General --key AccentColor "76,175,80" 2>/dev/null || true
+          fi
+          # Set GTK theme for KDE
+          gsettings set org.gnome.desktop.interface gtk-theme 'Breeze-Dark' 2>/dev/null || true
+          echo "Theme BamOS Bamboo Green đã được áp dụng!"
+
+      - id: "kde-icons"
+        title: "🖼️ Cài đặt icon theme Tela Circle"
+        description: "Icon theme hiện đại, bo tròn, nhiều màu sắc — phù hợp phong cách Windows 11."
+        default: false
+        script: |
+          echo "Đang cài đặt Tela Circle icon theme..."
+          if [ ! -d ~/.local/share/icons/Tela-circle ]; then
+              git clone --depth 1 https://github.com/vinceliuice/Tela-circle-icon-theme.git /tmp/tela-circle 2>/dev/null && \
+              /tmp/tela-circle/install.sh -c green -d ~/.local/share/icons && \
+              rm -rf /tmp/tela-circle
+          fi
+          if command -v kwriteconfig5 &>/dev/null; then
+              kwriteconfig5 --file kdeglobals \
+                  --group Icons --key Theme Tela-circle 2>/dev/null || true
+          fi
+          echo "Tela Circle icons đã được cài đặt!"
+
+      - id: "kde-fonts"
+        title: "🔤 Cấu hình fonts KDE (Inter + Maple)"
+        description: "Font Inter cho giao diện, Maple Mono cho terminal và code."
+        default: true
+        script: |
+          echo "Đang cấu hình fonts KDE..."
+          if command -v kwriteconfig5 &>/dev/null; then
+              kwriteconfig5 --file kdeglobals \
+                  --group General --key font "Inter,10,-1,5,50,0,0,0,0,0"
+              kwriteconfig5 --file kdeglobals \
+                  --group General --key fixed "Maple Mono,10,-1,5,50,0,0,0,0,0"
+              kwriteconfig5 --file kdeglobals \
+                  --group General --key smallestReadableFont "Inter,8,-1,5,50,0,0,0,0,0"
+              kwriteconfig5 --file kdeglobals \
+                  --group General --key toolBarFont "Inter,9,-1,5,50,0,0,0,0,0"
+              kwriteconfig5 --file kdeglobals \
+                  --group General --key menuFont "Inter,10,-1,5,50,0,0,0,0,0"
+          fi
+          echo "Fonts KDE đã được cấu hình!"
+
+      - id: "kde-win11-shortcuts"
+        title: "⌨️ Shortcuts kiểu Windows 11"
+        description: "Win+E mở File Manager, Win+R mở KRunner, Win+L khóa màn hình."
+        default: false
+        script: |
+          echo "Đang cấu hình KDE shortcuts kiểu Windows 11..."
+          if command -v kwriteconfig5 &>/dev/null; then
+              # Win+E → Dolphin
+              kwriteconfig5 --file kglobalshortcutsrc \
+                  --group dolphin.desktop --key "_launch" "Meta+E,none,Dolphin"
+              # Win+R → KRunner
+              kwriteconfig5 --file kglobalshortcutsrc \
+                  --group krunner.desktop --key "_launch" "Meta+R\tMeta+Space,Alt+F2\tAlt+Space\tMeta+R,Search,KRunner"
+              # Win+L → Lock Screen
+              kwriteconfig5 --file kglobalshortcutsrc \
+                  --group ksmserver.desktop --key "Lock Session" "Meta+L\tScreensaver,Meta+L\tCtrl+Alt+L,Lock Session"
+          fi
+          echo "Shortcuts Windows 11 đã được cấu hình!"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Tab 5: System & Hardware
+  # ═══════════════════════════════════════════════════════════════════════════
+  - title: "⚙️ Hệ thống / System"
+    icon: "system-run-symbolic"
+    description: "Cấu hình hệ thống, driver, hiệu năng và bảo mật."
+    actions:
+      - id: "nvidia-driver"
+        title: "🎮 Cấu hình NVIDIA GPU"
+        description: "Cài đặt hoặc chuyển đổi driver NVIDIA (open cho RTX 20+, closed cho GTX cũ)."
+        default: false
+        script: "/usr/libexec/bamos/nvidia-setup.sh"
+
+      - id: "xbox-controller"
+        title: "🎮 Driver tay cầm Xbox / PlayStation"
+        description: "Cài đặt driver xone (Xbox USB), xpadneo (Xbox Bluetooth), và hỗ trợ PlayStation."
+        default: false
+        script: "/usr/libexec/bamos/install-kmods.sh"
+
+      - id: "cachyos-tuning"
+        title: "⚡ Tối ưu hiệu năng (CachyOS tuning)"
+        description: "Áp dụng scx_bpfland scheduler, ananicy-cpp, BBR TCP, IO scheduler tối ưu."
+        default: true
+        script: "/usr/libexec/bamos/kernel-optimize.sh"
+
+      - id: "secureboot"
+        title: "🔒 Enroll Secure Boot key"
+        description: "Đăng ký khóa Secure Boot để NVIDIA và các kernel modules hoạt động không cần tắt Secure Boot."
+        default: false
+        script: "/usr/libexec/bamos/bamos-enroll-secureboot"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Tab 6: Gaming & Entertainment
+  # ═══════════════════════════════════════════════════════════════════════════
+  - title: "🎮 Giải trí / Gaming"
+    icon: "applications-games-symbolic"
+    description: "Cài đặt công cụ gaming, AI và giải trí."
+    actions:
+      - id: "steam-gaming"
+        title: "🎮 Cài đặt Steam, Lutris & Gaming Tools"
+        description: "Cài đặt Steam, Lutris, MangoHud, GameMode và các công cụ gaming."
+        default: false
+        script: "/usr/libexec/bamos/setup-gaming"
+
+      - id: "virtualization"
+        title: "💻 Cài đặt KVM/QEMU (máy ảo)"
+        description: "Cài đặt virt-manager, KVM, QEMU để chạy Windows hoặc Linux máy ảo."
+        default: false
+        script: "/usr/libexec/bamos/setup-virtualization"
+
+      - id: "ollama-ai"
+        title: "🤖 Cài đặt Ollama (AI/LLM local)"
+        description: "Chạy các model AI như Llama 3, Mistral, Gemma, Qwen trên máy của bạn."
+        default: false
+        script: "/usr/libexec/bamos/setup-ollama"

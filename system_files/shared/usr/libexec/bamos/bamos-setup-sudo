@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+# bamos-setup-sudo — Privilege escalation tool switcher (adapted from RakuOS setup-sudo)
+# Supports: sudo-rs (default), sudo (GNU), doas, run0
+
+set -euo pipefail
+
+CHOICE="${1:-}"
+
+show_help() {
+    echo "BamOS Privilege Escalation Switcher"
+    echo ""
+    echo "Usage: bamos setup-sudo <tool>"
+    echo ""
+    echo "Available tools:"
+    echo "  sudo-rs   Rust sudo implementation (default, recommended)"
+    echo "  sudo      Traditional GNU sudo"
+    echo "  doas      OpenBSD doas (lightweight)"
+    echo "  run0      systemd-run based (modern)"
+    echo ""
+    echo "Current: $(readlink /usr/bin/sudo 2>/dev/null | xargs basename || echo 'sudo')"
+}
+
+if [[ -z "$CHOICE" ]]; then
+    show_help
+    exit 1
+fi
+
+if [[ "$(id -u)" -ne 0 ]]; then
+    echo "This command must be run as root."
+    echo "Use: sudo bamos setup-sudo <tool>"
+    exit 1
+fi
+
+case "$CHOICE" in
+    sudo-rs)
+        echo "Switching to sudo-rs..."
+        if command -v sudo-rs &>/dev/null; then
+            # Replace sudo with sudo-rs via alternatives
+            if command -v alternatives &>/dev/null; then
+                alternatives --set sudo /usr/bin/sudo-rs 2>/dev/null || true
+            fi
+            ln -sf /usr/bin/sudo-rs /usr/local/bin/sudo 2>/dev/null || true
+            echo "✓ sudo-rs is now the default."
+        else
+            echo "✗ sudo-rs is not installed. Install with: sudo rpm-ostree install sudo-rs"
+            exit 1
+        fi
+        ;;
+    sudo)
+        echo "Switching to GNU sudo..."
+        if command -v gnu_sudo &>/dev/null; then
+            ln -sf /usr/bin/gnu_sudo /usr/local/bin/sudo 2>/dev/null || true
+            echo "✓ GNU sudo is now the default."
+        elif [[ -f /usr/bin/sudo.real ]]; then
+            ln -sf /usr/bin/sudo.real /usr/local/bin/sudo 2>/dev/null || true
+            echo "✓ GNU sudo is now the default."
+        else
+            echo "ℹ GNU sudo is already the default."
+        fi
+        ;;
+    doas)
+        echo "Checking doas..."
+        if command -v doas &>/dev/null; then
+            echo "ℹ doas is available. Configure /etc/doas.conf then use 'doas' directly."
+            echo "  To make it default: ln -sf /usr/bin/doas /usr/local/bin/sudo"
+        else
+            echo "✗ doas is not installed. Install with: sudo rpm-ostree install opendoas"
+            exit 1
+        fi
+        ;;
+    run0)
+        echo "Checking run0 (systemd-run)..."
+        if command -v systemd-run &>/dev/null; then
+            echo "ℹ run0 is available via systemd-run."
+            echo "  Usage: systemd-run --user --pipe --wait --pty ..."
+            echo "  Or create alias: alias sudo='systemd-run --user --pipe --wait --pty'"
+        else
+            echo "✗ systemd-run is not available."
+            exit 1
+        fi
+        ;;
+    *)
+        show_help
+        exit 1
+        ;;
+esac
+
+# Save preference
+mkdir -p /var/lib/bamos
+echo "$CHOICE" > /var/lib/bamos/user-sudo

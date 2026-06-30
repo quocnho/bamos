@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=BamOS Portal
+Name[vi]=Cổng BamOS
+Comment=Helps you setup BamOS — Hỗ trợ thiết lập BamOS
+Comment[vi]=Hỗ trợ bạn thiết lập BamOS
+Exec=bamos-portal.py /usr/share/bamos/portal/portal.yml
+Icon=io.bamos.Portal
+Terminal=false
+Type=Application
+Categories=System;Settings;
+Keywords=bamos;setup;configuration;vietnamese;
+StartupNotify=true

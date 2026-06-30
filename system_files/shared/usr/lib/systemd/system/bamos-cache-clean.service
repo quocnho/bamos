@@ -1,0 +1,9 @@
+[Unit]
+Description=BamOS Cache Cleaner
+ConditionPathExists=/var/cache/libdnf5
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/bamos/bamos-cache-clean
+IOSchedulingClass=idle
+Nice=19

@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=BamOS
+Description=BamOS Boot Splash — Vietnamese Linux Distribution
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/bamos
+ScriptFile=/usr/share/plymouth/themes/bamos/bamos.script

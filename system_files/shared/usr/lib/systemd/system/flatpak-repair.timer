@@ -1,0 +1,11 @@
+[Unit]
+Description=Weekly Flatpak repair and metadata refresh
+Documentation=https://github.com/quocnho/bamos
+
+[Timer]
+OnCalendar=weekly
+Persistent=true
+RandomizedDelaySec=3600
+
+[Install]
+WantedBy=timers.target

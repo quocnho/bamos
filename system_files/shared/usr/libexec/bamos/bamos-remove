@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# bamos-remove — Package remover for BamOS
+
+set -euo pipefail
+
+if [ $# -eq 0 ]; then
+    echo "Usage: bamos remove <package...>"
+    echo "Remove packages from the system image layer."
+    exit 1
+fi
+
+echo "Removing packages: $*"
+echo "This will remove packages via rpm-ostree and require a reboot."
+echo ""
+
+sudo rpm-ostree remove "$@"
+
+echo ""
+echo "Packages staged for removal."
+echo "Please reboot to apply: systemctl reboot"

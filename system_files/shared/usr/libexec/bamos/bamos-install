@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# bamos-install — Package installer for BamOS
+# Adapted from RakuOS: uses rpm-ostree for layering packages
+
+set -euo pipefail
+
+if [ $# -eq 0 ]; then
+    echo "Usage: bamos install <package...>"
+    echo "Install packages into the system image layer."
+    exit 1
+fi
+
+echo "Installing packages: $*"
+echo "This will layer packages via rpm-ostree and require a reboot."
+echo ""
+
+sudo rpm-ostree install "$@"
+
+echo ""
+echo "Packages staged for installation."
+echo "Please reboot to apply: systemctl reboot"

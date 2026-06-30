@@ -1,0 +1,170 @@
+name: Build BamOS Images
+
+on:
+  # Scheduled build: daily at 06:00 UTC+7 (Vietnam time)
+  schedule:
+    - cron: "0 23 * * *" # 23:00 UTC = 06:00 UTC+7
+
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: "Image variant to build"
+        required: false
+        type: choice
+        default: "all"
+        options:
+          - all
+          - bamos-gnome
+          - bamos-kde
+          - bamos-gnome-nvidia
+          - bamos-kde-nvidia
+
+  # Build on PR
+  pull_request:
+    branches:
+      - main
+
+  # Build on push to main (releases only)
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_OWNER: ${{ github.repository_owner }}
+
+jobs:
+  # Determine which variants to build
+  matrix-prep:
+    runs-on: ubuntu-latest
+    outputs:
+      variants: ${{ steps.set-matrix.outputs.variants }}
+    steps:
+      - name: Set build matrix
+        id: set-matrix
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.variant }}" != "all" ]]; then
+            echo "variants=[\"${{ inputs.variant }}\"]" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "schedule" ]]; then
+            # Daily build: all variants
+            echo 'variants=["bamos-gnome","bamos-kde","bamos-gnome-nvidia","bamos-kde-nvidia"]' >> $GITHUB_OUTPUT
+          else
+            echo 'variants=["bamos-gnome","bamos-kde","bamos-gnome-nvidia","bamos-kde-nvidia"]' >> $GITHUB_OUTPUT
+          fi
+
+  # Build images
+  build:
+    needs: matrix-prep
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        variant: ${{ fromJSON(needs.matrix-prep.outputs.variants) }}
+      fail-fast: false
+
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate image metadata
+        id: meta
+        run: |
+          # Set base image, target stage, and NVIDIA flavor based on variant
+          case "${{ matrix.variant }}" in
+            bamos-gnome)
+              echo "BASE_IMAGE=ghcr.io/ublue-os/silverblue-main:latest" >> $GITHUB_ENV
+              echo "BASE_IMAGE_NAME=silverblue" >> $GITHUB_ENV
+              echo "TARGET_STAGE=" >> $GITHUB_ENV
+              ;;
+            bamos-kde)
+              echo "BASE_IMAGE=ghcr.io/ublue-os/kinoite-main:latest" >> $GITHUB_ENV
+              echo "BASE_IMAGE_NAME=kinoite" >> $GITHUB_ENV
+              echo "TARGET_STAGE=" >> $GITHUB_ENV
+              ;;
+            bamos-gnome-nvidia)
+              echo "BASE_IMAGE=ghcr.io/ublue-os/silverblue-main:latest" >> $GITHUB_ENV
+              echo "BASE_IMAGE_NAME=silverblue" >> $GITHUB_ENV
+              echo "TARGET_STAGE=bamos-nvidia" >> $GITHUB_ENV
+              ;;
+            bamos-kde-nvidia)
+              echo "BASE_IMAGE=ghcr.io/ublue-os/kinoite-main:latest" >> $GITHUB_ENV
+              echo "BASE_IMAGE_NAME=kinoite" >> $GITHUB_ENV
+              echo "TARGET_STAGE=bamos-nvidia" >> $GITHUB_ENV
+              ;;
+          esac
+
+          # Generate tag from date + short SHA
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          DATE_TAG=$(date +%Y%m%d)
+          echo "IMAGE_TAG=${DATE_TAG}-${SHORT_SHA}" >> $GITHUB_ENV
+          echo "DATE_TAG=${DATE_TAG}" >> $GITHUB_ENV
+
+          # Build metadata for image-info.sh (Bazzite pattern)
+          echo "IMAGE_COMMIT=${{ github.sha }}" >> $GITHUB_ENV
+          echo "IMAGE_BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_ENV
+          echo "IMAGE_REF=${{ github.ref }}" >> $GITHUB_ENV
+
+      - name: Build container image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Containerfile
+          platforms: linux/amd64
+          push: ${{ github.event_name != 'pull_request' }}
+          target: ${{ env.TARGET_STAGE }}
+          build-args: |
+            BASE_IMAGE=${{ env.BASE_IMAGE }}
+            BASE_IMAGE_NAME=${{ env.BASE_IMAGE_NAME }}
+            IMAGE_NAME=${{ matrix.variant }}
+            IMAGE_COMMIT=${{ env.IMAGE_COMMIT }}
+            IMAGE_BUILD_DATE=${{ env.IMAGE_BUILD_DATE }}
+            IMAGE_REF=${{ env.IMAGE_REF }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ matrix.variant }}:${{ env.IMAGE_TAG }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ matrix.variant }}:${{ env.DATE_TAG }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ matrix.variant }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Install cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign container image
+        if: github.event_name != 'pull_request'
+        run: |
+          cosign sign --yes \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ matrix.variant }}@${{ steps.build.outputs.digest }}
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+
+      - name: Generate ISO
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "ISO generation will be implemented using bootc-image-builder"
+          # TODO: Implement ISO generation using bootc-image-builder
+          # sudo podman run --rm --privileged \
+          #   -v ./output:/output \
+          #   quay.io/centos-bootc/bootc-image-builder:latest \
+          #   --type anaconda-iso \
+          #   ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ matrix.variant }}:${{ env.IMAGE_TAG }}

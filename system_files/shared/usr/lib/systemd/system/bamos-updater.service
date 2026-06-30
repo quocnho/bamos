@@ -1,0 +1,25 @@
+[Unit]
+Description=BamOS Auto-Updater
+Documentation=https://github.com/quocnho/bamos
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/bamos/bamos-updater
+Nice=19
+IOSchedulingClass=idle
+Environment="BAMOS_CHANNEL=latest"
+StandardOutput=journal
+StandardError=journal
+
+# Security hardening
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/bamos
+ReadOnlyPaths=/run /usr
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# setup-gaming — Install gaming tools for BamOS (inspired by RakuOS)
+set -euo pipefail
+
+echo "============================================="
+echo "  BamOS Gaming Setup"
+echo "============================================="
+
+echo "Installing gaming packages..."
+rpm-ostree install \
+    steam \
+    lutris \
+    mangohud \
+    gamescope \
+    || echo "Some gaming packages may need manual install."
+
+echo ""
+echo "Installing Flatpak gaming tools..."
+flatpak install -y --noninteractive \
+    com.heroicgameslauncher.hgl \
+    net.lutris.Lutris \
+    com.valvesoftware.Steam \
+    org.prismlauncher.PrismLauncher \
+    2>/dev/null || echo "Some Flatpaks skipped."
+
+echo ""
+echo "Gaming setup complete!"
+echo "Launch Steam or Lutris to get started."

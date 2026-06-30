@@ -1,0 +1,16 @@
+extends: default
+
+rules:
+  line-length:
+    max: 200
+    level: warning
+  document-start:
+    level: warning
+  truthy:
+    level: warning
+  comments:
+    min-spaces-from-content: 1
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false

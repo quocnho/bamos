@@ -1,0 +1,139 @@
+#!/usr/bin/env bash
+# bamos-updater — BamOS Auto-Updater (adapted from RakuOS rakuos-updater)
+# Checks for new bootc images and applies upgrades automatically
+# Runs via systemd timer (daily)
+
+set -euo pipefail
+
+REGISTRY="${BAMOS_REGISTRY:-ghcr.io}"
+IMAGE_OWNER="${BAMOS_IMAGE_OWNER:-quocnho}"
+IMAGE_NAME="${BAMOS_IMAGE_NAME:-bamos-gnome}"
+CHANNEL="${BAMOS_CHANNEL:-latest}"
+STATE_FILE="/var/lib/bamos/updater.state"
+LOCK_FILE="/run/bamos-updater.lock"
+NOTIFY_PENDING="/var/lib/bamos/update-notify.pending"
+
+die() { echo "ERROR: $*" >&2; exit 1; }
+
+# ── Notification helper (RakuOS pattern) ────────────────────────────────────
+
+notify_and_maybe_reboot() {
+    local message="$1"
+    echo "[bamos-updater] New deployment staged — notifying user."
+
+    local ACTIVE_USER
+    ACTIVE_USER=$(loginctl list-sessions --no-legend | awk '{print $3}' | head -n1)
+
+    if [[ -z "$ACTIVE_USER" ]] || ! command -v notify-send &>/dev/null; then
+        echo "[bamos-updater] No active graphical session — deferring notification."
+        # Write pending notification for next login
+        mkdir -p "$(dirname "$NOTIFY_PENDING")"
+        printf 'BamOS Update Ready\n%s\n' "$message" > "$NOTIFY_PENDING"
+        return
+    fi
+
+    local USER_UID USER_RUNTIME ACTION
+    USER_UID=$(id -u "$ACTIVE_USER")
+    USER_RUNTIME="/run/user/$USER_UID"
+
+    echo "[bamos-updater] Sending notification to: $ACTIVE_USER"
+
+    ACTION=$(sudo -u "$ACTIVE_USER" \
+        DBUS_SESSION_BUS_ADDRESS="unix:path=$USER_RUNTIME/bus" \
+        DISPLAY=:0 \
+        notify-send \
+        --app-name="BamOS Updater" \
+        --icon=system-software-update \
+        --urgency=critical \
+        --expire-time=0 \
+        --action=reboot="Khởi động lại ngay" \
+        --action=later="Để sau" \
+        --wait \
+        "BamOS Update Ready" \
+        "$message" 2>/dev/null || echo "later")
+
+    case "$ACTION" in
+        reboot)
+            echo "[bamos-updater] User chose reboot — rebooting now."
+            systemctl reboot
+            ;;
+        *)
+            echo "[bamos-updater] User chose later or dismissed."
+            ;;
+    esac
+}
+
+# ── Main ────────────────────────────────────────────────────────────────────
+
+# Acquire lock
+exec 200>"$LOCK_FILE"
+flock -n 200 || { echo "bamos-updater already running — exiting."; exit 0; }
+
+echo "[bamos-updater] Checking for system image updates..."
+
+# Check bootc availability
+command -v bootc >/dev/null 2>&1 || die "bootc not available."
+
+# Get current image info
+bootc_status=$(bootc status --json 2>/dev/null) || die "bootc status failed"
+CURRENT_DIGEST=$(printf '%s' "$bootc_status" | jq -r '.status.booted.image.imageDigest // empty')
+IMAGE_FULL=$(printf '%s' "$bootc_status" | jq -r '.status.booted.image.image.image // empty')
+
+if [[ -z "$CURRENT_DIGEST" ]]; then
+    echo "[bamos-updater] Could not detect current image digest — skipping."
+    exit 0
+fi
+
+# Check for updates via bootc
+echo "[bamos-updater] Current image: $IMAGE_FULL"
+echo "[bamos-updater] Current digest: $CURRENT_DIGEST"
+
+# Check remote availability via skopeo
+IMAGE_REF="${REGISTRY}/${IMAGE_OWNER}/${IMAGE_NAME}:${CHANNEL}"
+REMOTE_DIGEST=$(skopeo inspect "docker://${IMAGE_REF}" 2>/dev/null | jq -r '.Digest // empty' || true)
+
+if [[ -z "$REMOTE_DIGEST" ]]; then
+    echo "[bamos-updater] Could not inspect remote image — will retry on next run."
+    exit 0
+fi
+
+if [[ "$CURRENT_DIGEST" == "$REMOTE_DIGEST" ]]; then
+    echo "[bamos-updater] System is up to date."
+    mkdir -p "$(dirname "$STATE_FILE")"
+    echo "$(date -Iseconds) up-to-date" >> "$STATE_FILE"
+    exit 0
+fi
+
+# Update available — apply
+echo "[bamos-updater] Update available!"
+echo "  Current: $CURRENT_DIGEST"
+echo "  Remote:  $REMOTE_DIGEST"
+
+if bootc upgrade 2>/dev/null; then
+    echo "[bamos-updater] Upgrade staged successfully."
+
+    # Update fc-cache after image change
+    fc-cache -f 2>/dev/null || true
+
+    # Update state
+    mkdir -p "$(dirname "$STATE_FILE")"
+    echo "$(date -Iseconds) upgraded $CURRENT_DIGEST -> $REMOTE_DIGEST" >> "$STATE_FILE"
+
+    # Write flag for other services
+    mkdir -p /var/lib/bamos
+    echo "Update available — reboot to apply" > /var/lib/bamos/update-available
+
+    # Notify user with reboot action
+    notify_and_maybe_reboot "Bản cập nhật BamOS đã sẵn sàng. Khởi động lại để áp dụng.\n\nBamOS update is ready. Reboot to apply."
+
+else
+    echo "[bamos-updater] Upgrade failed — will retry on next run."
+    exit 1
+fi
+
+# Clean up old state entries (keep last 30)
+if [[ -f "$STATE_FILE" ]]; then
+    tail -30 "$STATE_FILE" > "${STATE_FILE}.tmp" && mv "${STATE_FILE}.tmp" "$STATE_FILE"
+fi
+
+echo "[bamos-updater] Done."

@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# setup-ollama — Install Ollama for local AI/LLM inference (GPU-accelerated)
+# Adapted from RakuOS setup-ollama
+# Sets up the ollama service with NVIDIA GPU acceleration support when available.
+
+set -euo pipefail
+
+echo "Cài đặt Ollama - Local AI/LLM..."
+echo "Installing Ollama for local AI/LLM inference..."
+
+# Install ollama via curl (official installer)
+if ! command -v ollama &>/dev/null; then
+    echo "Đang tải và cài đặt Ollama..."
+    curl -fsSL https://ollama.com/install.sh | sh
+fi
+
+# Enable and start ollama systemd service
+systemctl enable ollama 2>/dev/null || true
+
+# Check for NVIDIA GPU and configure GPU acceleration
+if command -v nvidia-smi &>/dev/null; then
+    echo "Phát hiện GPU NVIDIA — cấu hình GPU acceleration..."
+    echo "NVIDIA GPU detected — configuring GPU acceleration."
+
+    # Create ollama override to use NVIDIA runtime
+    mkdir -p /etc/systemd/system/ollama.service.d
+    cat > /etc/systemd/system/ollama.service.d/override.conf <<'EOF'
+[Service]
+Environment="OLLAMA_HOST=0.0.0.0:11434"
+Environment="OLLAMA_NUM_PARALLEL=2"
+EOF
+    systemctl daemon-reload
+
+    # Ensure nvidia-container-toolkit is installed
+    if ! command -v nvidia-container-cli &>/dev/null; then
+        echo "Cài đặt nvidia-container-toolkit..."
+        rpm-ostree install nvidia-container-toolkit 2>/dev/null || \
+            echo "LƯU Ý: nvidia-container-toolkit sẽ được cài sau khi khởi động lại."
+    fi
+elif command -v rocminfo &>/dev/null; then
+    echo "Phát hiện GPU AMD — Ollama hỗ trợ ROCm mặc định."
+    echo "AMD GPU detected — Ollama supports ROCm natively."
+else
+    echo "Không phát hiện GPU rời — Ollama sẽ chạy trên CPU."
+    echo "No dedicated GPU detected — Ollama will run on CPU."
+fi
+
+# Start ollama
+systemctl start ollama 2>/dev/null || true
+
+echo ""
+echo "Ollama đã được cài đặt thành công!"
+echo "Ollama installed successfully!"
+echo ""
+echo "Các model phổ biến (Popular models):"
+echo "  ollama pull llama3.2    # Meta Llama 3.2 (3B)"
+echo "  ollama pull mistral      # Mistral 7B"
+echo "  ollama pull gemma3       # Google Gemma 3"
+echo "  ollama pull qwen2.5      # Alibaba Qwen 2.5"
+echo ""
+echo "Giao diện web (Web UI):"
+echo "  flatpak install io.github.open-webui"

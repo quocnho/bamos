@@ -1,0 +1,15 @@
+[Unit]
+Description=BamOS Flatpak Event Watcher
+After=flatpak-system-helper.service
+Wants=flatpak-system-helper.service
+
+[Service]
+Type=simple
+ExecStart=/usr/libexec/bamos/bamos-flatpak-watcher
+Restart=on-failure
+RestartSec=30
+Nice=19
+IOSchedulingClass=idle
+
+[Install]
+WantedBy=multi-user.target

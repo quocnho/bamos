@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.bamos.Portal</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0</project_license>
+  <name>BamOS Portal</name>
+  <name xml:lang="vi">Cổng BamOS</name>
+  <summary>First-boot setup and system configuration for BamOS</summary>
+  <summary xml:lang="vi">Thiết lập lần đầu và cấu hình hệ thống cho BamOS</summary>
+
+  <description>
+    <p>
+      BamOS Portal is a tabbed GTK4 application that guides you through
+      setting up your BamOS system after first boot. It helps you install
+      Vietnamese language support, fonts, WPS Office, Zalo, printer drivers,
+      USB token support, and more.
+    </p>
+    <p xml:lang="vi">
+      Cổng BamOS là ứng dụng GTK4 dạng tab hướng dẫn bạn thiết lập hệ thống
+      BamOS sau lần khởi động đầu tiên. Nó giúp bạn cài đặt hỗ trợ tiếng Việt,
+      fonts, WPS Office, Zalo, driver máy in, hỗ trợ USB token và nhiều hơn nữa.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">io.bamos.Portal.desktop</launchable>
+
+  <url type="homepage">https://github.com/quocnho/bamos</url>
+  <url type="bugtracker">https://github.com/quocnho/bamos/issues</url>
+
+  <developer id="io.bamos">
+    <name>BamOS Team</name>
+  </developer>
+
+  <categories>
+    <category>System</category>
+    <category>Settings</category>
+  </categories>
+
+  <keywords>
+    <keyword>bamos</keyword>
+    <keyword>setup</keyword>
+    <keyword>configuration</keyword>
+    <keyword>vietnamese</keyword>
+    <keyword xml:lang="vi">thiết lập</keyword>
+    <keyword xml:lang="vi">cấu hình</keyword>
+    <keyword xml:lang="vi">tiếng việt</keyword>
+  </keywords>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>BamOS Portal main window</caption>
+      <image>https://raw.githubusercontent.com/quocnho/bamos/main/branding/screenshots/portal.png</image>
+    </screenshot>
+  </screenshots>
+
+  <releases>
+    <release version="1.0.0" date="2026-06-30">
+      <description>
+        <p>Initial release of BamOS Portal</p>
+        <p xml:lang="vi">Phiên bản đầu tiên của Cổng BamOS</p>
+      </description>
+    </release>
+  </releases>
+
+  <content_rating type="oars-1.1" />
+</component>

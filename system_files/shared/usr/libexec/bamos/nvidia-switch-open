@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# nvidia-switch-open — Switch to NVIDIA open driver for modern GPUs
+set -euo pipefail
+
+echo "Switching to NVIDIA open-source kernel driver (for Turing/RTX 20+ GPUs)..."
+echo "This will remove nvidia (closed) and install nvidia-open."
+echo "Reboot required after completion."
+echo ""
+
+sudo rpm-ostree override remove \
+    kmod-nvidia \
+    xorg-x11-drv-nvidia \
+    --install kmod-nvidia-open \
+    --install xorg-x11-drv-nvidia-open
+
+echo ""
+echo "Driver switch staged. Please reboot: systemctl reboot"

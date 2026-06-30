@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# bamos-update — System updater for BamOS
+# Updates: rpm-ostree layered packages + flatpaks + bootc system image
+
+set -euo pipefail
+
+echo "============================================="
+echo "  BamOS System Update"
+echo "============================================="
+echo ""
+
+# 1. Check for base image updates
+echo "[1/3] Checking for system image updates..."
+if command -v bootc &>/dev/null; then
+    sudo bootc upgrade --check || echo "  No base image updates available."
+else
+    echo "  bootc not available, skipping."
+fi
+echo ""
+
+# 2. Update rpm-ostree layered packages
+echo "[2/3] Updating layered packages..."
+if rpm-ostree status &>/dev/null; then
+    sudo rpm-ostree update || echo "  Layered package update skipped."
+fi
+echo ""
+
+# 3. Update Flatpaks
+echo "[3/3] Updating Flatpak applications..."
+if command -v flatpak &>/dev/null; then
+    flatpak update -y --noninteractive 2>/dev/null || echo "  No Flatpak updates available."
+    flatpak update -y --user --noninteractive 2>/dev/null || true
+fi
+echo ""
+
+echo "============================================="
+echo "  Update complete!"
+echo "============================================="
+echo ""
+echo "If packages were updated, please reboot:"
+echo "  systemctl reboot"
