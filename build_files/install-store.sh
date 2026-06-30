@@ -25,10 +25,17 @@ if command -v flatpak &>/dev/null; then
 
     # Try installing from Flathub first (Bazaar is available there)
     echo "[bamos] Installing BamStore (Bazaar) from Flathub..."
-    if flatpak install -y --noninteractive --system flathub io.github.bazaar_org.bazaar 2>/dev/null; then
+    echo "[bamos] Adding Flathub remote..."
+    flatpak remote-add --if-not-exists --system flathub https://dl.flathub.org/repo/flathub.flatpakrepo || \
+        echo "[bamos] Flathub remote-add failed"
+
+    echo "[bamos] Installing Bazaar from Flathub..."
+    if flatpak install -y --noninteractive --system flathub io.github.bazaar_org.bazaar; then
         echo "[bamos] BamStore installed successfully from Flathub."
         echo "[bamos] Launch with: flatpak run io.github.bazaar_org.bazaar"
         exit 0
+    else
+        echo "[bamos] Flatpak install failed — will defer to first boot."
     fi
 
     echo "[bamos] Flatpak installation not available — will install as native package."

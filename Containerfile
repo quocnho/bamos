@@ -168,10 +168,12 @@ RUN IMAGE_NAME="${IMAGE_NAME}" IMAGE_VENDOR="${IMAGE_VENDOR}" \
 # 8. CLEANUP & FINALIZE
 # =============================================================================
 
-# Create first-boot service for BamOS Store installation
+# Create first-boot service for BamOS Store installation (fallback if build-time fails)
 RUN mkdir -p /etc/systemd/system && \
-    printf '[Unit]\nDescription=BamOS Store first-boot installation\nAfter=network-online.target\nWants=network-online.target\nConditionPathExists=!/var/lib/bamos/store-installed\n\n[Service]\nType=oneshot\nExecStart=/usr/libexec/bamos/install-store.sh\nExecStartPost=touch /var/lib/bamos/store-installed\nRemainAfterExit=yes\n\n[Install]\nWantedBy=multi-user.target\n' > /etc/systemd/system/bamos-install-store.service && \
-    systemctl enable bamos-install-store.service || true
+    if ! flatpak list --system 2>/dev/null | grep -q io.github.bazaar_org.bazaar; then \
+        printf '[Unit]\nDescription=BamOS Store first-boot installation\nAfter=network-online.target\nWants=network-online.target\nConditionPathExists=!/var/lib/bamos/store-installed\n\n[Service]\nType=oneshot\nExecStart=/usr/libexec/bamos/install-store.sh\nExecStartPost=touch /var/lib/bamos/store-installed\nRemainAfterExit=yes\n\n[Install]\nWantedBy=multi-user.target\n' > /etc/systemd/system/bamos-install-store.service && \
+        systemctl enable bamos-install-store.service || true; \
+    fi
 
 # Run Bazzite-style finalize: migrate passwd/group, clean locks, temp files, cache
 RUN /usr/libexec/bamos/finalize.sh
@@ -220,6 +222,14 @@ COPY system_files/shared/usr/share/metainfo/io.bamos.Portal.metainfo.xml /usr/sh
 # Copy BamOS Portal configuration
 COPY system_files/shared/usr/share/bamos/portal/portal.yml /usr/share/bamos/portal/portal.yml
 
+# =============================================================================
+# Pre-install BamOS Store via Flatpak (so it's baked into the ISO)
+# =============================================================================
+RUN flatpak remote-add --if-not-exists --system flathub https://dl.flathub.org/repo/flathub.flatpakrepo && \
+    flatpak install -y --noninteractive --system flathub io.github.bazaar_org.bazaar || \
+    echo "BamOS Store deferred — will install at first boot"
+
+# =============================================================================
 # Enable system services (RakuOS-inspired maintenance timers)
 RUN systemctl enable bamos-cache-clean.timer && \
     systemctl enable flatpak-cleanup.timer && \
