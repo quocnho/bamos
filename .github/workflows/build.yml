@@ -92,24 +92,24 @@ jobs:
           # Set base image, target stage, and NVIDIA flavor based on variant
           case "${{ matrix.variant }}" in
             bamos-gnome)
-              echo "BASE_IMAGE=ghcr.io/ublue-os/silverblue-main:latest" >> $GITHUB_ENV
+              echo "BASE_IMAGE=ghcr.io/ublue-os/silverblue-main" >> $GITHUB_ENV
               echo "BASE_IMAGE_NAME=silverblue" >> $GITHUB_ENV
-              echo "TARGET_STAGE=" >> $GITHUB_ENV
+              echo "TARGET_STAGE=bamos-gnome" >> $GITHUB_ENV
               ;;
             bamos-kde)
-              echo "BASE_IMAGE=ghcr.io/ublue-os/kinoite-main:latest" >> $GITHUB_ENV
+              echo "BASE_IMAGE=ghcr.io/ublue-os/kinoite-main" >> $GITHUB_ENV
               echo "BASE_IMAGE_NAME=kinoite" >> $GITHUB_ENV
-              echo "TARGET_STAGE=" >> $GITHUB_ENV
+              echo "TARGET_STAGE=bamos-kde" >> $GITHUB_ENV
               ;;
             bamos-gnome-nvidia)
-              echo "BASE_IMAGE=ghcr.io/ublue-os/silverblue-main:latest" >> $GITHUB_ENV
+              echo "BASE_IMAGE=ghcr.io/ublue-os/silverblue-main" >> $GITHUB_ENV
               echo "BASE_IMAGE_NAME=silverblue" >> $GITHUB_ENV
-              echo "TARGET_STAGE=bamos-nvidia" >> $GITHUB_ENV
+              echo "TARGET_STAGE=bamos-nvidia-gnome" >> $GITHUB_ENV
               ;;
             bamos-kde-nvidia)
-              echo "BASE_IMAGE=ghcr.io/ublue-os/kinoite-main:latest" >> $GITHUB_ENV
+              echo "BASE_IMAGE=ghcr.io/ublue-os/kinoite-main" >> $GITHUB_ENV
               echo "BASE_IMAGE_NAME=kinoite" >> $GITHUB_ENV
-              echo "TARGET_STAGE=bamos-nvidia" >> $GITHUB_ENV
+              echo "TARGET_STAGE=bamos-nvidia-kde" >> $GITHUB_ENV
               ;;
           esac
 
@@ -160,11 +160,23 @@ jobs:
 
       - name: Generate ISO
         if: github.event_name != 'pull_request'
+        env:
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
         run: |
-          echo "ISO generation will be implemented using bootc-image-builder"
-          # TODO: Implement ISO generation using bootc-image-builder
-          # sudo podman run --rm --privileged \
-          #   -v ./output:/output \
-          #   quay.io/centos-bootc/bootc-image-builder:latest \
-          #   --type anaconda-iso \
-          #   ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ matrix.variant }}:${{ env.IMAGE_TAG }}
+          echo "🐉 Generating ISO for ${{ matrix.variant }}..."
+          mkdir -p output
+          sudo podman run --rm --privileged \
+            -v ${{ github.workspace }}/output:/output \
+            -v /var/lib/containers/storage:/var/lib/containers/storage \
+            quay.io/centos-bootc/bootc-image-builder:latest \
+            --type anaconda-iso \
+            --local \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ matrix.variant }}:${{ env.IMAGE_TAG }}
+
+      - name: Upload ISO artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.variant }}-iso-${{ env.DATE_TAG }}
+          path: ${{ github.workspace }}/output/bootiso/*.iso
+          retention-days: 14

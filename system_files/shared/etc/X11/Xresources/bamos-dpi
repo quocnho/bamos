@@ -1,0 +1,8 @@
+! BamOS X11 Resources — Consistent DPI
+! Prevents "System DPI asymmetric" warnings in Qt/GTK/WPS Office
+Xft.dpi: 96
+Xft.antialias: 1
+Xft.hinting: 1
+Xft.hintstyle: hintslight
+Xft.rgba: rgb
+Xft.lcdfilter: lcddefault

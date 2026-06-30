@@ -1,0 +1,24 @@
+# BamOS Fcitx5 Configuration — Vietnamese Input Method
+# Installed at /etc/fcitx5/profile for system-wide defaults
+# Enables English + Unikey (Vietnamese) input methods
+# Super+Space to toggle between them
+
+[Groups/0]
+# Group Name
+Name=Default
+
+# Layout
+Default Layout=us
+Default Input Method=keyboard-us
+
+# Input Method List
+[Groups/0/Items/0]
+Name=keyboard-us
+Layout=
+
+[Groups/0/Items/1]
+Name=unikey
+Layout=
+
+[GroupOrder]
+0=Default

@@ -2,36 +2,26 @@
 # Base: Fedora Atomic Desktop (ublue-os silverblue/kinoite)
 # Target: Vietnamese users with office, printing, and cultural integrations
 #
-# Multi-stage build supporting:
-#   - bamos-gnome (Silverblue + GNOME)
-#   - bamos-kde (Kinoite + KDE Plasma Win11)
-#   - bamos-gnome-nvidia (GNOME + NVIDIA drivers for all GPU gens)
-#   - bamos-kde-nvidia (KDE + NVIDIA drivers for all GPU gens)
+# Multi-stage build:
+#   Stage 1: bamos-base        — Common packages (NO input method)
+#   Stage 2: bamos-gnome       — base + ibus-unikey (GNOME)
+#   Stage 3: bamos-kde         — base + fcitx5-unikey (KDE)
+#   Stage 4: bamos-nvidia-gnome — bamos-gnome + NVIDIA (GNOME-NVIDIA)
+#   Stage 5: bamos-nvidia-kde  — bamos-kde + NVIDIA (KDE-NVIDIA)
 #
-# NVIDIA GPU Support Reference:
-#   nvidia-open:  RTX 50 (Blackwell), RTX 40 (Ada), RTX 30 (Ampere), RTX 20/Turing
-#   nvidia:       GTX 16/10/900/700 (Maxwell/Pascal/Volta) - closed driver
-#   nvidia-legacy: GTX 600/700 (Kepler) - 470xx EOL series
+# NVIDIA: RPM Fusion (not akmods cache — Fedora 44 akmods not yet published)
 
 ARG BASE_IMAGE="ghcr.io/ublue-os/silverblue-main"
 ARG IMAGE_NAME="bamos"
 ARG IMAGE_VENDOR="quocnho"
 ARG IMAGE_VERSION="latest"
 ARG FEDORA_VERSION="44"
-ARG KERNEL_FLAVOR="main"
 ARG IMAGE_COMMIT="unknown"
 ARG IMAGE_BUILD_DATE=""
 ARG IMAGE_REF="unknown"
 
 # =============================================================================
-# Stage 0: NVIDIA Akmods Cache (BOTH open and closed drivers)
-# Both are cached so single-variant images can support all GPU generations
-# =============================================================================
-FROM ghcr.io/ublue-os/akmods-nvidia:${KERNEL_FLAVOR}-${FEDORA_VERSION} AS akmods-nvidia
-FROM ghcr.io/ublue-os/akmods-nvidia-open:${KERNEL_FLAVOR}-${FEDORA_VERSION} AS akmods-nvidia-open
-
-# =============================================================================
-# Stage 1: Base BamOS Image (shared by all variants)
+# Stage 1: Base BamOS Image (shared by all variants, NO input method)
 # =============================================================================
 FROM ${BASE_IMAGE}:${IMAGE_VERSION} AS bamos-base
 
@@ -51,24 +41,19 @@ RUN rpm-ostree install \
     https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
     https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 
-# Install core Vietnamese support packages
+# Install core packages (NO input method — added per-variant)
 RUN rpm-ostree install \
-    # === Vietnamese Input ===
-    ibus-bamboo \
-    ibus-bamboo-autostart \
+    # === Spell Check ===
     hunspell-vi \
     # === Fonts ===
-    google-noto-sans-vietnamese-fonts \
-    google-noto-serif-vietnamese-fonts \
-    google-noto-sans-mono-vietnamese-fonts \
+    google-noto-sans-fonts \
+    # === Symbol/Dingbat font replacements (for WPS Office) ===
+    dejavu-sans-fonts \
+    dejavu-serif-fonts \
+    dejavu-sans-mono-fonts \
+    libreoffice-opensymbol-fonts \
     # === Vietnamese Locale ===
     glibc-langpack-vi \
-    # === Office & Productivity ===
-    # WPS Office will be installed via script (proprietary)
-    # === Printing Stack ===
-    cups \
-    cups-pdf \
-    system-config-printer \
     # === USB Token / Smart Card Support ===
     opensc \
     pcsc-lite \
@@ -85,9 +70,14 @@ RUN rpm-ostree install \
     fwupd \
     # === Multimedia ===
     ffmpegthumbnailer \
-    # === Other ===
-    @multimedia \
-    @printing
+    # === Multimedia & Printing (replaces @multimedia @printing) ===
+    gstreamer1-plugins-good \
+    gstreamer1-plugins-bad-free \
+    gstreamer1-plugins-ugly-free \
+    gstreamer1-plugin-libav
+
+# Install Plymouth script plugin (required by bamos.script theme)
+RUN rpm-ostree install plymouth-plugin-script || echo "plugin already installed"
 
 # =============================================================================
 # 2. SYSTEM CONFIGURATION FILES
@@ -103,19 +93,10 @@ RUN chmod +x /usr/bin/bamos && \
 # Copy font configuration (Vietnamese font aliases, MS replacements, rendering)
 COPY system_files/fonts/66-bamos-vietnamese.conf /etc/fonts/conf.d/66-bamos-vietnamese.conf
 
-# Copy GNOME GSsettings override (RakuOS-inspired theme, extensions, keybindings)
-COPY system_files/shared/usr/share/glib-2.0/schemas/zz-bamos-gnome.gschema.override /usr/share/glib-2.0/schemas/
-
-# Compile GSsettings
-RUN glib-compile-schemas /usr/share/glib-2.0/schemas/
-
 # Copy sudoers for passwordless package management
 COPY system_files/shared/etc/sudoers.d/ /etc/sudoers.d/
 RUN chown root:root /etc/sudoers.d/bamos-software && \
     chmod 0440 /etc/sudoers.d/bamos-software
-
-# Copy KDE configuration files
-COPY system_files/kde/ /etc/skel/.config/
 
 # Copy WPS Office configuration
 COPY system_files/office/wps-config/ /etc/skel/.config/Kingsoft/
@@ -148,7 +129,6 @@ RUN chmod +x /usr/libexec/bamos/*.sh
 # Run first-boot setup scripts
 RUN /usr/libexec/bamos/setup-vn-input.sh
 RUN /usr/libexec/bamos/setup-fonts.sh
-RUN /usr/libexec/bamos/setup-printing.sh
 
 # Install BamOS Portal (GTK4 first-boot setup wizard)
 RUN /usr/libexec/bamos/install-portal.sh || echo "BamOS Portal setup deferred"
@@ -159,33 +139,24 @@ RUN /usr/libexec/bamos/install-store.sh || echo "BamOS Store setup deferred"
 # Apply branding (logo, Plymouth, OS release)
 RUN /usr/libexec/bamos/branding.sh || echo "Branding setup deferred"
 
-# Setup WPS Office (downloaded during build to keep image reproducible)
-# Note: WPS Office is proprietary; users accept license during first run
-RUN /usr/libexec/bamos/install-wps.sh
+# Setup WPS Office config + first-boot installer
+RUN /usr/libexec/bamos/install-wps.sh || echo "WPS Office setup deferred"
 
-# Setup Zalo via Wine
+# Setup Zalo first-boot installer
 RUN /usr/libexec/bamos/setup-zalo.sh || echo "Zalo setup deferred to first boot"
 
 # Setup USB Token libraries
 RUN /usr/libexec/bamos/setup-token.sh
 
 # =============================================================================
-# 7. KERNEL & PERFORMANCE OPTIMIZATION (CachyOS-inspired)
-# =============================================================================
-
-# Apply CachyOS performance tuning (scx schedulers, ananicy, BBR, IO scheduler, sysctl)
-# Uses uBlue kernel + CachyOS userspace tuning for maximum stability
-RUN /usr/libexec/bamos/kernel-optimize.sh || echo "Kernel optimization deferred"
-
-# =============================================================================
-# 6. ADDITIONAL KERNEL MODULES (Bazzite pattern)
+# 6. ADDITIONAL KERNEL MODULES
 # =============================================================================
 
 # Install community kernel modules: xone (Xbox), xpadneo (Xbox BT), broadcom-wl, v4l2loopback
 RUN /usr/libexec/bamos/install-kmods.sh || echo "Some kmods deferred"
 
 # =============================================================================
-# 7. IMAGE INFO (Bazzite pattern)
+# 7. IMAGE INFO
 # =============================================================================
 
 # Generate OCI metadata and image info JSON
@@ -194,8 +165,13 @@ RUN IMAGE_NAME="${IMAGE_NAME}" IMAGE_VENDOR="${IMAGE_VENDOR}" \
     /usr/libexec/bamos/image-info.sh
 
 # =============================================================================
-# 8. CLEANUP & FINALIZE (Bazzite finalize pattern)
+# 8. CLEANUP & FINALIZE
 # =============================================================================
+
+# Create first-boot service for BamOS Store installation
+RUN mkdir -p /etc/systemd/system && \
+    printf '[Unit]\nDescription=BamOS Store first-boot installation\nAfter=network-online.target\nWants=network-online.target\nConditionPathExists=!/var/lib/bamos/store-installed\n\n[Service]\nType=oneshot\nExecStart=/usr/libexec/bamos/install-store.sh\nExecStartPost=touch /var/lib/bamos/store-installed\nRemainAfterExit=yes\n\n[Install]\nWantedBy=multi-user.target\n' > /etc/systemd/system/bamos-install-store.service && \
+    systemctl enable bamos-install-store.service || true
 
 # Run Bazzite-style finalize: migrate passwd/group, clean locks, temp files, cache
 RUN /usr/libexec/bamos/finalize.sh
@@ -206,9 +182,6 @@ RUN fc-cache -fv
 # =============================================================================
 # 9. FINAL SYSTEM SETUP
 # =============================================================================
-
-# Set system locale defaults
-RUN localedef -i vi_VN -f UTF-8 vi_VN.UTF-8
 
 # Wire up zshrc.d fragment sourcing
 RUN mkdir -p /etc/zshrc.d && \
@@ -223,7 +196,6 @@ RUN mkdir -p /etc/zshrc.d && \
 RUN mkdir -p /etc/fastfetch && \
     ln -sf /usr/share/fastfetch/presets/bamos/bamos-fastfetch.jsonc /etc/fastfetch/config.jsonc
 
-# =============================================================================
 # Copy Flatpak fixes (per-app post-install hooks: Firefox, StreamController)
 COPY system_files/shared/usr/libexec/bamos/internal/flatpak-fixes/ /usr/libexec/bamos/internal/flatpak-fixes/
 
@@ -232,25 +204,6 @@ COPY system_files/shared/etc/fish/conf.d/ /etc/fish/conf.d/
 
 # Copy Secure Boot certificate
 COPY branding/bamos-mok.cer /usr/share/bamos/secureboot/bamos-sb.der
-
-# =============================================================================
-# Enable system services (RakuOS-inspired maintenance timers)
-# =============================================================================
-
-RUN systemctl enable bamos-cache-clean.timer && \
-    systemctl enable flatpak-cleanup.timer && \
-    systemctl enable flatpak-repair.timer && \
-    systemctl enable podman-prune.timer && \
-    systemctl enable bamos-setup.service && \
-    systemctl enable bamos-flatpak-watcher.service && \
-    systemctl enable bamos-updater.timer && \
-    systemctl enable bamos-enroll-secureboot.service || true
-
-# Enable user services
-RUN systemctl --global enable bamos-user.service || true
-
-# Set default Plymouth theme
-RUN plymouth-set-default-theme bamos -R || true
 
 # Copy ISO/USB GRUB configuration
 COPY branding/iso-grub.cfg /usr/share/bamos/iso-grub.cfg
@@ -267,95 +220,163 @@ COPY system_files/shared/usr/share/metainfo/io.bamos.Portal.metainfo.xml /usr/sh
 # Copy BamOS Portal configuration
 COPY system_files/shared/usr/share/bamos/portal/portal.yml /usr/share/bamos/portal/portal.yml
 
-# =============================================================================
-# Stage 2: NVIDIA Variant (derived from base BamOS)
-# Single variant supports ALL GPU generations via first-boot auto-detection
-# =============================================================================
+# Enable system services (RakuOS-inspired maintenance timers)
+RUN systemctl enable bamos-cache-clean.timer && \
+    systemctl enable flatpak-cleanup.timer && \
+    systemctl enable flatpak-repair.timer && \
+    systemctl enable podman-prune.timer && \
+    systemctl enable bamos-setup.service && \
+    systemctl enable bamos-flatpak-watcher.service && \
+    systemctl enable bamos-updater.timer && \
+    systemctl enable bamos-enroll-secureboot.service || true
 
-FROM bamos-base AS bamos-nvidia
+# Enable user services
+RUN systemctl --global enable bamos-user.service || true
 
-ARG IMAGE_NAME="${IMAGE_NAME:-bamos-nvidia}"
+# Set default Plymouth theme (no initramfs rebuild — happens at first boot)
+RUN plymouth-set-default-theme bamos || true
+
+# =============================================================================
+# Stage 2: GNOME Variant (adds ibus-unikey ONLY)
+# =============================================================================
+FROM bamos-base AS bamos-gnome
+
+ARG IMAGE_NAME="${IMAGE_NAME:-bamos-gnome}"
+ARG IMAGE_VENDOR="${IMAGE_VENDOR:-quocnho}"
+ARG VERSION_TAG="${VERSION_TAG}"
+
+LABEL org.opencontainers.image.title="BamOS GNOME"
+LABEL org.opencontainers.image.description="BamOS GNOME — ibus-unikey Vietnamese input"
+LABEL io.bamos.variant="${IMAGE_NAME}"
+
+# Install GNOME input method (ibus-unikey only — no fcitx5)
+RUN rpm-ostree install ibus-unikey
+
+# Copy GNOME GSsettings override (RakuOS-inspired theme, extensions, keybindings)
+# Only applied on GNOME variants — keeps base stage clean
+COPY system_files/shared/usr/share/glib-2.0/schemas/zz-bamos-gnome.gschema.override /usr/share/glib-2.0/schemas/
+RUN glib-compile-schemas /usr/share/glib-2.0/schemas/
+
+# =============================================================================
+# Stage 3: KDE Variant (adds fcitx5-unikey + KDE config)
+# =============================================================================
+FROM bamos-base AS bamos-kde
+
+ARG IMAGE_NAME="${IMAGE_NAME:-bamos-kde}"
+ARG IMAGE_VENDOR="${IMAGE_VENDOR:-quocnho}"
+ARG VERSION_TAG="${VERSION_TAG}"
+
+LABEL org.opencontainers.image.title="BamOS KDE"
+LABEL org.opencontainers.image.description="BamOS KDE — fcitx5-unikey Vietnamese input"
+LABEL io.bamos.variant="${IMAGE_NAME}"
+
+# Install KDE input method (fcitx5-unikey only — no ibus-unikey)
+RUN rpm-ostree install \
+    fcitx5 \
+    fcitx5-unikey \
+    fcitx5-autostart \
+    fcitx5-configtool \
+    fcitx5-gtk \
+    fcitx5-qt
+
+# Copy KDE configuration files (Plasma Win11 layout)
+COPY system_files/kde/ /etc/skel/.config/
+
+# Copy Fcitx5 input method configuration
+COPY system_files/kde/etc/fcitx5/ /usr/share/bamos/fcitx5/
+
+# =============================================================================
+# Stage 4: GNOME-NVIDIA Variant (bamos-gnome + NVIDIA drivers)
+# =============================================================================
+FROM bamos-gnome AS bamos-nvidia-gnome
+
+ARG IMAGE_NAME="${IMAGE_NAME:-bamos-nvidia-gnome}"
+ARG IMAGE_VENDOR="${IMAGE_VENDOR:-quocnho}"
+ARG VERSION_TAG="${VERSION_TAG}"
+ARG VERSION_PRETTY="${VERSION_PRETTY}"
+ARG BASE_IMAGE_NAME="${BASE_IMAGE_NAME:-silverblue}"
+
+LABEL org.opencontainers.image.title="BamOS GNOME NVIDIA"
+LABEL org.opencontainers.image.description="BamOS GNOME + NVIDIA (RPM Fusion)"
+LABEL io.bamos.nvidia.flavor="rpmfusion"
+
+# Copy NVIDIA system files (firstboot auto-detect, udev rules)
+COPY system_files/nvidia/shared/ /
+
+# Remove nouveau driver
+RUN rpm-ostree override remove xorg-x11-drv-nouveau || true
+
+# Install NVIDIA open driver + userspace
+RUN rpm-ostree install \
+    kmod-nvidia-open \
+    xorg-x11-drv-nvidia-open-cuda \
+    egl-wayland \
+    egl-wayland2 \
+    nvidia-settings \
+    nvidia-persistenced \
+    nvidia-vaapi-driver \
+    || echo "Some NVIDIA packages deferred"
+
+# NVIDIA Container Toolkit
+RUN curl -sL https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo \
+    -o /etc/yum.repos.d/nvidia-container-toolkit.repo && \
+    rpm-ostree install nvidia-container-toolkit || echo "nvidia-container-toolkit deferred"
+
+# First-boot auto-detection
+RUN chmod +x /usr/libexec/bamos/nvidia-setup.sh && \
+    chmod +x /usr/libexec/bamos/nvidia-firstboot-setup.sh
+
+RUN printf '[Unit]\nDescription=BamOS NVIDIA First-Boot GPU Detection\nAfter=network.target\nBefore=display-manager.service\n\n[Service]\nType=oneshot\nExecStart=/usr/libexec/bamos/nvidia-firstboot-setup.sh\nRemainAfterExit=yes\nTimeoutStartSec=120\n\n[Install]\nWantedBy=multi-user.target\n' > /etc/systemd/system/bamos-nvidia-firstboot.service && \
+    systemctl enable bamos-nvidia-firstboot.service
+
+# Finalize
+RUN rpm-ostree cleanup -m && ostree container commit
+RUN --mount=type=tmpfs,target=/run --network=none bootc container lint || true
+
+# =============================================================================
+# Stage 5: KDE-NVIDIA Variant (bamos-kde + NVIDIA drivers)
+# =============================================================================
+FROM bamos-kde AS bamos-nvidia-kde
+
+ARG IMAGE_NAME="${IMAGE_NAME:-bamos-nvidia-kde}"
 ARG IMAGE_VENDOR="${IMAGE_VENDOR:-quocnho}"
 ARG VERSION_TAG="${VERSION_TAG}"
 ARG VERSION_PRETTY="${VERSION_PRETTY}"
 ARG BASE_IMAGE_NAME="${BASE_IMAGE_NAME:-kinoite}"
 
-LABEL org.opencontainers.image.title="BamOS NVIDIA"
-LABEL org.opencontainers.image.description="BamOS with NVIDIA GPU drivers (auto-detect: open + closed)"
-LABEL io.bamos.nvidia.flavor="auto-detect"
+LABEL org.opencontainers.image.title="BamOS KDE NVIDIA"
+LABEL org.opencontainers.image.description="BamOS KDE + NVIDIA (RPM Fusion)"
+LABEL io.bamos.nvidia.flavor="rpmfusion"
 
 # Copy NVIDIA system files
 COPY system_files/nvidia/shared/ /
 
-# Remove open-source nouveau driver (conflicts with NVIDIA proprietary)
-RUN rpm-ostree override remove \
-    xorg-x11-drv-nouveau \
-    || true
+# Remove nouveau driver
+RUN rpm-ostree override remove xorg-x11-drv-nouveau || true
 
-# =============================================================================
-# Install NVIDIA Open Driver (default for RTX 20+ GPUs)
-# =============================================================================
-
-RUN --mount=type=cache,dst=/var/cache \
-    --mount=type=cache,dst=/var/log \
-    --mount=type=bind,from=akmods-nvidia-open,src=/rpms,dst=/tmp/rpms/nvidia-open \
-    --mount=type=tmpfs,dst=/tmp \
-    echo "Installing NVIDIA open driver (default for Turing+ GPUs)..." && \
-    IMAGE_NAME="${BASE_IMAGE_NAME}" \
-    AKMODNV_PATH="/tmp/rpms/nvidia-open" \
-    MULTILIB=1 \
-    /tmp/rpms/nvidia-open/ublue-os/nvidia-install.sh && \
-    rm -f /usr/share/vulkan/icd.d/nouveau_icd.*.json && \
-    ln -sf libnvidia-ml.so.1 /usr/lib64/libnvidia-ml.so
-
-# =============================================================================
-# Also cache NVIDIA Closed Driver RPMs (for Maxwell/Pascal legacy GPUs)
-# These are staged in /opt/bamos/nvidia-closed/ for first-boot switching
-# =============================================================================
-
-RUN --mount=type=cache,dst=/var/cache \
-    --mount=type=bind,from=akmods-nvidia,src=/rpms,dst=/tmp/rpms/nvidia \
-    --mount=type=tmpfs,dst=/tmp \
-    echo "Caching NVIDIA closed driver RPMs for legacy GPU auto-switching..." && \
-    mkdir -p /opt/bamos/nvidia-closed/ && \
-    cp -r /tmp/rpms/nvidia/kmods/*.rpm /opt/bamos/nvidia-closed/ 2>/dev/null || true && \
-    cp -r /tmp/rpms/nvidia/ublue-os/*.rpm /opt/bamos/nvidia-closed/ 2>/dev/null || true && \
-    echo "Cached $(ls /opt/bamos/nvidia-closed/*.rpm 2>/dev/null | wc -l) closed-driver RPMs"
-
-# =============================================================================
-# Install NVIDIA userspace tools
-# =============================================================================
-
+# Install NVIDIA open driver + userspace
 RUN rpm-ostree install \
+    kmod-nvidia-open \
+    xorg-x11-drv-nvidia-open-cuda \
     egl-wayland \
     egl-wayland2 \
     nvidia-settings \
     nvidia-persistenced \
-    || echo "Some NVIDIA packages deferred to runtime"
+    nvidia-vaapi-driver \
+    || echo "Some NVIDIA packages deferred"
 
-# Install NVIDIA Container Toolkit for GPU passthrough to containers
+# NVIDIA Container Toolkit
 RUN curl -sL https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo \
     -o /etc/yum.repos.d/nvidia-container-toolkit.repo && \
-    rpm-ostree install nvidia-container-toolkit || true
+    rpm-ostree install nvidia-container-toolkit || echo "nvidia-container-toolkit deferred"
 
-# =============================================================================
-# First-boot auto-detection setup
-# =============================================================================
-
-# Make scripts executable
+# First-boot auto-detection
 RUN chmod +x /usr/libexec/bamos/nvidia-setup.sh && \
     chmod +x /usr/libexec/bamos/nvidia-firstboot-setup.sh
 
-# Create systemd service for first-boot NVIDIA auto-detection
 RUN printf '[Unit]\nDescription=BamOS NVIDIA First-Boot GPU Detection\nAfter=network.target\nBefore=display-manager.service\n\n[Service]\nType=oneshot\nExecStart=/usr/libexec/bamos/nvidia-firstboot-setup.sh\nRemainAfterExit=yes\nTimeoutStartSec=120\n\n[Install]\nWantedBy=multi-user.target\n' > /etc/systemd/system/bamos-nvidia-firstboot.service && \
     systemctl enable bamos-nvidia-firstboot.service
 
-# =============================================================================
-# Finalize NVIDIA image
-# =============================================================================
-
-RUN rpm-ostree cleanup -m && \
-    ostree container commit
-
-# Lint check
+# Finalize
+RUN rpm-ostree cleanup -m && ostree container commit
 RUN --mount=type=tmpfs,target=/run --network=none bootc container lint || true

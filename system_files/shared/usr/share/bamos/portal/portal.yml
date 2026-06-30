@@ -99,9 +99,9 @@ screens:
 
       - id: "wps-office"
         title: "📄 WPS Office"
-        description: "Cài đặt bộ office WPS tương thích Microsoft Office, có sẵn fonts và giao diện tiếng Việt."
-        default: true
-        script: "/usr/libexec/bamos/install-wps.sh"
+        description: "Cài đặt bộ office WPS tương thích Microsoft Office, có sẵn fonts và giao diện tiếng Việt. Yêu cầu khởi động lại sau khi cài."
+        default: false
+        script: "/usr/libexec/bamos/bamos-install-wps.sh"
 
       - id: "zalo"
         title: "💬 Zalo"
@@ -117,8 +117,8 @@ screens:
 
       - id: "printing"
         title: "🖨️ Driver máy in"
-        description: "Cài đặt driver cho HP, Canon, Brother, Epson và các máy in phổ biến."
-        default: true
+        description: "Cài đặt driver cho HP, Canon, Brother, Epson và các máy in phổ biến. Yêu cầu khởi động lại sau khi cài."
+        default: false
         script: "/usr/libexec/bamos/setup-printing.sh"
 
   # ═══════════════════════════════════════════════════════════════════════════

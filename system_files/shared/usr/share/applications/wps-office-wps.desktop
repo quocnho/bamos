@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=WPS Office
+Name[vi]=WPS Office
+Comment=Vietnamese office suite
+Comment[vi]=Bộ ứng dụng văn phòng
+Exec=/usr/local/bin/wps %f
+Icon=wps-office-wps
+Terminal=false
+Type=Application
+Categories=Office;WordProcessor;
+StartupWMClass=wps
+MimeType=application/wps-office.doc;application/wps-office.docx;application/wps-office.wps;

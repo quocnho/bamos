@@ -1,0 +1,34 @@
+#!/bin/bash
+# bamos-wps-wrapper.sh — WPS Office launcher with correct DPI & font settings
+# WPS Office is a Qt5/X11 app that runs via XWayland on Wayland sessions.
+# This script ensures proper DPI scaling and font rendering.
+
+# Force Qt5 to use X11 backend (WPS doesn't support Qt5 Wayland well)
+export QT_QPA_PLATFORM=xcb
+export QT_AUTO_SCREEN_SCALE_FACTOR=0
+export QT_SCALE_FACTOR=1
+export QT_FONT_DPI=96
+
+# XWayland DPI consistency (prevents blurry fonts)
+export XWAYLAND_FORCE_DPI=96
+
+# GDK/GTK — for any GTK dialogs WPS might show
+export GDK_DPI_SCALE=1
+export GDK_SCALE=1
+export GDK_BACKEND=x11
+
+# Find and launch WPS
+WPS_BIN=""
+for bin in /usr/lib/wps-office/office6/wps /opt/kingsoft/wps-office/office6/wps; do
+    if [ -f "$bin" ]; then
+        WPS_BIN="$bin"
+        break
+    fi
+done
+
+if [ -z "$WPS_BIN" ]; then
+    # Not installed — run installer
+    exec /usr/libexec/bamos/bamos-install-wps.sh
+fi
+
+exec "$WPS_BIN" "$@"

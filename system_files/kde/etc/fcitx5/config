@@ -1,0 +1,26 @@
+# BamOS Fcitx5 Global Configuration
+
+# Show tray icon
+TrayIconVisible=true
+
+# Trigger input method (set by KDE shortcut)
+TriggerKey=CTRL_SHIFT
+
+# Extra trigger keys
+EnumerateForwardKeys=
+EnumerateBackwardKeys=
+
+# Switch between input methods
+SwitchKey=Super+space
+
+# Vertical candidate list
+VerticalCandidateList=false
+
+# Font for candidate list
+Font="Inter 10"
+
+# Theme
+Theme=Breeze
+
+# Preload input method (start with English for better compatibility)
+PreloadInputMethod=keyboard-us

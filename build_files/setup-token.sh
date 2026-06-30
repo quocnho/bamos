@@ -11,10 +11,10 @@ echo "Setting up USB Token / Digital Signature support..."
 systemctl enable pcscd || true
 
 # Create PKCS#11 module configuration
-mkdir -p /etc/pkcs11/
+mkdir -p /etc/pkcs11/ 2>/dev/null || true
 
 # Create directories for token middleware
-mkdir -p /usr/local/lib/token/
+mkdir -p /usr/local/lib/token/ 2>/dev/null || true
 
 # Configure Firefox/Chromium for digital signing
 # Add PKCS#11 module loading script

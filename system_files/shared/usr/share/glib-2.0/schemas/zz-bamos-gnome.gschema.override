@@ -47,7 +47,7 @@ multi-monitor=true
 no-overview-at-startup=true
 
 [org.gnome.desktop.input-sources]
-sources=[('xkb', 'us'), ('ibus', 'bamboo')]
+sources=[('xkb', 'us'), ('ibus', 'unikey')]
 xkb-options=['caps:escape']
 
 [org.gnome.desktop.peripherals.touchpad]
@@ -66,8 +66,9 @@ toggle-fullscreen=['<Super>f']
 [org.gnome.settings-daemon.plugins.media-keys]
 home=['<Super>e']
 www=['<Super>w']
-terminal=['<Super>t']
 calculator=['<Super>c']
+
+# Note: 'terminal' key removed in GNOME 48+ — Ptyxis has its own shortcut
 
 [org.gnome.nautilus.preferences]
 default-folder-viewer='list-view'

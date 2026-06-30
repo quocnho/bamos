@@ -38,27 +38,19 @@ modules:
       - https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-${releasever}.noarch.rpm
     install:
       # Vietnamese Input
-      - ibus-bamboo
+      - ibus-unikey
       - hunspell-vi
       # Locale
       - glibc-langpack-vi
       # Fonts
-      - google-noto-sans-vietnamese-fonts
-      - google-noto-serif-vietnamese-fonts
-      - google-noto-sans-mono-vietnamese-fonts
-      # Printing
-      - cups
-      - cups-pdf
-      - system-config-printer
-      - hplip
+      - google-noto-sans-fonts
       # Smart Card / Token
       - opensc
       - pcsc-lite
       - pcsc-lite-ccid
       - pcsc-tools
       # Multimedia
-      - @multimedia
-      - @printing
+      - ffmpegthumbnailer
       # Utilities
       - curl
       - wget
@@ -92,8 +84,6 @@ modules:
       - build_files/setup-fonts.sh
       # WPS Office installer
       - build_files/install-wps.sh
-      # Printer setup
-      - build_files/setup-printing.sh
       # USB Token setup
       - build_files/setup-token.sh
       # Zalo setup
@@ -114,6 +104,8 @@ modules:
     files:
       # KDE config
       - system_files/kde/: /etc/skel/.config/
+      # Fcitx5 input method (KDE)
+      - system_files/kde/etc/fcitx5/: /usr/share/bamos/fcitx5/
       # Fonts
       - system_files/fonts/: /usr/share/fonts/bamos/
       # Web apps

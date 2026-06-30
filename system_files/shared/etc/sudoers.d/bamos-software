@@ -1,0 +1,10 @@
+# BamOS — Passwordless package management for the "bamos" user group
+# Enables bamos CLI commands (install, remove, update, upgrade) without password
+# Only applies to members of the "wheel" group (admin users)
+
+%wheel ALL=(ALL) NOPASSWD: /usr/bin/rpm-ostree
+%wheel ALL=(ALL) NOPASSWD: /usr/bin/bootc
+%wheel ALL=(ALL) NOPASSWD: /usr/local/bin/bamos
+%wheel ALL=(ALL) NOPASSWD: /usr/bin/bamos
+%wheel ALL=(ALL) NOPASSWD: /usr/libexec/bamos/*
+%wheel ALL=(ALL) NOPASSWD: /usr/bin/flatpak

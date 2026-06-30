@@ -1,29 +1,53 @@
 #!/bin/bash
-# setup-printing.sh
-# Configure printer support for Vietnamese common printer models
+# setup-printing.sh — Install printer drivers and start CUPS
+# Designed for first-boot use via BamOS Portal or CLI
+# Uses rpm-ostree to layer printer packages (requires reboot)
 
-set -e
+set -euo pipefail
 
-echo "Setting up printer support..."
+echo "🖨️  Đang cài đặt máy in..."
+echo "🖨️  Installing printer support..."
 
-# Enable and start CUPS
-systemctl enable cups || true
+# =============================================================================
+# 1. Install printer packages via rpm-ostree
+# =============================================================================
+echo "1. Cài đặt driver máy in..."
+echo "   Installing printer drivers..."
 
-# Install additional printer drivers via rpm-ostree
-echo "Installing printer drivers..."
 rpm-ostree install \
+    cups \
+    cups-pdf \
+    system-config-printer \
     hplip \
-    hplip-gui \
-    || echo "Some printer drivers may need to be installed on the running system."
+    gutenprint-cups \
+    foomatic-db-ppds || {
+    echo "⚠️  Một số gói không có sẵn. Vui lòng cài thủ công:"
+    echo "   sudo rpm-ostree install cups hplip gutenprint-cups"
+    exit 1
+}
 
-# Add user to lpadmin group for printer management
-# (Applied on first boot via systemd service)
+# =============================================================================
+# 2. Enable CUPS service
+# =============================================================================
+echo "2. Kích hoạt dịch vụ in ấn (CUPS)..."
+echo "   Enabling CUPS service..."
+systemctl enable cups 2>/dev/null || true
 
-# Configure CUPS for network printer discovery
-if [ -f /etc/cups/cupsd.conf ]; then
-    # Enable browsing for network printers
-    sed -i 's/Browsing Off/Browsing On/' /etc/cups/cupsd.conf || true
-fi
+# =============================================================================
+# 3. Add user to lpadmin group (for printer management without root)
+# =============================================================================
 
-echo "Printer support setup complete!"
-echo "Add printers via: http://localhost:631 or system-config-printer"
+# =============================================================================
+# 4. Done
+# =============================================================================
+echo ""
+echo "✅ Printer support staged for installation!"
+echo "   ✅ Driver máy in đã được xếp hàng chờ cài đặt."
+echo ""
+echo "⚠️  KHỞI ĐỘNG LẠI để áp dụng: systemctl reboot"
+echo "⚠️  REBOOT REQUIRED to apply: systemctl reboot"
+echo ""
+echo "   Sau khi khởi động lại:"
+echo "   - Mở: http://localhost:631 (CUPS web interface)"
+echo "   - Hoặc dùng: system-config-printer"
+echo "   - Thêm user vào nhóm lpadmin: sudo usermod -aG lpadmin $USER"

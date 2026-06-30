@@ -5,19 +5,23 @@
 default:
     @just --list
 
-# Build BamOS GNOME variant locally
-build-gnome BASE_IMAGE="ghcr.io/ublue-os/silverblue-main:latest" TAG="bamos-gnome:local":
-    podman build \
+# Build BamOS GNOME variant locally (sudo for ISO compatibility)
+build-gnome TAG="bamos-gnome:local":
+    sudo podman build \
         -f Containerfile \
-        --build-arg BASE_IMAGE={{ BASE_IMAGE }} \
+        --target bamos-gnome \
+        --build-arg BASE_IMAGE=ghcr.io/ublue-os/silverblue-main \
+        --build-arg IMAGE_VERSION=latest \
         --build-arg IMAGE_NAME=bamos-gnome \
         -t {{ TAG }} .
 
-# Build BamOS KDE variant locally
-build-kde BASE_IMAGE="ghcr.io/ublue-os/kinoite-main:latest" TAG="bamos-kde:local":
-    podman build \
+# Build BamOS KDE variant locally (sudo for ISO compatibility)
+build-kde TAG="bamos-kde:local":
+    sudo podman build \
         -f Containerfile \
-        --build-arg BASE_IMAGE={{ BASE_IMAGE }} \
+        --target bamos-kde \
+        --build-arg BASE_IMAGE=ghcr.io/ublue-os/kinoite-main \
+        --build-arg IMAGE_VERSION=latest \
         --build-arg IMAGE_NAME=bamos-kde \
         -t {{ TAG }} .
 
@@ -28,22 +32,24 @@ build-all:
     just build-gnome-nvidia
     just build-kde-nvidia
 
-# Build GNOME variant with NVIDIA (auto-detect: open for RTX 20+, closed for legacy GPUs)
+# Build GNOME variant with NVIDIA (sudo for ISO compatibility)
 build-gnome-nvidia:
-    podman build \
+    sudo podman build \
         -f Containerfile \
-        --target bamos-nvidia \
-        --build-arg BASE_IMAGE=ghcr.io/ublue-os/silverblue-main:latest \
+        --target bamos-nvidia-gnome \
+        --build-arg BASE_IMAGE=ghcr.io/ublue-os/silverblue-main \
+        --build-arg IMAGE_VERSION=latest \
         --build-arg BASE_IMAGE_NAME=silverblue \
         --build-arg IMAGE_NAME=bamos-gnome-nvidia \
         -t bamos-gnome-nvidia:local .
 
-# Build KDE variant with NVIDIA (auto-detect: open for RTX 20+, closed for legacy GPUs)
+# Build KDE variant with NVIDIA (sudo for ISO compatibility)
 build-kde-nvidia:
-    podman build \
+    sudo podman build \
         -f Containerfile \
-        --target bamos-nvidia \
-        --build-arg BASE_IMAGE=ghcr.io/ublue-os/kinoite-main:latest \
+        --target bamos-nvidia-kde \
+        --build-arg BASE_IMAGE=ghcr.io/ublue-os/kinoite-main \
+        --build-arg IMAGE_VERSION=latest \
         --build-arg BASE_IMAGE_NAME=kinoite \
         --build-arg IMAGE_NAME=bamos-kde-nvidia \
         -t bamos-kde-nvidia:local .
@@ -220,39 +226,23 @@ nvidia-monitor:
 # Check NVIDIA Wayland support
 nvidia-wayland-check:
     @echo "=== Wayland NVIDIA Status ==="
-    @if [ -f /etc/modprobe.d/nvidia-modeset.conf ]; then
-        echo "✓ NVIDIA modeset enabled"
-        grep modeset /etc/modprobe.d/nvidia-modeset.conf || true
-    else
-        echo "✗ NVIDIA modeset NOT configured"
+    @if [ -f /etc/modprobe.d/nvidia-modeset.conf ]; then\
+    echo "✓ NVIDIA modeset enabled";\
+    grep modeset /etc/modprobe.d/nvidia-modeset.conf || true;\
+    else\
+    echo "✗ NVIDIA modeset NOT configured";\
     fi
     @echo ""
-    @if pgrep -x "gnome-shell" > /dev/null || pgrep -x "kwin_wayland" > /dev/null; then
-        echo "✓ Running Wayland session"
-    else
-        echo "⚠ Not a Wayland session (or cannot detect)"
+    @if pgrep -x "gnome-shell" > /dev/null || pgrep -x "kwin_wayland" > /dev/null; then\
+    echo "✓ Running Wayland session";\
+    else\
+    echo "⚠ Not a Wayland session (or cannot detect)";\
     fi
 
 # Detect NVIDIA GPU generation
 nvidia-detect-gen:
     @echo "Detecting NVIDIA GPU generation..."
-    @GPU_PCI=$$(lspci -nn | grep -i nvidia | head -1 | grep -oP '\[\K[0-9A-F]{4}:[0-9A-F]{4}(?=\])' || echo ""); \
-    if [ -n "$$GPU_PCI" ]; then \
-        echo "GPU PCI ID: $$GPU_PCI"; \
-        case "$$GPU_PCI" in \
-            *"10DE:2"* | *"10DE:26"* | *"10DE:27"* | *"10DE:28"*) echo "Generation: Blackwell (RTX 50 series) - Use nvidia-open driver";; \
-            *"10DE:22"* | *"10DE:23"* | *"10DE:24"* | *"10DE:25"*) echo "Generation: Ada Lovelace (RTX 40 series) - Use nvidia-open driver";; \
-            *"10DE:24"*|*"10DE:25"*) echo "Generation: Ampere (RTX 30 series) - Use nvidia-open driver";; \
-            *"10DE:1E"* | *"10DE:1F"* | *"10DE:21"*) echo "Generation: Turing (RTX 20/GTX 16 series) - Use nvidia-open driver";; \
-            *"10DE:1B"*|*"10DE:1C"*|*"10DE:1D"*) echo "Generation: Volta/Pascal (GTX 10 series) - Use nvidia (closed) driver";; \
-            *"10DE:13"* | *"10DE:14"* | *"10DE:15"*) echo "Generation: Maxwell v2 (GTX 900 series) - Use nvidia (closed) driver";; \
-            *"10DE:11"* | *"10DE:12"*) echo "Generation: Maxwell v1 (GTX 700 series) - Use nvidia (closed) driver";; \
-            *"10DE:0F"* | *"10DE:10"*) echo "Generation: Kepler (GTX 600/700) - Legacy 470xx only, NO Wayland";; \
-            *) echo "Generation: Unknown - Check docs/NVIDIA-COMPATIBILITY.md";;
-        esac; \
-    else \
-        echo "No NVIDIA GPU detected."; \
-    fi
+    @GPU_PCI=$$(lspci -nn | grep -i nvidia | head -1 | grep -oP '\[\K[0-9A-F]{4}:[0-9A-F]{4}(?=\])' || echo ''); if [ -n "$$GPU_PCI" ]; then echo "GPU PCI ID: $$GPU_PCI"; case "$$GPU_PCI" in *"10DE:2"*|*"10DE:26"*|*"10DE:27"*|*"10DE:28"*) echo "Generation: Blackwell (RTX 50) - nvidia-open";; *"10DE:22"*|*"10DE:23"*|*"10DE:24"*|*"10DE:25"*) echo "Generation: Ada Lovelace (RTX 40) - nvidia-open";; *"10DE:1E"*|*"10DE:1F"*|*"10DE:21"*) echo "Generation: Turing (RTX 20/GTX 16) - nvidia-open";; *"10DE:1B"*|*"10DE:1C"*|*"10DE:1D"*) echo "Generation: Volta/Pascal (GTX 10) - nvidia closed";; *"10DE:13"*|*"10DE:14"*|*"10DE:15"*) echo "Generation: Maxwell v2 (GTX 900) - nvidia closed";; *"10DE:11"*|*"10DE:12"*) echo "Generation: Maxwell v1 (GTX 700) - nvidia closed";; *"10DE:0F"*|*"10DE:10"*) echo "Generation: Kepler (GTX 600/700) - Legacy 470xx only, NO Wayland";; *) echo "Generation: Unknown";; esac; else echo "No NVIDIA GPU detected."; fi
 
 # Enroll Secure Boot key for NVIDIA modules
 enroll-secure-boot-key:
@@ -270,9 +260,146 @@ status:
 changes:
     rpm-ostree db diff
 
-# Enroll Secure Boot key
-enroll-secure-boot-key:
-    sudo mokutil --timeout -1
-    sudo mokutil --import /etc/pki/akmods/certs/public_key.der
-    @echo "Reboot and enroll the key in the MOK Manager."
-    @echo "Password: universalblue"
+# =============================================================================
+# VM Management
+# =============================================================================
+
+# Setup VM host (install KVM, libvirt, add user to group)
+vm-setup:
+    @echo "🐉 Setting up VM environment..."
+    chmod +x build_files/vm-setup.sh
+    build_files/vm-setup.sh
+
+# Create VM from latest built ISO
+vm-create VARIANT="gnome":
+    @echo "🐉 Creating VM from {{ VARIANT }} ISO..."
+    chmod +x build_files/vm-create.sh
+    @bash build_files/vm-create.sh {{ VARIANT }}
+
+# Start VM
+vm-start VM="bamos-gnome":
+    @echo "🚀 Starting {{ VM }}..."
+    virsh start {{ VM }}
+    @echo "Connect: virt-manager --connect qemu:///system &"
+
+# Stop VM
+vm-stop VM="bamos-gnome":
+    @echo "🛑 Stopping {{ VM }}..."
+    virsh destroy {{ VM }} 2>/dev/null || echo "VM not running"
+
+# Delete VM and its disk
+vm-delete VM="bamos-gnome":
+    @echo "🗑️  Deleting {{ VM }}..."
+    virsh destroy {{ VM }} 2>/dev/null || true
+    virsh undefine {{ VM }} --remove-all-storage 2>/dev/null || true
+    @echo "✅ Deleted"
+
+# List all VMs
+vm-list:
+    @echo "📋 BamOS VMs:"
+    virsh list --all | grep -E "bamos|Id\|----" || echo "   No VMs found"
+
+# Open VM console (virt-manager or virt-viewer)
+vm-console VM="bamos-gnome":
+    @echo "🖥️  Connecting to {{ VM }}..."
+    @if command -v virt-viewer &>/dev/null; then\
+        virt-viewer {{ VM }};\
+    elif command -v virt-manager &>/dev/null; then\
+        virt-manager --connect qemu:///system;\
+    else\
+        echo "Cài đặt: sudo rakuos install virt-manager virt-viewer";\
+    fi
+
+# Build all and create VM (fastest path to testing)
+build-vm VARIANT="gnome":
+    @echo "🐉 Building {{ VARIANT }} image + ISO + VM..."
+    just build-iso-{{ VARIANT }}
+    just vm-create {{ VARIANT }}
+
+# =============================================================================
+# ISO Generation (bootc-image-builder)
+# =============================================================================
+
+# Generate ISO from local bamos-gnome image
+iso-gnome TAG="bamos-gnome:local":
+    @echo "🐉 Generating BamOS GNOME ISO..."
+    @mkdir -p output
+    sudo podman run --rm --privileged \
+        -v $(pwd)/output:/output \
+        quay.io/centos-bootc/bootc-image-builder:latest \
+        --type anaconda-iso \
+        {{ TAG }}
+    @echo "📀 ISO at ./output/bootiso/"
+    @ls -lh ./output/bootiso/ 2>/dev/null || echo "Check ./output/ for the ISO"
+
+# Generate ISO from local bamos-kde image
+iso-kde TAG="bamos-kde:local":
+    @echo "🐉 Generating BamOS KDE ISO..."
+    @mkdir -p output
+    sudo podman run --rm --privileged \
+        -v $(pwd)/output:/output \
+        quay.io/centos-bootc/bootc-image-builder:latest \
+        --type anaconda-iso \
+        {{ TAG }}
+    @echo "📀 ISO at ./output/bootiso/"
+
+# Generate ISO from local bamos-gnome-nvidia image
+iso-gnome-nvidia TAG="bamos-gnome-nvidia:local":
+    @echo "🐉 Generating BamOS GNOME NVIDIA ISO..."
+    @mkdir -p output
+    sudo podman run --rm --privileged \
+        -v $(pwd)/output:/output \
+        quay.io/centos-bootc/bootc-image-builder:latest \
+        --type anaconda-iso \
+        {{ TAG }}
+    @echo "📀 ISO at ./output/bootiso/"
+
+# Generate ISO from local bamos-kde-nvidia image
+iso-kde-nvidia TAG="bamos-kde-nvidia:local":
+    @echo "🐉 Generating BamOS KDE NVIDIA ISO..."
+    @mkdir -p output
+    sudo podman run --rm --privileged \
+        -v $(pwd)/output:/output \
+        quay.io/centos-bootc/bootc-image-builder:latest \
+        --type anaconda-iso \
+        {{ TAG }}
+    @echo "📀 ISO at ./output/bootiso/"
+
+# Generate ISO from a published registry image
+iso-registry VARIANT="bamos-gnome" TAG="latest":
+    @echo "🐉 Generating ISO from ghcr.io/quocnho/{{ VARIANT }}:{{ TAG }}..."
+    @mkdir -p output
+    sudo podman run --rm --privileged \
+        -v $(pwd)/output:/output \
+        quay.io/centos-bootc/bootc-image-builder:latest \
+        --type anaconda-iso \
+        ghcr.io/quocnho/{{ VARIANT }}:{{ TAG }}
+    @echo "📀 ISO generated at ./output/bootiso/"
+
+# Generate ISOs for all 4 variants
+iso-all:
+    just iso-gnome
+    just iso-kde
+    just iso-gnome-nvidia
+    just iso-kde-nvidia
+    @echo "✨ All ISOs generated!"
+
+# Build + ISO in one step
+build-iso-gnome:
+    @echo "🐉 Building bamos-gnome image + ISO..."
+    just build-gnome
+    just iso-gnome
+    @echo "✅ bamos-gnome: build + ISO complete!"
+
+# Build + ISO for all variants
+build-iso-all:
+    @echo "🐉 Building all variants + ISOs..."
+    just build-all
+    just iso-all
+    @echo "✅ All builds + ISOs complete!"
+
+# Clean output directory
+clean-output:
+    @echo "🧹 Cleaning output directory..."
+    sudo rm -rf output/
+    @echo "✅ Output cleaned."
