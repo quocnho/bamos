@@ -36,6 +36,9 @@ LABEL io.bamos.variant="${IMAGE_NAME}"
 # 1. CORE PACKAGES
 # =============================================================================
 
+# Disable updates-archive repo (unreachable in container builds)
+RUN sed -i 's/enabled=1/enabled=0/' /etc/yum.repos.d/fedora-updates-archive.repo 2>/dev/null || true
+
 # Enable RPM Fusion repositories
 RUN rpm-ostree install \
     https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
