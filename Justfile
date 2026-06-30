@@ -326,6 +326,7 @@ iso-gnome TAG="bamos-gnome:local":
     @mkdir -p output
     sudo podman run --rm --privileged \
         -v $(pwd)/output:/output \
+        -v /var/lib/containers/storage:/var/lib/containers/storage \
         quay.io/centos-bootc/bootc-image-builder:latest \
         --type anaconda-iso \
         {{ TAG }}
@@ -338,6 +339,7 @@ iso-kde TAG="bamos-kde:local":
     @mkdir -p output
     sudo podman run --rm --privileged \
         -v $(pwd)/output:/output \
+        -v /var/lib/containers/storage:/var/lib/containers/storage \
         quay.io/centos-bootc/bootc-image-builder:latest \
         --type anaconda-iso \
         {{ TAG }}
@@ -349,6 +351,7 @@ iso-gnome-nvidia TAG="bamos-gnome-nvidia:local":
     @mkdir -p output
     sudo podman run --rm --privileged \
         -v $(pwd)/output:/output \
+        -v /var/lib/containers/storage:/var/lib/containers/storage \
         quay.io/centos-bootc/bootc-image-builder:latest \
         --type anaconda-iso \
         {{ TAG }}
@@ -360,6 +363,7 @@ iso-kde-nvidia TAG="bamos-kde-nvidia:local":
     @mkdir -p output
     sudo podman run --rm --privileged \
         -v $(pwd)/output:/output \
+        -v /var/lib/containers/storage:/var/lib/containers/storage \
         quay.io/centos-bootc/bootc-image-builder:latest \
         --type anaconda-iso \
         {{ TAG }}
@@ -371,6 +375,7 @@ iso-registry VARIANT="bamos-gnome" TAG="latest":
     @mkdir -p output
     sudo podman run --rm --privileged \
         -v $(pwd)/output:/output \
+        -v /var/lib/containers/storage:/var/lib/containers/storage \
         quay.io/centos-bootc/bootc-image-builder:latest \
         --type anaconda-iso \
         ghcr.io/quocnho/{{ VARIANT }}:{{ TAG }}
