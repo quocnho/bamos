@@ -193,8 +193,26 @@ BamOS cung cấp **12 phiên bản ISO** khác nhau, tổ hợp từ 3 Desktop E
 - **Container Runtime (Developers Edition):** Podman (thay Docker)
 - **Gaming Stack (Gaming Edition):** GameScope, MangoHud, Steam, Lutris, Heroic, ProtonGE
 - **Studio Stack (Studio Edition):** Low-latency kernel params, JACK via PipeWire, color management
+- **Power Management:** tuned (Red Hat Enterprise) — thay thế PPD/TLP
+  - Dynamic tuning: tự động điều chỉnh CPU governor theo load
+  - PPD bridge: GNOME Settings → Power vẫn điều khiển được
+  - Profile mặc định theo edition: desktop / throughput-performance / latency-performance
+  - Battery optimization cho laptop: ASPM powersupersave, WiFi power saving, runtime PM
+- **Calamares Unified Installer:**
+  - Custom Python module `bamos-config`: sinh edition-config.nix động
+  - Packagechooser Edition: Standard / Developers / Gaming / Studio
+  - Packagechooser Machine Type: Laptop / Desktop / Server
+  - Branding: logo, Nord color palette, slideshow (GLF-OS inspired)
+  - Ổ D drive icon + Nautilus bookmark
+  - Post-install /iso-cfg: flake template `github:quocnho/bamos`
+- **Hardware Detection Tools (mọi edition):**
+  - pciutils (lspci), usbutils (lsusb), dmidecode, inxi, mesa-demos (glxinfo)
+- **File Manager Integration:**
+  - Ổ D (/data) tự động mount + bookmark trong Nautilus sidebar
+  - Custom drive icon (SVG) — giống Windows D drive
+  - XDG user dirs redirect: ~/Documents → /data/Documents
 - **CI/CD:** GitHub Actions (Nix Flakes)
-- **Binary Cache:** Cachix
+- **Binary Cache:** Cachix (bamos.cachix.org)
 
 ---
 
@@ -255,36 +273,47 @@ BamOS cung cấp **12 phiên bản ISO** khác nhau, tổ hợp từ 3 Desktop E
 42. Docs website — 32+ trang (bazzite-style)
 43. Technical docs — architecture, modules, iso-build, kernel
 
-### Phase 7 — Auto-Detect Hardware 🟡 (Hoàn thiện)
+### Phase 7 — Auto-Detect Hardware + Power Management 🟡 (Hoàn thiện)
 44. `modules/hardware/detect.nix` — auto-detect GPU, PCI bus IDs
-45. `pkgs/bamos-detect-hardware.sh` — script quét hardware (lspci) — dùng `writeScriptBin` + readFile
+45. `pkgs/bamos-detect-hardware.sh` — script quét hardware (lspci)
 46. First-boot GPU detection: chạy `sudo bamos-detect-hardware`
-47. Tự động sinh bus IDs: Intel iGPU + NVIDIA/AMD dGPU
+47. Tự động sinh bus IDs + NVIDIA stable driver 595.84
 48. GPU driver chỉ load khi phát hiện có GPU tương ứng
-49. Workflow: detect → rebuild → NVIDIA active
-50. **Fix**: Heredoc single-quote bug — đã sửa dùng UNQUOTED EOF cho phép `$variable` expansion
-51. **Fix**: shellcheck SC2001 — đã viết lại script dùng bash pattern substitution thay `sed`
-52. **Theming RakuOS**: hoàn thiện WhiteSur-dark icons + Bibata cursors + Nordic theme cho cả 3 DE
+49. `services.xserver.videoDrivers` fix — kích hoạt hardware.video.nvidia module
+50. **tuned** (Red Hat) thay PPD: dynamic_tuning, PPD bridge, profile theo edition
+51. **Case study LG Gram**: i5-10210U, GTX 1650, NVMe — CPU governor powersave, ~4W GPU idle
+52. **Battery optimization**: ASPM powersupersave, WiFi power save, runtime PM, swap 16GB
+53. **Hardware tools**: pciutils, usbutils, dmidecode, inxi, mesa-demos trong mọi edition
 
-### Phase 8 — BamOS Portal (Tương lai)
-53. Factory Reset Desktop (1-click restore UI)
-54. Driver Manager (NVIDIA, AMD, Intel auto-install)
-55. System Info Dashboard
-56. Edition Switcher
+### Phase 8 — Unified Calamares Installer 🟡 (Đang phát triển)
+51. **Unified ISO**: 3 ISOs (GNOME/KDE/COSMIC) thay 12 — edition chọn khi install
+52. **Edition selector**: packagechooser với 4 edition (Standard/Developers/Gaming/Studio)
+53. **Machine type selector**: Laptop/Desktop/Server — auto power profile
+54. **Ổ D integration**: /data mount + custom drive icon + Nautilus bookmark
+55. **Calamares branding**: Logo, colors, fonts, slideshow (GLF-OS inspired)
+56. **/iso-cfg**: Post-install flake template `github:quocnho/bamos` — dễ update
+57. **Custom Python module**: bamos-config — sinh edition-config.nix động
+58. **Hardware detect tích hợp**: lspci + dmidecode chạy trong Calamares
+59. **Update workflow**: `cd /iso-cfg && sudo nix flake update && sudo nixos-rebuild switch`
+60. **Theming RakuOS**: hoàn thiện WhiteSur-dark icons + Bibata cursors + Nordic theme
 
-### Phase 9 — Hoàn thiện ma trận 3×4 (Tương lai)
-57. **COSMIC Standard ISO**
-58. **COSMIC Developers ISO**
-59. **COSMIC Gaming ISO**
-60. Complete 12/12 ISO variants với chất lượng production
+### Phase 9 — BamOS Portal (Tương lai)
+61. Factory Reset Desktop (1-click restore UI)
+62. Driver Manager (NVIDIA, AMD, Intel auto-install)
+63. System Info Dashboard
+64. Edition Switcher (chuyển edition không cần cài lại)
 
-### Phase 10 — Community (Tương lai)
-61. Home Manager integration cho user-level config
-62. Custom packages (`pkgs/`) cho phần mềm Việt
-63. Overlays (`overlays/`) tùy biến nixpkgs
-64. Documentation website + Hướng dẫn tiếng Việt
-65. Community modules registry
-66. Cộng đồng 500+ người dùng
+### Phase 10 — Hoàn thiện ma trận (Tương lai)
+65. Unified ISO cho tất cả DE
+66. Testing: QEMU VM + CI/CD tự động test ISO
+67. Binary cache đầy đủ — build lần đầu, cache mãi mãi
+
+### Phase 11 — Community (Tương lai)
+68. Home Manager integration cho user-level config
+69. Custom packages (`pkgs/`) cho phần mềm Việt
+70. Overlays (`overlays/`) tùy biến nixpkgs
+71. Documentation website + Hướng dẫn tiếng Việt
+72. Cộng đồng 500+ người dùng
 
 ---
 

@@ -169,6 +169,9 @@ in
         maximize = [ "<Alt>F10" ];
         close = [ "<Alt>F4" ];
       };
+      "org/gnome/nautilus/preferences" = {
+        bookmarks = [ "file:///data" ];
+      };
       "org/gnome/shell" = {
         enabled-extensions = [
           "appindicatorsupport@rgcjonas.gmail.com"

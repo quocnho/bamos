@@ -151,7 +151,7 @@ in
     # ═══════════════════════════════════════════════════════
     # 5. Audio power saving
     # ═══════════════════════════════════════════════════════
-    hardware.pulseaudio.daemon.config = {
+    services.pulseaudio.daemon.config = {
       default-fragments = 4;
       default-fragment-size-msec = 25;
     };
