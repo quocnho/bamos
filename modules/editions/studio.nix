@@ -1,6 +1,9 @@
 # modules/editions/studio.nix
 # Lưu ý: Chỉ dùng các package có sẵn trong pinned nixpkgs
-{ pkgs, ... }: {
+{ pkgs, lib, ... }: {
+  # tuned profile: latency-performance — độ trễ thấp cho studio (audio/video)
+  bamos.power-management.profile = lib.mkDefault "latency-performance";
+
   environment.systemPackages = with pkgs; [
     # 3D/CAD
     blender

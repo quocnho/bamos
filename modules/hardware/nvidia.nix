@@ -45,7 +45,7 @@ in
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = config.boot.kernelPackages.nvidiaPackages.beta;
+      default = config.boot.kernelPackages.nvidiaPackages.stable;
       description = "NVIDIA driver package (production/beta/latest)";
     };
 
@@ -74,6 +74,9 @@ in
     # ═══════════════════════════════════════════════════════
     # NVIDIA DRIVERS
     # ═══════════════════════════════════════════════════════
+    # BẮT BUỘC: khai báo driver NVIDIA để NixOS kích hoạt hardware.video.nvidia module
+    services.xserver.videoDrivers = [ "nvidia" ];
+
     hardware.nvidia = {
       package = cfg.package;
 

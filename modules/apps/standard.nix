@@ -1,11 +1,9 @@
 # modules/apps/standard.nix
 # Standard Edition applications — người dùng phổ thông
 # Bao gồm: browser, office, media, utilities
-{ pkgs
-, ...
-}:
-
-{
+{ pkgs, lib, ... }: {
+  # tuned profile: desktop — kích hoạt sched_autogroup cho desktop mượt mà
+  bamos.power-management.profile = lib.mkDefault "desktop";
   environment.systemPackages = with pkgs; [
     # Web
     firefox

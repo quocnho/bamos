@@ -1,5 +1,8 @@
 # modules/editions/gaming.nix
 { pkgs, lib, ... }: {
+  # tuned profile: latency-performance — độ trễ thấp cho gaming
+  bamos.power-management.profile = lib.mkDefault "latency-performance";
+
   programs.steam = {
     enable = true;
     remotePlay.openFirewall = true;

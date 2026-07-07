@@ -6,6 +6,7 @@
     ./core/locale.nix
     ./hardware/bluetooth.nix
     ./hardware/network.nix
+    ./hardware/power-management.nix
     ./desktop/gnome.nix
     ./core/audio.nix
     ./core/user.nix

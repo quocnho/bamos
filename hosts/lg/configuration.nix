@@ -61,9 +61,24 @@
     enable = true;
     desktop = "gnome";
     autoAddFlathub = true;
-    installCuratedApps = true;
-    extraFlatpakApps = [ "cn.wps.wps_365" ];
-    wpsFix = true;
+    installCuratedApps = false;
+    extraFlatpakApps = [ ];
+  };
+
+  # ═══════════════════════════════════════════════
+  # Power Management — case study LG Gram
+  #   CPU: i5-10210U (8 cores, 1.6-4.2 GHz)
+  #   GPU: Intel UHD + NVIDIA GTX 1650 (offload)
+  #   Disk: NVMe 476GB, 15GB RAM
+  # ═══════════════════════════════════════════════
+  bamos.power-management = {
+    enable = true;
+    profile = "desktop";
+    ppdSupport = true;
+    dynamicTuning = true;
+    batteryOptimized = true;
+    enableSwap = true;
+    swapSize = 16384;
   };
 
   # VM & Container

@@ -6,7 +6,6 @@
   # ═══════════════════════════════════════════════════════
   services.printing.enable = false;
   services.avahi.enable = false;
-  services.power-profiles-daemon.enable = false;
 
   # ═══════════════════════════════════════════════════════
   # Tắt documentation để giảm dung lượng ISO và build time
