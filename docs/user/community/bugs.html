@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BamOS — Bug Reports</title>
+  <link rel="stylesheet" href="../css/fonts.css">
+  <link rel="stylesheet" href="../css/bazzite-main.min.css">
+  <link rel="stylesheet" href="../css/bamos-overrides.css">
+</head>
+<body data-page="community-bugs">
+<div class="md-container">
+  <header class="md-header">
+    <nav class="md-header__inner md-grid">
+      <a href="../index.html" class="md-header__button md-logo" title="BamOS">
+        <svg viewBox="0 0 512 512" width="32"><rect width="512" height="512" rx="100" fill="var(--md-primary-fg-color)"/><g transform="translate(256,210)" stroke="white" stroke-width="12" stroke-linecap="round" fill="none"><line x1="0" y1="-130" x2="0" y2="130"/><line x1="-113" y1="-65" x2="113" y2="65"/><line x1="-113" y1="65" x2="113" y2="-65"/></g><text x="256" y="380" text-anchor="middle" font-family="Arial" font-size="80" fill="white">Bam</text></svg>
+      </a>
+      <div class="md-header__title"><span class="md-header__topic"><span class="md-ellipsis">BamOS Documentation</span></span></div>
+      <div class="md-header__option">
+        <div class="md-search">
+          <input type="search" class="md-search__input" placeholder="Search..." onkeyup="doSearch(this.value)">
+          <div id="search-results" class="md-search-results"></div>
+        </div>
+      </div>
+      <a href="https://github.com/quocnho/bamos" class="md-source"><svg viewBox="0 0 16 16" width="16"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg> GitHub</a>
+      <label class="md-header__button" for="__drawer">☰</label>
+    </nav>
+  </header>
+  <input type="checkbox" id="__drawer" class="md-toggle" style="display:none">
+  <div class="md-main">
+    <div class="md-main__inner md-grid">
+      <nav class="md-sidebar md-sidebar--primary" id="sidebar">
+        <div class="md-sidebar__scrollwrap">
+          <div class="md-sidebar__inner">
+            <nav class="md-nav md-nav--primary">
+              <ul class="md-nav__list">
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Getting Started</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../index.html" class="md-nav__link" data-page="home"><span class="md-ellipsis">🏠 Home</span></a></li>
+                      <li class="md-nav__item"><a href="../faq.html" class="md-nav__link" data-page="faq"><span class="md-ellipsis">❓ FAQ</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Installation</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../installation/guide.html" class="md-nav__link" data-page="install-guide"><span class="md-ellipsis">📖 Guide</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/post-install.html" class="md-nav__link" data-page="install-post"><span class="md-ellipsis">🔧 Post-Install</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/troubleshoot.html" class="md-nav__link" data-page="install-troubleshoot"><span class="md-ellipsis">🛠 Troubleshoot</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/legacy.html" class="md-nav__link" data-page="install-legacy"><span class="md-ellipsis">💻 Legacy</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/alternative.html" class="md-nav__link" data-page="install-alt"><span class="md-ellipsis">🔄 Alternative</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">General</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../general/editions.html" class="md-nav__link" data-page="general-editions"><span class="md-ellipsis">📋 Editions</span></a></li>
+                      <li class="md-nav__item"><a href="../general/comparison.html" class="md-nav__link" data-page="general-comparison"><span class="md-ellipsis">🔄 Comparison</span></a></li>
+                      <li class="md-nav__item"><a href="../general/tweaks.html" class="md-nav__link" data-page="general-tweaks"><span class="md-ellipsis">⚙ Tweaks</span></a></li>
+                      <li class="md-nav__item"><a href="../general/vpn.html" class="md-nav__link" data-page="general-vpn"><span class="md-ellipsis">🔒 VPN</span></a></li>
+                      <li class="md-nav__item"><a href="../general/uninstalling.html" class="md-nav__link" data-page="general-uninstalling"><span class="md-ellipsis">🗑 Uninstalling</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Gaming</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../gaming/introduction.html" class="md-nav__link" data-page="gaming-intro"><span class="md-ellipsis">🎮 Introduction</span></a></li>
+                      <li class="md-nav__item"><a href="../gaming/launchers.html" class="md-nav__link" data-page="gaming-launchers"><span class="md-ellipsis">🚀 Launchers</span></a></li>
+                      <li class="md-nav__item"><a href="../gaming/launch-options.html" class="md-nav__link" data-page="gaming-options"><span class="md-ellipsis">⚙ Options</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Software</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../software/center.html" class="md-nav__link" data-page="software-center"><span class="md-ellipsis">🖥 Center</span></a></li>
+                      <li class="md-nav__item"><a href="../software/flatpak.html" class="md-nav__link" data-page="software-flatpak"><span class="md-ellipsis">📂 Flatpak</span></a></li>
+                      <li class="md-nav__item"><a href="../software/containers.html" class="md-nav__link" data-page="software-containers"><span class="md-ellipsis">🐳 Containers</span></a></li>
+                      <li class="md-nav__item"><a href="../software/distrobox.html" class="md-nav__link" data-page="software-distrobox"><span class="md-ellipsis">📦 Distrobox</span></a></li>
+                      <li class="md-nav__item"><a href="../software/appimage.html" class="md-nav__link" data-page="software-appimage"><span class="md-ellipsis">🗜 AppImage</span></a></li>
+                      <li class="md-nav__item"><a href="../software/waydroid.html" class="md-nav__link" data-page="software-waydroid"><span class="md-ellipsis">📱 Waydroid</span></a></li>
+                      <li class="md-nav__item"><a href="../software/updates.html" class="md-nav__link" data-page="software-updates"><span class="md-ellipsis">🔄 Updates</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Advanced</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../advanced/cli.html" class="md-nav__link" data-page="advanced-cli"><span class="md-ellipsis">⌨ CLI</span></a></li>
+                      <li class="md-nav__item"><a href="../advanced/custom-image.html" class="md-nav__link" data-page="advanced-custom"><span class="md-ellipsis">🛠 Custom Image</span></a></li>
+                      <li class="md-nav__item"><a href="../advanced/reset-password.html" class="md-nav__link" data-page="advanced-password"><span class="md-ellipsis">🔑 Password</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Community</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../community/contributing.html" class="md-nav__link" data-page="community-contributing"><span class="md-ellipsis">🤝 Contribute</span></a></li>
+                      <li class="md-nav__item"><a href="../community/bugs.html" class="md-nav__link md-nav__link--active" data-page="community-bugs"><span class="md-ellipsis">🐛 Bugs</span></a></li>
+                      <li class="md-nav__item"><a href="../community/links.html" class="md-nav__link" data-page="community-links"><span class="md-ellipsis">🔗 Links</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Resources</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../resources/specs.html" class="md-nav__link" data-page="resources-specs"><span class="md-ellipsis">🔧 Specs</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/kernel.html" class="md-nav__link" data-page="resources-kernel"><span class="md-ellipsis">🧠 Kernel</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/cache.html" class="md-nav__link" data-page="resources-cache"><span class="md-ellipsis">💾 Cache</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/download.html" class="md-nav__link" data-page="resources-download"><span class="md-ellipsis">⬇ Download</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </nav>
+      <div class="md-content">
+        <article class="md-content__inner md-typeset">
+          <h1>🐛 Báo lỗi trên BamOS</h1>
+
+          <p>BamOS sử dụng <strong>GitHub Issues</strong> để quản lý lỗi và yêu cầu tính năng. Khi báo lỗi, hãy cung cấp càng nhiều thông tin càng tốt để đội ngũ phát triển có thể xử lý nhanh chóng.</p>
+
+          <div class="md-tip">💡 <strong>Đã kiểm tra chưa?</strong> Trước khi báo lỗi, hãy thử tìm kiếm trên <a href="https://github.com/quocnho/bamos/issues">GitHub Issues</a> để xem lỗi đã được báo cáo trước đó chưa.</div>
+
+          <h2>Báo lỗi qua GitHub Issues</h2>
+          <p>Để báo lỗi mới, truy cập:</p>
+          <div class="md-code">https://github.com/quocnho/bamos/issues/new/choose</div>
+          <p>Sau đó chọn mẫu phù hợp:</p>
+          <ul>
+            <li><strong>Bug Report</strong> — Dành cho lỗi phần mềm</li>
+            <li><strong>Feature Request</strong> — Dành cho yêu cầu tính năng mới</li>
+            <li><strong>Documentation Issue</strong> — Dành cho lỗi trong tài liệu</li>
+          </ul>
+
+          <h2>Template báo lỗi (Bug Report)</h2>
+          <p>Khi tạo issue mới, hãy điền đầy đủ các thông tin sau:</p>
+
+          <div class="md-code" style="background:#f8f9fa;color:#333;white-space:pre-wrap;">---
+Tiêu đề: [Tóm tắt ngắn gọn về lỗi]
+---
+
+## Mô tả lỗi
+Mô tả rõ ràng và chi tiết về lỗi bạn gặp phải.
+
+## Các bước tái hiện
+1. Vào mục '...'
+2. Nhấn vào '....'
+3. Kéo xuống '....'
+4. Thấy lỗi
+
+## Hành vi mong đợi
+Mô tả điều gì đáng lẽ phải xảy ra.
+
+## Ảnh chụp màn hình / Video
+Nếu có, hãy đính kèm ảnh hoặc video quay lại lỗi.
+
+## Thông tin hệ thống
+- BamOS Edition: [Desktop / Gaming / Server / Minimal]
+- Phiên bản: [vd: 0.4.0]
+- Kernel: [vd: 6.8.7-zen]
+
+## Log / Error output
+```
+Dán lỗi từ terminal hoặc journalctl vào đây
+```
+
+## Phần cứng
+- CPU: [vd: AMD Ryzen 5 5600]
+- GPU: [vd: NVIDIA RTX 3060 / AMD RX 6600]
+- RAM: [vd: 16 GB]
+- Ổ cứng: [vd: NVMe SSD 512 GB]
+
+## Thông tin bổ sung
+Bất kỳ thông tin nào khác có thể giúp ích.</div>
+
+          <h2>Thông tin cần thu thập trước khi báo lỗi</h2>
+
+          <h3>Kiểm tra phiên bản BamOS</h3>
+          <div class="md-code"># Xem phiên bản hệ thống
+cat /etc/ostree/version
+
+# Xem thông tin kernel
+uname -a
+
+# Xem edition
+cat /etc/bamos-edition 2>/dev/null || echo "Chưa xác định"</div>
+
+          <h3>Thu thập log</h3>
+          <div class="md-code"># Log hệ thống gần đây
+journalctl -b --no-pager -n 200 > bamos-log.txt
+
+# Log của một service cụ thể
+journalctl -u &lt;tên-service&gt; --no-pager
+
+# Log khi boot lần cuối
+journalctl -b-1 --no-pager</div>
+
+          <h3>Thông tin phần cứng</h3>
+          <div class="md-code"># CPU
+lscpu | grep "Model name"
+
+# GPU
+lspci | grep -E "VGA|3D"
+
+# RAM
+free -h
+
+# Ổ cứng
+lsblk</div>
+
+          <h2>Một số lỗi thường gặp và cách tự xử lý</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Lỗi</th>
+                <th>Nguyên nhân</th>
+                <th>Giải pháp</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Không boot được sau cập nhật</td>
+                <td>Xung đột kernel hoặc driver</td>
+                <td>Chọn phiên bản cũ trong GRUB, rollback</td>
+              </tr>
+              <tr>
+                <td>WiFi không hoạt động</td>
+                <td>Thiếu firmware</td>
+                <td>Dùng dây mạng, cập nhật hệ thống</td>
+              </tr>
+              <tr>
+                <td>Âm thanh không có</td>
+                <td>PipeWire chưa cấu hình đúng</td>
+                <td><code>systemctl --user restart pipewire</code></td>
+              </tr>
+              <tr>
+                <td>Màn hình đen sau boot</td>
+                <td>Driver GPU không tương thích</td>
+                <td>Thêm <code>nomodeset</code> vào kernel params</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="md-tip">🔍 <strong>Đã thử hết?</strong> Nếu bạn đã thử các giải pháp trên mà vẫn gặp lỗi, hãy tạo issue mới trên GitHub. Đừng quên đính kèm log và thông tin hệ thống!</div>
+
+          <h2>Yêu cầu tính năng mới</h2>
+          <p>Nếu bạn có ý tưởng cho tính năng mới, hãy tạo Feature Request với template:</p>
+          <div class="md-code" style="background:#f8f9fa;color:#333;white-space:pre-wrap;">---
+Tiêu đề: [Tóm tắt tính năng]
+---
+
+## Vấn đề / Nhu cầu
+Tại sao bạn cần tính năng này?
+
+## Giải pháp đề xuất
+Mô tả cách bạn muốn tính năng hoạt động.
+
+## Giải pháp thay thế
+Bạn đã thử cách nào khác chưa?
+
+## Ảnh chụp / Wireframe
+Nếu có, hãy đính kèm hình ảnh minh hoạ.</div>
+
+          <h2>Khi nào issue bị đóng?</h2>
+          <ul>
+            <li>Lỗi đã được sửa trong bản cập nhật mới nhất</li>
+            <li>Thiếu thông tin và người báo cáo không phản hồi sau 14 ngày</li>
+            <li>Lỗi không thể tái hiện lại được</li>
+            <li>Là duplicate của issue khác</li>
+          </ul>
+
+          <div class="md-tip">💬 <strong>Thảo luận cộng đồng:</strong> Xem trang <a href="../community/links.html">Links</a> để tham gia các kênh thảo luận khác.</div>
+        </article>
+      </div>
+    </div>
+  </div>
+  <footer class="md-footer">
+    <div class="md-footer-meta">
+      <div class="md-footer-meta__inner md-grid">
+        <div class="md-copyright">
+          <span class="md-copyright__highlight">MIT License © 2026 BamOS Project</span>
+          Built with ❤️ for the Vietnamese Linux community
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+<script src="../js/include.js"></script>
+</body>
+</html>
+</title></h1></p></h3></th></th></td></td></td></td></h2></h2>

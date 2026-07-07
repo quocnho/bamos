@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BamOS — Game Launchers</title>
+  <link rel="stylesheet" href="../css/fonts.css">
+  <link rel="stylesheet" href="../css/bazzite-main.min.css">
+  <link rel="stylesheet" href="../css/bamos-overrides.css">
+</head>
+<body data-page="gaming-launchers">
+<div class="md-container">
+  <header class="md-header">
+    <nav class="md-header__inner md-grid">
+      <a href="../index.html" class="md-header__button md-logo" title="BamOS">
+        <svg viewBox="0 0 512 512" width="32"><rect width="512" height="512" rx="100" fill="var(--md-primary-fg-color)"/><g transform="translate(256,210)" stroke="white" stroke-width="12" stroke-linecap="round" fill="none"><line x1="0" y1="-130" x2="0" y2="130"/><line x1="-113" y1="-65" x2="113" y2="65"/><line x1="-113" y1="65" x2="113" y2="-65"/></g><text x="256" y="380" text-anchor="middle" font-family="Arial" font-size="80" fill="white">Bam</text></svg>
+      </a>
+      <div class="md-header__title"><span class="md-header__topic"><span class="md-ellipsis">BamOS Documentation</span></span></div>
+      <div class="md-header__option">
+        <div class="md-search">
+          <input type="search" class="md-search__input" placeholder="Search..." onkeyup="doSearch(this.value)">
+          <div id="search-results" class="md-search-results"></div>
+        </div>
+      </div>
+      <a href="https://github.com/quocnho/bamos" class="md-source"><svg viewBox="0 0 16 16" width="16"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg> GitHub</a>
+      <label class="md-header__button" for="__drawer">☰</label>
+    </nav>
+  </header>
+  <input type="checkbox" id="__drawer" class="md-toggle" style="display:none">
+  <div class="md-main">
+    <div class="md-main__inner md-grid">
+      <nav class="md-sidebar md-sidebar--primary" id="sidebar">
+        <div class="md-sidebar__scrollwrap">
+          <div class="md-sidebar__inner">
+            <nav class="md-nav md-nav--primary">
+              <ul class="md-nav__list">
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Getting Started</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../index.html" class="md-nav__link" data-page="home"><span class="md-ellipsis">🏠 Home</span></a></li>
+                      <li class="md-nav__item"><a href="../faq.html" class="md-nav__link" data-page="faq"><span class="md-ellipsis">❓ FAQ</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Installation</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../installation/guide.html" class="md-nav__link" data-page="install-guide"><span class="md-ellipsis">📖 Guide</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/post-install.html" class="md-nav__link" data-page="install-post"><span class="md-ellipsis">🔧 Post-Install</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/troubleshoot.html" class="md-nav__link" data-page="install-troubleshoot"><span class="md-ellipsis">🛠 Troubleshoot</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/legacy.html" class="md-nav__link" data-page="install-legacy"><span class="md-ellipsis">💻 Legacy</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/alternative.html" class="md-nav__link" data-page="install-alt"><span class="md-ellipsis">🔄 Alternative</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">General</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../general/editions.html" class="md-nav__link" data-page="general-editions"><span class="md-ellipsis">📋 Editions</span></a></li>
+                      <li class="md-nav__item"><a href="../general/comparison.html" class="md-nav__link" data-page="general-comparison"><span class="md-ellipsis">🔄 Comparison</span></a></li>
+                      <li class="md-nav__item"><a href="../general/tweaks.html" class="md-nav__link" data-page="general-tweaks"><span class="md-ellipsis">⚙ Tweaks</span></a></li>
+                      <li class="md-nav__item"><a href="../general/vpn.html" class="md-nav__link" data-page="general-vpn"><span class="md-ellipsis">🔒 VPN</span></a></li>
+                      <li class="md-nav__item"><a href="../general/uninstalling.html" class="md-nav__link" data-page="general-uninstalling"><span class="md-ellipsis">🗑 Uninstalling</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Gaming</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../gaming/introduction.html" class="md-nav__link" data-page="gaming-intro"><span class="md-ellipsis">🎮 Introduction</span></a></li>
+                      <li class="md-nav__item"><a href="../gaming/launchers.html" class="md-nav__link md-nav__link--active" data-page="gaming-launchers"><span class="md-ellipsis">🚀 Launchers</span></a></li>
+                      <li class="md-nav__item"><a href="../gaming/launch-options.html" class="md-nav__link" data-page="gaming-options"><span class="md-ellipsis">⚙ Options</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Software</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../software/center.html" class="md-nav__link" data-page="software-center"><span class="md-ellipsis">🖥 Center</span></a></li>
+                      <li class="md-nav__item"><a href="../software/flatpak.html" class="md-nav__link" data-page="software-flatpak"><span class="md-ellipsis">📂 Flatpak</span></a></li>
+                      <li class="md-nav__item"><a href="../software/containers.html" class="md-nav__link" data-page="software-containers"><span class="md-ellipsis">🐳 Containers</span></a></li>
+                      <li class="md-nav__item"><a href="../software/distrobox.html" class="md-nav__link" data-page="software-distrobox"><span class="md-ellipsis">📦 Distrobox</span></a></li>
+                      <li class="md-nav__item"><a href="../software/appimage.html" class="md-nav__link" data-page="software-appimage"><span class="md-ellipsis">🗜 AppImage</span></a></li>
+                      <li class="md-nav__item"><a href="../software/waydroid.html" class="md-nav__link" data-page="software-waydroid"><span class="md-ellipsis">📱 Waydroid</span></a></li>
+                      <li class="md-nav__item"><a href="../software/updates.html" class="md-nav__link" data-page="software-updates"><span class="md-ellipsis">🔄 Updates</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Advanced</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../advanced/cli.html" class="md-nav__link" data-page="advanced-cli"><span class="md-ellipsis">⌨ CLI</span></a></li>
+                      <li class="md-nav__item"><a href="../advanced/custom-image.html" class="md-nav__link" data-page="advanced-custom"><span class="md-ellipsis">🛠 Custom Image</span></a></li>
+                      <li class="md-nav__item"><a href="../advanced/reset-password.html" class="md-nav__link" data-page="advanced-password"><span class="md-ellipsis">🔑 Password</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Community</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../community/contributing.html" class="md-nav__link" data-page="community-contributing"><span class="md-ellipsis">🤝 Contribute</span></a></li>
+                      <li class="md-nav__item"><a href="../community/bugs.html" class="md-nav__link" data-page="community-bugs"><span class="md-ellipsis">🐛 Bugs</span></a></li>
+                      <li class="md-nav__item"><a href="../community/links.html" class="md-nav__link" data-page="community-links"><span class="md-ellipsis">🔗 Links</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Resources</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../resources/specs.html" class="md-nav__link" data-page="resources-specs"><span class="md-ellipsis">🔧 Specs</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/kernel.html" class="md-nav__link" data-page="resources-kernel"><span class="md-ellipsis">🧠 Kernel</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/cache.html" class="md-nav__link" data-page="resources-cache"><span class="md-ellipsis">💾 Cache</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/download.html" class="md-nav__link" data-page="resources-download"><span class="md-ellipsis">⬇ Download</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </nav>
+      <div class="md-content">
+        <article class="md-content__inner md-typeset">
+
+          <h1>🚀 Game Launcher trên BamOS</h1>
+
+          <p>BamOS hỗ trợ đa dạng các game launcher, giúp bạn truy cập kho game từ nhiều nền tảng khác nhau. Dưới đây là danh sách các launcher phổ biến và cách sử dụng chúng.</p>
+
+          <div class="md-video">
+            <img src="../assets/images/placeholder.svg" alt="Game Launchers" style="max-width:100%;border-radius:8px">
+            <p>📹 Hướng dẫn sử dụng các game launcher trên BamOS (sẽ thêm sau)</p>
+          </div>
+
+          <h2 id="steam">🎯 1. Steam</h2>
+          <p><strong>Steam</strong> là game launcher chính và được cài đặt sẵn trên Gaming Edition. Với hàng ngàn tựa game native Linux và hàng chục ngàn game Windows chạy qua Proton, Steam là trung tâm giải trí không thể thiếu.</p>
+
+          <div class="admonition tip">
+            <p class="admonition-title">💡 Mẹo</p>
+            <p>Kích hoạt Steam Play (Proton) cho tất cả game: Steam → Settings → Compatibility → ☑ Enable Steam Play for all other titles.</p>
+          </div>
+
+          <pre><code># Cài Steam (nếu chưa có)
+sudo rpm-ostree install steam
+
+# Hoặc qua Flatpak
+flatpak install flathub com.valvesoftware.Steam
+</code></pre>
+
+          <h2 id="lutris">🎮 2. Lutris</h2>
+          <p><strong>Lutris</strong> là trình quản lý game mã nguồn mở, hỗ trợ tích hợp nhiều nền tảng: Steam, GOG, Epic Games, Humble Bundle, và các bản cài đặt thủ công. Lutris tự động cấu hình Wine/Proton cho từng game.</p>
+
+          <pre><code># Cài Lutris
+sudo rpm-ostree install lutris
+
+# Hoặc Flatpak
+flatpak install flathub net.lutris.Lutris
+</code></pre>
+
+          <div class="admonition note">
+            <p class="admonition-title">📝 Lutris Runners</p>
+            <p>Lutris hỗ trợ nhiều <strong>runner</strong>: Wine (vanilla, GE, staging), Proton, Steam, RetroArch, DOSBox, ScummVM, MAME và nhiều hơn nữa.</p>
+          </div>
+
+          <h2 id="heroic">🦸 3. Heroic Games Launcher</h2>
+          <p><strong>Heroic Games Launcher</strong> là launcher mã nguồn mở cho Epic Games Store, GOG và Amazon Games. Không cần cài đặt client Windows cồng kềnh — Heroic chạy native trên Linux.</p>
+
+          <h3>Tính năng chính</h3>
+          <ul>
+            <li>Đăng nhập Epic Games, GOG, Amazon</li>
+            <li>Tải và cài game trực tiếp</li>
+            <li>Tích hợp Wine, Proton, GameScope, MangoHud</li>
+            <li>Cloud saves</li>
+            <li>Quản lý DLC</li>
+          </ul>
+
+          <pre><code># Cài Heroic Games Launcher
+flatpak install flathub com.heroicgameslauncher.hgl
+</code></pre>
+
+          <div class="admonition tip">
+            <p class="admonition-title">💡 Mẹo</p>
+            <p>Trong Heroic, bạn có thể chọn Wine/Proton riêng cho từng game, bật GameScope và MangoHud ngay trong cài đặt của từng game.</p>
+          </div>
+
+          <h2 id="bottles">🍾 4. Bottles</h2>
+          <p><strong>Bottles</strong> là công cụ quản lý tiền tố Wine (Wine prefixes) với giao diện đồ họa đẹp mắt. Mỗi "bottle" là một môi trường Windows riêng biệt — lý tưởng để chạy game và ứng dụng Windows.</p>
+
+          <pre><code># Cài Bottles
+flatpak install flathub com.usebottles.bottles
+</code></pre>
+
+          <h3>Các loại Bottle</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Loại</th>
+                <th>Mục đích</th>
+                <th>Cấu hình</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>🎮 Gaming</td>
+                <td>Chơi game</td>
+                <td>DXVK, VKD3D, GameMode, MangoHud</td>
+              </tr>
+              <tr>
+                <td>🖥 Software</td>
+                <td>Ứng dụng văn phòng</td>
+                <td>WinHTTP, .NET, fonts</td>
+              </tr>
+              <tr>
+                <td>⚙ Custom</td>
+                <td>Tùy chỉnh thủ công</td>
+                <td>Toàn quyền kiểm soát</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2 id="itch">🕹️ 5. itch.io</h2>
+          <p>Trình quản lý game cho itch.io — nơi hàng ngàn indie game được phát hành. Hỗ trợ tải, cập nhật và chạy game trực tiếp.</p>
+
+          <pre><code># Cài itch.io App
+flatpak install flathub io.itch.itch
+</code></pre>
+
+          <h2 id="others">📌 Các launcher khác</h2>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Launcher</th>
+                <th>Cách cài</th>
+                <th>Ghi chú</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>🟦 Battle.net</td>
+                <td>Lutris / Bottles</td>
+                <td>Overwatch, Diablo, WoW</td>
+              </tr>
+              <tr>
+                <td>🟩 EA App</td>
+                <td>Lutris / Bottles</td>
+                <td>EA Sports, Battlefield, The Sims</td>
+              </tr>
+              <tr>
+                <td>🟪 Ubisoft Connect</td>
+                <td>Lutris / Bottles</td>
+                <td>Assassin's Creed, Far Cry, Rainbow Six</td>
+              </tr>
+              <tr>
+                <td>🟥 Amazon Games</td>
+                <td>Heroic</td>
+                <td>Prime Gaming free games</td>
+              </tr>
+              <tr>
+                <td>⬜ GOG Galaxy</td>
+                <td>Heroic / Lutris</td>
+                <td>DRM-free games</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="admonition warning">
+            <p class="admonition-title">⚠️ Lưu ý về Anti-Cheat</p>
+            <p>Một số launcher và game có Anti-Cheat (EAC, BattlEye) cần cấu hình đặc biệt. Xem thêm tại <a href="../gaming/launch-options.html">trang Tùy chọn khởi chạy</a>.</p>
+          </div>
+
+          <p>👉 Xem thêm: <a href="../gaming/introduction.html">Giới thiệu Gaming</a> và <a href="../gaming/launch-options.html">Tùy chọn khởi chạy</a>.</p>
+
+        </article>
+      </div>
+    </div>
+  </div>
+  <footer class="md-footer">
+    <div class="md-footer-meta">
+      <div class="md-footer-meta__inner md-grid">
+        <div class="md-copyright">
+          <span class="md-copyright__highlight">MIT License © 2026 BamOS Project</span>
+          Built with ❤️ for the Vietnamese Linux community
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+<script src="../js/include.js"></script>
+</body>
+</html>
+</title></h1></p></li></li></code></p></code></th></td></td></th></th></td></td>

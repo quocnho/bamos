@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BamOS — Hướng dẫn Sau Cài đặt</title>
+  <link rel="stylesheet" href="../css/fonts.css">
+  <link rel="stylesheet" href="../css/bazzite-main.min.css">
+  <link rel="stylesheet" href="../css/bamos-overrides.css">
+</head>
+<body data-page="install-post">
+<!-- md-container -->
+<div class="md-container">
+  <!-- Header -->
+  <header class="md-header">
+    <nav class="md-header__inner md-grid">
+      <a href="../index.html" class="md-header__button md-logo" title="BamOS">
+        <svg viewBox="0 0 512 512" width="32"><rect width="512" height="512" rx="100" fill="var(--md-primary-fg-color)"/><g transform="translate(256,210)" stroke="white" stroke-width="12" stroke-linecap="round" fill="none"><line x1="0" y1="-130" x2="0" y2="130"/><line x1="-113" y1="-65" x2="113" y2="65"/><line x1="-113" y1="65" x2="113" y2="-65"/></g><text x="256" y="380" text-anchor="middle" font-family="Arial" font-size="80" fill="white">Bam</text></svg>
+      </a>
+      <div class="md-header__title"><span class="md-header__topic"><span class="md-ellipsis">BamOS Documentation</span></span></div>
+      <div class="md-header__option">
+        <div class="md-search">
+          <input type="search" class="md-search__input" placeholder="Search..." onkeyup="doSearch(this.value)">
+          <div id="search-results" class="md-search-results"></div>
+        </div>
+      </div>
+      <a href="https://github.com/quocnho/bamos" class="md-source">
+        <svg viewBox="0 0 16 16" width="16"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg> GitHub
+      </a>
+      <label class="md-header__button" for="__drawer">☰</label>
+    </nav>
+  </header>
+
+  <!-- Checkbox for drawer -->
+  <input type="checkbox" id="__drawer" class="md-toggle" style="display:none">
+
+  <!-- Main layout -->
+  <div class="md-main">
+    <div class="md-main__inner md-grid">
+      <!-- Sidebar -->
+      <nav class="md-sidebar md-sidebar--primary" id="sidebar">
+        <div class="md-sidebar__scrollwrap">
+          <div class="md-sidebar__inner">
+            <nav class="md-nav md-nav--primary">
+              <ul class="md-nav__list">
+                <!-- Getting Started -->
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Getting Started</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../index.html" class="md-nav__link" data-page="home"><span class="md-ellipsis">🏠 Home</span></a></li>
+                      <li class="md-nav__item"><a href="../faq.html" class="md-nav__link" data-page="faq"><span class="md-ellipsis">❓ FAQ</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <!-- Installation -->
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Installation</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../installation/guide.html" class="md-nav__link" data-page="install-guide"><span class="md-ellipsis">📖 Guide</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/post-install.html" class="md-nav__link md-nav__link--active" data-page="install-post"><span class="md-ellipsis">🔧 Post-Install</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/troubleshoot.html" class="md-nav__link" data-page="install-troubleshoot"><span class="md-ellipsis">🛠 Troubleshoot</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/legacy.html" class="md-nav__link" data-page="install-legacy"><span class="md-ellipsis">💻 Legacy</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/alternative.html" class="md-nav__link" data-page="install-alt"><span class="md-ellipsis">🔄 Alternative</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <!-- General -->
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">General</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../general/editions.html" class="md-nav__link" data-page="general-editions"><span class="md-ellipsis">📋 Editions</span></a></li>
+                      <li class="md-nav__item"><a href="../general/comparison.html" class="md-nav__link" data-page="general-comparison"><span class="md-ellipsis">🔄 Comparison</span></a></li>
+                      <li class="md-nav__item"><a href="../general/tweaks.html" class="md-nav__link" data-page="general-tweaks"><span class="md-ellipsis">⚙ Tweaks</span></a></li>
+                      <li class="md-nav__item"><a href="../general/vpn.html" class="md-nav__link" data-page="general-vpn"><span class="md-ellipsis">🔒 VPN</span></a></li>
+                      <li class="md-nav__item"><a href="../general/uninstalling.html" class="md-nav__link" data-page="general-uninstalling"><span class="md-ellipsis">🗑 Uninstalling</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <!-- Gaming -->
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Gaming</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../gaming/introduction.html" class="md-nav__link" data-page="gaming-intro"><span class="md-ellipsis">🎮 Introduction</span></a></li>
+                      <li class="md-nav__item"><a href="../gaming/launchers.html" class="md-nav__link" data-page="gaming-launchers"><span class="md-ellipsis">🚀 Launchers</span></a></li>
+                      <li class="md-nav__item"><a href="../gaming/launch-options.html" class="md-nav__link" data-page="gaming-options"><span class="md-ellipsis">⚙ Options</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <!-- Software -->
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Software</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../software/center.html" class="md-nav__link" data-page="software-center"><span class="md-ellipsis">🖥 Center</span></a></li>
+                      <li class="md-nav__item"><a href="../software/flatpak.html" class="md-nav__link" data-page="software-flatpak"><span class="md-ellipsis">📂 Flatpak</span></a></li>
+                      <li class="md-nav__item"><a href="../software/containers.html" class="md-nav__link" data-page="software-containers"><span class="md-ellipsis">🐳 Containers</span></a></li>
+                      <li class="md-nav__item"><a href="../software/distrobox.html" class="md-nav__link" data-page="software-distrobox"><span class="md-ellipsis">📦 Distrobox</span></a></li>
+                      <li class="md-nav__item"><a href="../software/appimage.html" class="md-nav__link" data-page="software-appimage"><span class="md-ellipsis">🗜 AppImage</span></a></li>
+                      <li class="md-nav__item"><a href="../software/waydroid.html" class="md-nav__link" data-page="software-waydroid"><span class="md-ellipsis">📱 Waydroid</span></a></li>
+                      <li class="md-nav__item"><a href="../software/updates.html" class="md-nav__link" data-page="software-updates"><span class="md-ellipsis">🔄 Updates</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <!-- Advanced -->
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Advanced</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../advanced/cli.html" class="md-nav__link" data-page="advanced-cli"><span class="md-ellipsis">⌨ CLI</span></a></li>
+                      <li class="md-nav__item"><a href="../advanced/custom-image.html" class="md-nav__link" data-page="advanced-custom"><span class="md-ellipsis">🛠 Custom Image</span></a></li>
+                      <li class="md-nav__item"><a href="../advanced/reset-password.html" class="md-nav__link" data-page="advanced-password"><span class="md-ellipsis">🔑 Password</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <!-- Community -->
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Community</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../community/contributing.html" class="md-nav__link" data-page="community-contributing"><span class="md-ellipsis">🤝 Contribute</span></a></li>
+                      <li class="md-nav__item"><a href="../community/bugs.html" class="md-nav__link" data-page="community-bugs"><span class="md-ellipsis">🐛 Bugs</span></a></li>
+                      <li class="md-nav__item"><a href="../community/links.html" class="md-nav__link" data-page="community-links"><span class="md-ellipsis">🔗 Links</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <!-- Resources -->
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Resources</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../resources/specs.html" class="md-nav__link" data-page="resources-specs"><span class="md-ellipsis">🔧 Specs</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/kernel.html" class="md-nav__link" data-page="resources-kernel"><span class="md-ellipsis">🧠 Kernel</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/cache.html" class="md-nav__link" data-page="resources-cache"><span class="md-ellipsis">💾 Cache</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/download.html" class="md-nav__link" data-page="resources-download"><span class="md-ellipsis">⬇ Download</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Content -->
+      <div class="md-content">
+        <article class="md-content__inner md-typeset">
+
+          <h1>🔧 Hướng dẫn Sau Cài đặt</h1>
+          <p>Sau khi cài đặt BamOS thành công, bạn nên thực hiện một số bước sau để hệ thống hoạt động ổn định và tối ưu nhất.</p>
+
+          <h2>1. Cập nhật hệ thống</h2>
+          <p>Ngay sau khi đăng nhập lần đầu, hãy mở terminal và chạy lệnh cập nhật:</p>
+          <div style="background:#f5f5f5;padding:12px 16px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:14px;overflow-x:auto;margin:12px 0;">
+            <span style="color:#888;"># Cập nhật toàn bộ hệ thống</span><br>
+            <span style="color:#2e7d32;">$</span> ublue-update --force
+          </div>
+          <p>Lệnh này sẽ tự động tải xuống và áp dụng bản cập nhật BamOS mới nhất từ remote image.</p>
+
+          <div class="admonition note">
+            <p class="admonition-title">Ghi chú</p>
+            <p>BamOS sử dụng cơ chế cập nhật atomic image-based. Sau khi cập nhật, bạn cần khởi động lại để chuyển sang deployment mới.</p>
+          </div>
+
+          <h2>2. Cài đặt trình điều khiển (driver)</h2>
+          <p>BamOS tự động nhận diện và cài đặt hầu hết driver. Tuy nhiên, với card đồ họa NVIDIA, bạn cần kích hoạt driver độc quyền:</p>
+          <div style="background:#f5f5f5;padding:12px 16px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:14px;overflow-x:auto;margin:12px 0;">
+            <span style="color:#888;"># Kích hoạt driver NVIDIA</span><br>
+            <span style="color:#2e7d32;">$</span> rpm-ostree override remove mesa-va-driver mesa-vdpau-driver<br>
+            <span style="color:#2e7d32;">$</span> rpm-ostree install akmod-nvidia xorg-x11-drv-nvidia-cuda
+          </div>
+
+          <div class="admonition warning">
+            <p class="admonition-title">Cảnh báo</p>
+            <p>Với laptop hybrid (Intel/NVIDIA Optimus), hãy dùng phiên bản BamOS có NVIDIA tích hợp sẵn thay vì tự cài driver thủ công.</p>
+          </div>
+
+          <h2>3. Cài đặt ứng dụng cơ bản</h2>
+          <p>Dùng GNOME Software (hoặc KDE Discover) để duyệt và cài ứng dụng Flatpak. Một số ứng dụng gợi ý:</p>
+          <ul>
+            <li><strong>Firefox</strong> — Trình duyệt web</li>
+            <li><strong>LibreOffice</strong> — Bộ ứng dụng văn phòng</li>
+            <li><strong>Thunderbird</strong> — Email client</li>
+            <li><strong>GIMP / Inkscape</strong> — Đồ họa</li>
+            <li><strong>VLC</strong> — Xem phim, nghe nhạc</li>
+            <li><strong>Việc làm 🎮</strong> — Steam, Heroic Games Launcher (Flatpak)</li>
+          </ul>
+
+          <h2>4. Cấu hình gõ tiếng Việt</h2>
+          <p>BamOS đã tích hợp sẵn IBus-Bamboo. Bạn chỉ cần bật lên:</p>
+          <ol>
+            <li>Vào <strong>Cài đặt → Bàn phím → Nguồn vào</strong></li>
+            <li>Thêm "Vietnamese (Bamboo)"</li>
+            <li>Sử dụng <kbd>Ctrl</kbd>+<kbd>Space</kbd> để chuyển đổi</li>
+          </ol>
+
+          <h2>5. Kết nối VPN (nếu cần)</h2>
+          <p>Vào <strong>Cài đặt → Mạng → VPN</strong> và thêm cấu hình VPN của bạn. Xem thêm tại trang <a href="../general/vpn.html">🔒 VPN</a>.</p>
+
+          <h2>6. Tinh chỉnh hệ thống</h2>
+          <p>BamOS có nhiều tùy chỉnh sẵn có. Tham khảo thêm tại:</p>
+          <ul>
+            <li><a href="../general/tweaks.html">⚙ Tweaks</a> — Các tinh chỉnh nâng cao</li>
+            <li><a href="../software/center.html">🖥 Software Center</a> — Hướng dẫn quản lý phần mềm</li>
+            <li><a href="../advanced/cli.html">⌨ CLI</a> — Công cụ dòng lệnh BamOS</li>
+          </ul>
+
+          <div class="admonition tip">
+            <p class="admonition-title">Mẹo</p>
+            <p>Bạn có thể dùng <code>bazzite-rollback-helper</code> để kiểm tra và quản lý các deployment nếu cần rollback.</p>
+          </div>
+
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="md-footer">
+    <div class="md-footer-meta">
+      <div class="md-footer-meta__inner md-grid">
+        <div class="md-copyright">
+          <span class="md-copyright__highlight">MIT License © 2026 BamOS Project</span>
+          Built with ❤️ for the Vietnamese Linux community
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+<script src="../js/include.js"></script>
+</body>
+</html></title></h1></h2></p>
+</p></p></p></h2></strong></p>

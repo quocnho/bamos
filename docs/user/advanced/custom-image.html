@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BamOS — Custom Image</title>
+  <link rel="stylesheet" href="../css/fonts.css">
+  <link rel="stylesheet" href="../css/bazzite-main.min.css">
+  <link rel="stylesheet" href="../css/bamos-overrides.css">
+</head>
+<body data-page="advanced-custom">
+<div class="md-container">
+  <header class="md-header">
+    <nav class="md-header__inner md-grid">
+      <a href="../index.html" class="md-header__button md-logo" title="BamOS">
+        <svg viewBox="0 0 512 512" width="32"><rect width="512" height="512" rx="100" fill="var(--md-primary-fg-color)"/><g transform="translate(256,210)" stroke="white" stroke-width="12" stroke-linecap="round" fill="none"><line x1="0" y1="-130" x2="0" y2="130"/><line x1="-113" y1="-65" x2="113" y2="65"/><line x1="-113" y1="65" x2="113" y2="-65"/></g><text x="256" y="380" text-anchor="middle" font-family="Arial" font-size="80" fill="white">Bam</text></svg>
+      </a>
+      <div class="md-header__title"><span class="md-header__topic"><span class="md-ellipsis">BamOS Documentation</span></span></div>
+      <div class="md-header__option">
+        <div class="md-search">
+          <input type="search" class="md-search__input" placeholder="Search..." onkeyup="doSearch(this.value)">
+          <div id="search-results" class="md-search-results"></div>
+        </div>
+      </div>
+      <a href="https://github.com/quocnho/bamos" class="md-source"><svg viewBox="0 0 16 16" width="16"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg> GitHub</a>
+      <label class="md-header__button" for="__drawer">☰</label>
+    </nav>
+  </header>
+  <input type="checkbox" id="__drawer" class="md-toggle" style="display:none">
+  <div class="md-main">
+    <div class="md-main__inner md-grid">
+      <nav class="md-sidebar md-sidebar--primary" id="sidebar">
+        <div class="md-sidebar__scrollwrap">
+          <div class="md-sidebar__inner">
+            <nav class="md-nav md-nav--primary">
+              <ul class="md-nav__list">
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Getting Started</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../index.html" class="md-nav__link" data-page="home"><span class="md-ellipsis">🏠 Home</span></a></li>
+                      <li class="md-nav__item"><a href="../faq.html" class="md-nav__link" data-page="faq"><span class="md-ellipsis">❓ FAQ</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Installation</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../installation/guide.html" class="md-nav__link" data-page="install-guide"><span class="md-ellipsis">📖 Guide</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/post-install.html" class="md-nav__link" data-page="install-post"><span class="md-ellipsis">🔧 Post-Install</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/troubleshoot.html" class="md-nav__link" data-page="install-troubleshoot"><span class="md-ellipsis">🛠 Troubleshoot</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/legacy.html" class="md-nav__link" data-page="install-legacy"><span class="md-ellipsis">💻 Legacy</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/alternative.html" class="md-nav__link" data-page="install-alt"><span class="md-ellipsis">🔄 Alternative</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">General</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../general/editions.html" class="md-nav__link" data-page="general-editions"><span class="md-ellipsis">📋 Editions</span></a></li>
+                      <li class="md-nav__item"><a href="../general/comparison.html" class="md-nav__link" data-page="general-comparison"><span class="md-ellipsis">🔄 Comparison</span></a></li>
+                      <li class="md-nav__item"><a href="../general/tweaks.html" class="md-nav__link" data-page="general-tweaks"><span class="md-ellipsis">⚙ Tweaks</span></a></li>
+                      <li class="md-nav__item"><a href="../general/vpn.html" class="md-nav__link" data-page="general-vpn"><span class="md-ellipsis">🔒 VPN</span></a></li>
+                      <li class="md-nav__item"><a href="../general/uninstalling.html" class="md-nav__link" data-page="general-uninstalling"><span class="md-ellipsis">🗑 Uninstalling</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Gaming</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../gaming/introduction.html" class="md-nav__link" data-page="gaming-intro"><span class="md-ellipsis">🎮 Introduction</span></a></li>
+                      <li class="md-nav__item"><a href="../gaming/launchers.html" class="md-nav__link" data-page="gaming-launchers"><span class="md-ellipsis">🚀 Launchers</span></a></li>
+                      <li class="md-nav__item"><a href="../gaming/launch-options.html" class="md-nav__link" data-page="gaming-options"><span class="md-ellipsis">⚙ Options</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Software</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../software/center.html" class="md-nav__link" data-page="software-center"><span class="md-ellipsis">🖥 Center</span></a></li>
+                      <li class="md-nav__item"><a href="../software/flatpak.html" class="md-nav__link" data-page="software-flatpak"><span class="md-ellipsis">📂 Flatpak</span></a></li>
+                      <li class="md-nav__item"><a href="../software/containers.html" class="md-nav__link" data-page="software-containers"><span class="md-ellipsis">🐳 Containers</span></a></li>
+                      <li class="md-nav__item"><a href="../software/distrobox.html" class="md-nav__link" data-page="software-distrobox"><span class="md-ellipsis">📦 Distrobox</span></a></li>
+                      <li class="md-nav__item"><a href="../software/appimage.html" class="md-nav__link" data-page="software-appimage"><span class="md-ellipsis">🗜 AppImage</span></a></li>
+                      <li class="md-nav__item"><a href="../software/waydroid.html" class="md-nav__link" data-page="software-waydroid"><span class="md-ellipsis">📱 Waydroid</span></a></li>
+                      <li class="md-nav__item"><a href="../software/updates.html" class="md-nav__link" data-page="software-updates"><span class="md-ellipsis">🔄 Updates</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Advanced</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../advanced/cli.html" class="md-nav__link" data-page="advanced-cli"><span class="md-ellipsis">⌨ CLI</span></a></li>
+                      <li class="md-nav__item"><a href="../advanced/custom-image.html" class="md-nav__link md-nav__link--active" data-page="advanced-custom"><span class="md-ellipsis">🛠 Custom Image</span></a></li>
+                      <li class="md-nav__item"><a href="../advanced/reset-password.html" class="md-nav__link" data-page="advanced-password"><span class="md-ellipsis">🔑 Password</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Community</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../community/contributing.html" class="md-nav__link" data-page="community-contributing"><span class="md-ellipsis">🤝 Contribute</span></a></li>
+                      <li class="md-nav__item"><a href="../community/bugs.html" class="md-nav__link" data-page="community-bugs"><span class="md-ellipsis">🐛 Bugs</span></a></li>
+                      <li class="md-nav__item"><a href="../community/links.html" class="md-nav__link" data-page="community-links"><span class="md-ellipsis">🔗 Links</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Resources</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../resources/specs.html" class="md-nav__link" data-page="resources-specs"><span class="md-ellipsis">🔧 Specs</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/kernel.html" class="md-nav__link" data-page="resources-kernel"><span class="md-ellipsis">🧠 Kernel</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/cache.html" class="md-nav__link" data-page="resources-cache"><span class="md-ellipsis">💾 Cache</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/download.html" class="md-nav__link" data-page="resources-download"><span class="md-ellipsis">⬇ Download</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </nav>
+      <div class="md-content">
+        <article class="md-content__inner md-typeset">
+          <h1>🛠 Tự tạo ISO BamOS tùy chỉnh</h1>
+
+          <p>BamOS là một bản phân phối <strong>mã nguồn mở</strong> dựa trên Nix, vì vậy bạn hoàn toàn có thể tự build ISO của riêng mình với những tuỳ chỉnh theo ý muốn. Hướng dẫn này dành cho những người dùng muốn tạo phiên bản BamOS riêng.</p>
+
+          <div class="md-tip">⚠️ <strong>Yêu cầu:</strong> Bạn cần có kiến thức cơ bản về Git, GitHub, Nix và Nix flakes. Một máy tính Linux với ít nhất 8 GB RAM và 40 GB dung lượng trống để build.</div>
+
+          <h2>1. Fork repository BamOS trên GitHub</h2>
+          <p>Đầu tiên, truy cập <a href="https://github.com/quocnho/bamos">github.com/quocnho/bamos</a> và fork repository về tài khoản GitHub của bạn.</p>
+          <div class="md-code"># Clone repository đã fork về máy
+git clone https://github.com/&lt;tên-bạn&gt;/bamos.git
+cd bamos</div>
+
+          <h2>2. Cấu trúc repository</h2>
+          <p>Repository BamOS sử dụng cấu trúc Nix flake tiêu chuẩn. Các tệp và thư mục quan trọng bạn cần biết:</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Tệp / Thư mục</th>
+                <th>Mô tả</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>flake.nix</code></td>
+                <td>Định nghĩa các gói, module, ISO build</td>
+              </tr>
+              <tr>
+                <td><code>iso/</code></td>
+                <td>Cấu hình build ISO cho từng edition</td>
+              </tr>
+              <tr>
+                <td><code>modules/</code></td>
+                <td>NixOS module tùy chỉnh của BamOS</td>
+              </tr>
+              <tr>
+                <td><code>pkgs/</code></td>
+                <td>Các gói phần mềm tùy chỉnh</td>
+              </tr>
+              <tr>
+                <td><code>overlays/</code></td>
+                <td>Overlay cho nixpkgs</td>
+              </tr>
+              <tr>
+                <td><code>profiles/</code></td>
+                <td>Cấu hình profile (Desktop, Gaming, Server)</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2>3. Tuỳ chỉnh flake.nix</h2>
+          <p>Mở tệp <code>flake.nix</code> và sửa đổi các thông số bạn muốn:</p>
+          <div class="md-code">{
+  description = "BamOS — Custom Build";
+
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    bazzite.url = "github:ublue-os/bazzite";
+  };
+
+  outputs = { self, nixpkgs, ... } @ inputs: {
+    # Thêm gói mới của bạn
+    packages.x86_64-linux.my-app = nixpkgs.legacyPackages.x86_64-linux.callPackage ./pkgs/my-app {};
+
+    # Custom ISO
+    iso = import ./iso/custom.nix { inherit inputs; };
+  };
+}</div>
+
+          <h3>Thêm gói mặc định vào ISO</h3>
+          <p>Để thêm một gói vào ISO tùy chỉnh, sửa tệp cấu hình ISO trong thư mục <code>iso/</code>:</p>
+          <div class="md-code">{ config, pkgs, ... }: {
+  # Thêm gói vào system packages
+  environment.systemPackages = with pkgs; [
+    vim
+    git
+    htop
+    btop
+    lazygit  # gói bạn muốn thêm
+  ];
+
+  # Kích hoạt service
+  services.openssh.enable = true;
+}</div>
+
+          <h2>4. Build ISO</h2>
+          <p>Sau khi đã tuỳ chỉnh xong, bạn có thể build ISO với lệnh:</p>
+          <div class="md-code"># Build ISO cho edition Desktop
+nix build .#iso-desktop
+
+# Build ISO cho edition Gaming
+nix build .#iso-gaming
+
+# Build ISO cho edition Server
+nix build .#iso-server
+
+# Build ISO cho edition Minimal
+nix build .#iso-minimal</div>
+          <p>Sau khi build hoàn tất, tệp ISO sẽ nằm trong thư mục <code>result/</code>.</p>
+
+          <div class="md-tip">⏱ <strong>Lưu ý:</strong> Lần build đầu tiên có thể mất rất lâu (30–60 phút) vì Nix phải tải và build tất cả dependencies. Các lần sau sẽ nhanh hơn nhờ cache.</div>
+
+          <h2>5. Ghi ISO vào USB</h2>
+          <p>Sử dụng một trong các công cụ sau để ghi ISO vào USB:</p>
+          <div class="md-code"># Dùng dd (Linux)
+sudo dd if=result/bamos-*.iso of=/dev/sdX bs=4M status=progress
+
+# Dùng rufus (Windows)
+# Dùng balenaEtcher (macOS / Windows / Linux)
+
+# Dùng Fedora Media Writer
+sudo mediawriter --write result/bamos-*.iso</div>
+
+          <h2>6. Đẩy lên GitHub và chia sẻ</h2>
+          <p>Sau khi build thành công, bạn có thể commit và push lên fork của mình, hoặc tạo Pull Request đóng góp lại cho BamOS:</p>
+          <div class="md-code">git add .
+git commit -m "feat: thêm gói my-app vào ISO"
+git push origin main</div>
+
+          <h2>Xử lý lỗi thường gặp</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Lỗi</th>
+                <th>Giải pháp</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>out of memory</code></td>
+                <td>Tăng swap hoặc chạy trên máy có RAM &ge; 8 GB</td>
+              </tr>
+              <tr>
+                <td><code>hash mismatch</code></td>
+                <td>Cập nhật hash với <code>nix flake update</code></td>
+              </tr>
+              <tr>
+                <td><code>build failed</code></td>
+                <td>Kiểm tra lỗi ở log, thường do thiếu dependency</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="md-tip">📖 <strong>Tham khảo thêm:</strong> Đọc hướng dẫn <a href="../community/contributing.html">đóng góp</a> nếu bạn muốn gửi thay đổi về repository chính thức.</div>
+        </article>
+      </div>
+    </div>
+  </div>
+  <footer class="md-footer">
+    <div class="md-footer-meta">
+      <div class="md-footer-meta__inner md-grid">
+        <div class="md-copyright">
+          <span class="md-copyright__highlight">MIT License © 2026 BamOS Project</span>
+          Built with ❤️ for the Vietnamese Linux community
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+<script src="../js/include.js"></script>
+</body>
+</html>
+</title>
+</h1></p></strong></strong></th></code></h2></h3></p></h2></code></strong></h2></h2></code></code></code>

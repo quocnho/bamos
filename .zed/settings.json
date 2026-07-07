@@ -1,0 +1,14 @@
+{
+  "lsp": {
+    "nil": {
+      "binary": {
+        "path": "nil"
+      },
+      "settings": {
+        "formatting": {
+          "command": ["nixpkgs-fmt"]
+        }
+      }
+    }
+  }
+}

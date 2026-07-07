@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BamOS — Distrobox</title>
+  <link rel="stylesheet" href="../css/fonts.css">
+  <link rel="stylesheet" href="../css/bazzite-main.min.css">
+  <link rel="stylesheet" href="../css/bamos-overrides.css">
+</head>
+<body data-page="software-distrobox">
+<div class="md-container">
+  <header class="md-header">
+    <nav class="md-header__inner md-grid">
+      <a href="../index.html" class="md-header__button md-logo" title="BamOS">
+        <svg viewBox="0 0 512 512" width="32"><rect width="512" height="512" rx="100" fill="var(--md-primary-fg-color)"/><g transform="translate(256,210)" stroke="white" stroke-width="12" stroke-linecap="round" fill="none"><line x1="0" y1="-130" x2="0" y2="130"/><line x1="-113" y1="-65" x2="113" y2="65"/><line x1="-113" y1="65" x2="113" y2="-65"/></g><text x="256" y="380" text-anchor="middle" font-family="Arial" font-size="80" fill="white">Bam</text></svg>
+      </a>
+      <div class="md-header__title"><span class="md-header__topic"><span class="md-ellipsis">BamOS Documentation</span></span></div>
+      <div class="md-header__option">
+        <div class="md-search">
+          <input type="search" class="md-search__input" placeholder="Search..." onkeyup="doSearch(this.value)">
+          <div id="search-results" class="md-search-results"></div>
+        </div>
+      </div>
+      <a href="https://github.com/quocnho/bamos" class="md-source"><svg viewBox="0 0 16 16" width="16"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg> GitHub</a>
+      <label class="md-header__button" for="__drawer">☰</label>
+    </nav>
+  </header>
+  <input type="checkbox" id="__drawer" class="md-toggle" style="display:none">
+  <div class="md-main">
+    <div class="md-main__inner md-grid">
+      <nav class="md-sidebar md-sidebar--primary" id="sidebar">
+        <div class="md-sidebar__scrollwrap">
+          <div class="md-sidebar__inner">
+            <nav class="md-nav md-nav--primary">
+              <ul class="md-nav__list">
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Getting Started</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../index.html" class="md-nav__link" data-page="home"><span class="md-ellipsis">🏠 Home</span></a></li>
+                      <li class="md-nav__item"><a href="../faq.html" class="md-nav__link" data-page="faq"><span class="md-ellipsis">❓ FAQ</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Installation</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../installation/guide.html" class="md-nav__link" data-page="install-guide"><span class="md-ellipsis">📖 Guide</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/post-install.html" class="md-nav__link" data-page="install-post"><span class="md-ellipsis">🔧 Post-Install</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/troubleshoot.html" class="md-nav__link" data-page="install-troubleshoot"><span class="md-ellipsis">🛠 Troubleshoot</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/legacy.html" class="md-nav__link" data-page="install-legacy"><span class="md-ellipsis">💻 Legacy</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/alternative.html" class="md-nav__link" data-page="install-alt"><span class="md-ellipsis">🔄 Alternative</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">General</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../general/editions.html" class="md-nav__link" data-page="general-editions"><span class="md-ellipsis">📋 Editions</span></a></li>
+                      <li class="md-nav__item"><a href="../general/comparison.html" class="md-nav__link" data-page="general-comparison"><span class="md-ellipsis">🔄 Comparison</span></a></li>
+                      <li class="md-nav__item"><a href="../general/tweaks.html" class="md-nav__link" data-page="general-tweaks"><span class="md-ellipsis">⚙ Tweaks</span></a></li>
+                      <li class="md-nav__item"><a href="../general/vpn.html" class="md-nav__link" data-page="general-vpn"><span class="md-ellipsis">🔒 VPN</span></a></li>
+                      <li class="md-nav__item"><a href="../general/uninstalling.html" class="md-nav__link" data-page="general-uninstalling"><span class="md-ellipsis">🗑 Uninstalling</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Gaming</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../gaming/introduction.html" class="md-nav__link" data-page="gaming-intro"><span class="md-ellipsis">🎮 Introduction</span></a></li>
+                      <li class="md-nav__item"><a href="../gaming/launchers.html" class="md-nav__link" data-page="gaming-launchers"><span class="md-ellipsis">🚀 Launchers</span></a></li>
+                      <li class="md-nav__item"><a href="../gaming/launch-options.html" class="md-nav__link" data-page="gaming-options"><span class="md-ellipsis">⚙ Options</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Software</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../software/center.html" class="md-nav__link" data-page="software-center"><span class="md-ellipsis">🖥 Center</span></a></li>
+                      <li class="md-nav__item"><a href="../software/flatpak.html" class="md-nav__link" data-page="software-flatpak"><span class="md-ellipsis">📂 Flatpak</span></a></li>
+                      <li class="md-nav__item"><a href="../software/containers.html" class="md-nav__link" data-page="software-containers"><span class="md-ellipsis">🐳 Containers</span></a></li>
+                      <li class="md-nav__item"><a href="../software/distrobox.html" class="md-nav__link md-nav__link--active" data-page="software-distrobox"><span class="md-ellipsis">📦 Distrobox</span></a></li>
+                      <li class="md-nav__item"><a href="../software/appimage.html" class="md-nav__link" data-page="software-appimage"><span class="md-ellipsis">🗜 AppImage</span></a></li>
+                      <li class="md-nav__item"><a href="../software/waydroid.html" class="md-nav__link" data-page="software-waydroid"><span class="md-ellipsis">📱 Waydroid</span></a></li>
+                      <li class="md-nav__item"><a href="../software/updates.html" class="md-nav__link" data-page="software-updates"><span class="md-ellipsis">🔄 Updates</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Advanced</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../advanced/cli.html" class="md-nav__link" data-page="advanced-cli"><span class="md-ellipsis">⌨ CLI</span></a></li>
+                      <li class="md-nav__item"><a href="../advanced/custom-image.html" class="md-nav__link" data-page="advanced-custom"><span class="md-ellipsis">🛠 Custom Image</span></a></li>
+                      <li class="md-nav__item"><a href="../advanced/reset-password.html" class="md-nav__link" data-page="advanced-password"><span class="md-ellipsis">🔑 Password</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Community</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../community/contributing.html" class="md-nav__link" data-page="community-contributing"><span class="md-ellipsis">🤝 Contribute</span></a></li>
+                      <li class="md-nav__item"><a href="../community/bugs.html" class="md-nav__link" data-page="community-bugs"><span class="md-ellipsis">🐛 Bugs</span></a></li>
+                      <li class="md-nav__item"><a href="../community/links.html" class="md-nav__link" data-page="community-links"><span class="md-ellipsis">🔗 Links</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Resources</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../resources/specs.html" class="md-nav__link" data-page="resources-specs"><span class="md-ellipsis">🔧 Specs</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/kernel.html" class="md-nav__link" data-page="resources-kernel"><span class="md-ellipsis">🧠 Kernel</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/cache.html" class="md-nav__link" data-page="resources-cache"><span class="md-ellipsis">💾 Cache</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/download.html" class="md-nav__link" data-page="resources-download"><span class="md-ellipsis">⬇ Download</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </nav>
+      <div class="md-content">
+        <article class="md-content__inner md-typeset">
+
+          <h1>📦 Distrobox</h1>
+
+          <p><strong>Distrobox</strong> là công cụ mạnh mẽ giúp bạn tạo và quản lý các container chạy bản phân phối Linux khác nhau, tích hợp sâu với hệ thống BamOS host. Đây là giải pháp lý tưởng để dùng các gói phần mềm từ nhiều distro khác nhau.</p>
+
+          <div class="md-video">
+            <img src="../assets/images/placeholder.svg" alt="Distrobox" style="max-width:100%;border-radius:8px">
+            <p>📹 Hướng dẫn sử dụng Distrobox trên BamOS (sẽ thêm sau)</p>
+          </div>
+
+          <div class="admonition tip">
+            <p class="admonition-title">💡 Distrobox hoạt động thế nào?</p>
+            <p>Distrobox dùng Podman hoặc Docker để tạo container, sau đó tự động tích hợp container với host — chia sẻ thư mục home, thiết bị, âm thanh, GPU và D-Bus. Ứng dụng cài trong container xuất hiện ngay trong menu ứng dụng!</p>
+          </div>
+
+          <h2 id="install">📥 Cài đặt</h2>
+          <p>Distrobox được cài đặt sẵn trên BamOS. Nếu chưa có, bạn có thể cài bằng:</p>
+
+          <pre><code># Cài Distrobox
+sudo rpm-ostree install distrobox
+
+# Hoặc qua pip
+pip install distrobox
+</code></pre>
+
+          <h2 id="create">🆕 Tạo Container</h2>
+
+          <h3>Tạo container Ubuntu</h3>
+          <pre><code># Tạo container tên "ubuntu"
+distrobox create --name ubuntu --image ubuntu:latest
+
+# Vào container
+distrobox enter ubuntu
+
+# Cài gói (bên trong container)
+sudo apt update
+sudo apt install git curl build-essential
+</code></pre>
+
+          <h3>Tạo container Arch Linux</h3>
+          <pre><code># Tạo container Arch
+distrobox create --name arch --image archlinux:latest
+
+# Vào container Arch
+distrobox enter arch
+
+# Cài gói qua pacman
+sudo pacman -Sy base-devel git
+# Cài yay (AUR helper)
+git clone https://aur.archlinux.org/yay.git
+cd yay && makepkg -si
+</code></pre>
+
+          <h3>Tạo container Fedora</h3>
+          <pre><code># Tạo container Fedora
+distrobox create --name fedora --image fedora:39
+
+# Vào container
+distrobox enter fedora
+sudo dnf install neovim htop
+</code></pre>
+
+          <h2 id="commands">⌨ Các lệnh Distrobox</h2>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Lệnh</th>
+                <th>Mô tả</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>distrobox create --name &lt;tên&gt; --image &lt;image&gt;</code></td>
+                <td>Tạo container mới</td>
+              </tr>
+              <tr>
+                <td><code>distrobox enter &lt;tên&gt;</code></td>
+                <td>Vào container</td>
+              </tr>
+              <tr>
+                <td><code>distrobox list</code></td>
+                <td>Liệt kê các container</td>
+              </tr>
+              <tr>
+                <td><code>distrobox stop &lt;tên&gt;</code></td>
+                <td>Dừng container</td>
+              </tr>
+              <tr>
+                <td><code>distrobox rm &lt;tên&gt;</code></td>
+                <td>Xóa container</td>
+              </tr>
+              <tr>
+                <td><code>distrobox update</code></td>
+                <td>Cập nhật container</td>
+              </tr>
+              <tr>
+                <td><code>distrobox upgrade --all</code></td>
+                <td>Cập nhật tất cả containers</td>
+              </tr>
+              <tr>
+                <td><code>distrobox init</code></td>
+                <td>Khởi tạo container hiện tại</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2 id="integration">🔄 Tích hợp với Host</h2>
+
+          <p>Sau khi tạo container và cài ứng dụng bên trong, Distrobox tự động tạo file <code>.desktop</code> cho từng ứng dụng, giúp chúng xuất hiện trong menu ứng dụng của BamOS.</p>
+
+          <pre><code># Cài GIMP trong container Ubuntu
+distrobox enter ubuntu
+sudo apt install gimp
+# Sau khi cài, GIMP sẽ xuất hiện trong menu ứng dụng!
+
+# Chạy lệnh từ host vào container
+distrobox enter ubuntu -- gimp
+</code></pre>
+
+          <div class="admonition note">
+            <p class="admonition-title">📝 Mẹo: Export ứng dụng</p>
+            <p>Mặc định Distrobox tự động export ứng dụng. Bạn có thể kiểm soát bằng lệnh: <code>distrobox-export --app &lt;tên&gt;</code> hoặc <code>distrobox-export --bin /usr/bin/htop --export-path ~/.local/bin</code></p>
+          </div>
+
+          <h2 id="shared">📂 Chia sẻ dữ liệu</h2>
+
+          <p>Container Distrobox tự động mount thư mục <code>$HOME</code> của bạn vào container. Điều này có nghĩa là:</p>
+          <ul>
+            <li>📁 Tất cả file trong <code>~/Documents</code>, <code>~/Downloads</code>,... đều có sẵn trong container</li>
+            <li>⚙ Cấu hình <code>~/.ssh</code>, <code>~/.gitconfig</code> được dùng chung</li>
+            <li>🖥 GPU và thiết bị USB được chia sẻ tự động</li>
+          </ul>
+
+          <h2 id="use-cases">🎯 Các trường hợp sử dụng</h2>
+
+          <h3>1. Phát triển phần mềm</h3>
+          <pre><code># Tạo container cho từng dự án
+distrobox create --name project-a --image fedora:39
+distrobox enter project-a
+# Cài dependencies cho dự án A
+sudo dnf install golang postgresql-devel
+</code></pre>
+
+          <h3>2. Dùng gói AUR</h3>
+          <pre><code>distrobox enter arch
+yay -S google-chrome visual-studio-code-bin
+</code></pre>
+
+          <h3>3. Thử nghiệm distro</h3>
+          <pre><code># Thử nghiệm OpenSUSE
+distrobox create --name opensuse --image opensuse/tumbleweed
+distrobox enter opensuse
+sudo zypper install neofetch
+neofetch
+</code></pre>
+
+          <h2 id="advanced">⚙ Tùy chỉnh nâng cao</h2>
+
+          <pre><code># Tạo container với các tùy chọn
+distrobox create \
+  --name dev \
+  --image fedora:39 \
+  --additional-flags "--security-opt label=disable" \
+  --home ~/distrobox/dev-home
+
+# Export script ra host
+distrobox-enter dev -- htop
+
+# Chạy ứng dụng GUI từ container
+distrobox enter dev -- code
+</code></pre>
+
+          <div class="admonition warning">
+            <p class="admonition-title">⚠️ Lưu ý</p>
+            <p>Không nên dùng Distrobox để chạy các ứng dụng cần hiệu năng đồ họa cao (game 3D). Hãy dùng Flatpak hoặc RPM-OSTree cho các trường hợp đó.</p>
+          </div>
+
+          <h2 id="troubleshoot">🛠 Xử lý sự cố</h2>
+
+          <div class="admonition note">
+            <p class="admonition-title">📝 Container không vào được</p>
+          </div>
+          <pre><code># Kiểm tra trạng thái
+podman ps -a
+
+# Khởi động lại container
+distrobox stop ubuntu
+distrobox enter ubuntu
+
+# Xem log
+podman logs ubuntu
+</code></pre>
+
+          <p>👉 Xem thêm: <a href="../software/containers.html">Containers</a> | <a href="../software/flatpak.html">Flatpak</a></p>
+
+        </article>
+      </div>
+    </div>
+  </div>
+  <footer class="md-footer">
+    <div class="md-footer-meta">
+      <div class="md-footer-meta__inner md-grid">
+        <div class="md-copyright">
+          <span class="md-copyright__highlight">MIT License © 2026 BamOS Project</span>
+          Built with ❤️ for the Vietnamese Linux community
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+<script src="../js/include.js"></script>
+</body>
+</html>
+</title></h1></p></code></code></code></code></th></code></td></code></code></code></p></code></p>

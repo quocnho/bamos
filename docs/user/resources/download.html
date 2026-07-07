@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BamOS — Download</title>
+  <link rel="stylesheet" href="../css/fonts.css">
+  <link rel="stylesheet" href="../css/bazzite-main.min.css">
+  <link rel="stylesheet" href="../css/bamos-overrides.css">
+</head>
+<body data-page="resources-download">
+<div class="md-container">
+  <header class="md-header">
+    <nav class="md-header__inner md-grid">
+      <a href="../index.html" class="md-header__button md-logo" title="BamOS">
+        <svg viewBox="0 0 512 512" width="32"><rect width="512" height="512" rx="100" fill="var(--md-primary-fg-color)"/><g transform="translate(256,210)" stroke="white" stroke-width="12" stroke-linecap="round" fill="none"><line x1="0" y1="-130" x2="0" y2="130"/><line x1="-113" y1="-65" x2="113" y2="65"/><line x1="-113" y1="65" x2="113" y2="-65"/></g><text x="256" y="380" text-anchor="middle" font-family="Arial" font-size="80" fill="white">Bam</text></svg>
+      </a>
+      <div class="md-header__title"><span class="md-header__topic"><span class="md-ellipsis">BamOS Documentation</span></span></div>
+      <div class="md-header__option">
+        <div class="md-search">
+          <input type="search" class="md-search__input" placeholder="Search..." onkeyup="doSearch(this.value)">
+          <div id="search-results" class="md-search-results"></div>
+        </div>
+      </div>
+      <a href="https://github.com/quocnho/bamos" class="md-source"><svg viewBox="0 0 16 16" width="16"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg> GitHub</a>
+      <label class="md-header__button" for="__drawer">☰</label>
+    </nav>
+  </header>
+  <input type="checkbox" id="__drawer" class="md-toggle" style="display:none">
+  <div class="md-main">
+    <div class="md-main__inner md-grid">
+      <nav class="md-sidebar md-sidebar--primary" id="sidebar">
+        <div class="md-sidebar__scrollwrap">
+          <div class="md-sidebar__inner">
+            <nav class="md-nav md-nav--primary">
+              <ul class="md-nav__list">
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Getting Started</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../index.html" class="md-nav__link" data-page="home"><span class="md-ellipsis">🏠 Home</span></a></li>
+                      <li class="md-nav__item"><a href="../faq.html" class="md-nav__link" data-page="faq"><span class="md-ellipsis">❓ FAQ</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Installation</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../installation/guide.html" class="md-nav__link" data-page="install-guide"><span class="md-ellipsis">📖 Guide</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/post-install.html" class="md-nav__link" data-page="install-post"><span class="md-ellipsis">🔧 Post-Install</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/troubleshoot.html" class="md-nav__link" data-page="install-troubleshoot"><span class="md-ellipsis">🛠 Troubleshoot</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/legacy.html" class="md-nav__link" data-page="install-legacy"><span class="md-ellipsis">💻 Legacy</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/alternative.html" class="md-nav__link" data-page="install-alt"><span class="md-ellipsis">🔄 Alternative</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">General</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../general/editions.html" class="md-nav__link" data-page="general-editions"><span class="md-ellipsis">📋 Editions</span></a></li>
+                      <li class="md-nav__item"><a href="../general/comparison.html" class="md-nav__link" data-page="general-comparison"><span class="md-ellipsis">🔄 Comparison</span></a></li>
+                      <li class="md-nav__item"><a href="../general/tweaks.html" class="md-nav__link" data-page="general-tweaks"><span class="md-ellipsis">⚙ Tweaks</span></a></li>
+                      <li class="md-nav__item"><a href="../general/vpn.html" class="md-nav__link" data-page="general-vpn"><span class="md-ellipsis">🔒 VPN</span></a></li>
+                      <li class="md-nav__item"><a href="../general/uninstalling.html" class="md-nav__link" data-page="general-uninstalling"><span class="md-ellipsis">🗑 Uninstalling</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Gaming</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../gaming/introduction.html" class="md-nav__link" data-page="gaming-intro"><span class="md-ellipsis">🎮 Introduction</span></a></li>
+                      <li class="md-nav__item"><a href="../gaming/launchers.html" class="md-nav__link" data-page="gaming-launchers"><span class="md-ellipsis">🚀 Launchers</span></a></li>
+                      <li class="md-nav__item"><a href="../gaming/launch-options.html" class="md-nav__link" data-page="gaming-options"><span class="md-ellipsis">⚙ Options</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Software</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../software/center.html" class="md-nav__link" data-page="software-center"><span class="md-ellipsis">🖥 Center</span></a></li>
+                      <li class="md-nav__item"><a href="../software/flatpak.html" class="md-nav__link" data-page="software-flatpak"><span class="md-ellipsis">📂 Flatpak</span></a></li>
+                      <li class="md-nav__item"><a href="../software/containers.html" class="md-nav__link" data-page="software-containers"><span class="md-ellipsis">🐳 Containers</span></a></li>
+                      <li class="md-nav__item"><a href="../software/distrobox.html" class="md-nav__link" data-page="software-distrobox"><span class="md-ellipsis">📦 Distrobox</span></a></li>
+                      <li class="md-nav__item"><a href="../software/appimage.html" class="md-nav__link" data-page="software-appimage"><span class="md-ellipsis">🗜 AppImage</span></a></li>
+                      <li class="md-nav__item"><a href="../software/waydroid.html" class="md-nav__link" data-page="software-waydroid"><span class="md-ellipsis">📱 Waydroid</span></a></li>
+                      <li class="md-nav__item"><a href="../software/updates.html" class="md-nav__link" data-page="software-updates"><span class="md-ellipsis">🔄 Updates</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Advanced</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../advanced/cli.html" class="md-nav__link" data-page="advanced-cli"><span class="md-ellipsis">⌨ CLI</span></a></li>
+                      <li class="md-nav__item"><a href="../advanced/custom-image.html" class="md-nav__link" data-page="advanced-custom"><span class="md-ellipsis">🛠 Custom Image</span></a></li>
+                      <li class="md-nav__item"><a href="../advanced/reset-password.html" class="md-nav__link" data-page="advanced-password"><span class="md-ellipsis">🔑 Password</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Community</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../community/contributing.html" class="md-nav__link" data-page="community-contributing"><span class="md-ellipsis">🤝 Contribute</span></a></li>
+                      <li class="md-nav__item"><a href="../community/bugs.html" class="md-nav__link" data-page="community-bugs"><span class="md-ellipsis">🐛 Bugs</span></a></li>
+                      <li class="md-nav__item"><a href="../community/links.html" class="md-nav__link" data-page="community-links"><span class="md-ellipsis">🔗 Links</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Resources</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../resources/specs.html" class="md-nav__link" data-page="resources-specs"><span class="md-ellipsis">🔧 Specs</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/kernel.html" class="md-nav__link" data-page="resources-kernel"><span class="md-ellipsis">🧠 Kernel</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/cache.html" class="md-nav__link" data-page="resources-cache"><span class="md-ellipsis">💾 Cache</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/download.html" class="md-nav__link md-nav__link--active" data-page="resources-download"><span class="md-ellipsis">⬇ Download</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </nav>
+      <div class="md-content">
+        <article class="md-content__inner md-typeset">
+          <h1>⬇ Tải xuống BamOS</h1>
+
+          <p>Chào mừng bạn đến với trang tải xuống BamOS! Dưới đây là các phiên bản ISO mới nhất. Hãy chọn edition phù hợp với nhu cầu của bạn.</p>
+
+          <div class="md-hero" style="background:linear-gradient(135deg,var(--md-primary-fg-color),var(--md-primary-fg-color--light));color:#fff;padding:24px;border-radius:8px;margin-bottom:24px;">
+            <div>
+              <h2 style="color:#fff;border:none;margin:0 0 8px;">🚀 BamOS v0.4.0</h2>
+              <p style="margin:0;opacity:0.9;">Bản phát hành mới nhất với nhiều cải tiến về hiệu năng và ổn định.</p>
+            </div>
+          </div>
+
+          <h2>Phiên bản tải xuống</h2>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Edition</th>
+                <th>Mô tả</th>
+                <th>Kích thước</th>
+                <th>Kernel</th>
+                <th>Tải xuống</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>🖥 Desktop</td>
+                <td>GNOME + COSMIC, đầy đủ ứng dụng văn phòng</td>
+                <td>~3.2 GB</td>
+                <td>Zen 6.8</td>
+                <td><a href="https://github.com/quocnho/bamos/releases/latest" class="bamos-download-btn" style="padding:6px 16px;font-size:13px;">⬇ ISO</a></td>
+              </tr>
+              <tr>
+                <td>🎮 Gaming</td>
+                <td>Steam, Lutris, GameScope, MangoHud</td>
+                <td>~5.8 GB</td>
+                <td>Zen 6.8 + XanMod</td>
+                <td><a href="https://github.com/quocnho/bamos/releases/latest" class="bamos-download-btn" style="padding:6px 16px;font-size:13px;">⬇ ISO</a></td>
+              </tr>
+              <tr>
+                <td>🗄 Server</td>
+                <td>Tối giản, Docker, Nginx, OpenSSH</td>
+                <td>~1.5 GB</td>
+                <td>LTS 6.6</td>
+                <td><a href="https://github.com/quocnho/bamos/releases/latest" class="bamos-download-btn" style="padding:6px 16px;font-size:13px;">⬇ ISO</a></td>
+              </tr>
+              <tr>
+                <td>⚡ Minimal</td>
+                <td>Chỉ CLI, base system, không DE</td>
+                <td>~1.2 GB</td>
+                <td>LTS 6.6</td>
+                <td><a href="https://github.com/quocnho/bamos/releases/latest" class="bamos-download-btn" style="padding:6px 16px;font-size:13px;">⬇ ISO</a></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="bamos-download-btn" style="background:#00c853;font-size:16px;padding:14px 28px;">
+            <a href="https://github.com/quocnho/bamos/releases/latest" style="color:#fff;text-decoration:none;display:flex;align-items:center;gap:10px;">
+              ⬇ Tải BamOS mới nhất (v0.4.0)
+            </a>
+          </div>
+
+          <h2>Checksum & Xác minh</h2>
+          <p>Sau khi tải ISO, bạn nên xác minh tính toàn vẹn của tệp bằng checksum để đảm bảo tệp không bị hỏng hoặc bị thay đổi.</p>
+
+          <h3>SHA256 Checksums</h3>
+          <div class="md-code"># Desktop
+sha256sum bamos-desktop-0.4.0.iso
+# f7c3b... (xem trên trang releases)
+
+# Gaming
+sha256sum bamos-gaming-0.4.0.iso
+# a1b2c... (xem trên trang releases)
+
+# Server
+sha256sum bamos-server-0.4.0.iso
+# d4e5f... (xem trên trang releases)
+
+# Minimal
+sha256sum bamos-minimal-0.4.0.iso
+# g6h7i... (xem trên trang releases)</div>
+
+          <h3>Cách xác minh trên Linux / macOS</h3>
+          <div class="md-code"># Tải file checksum
+curl -LO https://github.com/quocnho/bamos/releases/latest/download/sha256sums.txt
+
+# Xác minh
+sha256sum -c sha256sums.txt --ignore-missing
+
+# Kết quả: bamos-desktop-0.4.0.iso: OK</div>
+
+          <h3>Cách xác minh trên Windows (PowerShell)</h3>
+          <div class="md-code"># Tính checksum
+Get-FileHash .\bamos-desktop-0.4.0.iso -Algorithm SHA256
+
+# So sánh với giá trị trên trang releases</div>
+
+          <div class="md-tip">🔒 <strong>Tại sao cần xác minh?</strong> Checksum giúp bạn phát hiện tệp bị lỗi trong quá trình tải hoặc bị can thiệp trái phép. Luôn xác minh trước khi cài đặt!</div>
+
+          <h2>Hướng dẫn ghi ISO vào USB</h2>
+          <p>Sau khi tải ISO, bạn cần ghi vào USB để boot và cài đặt:</p>
+
+          <h3>Linux</h3>
+          <div class="md-code"># Xác định ổ USB (ví dụ /dev/sdb)
+lsblk
+
+# Ghi ISO
+sudo dd if=bamos-desktop-0.4.0.iso of=/dev/sdX bs=4M status=progress
+
+# Hoặc dùng balenaEtcher
+sudo balena-etcher-electron</div>
+
+          <h3>Windows</h3>
+          <ul>
+            <li><a href="https://rufus.ie/">Rufus</a> — Công cụ ghi ISO nhanh và dễ dàng</li>
+            <li><a href="https://www.balena.io/etcher/">balenaEtcher</a> — Đa nền tảng, đơn giản</li>
+            <li><a href="https://sourceforge.net/projects/ventoy/">Ventoy</a> — Boot nhiều ISO từ một USB</li>
+          </ul>
+
+          <h3>macOS</h3>
+          <div class="md-code"># Ghi ISO
+sudo dd if=bamos-desktop-0.4.0.iso of=/dev/rdisk2 bs=4M status=progress
+
+# Hoặc dùng balenaEtcher</div>
+
+          <h2>Phát hành trước đây</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Phiên bản</th>
+                <th>Ngày phát hành</th>
+                <th>Ghi chú</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>v0.4.0</td>
+                <td>2026-06 (hiện tại)</td>
+                <td>Cải thiện hiệu năng, thêm Waydroid</td>
+              </tr>
+              <tr>
+                <td>v0.3.0</td>
+                <td>2026-03</td>
+                <td>Thêm Gaming Edition, XanMod kernel</td>
+              </tr>
+              <tr>
+                <td>v0.2.0</td>
+                <td>2025-12</td>
+                <td>Thêm Server & Minimal Edition</td>
+              </tr>
+              <tr>
+                <td>v0.1.0</td>
+                <td>2025-09</td>
+                <td>Bản phát hành đầu tiên (Desktop)</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p>Tất cả các phiên bản đều có sẵn trên <a href="https://github.com/quocnho/bamos/releases">GitHub Releases</a>.</p>
+
+          <div class="md-tip">📖 <strong>Tiếp theo:</strong> Xem hướng dẫn <a href="../installation/guide.html">Cài đặt BamOS</a> để biết các bước chi tiết.</div>
+        </article>
+      </div>
+    </div>
+  </div>
+  <footer class="md-footer">
+    <div class="md-footer-meta">
+      <div class="md-footer-meta__inner md-grid">
+        <div class="md-copyright">
+          <span class="md-copyright__highlight">MIT License © 2026 BamOS Project</span>
+          Built with ❤️ for the Vietnamese Linux community
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+<script src="../js/include.js"></script>
+</body>
+</html>

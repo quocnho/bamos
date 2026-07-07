@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BamOS — Updates</title>
+  <link rel="stylesheet" href="../css/fonts.css">
+  <link rel="stylesheet" href="../css/bazzite-main.min.css">
+  <link rel="stylesheet" href="../css/bamos-overrides.css">
+</head>
+<body data-page="software-updates">
+<div class="md-container">
+  <header class="md-header">
+    <nav class="md-header__inner md-grid">
+      <a href="../index.html" class="md-header__button md-logo" title="BamOS">
+        <svg viewBox="0 0 512 512" width="32"><rect width="512" height="512" rx="100" fill="var(--md-primary-fg-color)"/><g transform="translate(256,210)" stroke="white" stroke-width="12" stroke-linecap="round" fill="none"><line x1="0" y1="-130" x2="0" y2="130"/><line x1="-113" y1="-65" x2="113" y2="65"/><line x1="-113" y1="65" x2="113" y2="-65"/></g><text x="256" y="380" text-anchor="middle" font-family="Arial" font-size="80" fill="white">Bam</text></svg>
+      </a>
+      <div class="md-header__title"><span class="md-header__topic"><span class="md-ellipsis">BamOS Documentation</span></span></div>
+      <div class="md-header__option">
+        <div class="md-search">
+          <input type="search" class="md-search__input" placeholder="Search..." onkeyup="doSearch(this.value)">
+          <div id="search-results" class="md-search-results"></div>
+        </div>
+      </div>
+      <a href="https://github.com/quocnho/bamos" class="md-source"><svg viewBox="0 0 16 16" width="16"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg> GitHub</a>
+      <label class="md-header__button" for="__drawer">☰</label>
+    </nav>
+  </header>
+  <input type="checkbox" id="__drawer" class="md-toggle" style="display:none">
+  <div class="md-main">
+    <div class="md-main__inner md-grid">
+      <nav class="md-sidebar md-sidebar--primary" id="sidebar">
+        <div class="md-sidebar__scrollwrap">
+          <div class="md-sidebar__inner">
+            <nav class="md-nav md-nav--primary">
+              <ul class="md-nav__list">
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Getting Started</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../index.html" class="md-nav__link" data-page="home"><span class="md-ellipsis">🏠 Home</span></a></li>
+                      <li class="md-nav__item"><a href="../faq.html" class="md-nav__link" data-page="faq"><span class="md-ellipsis">❓ FAQ</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Installation</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../installation/guide.html" class="md-nav__link" data-page="install-guide"><span class="md-ellipsis">📖 Guide</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/post-install.html" class="md-nav__link" data-page="install-post"><span class="md-ellipsis">🔧 Post-Install</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/troubleshoot.html" class="md-nav__link" data-page="install-troubleshoot"><span class="md-ellipsis">🛠 Troubleshoot</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/legacy.html" class="md-nav__link" data-page="install-legacy"><span class="md-ellipsis">💻 Legacy</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/alternative.html" class="md-nav__link" data-page="install-alt"><span class="md-ellipsis">🔄 Alternative</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">General</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../general/editions.html" class="md-nav__link" data-page="general-editions"><span class="md-ellipsis">📋 Editions</span></a></li>
+                      <li class="md-nav__item"><a href="../general/comparison.html" class="md-nav__link" data-page="general-comparison"><span class="md-ellipsis">🔄 Comparison</span></a></li>
+                      <li class="md-nav__item"><a href="../general/tweaks.html" class="md-nav__link" data-page="general-tweaks"><span class="md-ellipsis">⚙ Tweaks</span></a></li>
+                      <li class="md-nav__item"><a href="../general/vpn.html" class="md-nav__link" data-page="general-vpn"><span class="md-ellipsis">🔒 VPN</span></a></li>
+                      <li class="md-nav__item"><a href="../general/uninstalling.html" class="md-nav__link" data-page="general-uninstalling"><span class="md-ellipsis">🗑 Uninstalling</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Gaming</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../gaming/introduction.html" class="md-nav__link" data-page="gaming-intro"><span class="md-ellipsis">🎮 Introduction</span></a></li>
+                      <li class="md-nav__item"><a href="../gaming/launchers.html" class="md-nav__link" data-page="gaming-launchers"><span class="md-ellipsis">🚀 Launchers</span></a></li>
+                      <li class="md-nav__item"><a href="../gaming/launch-options.html" class="md-nav__link" data-page="gaming-options"><span class="md-ellipsis">⚙ Options</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Software</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../software/center.html" class="md-nav__link" data-page="software-center"><span class="md-ellipsis">🖥 Center</span></a></li>
+                      <li class="md-nav__item"><a href="../software/flatpak.html" class="md-nav__link" data-page="software-flatpak"><span class="md-ellipsis">📂 Flatpak</span></a></li>
+                      <li class="md-nav__item"><a href="../software/containers.html" class="md-nav__link" data-page="software-containers"><span class="md-ellipsis">🐳 Containers</span></a></li>
+                      <li class="md-nav__item"><a href="../software/distrobox.html" class="md-nav__link" data-page="software-distrobox"><span class="md-ellipsis">📦 Distrobox</span></a></li>
+                      <li class="md-nav__item"><a href="../software/appimage.html" class="md-nav__link" data-page="software-appimage"><span class="md-ellipsis">🗜 AppImage</span></a></li>
+                      <li class="md-nav__item"><a href="../software/waydroid.html" class="md-nav__link" data-page="software-waydroid"><span class="md-ellipsis">📱 Waydroid</span></a></li>
+                      <li class="md-nav__item"><a href="../software/updates.html" class="md-nav__link md-nav__link--active" data-page="software-updates"><span class="md-ellipsis">🔄 Updates</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Advanced</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../advanced/cli.html" class="md-nav__link" data-page="advanced-cli"><span class="md-ellipsis">⌨ CLI</span></a></li>
+                      <li class="md-nav__item"><a href="../advanced/custom-image.html" class="md-nav__link" data-page="advanced-custom"><span class="md-ellipsis">🛠 Custom Image</span></a></li>
+                      <li class="md-nav__item"><a href="../advanced/reset-password.html" class="md-nav__link" data-page="advanced-password"><span class="md-ellipsis">🔑 Password</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Community</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../community/contributing.html" class="md-nav__link" data-page="community-contributing"><span class="md-ellipsis">🤝 Contribute</span></a></li>
+                      <li class="md-nav__item"><a href="../community/bugs.html" class="md-nav__link" data-page="community-bugs"><span class="md-ellipsis">🐛 Bugs</span></a></li>
+                      <li class="md-nav__item"><a href="../community/links.html" class="md-nav__link" data-page="community-links"><span class="md-ellipsis">🔗 Links</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Resources</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../resources/specs.html" class="md-nav__link" data-page="resources-specs"><span class="md-ellipsis">🔧 Specs</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/kernel.html" class="md-nav__link" data-page="resources-kernel"><span class="md-ellipsis">🧠 Kernel</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/cache.html" class="md-nav__link" data-page="resources-cache"><span class="md-ellipsis">💾 Cache</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/download.html" class="md-nav__link" data-page="resources-download"><span class="md-ellipsis">⬇ Download</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </nav>
+      <div class="md-content">
+        <article class="md-content__inner md-typeset">
+
+          <h1>🔄 Cập nhật và Rollback trên BamOS</h1>
+
+          <p>BamOS sử dụng công nghệ <strong>OCI images</strong> và <strong>RPM-OSTree</strong> cho phép cập nhật nguyên tử (atomic updates) và rollback dễ dàng. Hệ thống luôn an toàn — nếu bản cập nhật có lỗi, bạn có thể quay lại phiên bản trước chỉ với một lệnh.</p>
+
+          <div class="md-video">
+            <img src="../assets/images/placeholder.svg" alt="Updates" style="max-width:100%;border-radius:8px">
+            <p>📹 Hướng dẫn cập nhật và rollback trên BamOS (sẽ thêm sau)</p>
+          </div>
+
+          <div class="admonition tip">
+            <p class="admonition-title">💡 Cập nhật nguyên tử là gì?</p>
+            <p>Không giống các bản phân phối truyền thống (cập nhật từng gói một), BamOS tải toàn bộ hệ thống mới dưới dạng image. Quá trình cập nhật diễn ra trong nền, không ảnh hưởng đến hệ thống đang chạy. Bạn chỉ cần khởi động lại để áp dụng.</p>
+          </div>
+
+          <h2 id="update-system">🔄 Cập nhật hệ thống</h2>
+
+          <h3>Cách 1: Dùng Software Center</h3>
+          <p>Cả GNOME Software và KDE Discover đều hiển thị thông báo khi có cập nhật. Bạn chỉ cần nhấn "Update All".</p>
+
+          <h3>Cách 2: Dùng CLI (Khuyên dùng)</h3>
+          <pre><code># Kiểm tra cập nhật
+sudo bazzite-rollback-helper update
+
+# Hoặc dùng rpm-ostree trực tiếp
+rpm-ostree update
+
+# Sau khi tải xong, khởi động lại
+systemctl reboot
+</code></pre>
+
+          <h3>Cập nhật Flatpak</h3>
+          <pre><code># Cập nhật tất cả Flatpak
+flatpak update
+
+# Cập nhật một ứng dụng cụ thể
+flatpak update org.gimp.GIMP
+</code></pre>
+
+          <h3>Cập nhật Distrobox containers</h3>
+          <pre><code># Cập nhật một container
+distrobox upgrade ubuntu
+
+# Cập nhật tất cả containers
+distrobox upgrade --all
+</code></pre>
+
+          <h2 id="check-status">🔍 Kiểm tra trạng thái</h2>
+
+          <pre><code># Xem thông tin deployment hiện tại
+rpm-ostree status
+
+# Kết quả sẽ hiển thị:
+# ● bamos:fedora-39 (deployed)
+#   Layer packages: steam lutris
+#   Initramfs: 2026-01-15
+#   Timestamp: 2026-01-15T12:00:00Z
+
+# Xem version BamOS
+cat /etc/os-release | grep VERSION
+</code></pre>
+
+          <h2 id="rollback">⏪ Rollback (Quay lại phiên bản cũ)</h2>
+
+          <p>Một trong những tính năng mạnh nhất của BamOS là khả năng rollback dễ dàng. RPM-OSTree giữ lại các deployment trước đó, cho phép bạn quay lại bất kỳ lúc nào.</p>
+
+          <pre><code># Xem danh sách các phiên bản đã cài
+rpm-ostree status
+
+# Rollback về phiên bản trước
+sudo rpm-ostree rollback
+
+# Hoặc chọn index cụ thể
+sudo rpm-ostree deploy 1
+
+# Khởi động lại để áp dụng
+systemctl reboot
+</code></pre>
+
+          <div class="admonition warning">
+            <p class="admonition-title">⚠️ Quan trọng</p>
+            <p>Sau khi rollback, mọi gói đã layer (cài qua <code>rpm-ostree install</code>) sẽ được giữ nguyên. Tuy nhiên, các thay đổi trong <code>/etc</code> có thể cần cấu hình lại nếu rollback xuống phiên bản cũ hơn nhiều.</p>
+          </div>
+
+          <h2 id="deploy">📦 Quản lý Deployment</h2>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Lệnh</th>
+                <th>Mô tả</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>rpm-ostree status</code></td>
+                <td>Xem danh sách deployments</td>
+              </tr>
+              <tr>
+                <td><code>rpm-ostree rollback</code></td>
+                <td>Quay về deployment trước</td>
+              </tr>
+              <tr>
+                <td><code>rpm-ostree deploy &lt;index&gt;</code></td>
+                <td>Chuyển sang deployment theo index</td>
+              </tr>
+              <tr>
+                <td><code>rpm-ostree cleanup -m</code></td>
+                <td>Xóa các deployment cũ (trừ 2 bản gần nhất)</td>
+              </tr>
+              <tr>
+                <td><code>rpm-ostree upgrade</code></td>
+                <td>Cập nhật lên bản mới nhất</td>
+              </tr>
+              <tr>
+                <td><code>rpm-ostree reload</code></td>
+                <td>Tải lại cấu hình (không cần reboot)</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2 id="layer-packages">📥 Quản lý gói đã layer</h2>
+
+          <pre><code># Xem danh sách gói đã layer
+rpm-ostree status
+
+# Thêm gói
+sudo rpm-ostree install htop
+
+# Gỡ gói
+sudo rpm-ostree uninstall htop
+
+# Cập nhật gói đã layer (tự động khi update)
+</code></pre>
+
+          <div class="admonition note">
+            <p class="admonition-title">📝 Layer packages vs Flatpak</p>
+            <p><strong>Layer packages</strong> (<code>rpm-ostree install</code>) được cài vào hệ thống gốc và yêu cầu reboot. <strong>Flatpak</strong> không cần reboot. Nguyên tắc: ưu tiên Flatpak, chỉ layer package khi thực sự cần.</p>
+          </div>
+
+          <h2 id="bazzite-helper">🛠 Bazzite Rollback Helper</h2>
+          <p>BamOS tích hợp <strong>bazzite-rollback-helper</strong> — công cụ giúp quản lý cập nhật và rollback dễ dàng hơn:</p>
+
+          <pre><code># Kiểm tra và cập nhật
+sudo bazzite-rollback-helper update
+
+# Rollback
+sudo bazzite-rollback-helper rollback
+
+# Kiểm tra trạng thái
+sudo bazzite-rollback-helper status
+</code></pre>
+
+          <h2 id="boot-menu">🖥 Chọn phiên bản khi khởi động</h2>
+          <p>Khi khởi động, bạn có thể chọn phiên bản BamOS muốn dùng từ GRUB boot menu:</p>
+          <ol>
+            <li>Khi thấy màn hình GRUB, nhấn <kbd>Esc</kbd> hoặc giữ <kbd>Shift</kbd></li>
+            <li>Chọn "BamOS (previous deployment)"</li>
+            <li>Nhấn Enter để boot vào phiên bản cũ</li>
+          </ol>
+
+          <h2 id="troubleshoot">🛠 Xử lý sự cố</h2>
+
+          <div class="admonition note">
+            <p class="admonition-title">📝 Cập nhật thất bại</p>
+          </div>
+          <pre><code># Kiểm tra log
+sudo journalctl -u rpm-ostreed -f
+
+# Thử lại với verbose
+rpm-ostree update --verbose
+
+# Rollback và thử lại sau
+sudo rpm-ostree rollback
+</code></pre>
+
+          <div class="admonition warning">
+            <p class="admonition-title">⚠️ Dung lượng ổ cứng</p>
+            <p>Mỗi deployment RPM-OSTree chiếm khoảng 5-10GB. Nếu ổ cứng đầy, hãy dọn dẹp: <code>sudo rpm-ostree cleanup -m</code>.</p>
+          </div>
+
+          <p>👉 Xem thêm: <a href="../software/flatpak.html">Flatpak</a> | <a href="../advanced/custom-image.html">Custom Image</a></p>
+
+        </article>
+      </div>
+    </div>
+  </div>
+  <footer class="md-footer">
+    <div class="md-footer-meta">
+      <div class="md-footer-meta__inner md-grid">
+        <div class="md-copyright">
+          <span class="md-copyright__highlight">MIT License © 2026 BamOS Project</span>
+          Built with ❤️ for the Vietnamese Linux community
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+<script src="../js/include.js"></script>
+</body>
+</html>
+</title>

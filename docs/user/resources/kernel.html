@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BamOS — Kernel</title>
+  <link rel="stylesheet" href="../css/fonts.css">
+  <link rel="stylesheet" href="../css/bazzite-main.min.css">
+  <link rel="stylesheet" href="../css/bamos-overrides.css">
+</head>
+<body data-page="resources-kernel">
+<div class="md-container">
+  <header class="md-header">
+    <nav class="md-header__inner md-grid">
+      <a href="../index.html" class="md-header__button md-logo" title="BamOS">
+        <svg viewBox="0 0 512 512" width="32"><rect width="512" height="512" rx="100" fill="var(--md-primary-fg-color)"/><g transform="translate(256,210)" stroke="white" stroke-width="12" stroke-linecap="round" fill="none"><line x1="0" y1="-130" x2="0" y2="130"/><line x1="-113" y1="-65" x2="113" y2="65"/><line x1="-113" y1="65" x2="113" y2="-65"/></g><text x="256" y="380" text-anchor="middle" font-family="Arial" font-size="80" fill="white">Bam</text></svg>
+      </a>
+      <div class="md-header__title"><span class="md-header__topic"><span class="md-ellipsis">BamOS Documentation</span></span></div>
+      <div class="md-header__option">
+        <div class="md-search">
+          <input type="search" class="md-search__input" placeholder="Search..." onkeyup="doSearch(this.value)">
+          <div id="search-results" class="md-search-results"></div>
+        </div>
+      </div>
+      <a href="https://github.com/quocnho/bamos" class="md-source"><svg viewBox="0 0 16 16" width="16"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg> GitHub</a>
+      <label class="md-header__button" for="__drawer">☰</label>
+    </nav>
+  </header>
+  <input type="checkbox" id="__drawer" class="md-toggle" style="display:none">
+  <div class="md-main">
+    <div class="md-main__inner md-grid">
+      <nav class="md-sidebar md-sidebar--primary" id="sidebar">
+        <div class="md-sidebar__scrollwrap">
+          <div class="md-sidebar__inner">
+            <nav class="md-nav md-nav--primary">
+              <ul class="md-nav__list">
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Getting Started</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../index.html" class="md-nav__link" data-page="home"><span class="md-ellipsis">🏠 Home</span></a></li>
+                      <li class="md-nav__item"><a href="../faq.html" class="md-nav__link" data-page="faq"><span class="md-ellipsis">❓ FAQ</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Installation</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../installation/guide.html" class="md-nav__link" data-page="install-guide"><span class="md-ellipsis">📖 Guide</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/post-install.html" class="md-nav__link" data-page="install-post"><span class="md-ellipsis">🔧 Post-Install</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/troubleshoot.html" class="md-nav__link" data-page="install-troubleshoot"><span class="md-ellipsis">🛠 Troubleshoot</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/legacy.html" class="md-nav__link" data-page="install-legacy"><span class="md-ellipsis">💻 Legacy</span></a></li>
+                      <li class="md-nav__item"><a href="../installation/alternative.html" class="md-nav__link" data-page="install-alt"><span class="md-ellipsis">🔄 Alternative</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">General</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../general/editions.html" class="md-nav__link" data-page="general-editions"><span class="md-ellipsis">📋 Editions</span></a></li>
+                      <li class="md-nav__item"><a href="../general/comparison.html" class="md-nav__link" data-page="general-comparison"><span class="md-ellipsis">🔄 Comparison</span></a></li>
+                      <li class="md-nav__item"><a href="../general/tweaks.html" class="md-nav__link" data-page="general-tweaks"><span class="md-ellipsis">⚙ Tweaks</span></a></li>
+                      <li class="md-nav__item"><a href="../general/vpn.html" class="md-nav__link" data-page="general-vpn"><span class="md-ellipsis">🔒 VPN</span></a></li>
+                      <li class="md-nav__item"><a href="../general/uninstalling.html" class="md-nav__link" data-page="general-uninstalling"><span class="md-ellipsis">🗑 Uninstalling</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Gaming</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../gaming/introduction.html" class="md-nav__link" data-page="gaming-intro"><span class="md-ellipsis">🎮 Introduction</span></a></li>
+                      <li class="md-nav__item"><a href="../gaming/launchers.html" class="md-nav__link" data-page="gaming-launchers"><span class="md-ellipsis">🚀 Launchers</span></a></li>
+                      <li class="md-nav__item"><a href="../gaming/launch-options.html" class="md-nav__link" data-page="gaming-options"><span class="md-ellipsis">⚙ Options</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Software</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../software/center.html" class="md-nav__link" data-page="software-center"><span class="md-ellipsis">🖥 Center</span></a></li>
+                      <li class="md-nav__item"><a href="../software/flatpak.html" class="md-nav__link" data-page="software-flatpak"><span class="md-ellipsis">📂 Flatpak</span></a></li>
+                      <li class="md-nav__item"><a href="../software/containers.html" class="md-nav__link" data-page="software-containers"><span class="md-ellipsis">🐳 Containers</span></a></li>
+                      <li class="md-nav__item"><a href="../software/distrobox.html" class="md-nav__link" data-page="software-distrobox"><span class="md-ellipsis">📦 Distrobox</span></a></li>
+                      <li class="md-nav__item"><a href="../software/appimage.html" class="md-nav__link" data-page="software-appimage"><span class="md-ellipsis">🗜 AppImage</span></a></li>
+                      <li class="md-nav__item"><a href="../software/waydroid.html" class="md-nav__link" data-page="software-waydroid"><span class="md-ellipsis">📱 Waydroid</span></a></li>
+                      <li class="md-nav__item"><a href="../software/updates.html" class="md-nav__link" data-page="software-updates"><span class="md-ellipsis">🔄 Updates</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Advanced</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../advanced/cli.html" class="md-nav__link" data-page="advanced-cli"><span class="md-ellipsis">⌨ CLI</span></a></li>
+                      <li class="md-nav__item"><a href="../advanced/custom-image.html" class="md-nav__link" data-page="advanced-custom"><span class="md-ellipsis">🛠 Custom Image</span></a></li>
+                      <li class="md-nav__item"><a href="../advanced/reset-password.html" class="md-nav__link" data-page="advanced-password"><span class="md-ellipsis">🔑 Password</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Community</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../community/contributing.html" class="md-nav__link" data-page="community-contributing"><span class="md-ellipsis">🤝 Contribute</span></a></li>
+                      <li class="md-nav__item"><a href="../community/bugs.html" class="md-nav__link" data-page="community-bugs"><span class="md-ellipsis">🐛 Bugs</span></a></li>
+                      <li class="md-nav__item"><a href="../community/links.html" class="md-nav__link" data-page="community-links"><span class="md-ellipsis">🔗 Links</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+                <li class="md-nav__item md-nav__item--section">
+                  <span class="md-nav__link md-nav__container"><span class="md-ellipsis">Resources</span></span>
+                  <nav class="md-nav">
+                    <ul class="md-nav__list">
+                      <li class="md-nav__item"><a href="../resources/specs.html" class="md-nav__link" data-page="resources-specs"><span class="md-ellipsis">🔧 Specs</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/kernel.html" class="md-nav__link md-nav__link--active" data-page="resources-kernel"><span class="md-ellipsis">🧠 Kernel</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/cache.html" class="md-nav__link" data-page="resources-cache"><span class="md-ellipsis">💾 Cache</span></a></li>
+                      <li class="md-nav__item"><a href="../resources/download.html" class="md-nav__link" data-page="resources-download"><span class="md-ellipsis">⬇ Download</span></a></li>
+                    </ul>
+                  </nav>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </nav>
+      <div class="md-content">
+        <article class="md-content__inner md-typeset">
+          <h1>🧠 Kernel trên BamOS</h1>
+
+          <p>BamOS sử dụng <strong>chiến lược đa kernel (dual-kernel)</strong> để tối ưu cho từng mục đích sử dụng. Tuỳ theo phiên bản, bạn sẽ được cài sẵn kernel phù hợp nhất.</p>
+
+          <div class="md-tip">💡 <strong>Bạn muốn biết mình đang dùng kernel nào?</strong> Gõ lệnh: <code>uname -r</code></div>
+
+          <h2>Chiến lược kernel của BamOS</h2>
+          <p>BamOS cung cấp 3 loại kernel chính, mỗi loại phục vụ một mục đích khác nhau:</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Kernel</th>
+                <th>Sử dụng cho</th>
+                <th>Đặc điểm</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>🐢 LTS (Long-Term Support)</td>
+                <td>ISO cài đặt, Server, Minimal</td>
+                <td>Ổn định nhất, ít thay đổi, hỗ trợ lâu dài</td>
+              </tr>
+              <tr>
+                <td>⚡ Zen Kernel</td>
+                <td>Desktop, Gaming (mặc định)</td>
+                <td>Cân bằng hiệu năng và ổn định, tối ưu cho desktop</td>
+              </tr>
+              <tr>
+                <td>🚀 XanMod Kernel</td>
+                <td>Gaming (tùy chọn)</td>
+                <td>Tối đa hiệu năng chơi game, giảm latency</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2>🐢 LTS Kernel — Cho ổn định tối đa</h2>
+          <p>Kernel LTS (Long-Term Support) được sử dụng trong ISO cài đặt BamOS để đảm bảo khả năng tương thích cao nhất với nhiều loại phần cứng khác nhau. Nó cũng là kernel mặc định cho Server và Minimal edition.</p>
+          <h3>Đặc điểm</h3>
+          <ul>
+            <li>Dựa trên nhánh kernel ổn định nhất của Linux</li>
+            <li>Được bảo trì trong nhiều năm với các bản vá bảo mật</li>
+            <li>Ít thay đổi đột ngột, giảm nguy cơ hỏng tương thích</li>
+            <li>Phù hợp với máy chủ, máy tính văn phòng, người dùng cần ổn định</li>
+          </ul>
+
+          <h2>⚡ Zen Kernel — Cân bằng cho Desktop</h2>
+          <p>Zen Kernel là kernel mặc định cho BamOS Desktop và Gaming Edition. Nó được tối ưu cho hiệu năng sử dụng hàng ngày, mang lại trải nghiệm mượt mà hơn so với kernel chính thống.</p>
+          <h3>Đặc điểm</h3>
+          <ul>
+            <li>Dựa trên nhánh kernel mainline mới nhất</li>
+            <li>Tối ưu scheduler cho tương tác desktop (MuQSS)</li>
+            <li>Giảm độ trễ (latency) cho ứng dụng thời gian thực</li>
+            <li>Cải thiện thời gian phản hồi khi đa nhiệm</li>
+            <li>Tích hợp sẵn nhiều driver và tính năng mới</li>
+          </ul>
+          <div class="md-code"># Kiểm tra phiên bản Zen Kernel
+uname -r
+# Kết quả sẽ có "zen" ở cuối, vd: 6.8.7-zen1-1-zen</div>
+
+          <h2>🚀 XanMod Kernel — Tối đa cho Gaming</h2>
+          <p>XanMod Kernel là kernel hiệu năng cao dành riêng cho gaming, có sẵn trên BamOS Gaming Edition. Nó được tinh chỉnh để giảm tối đa độ trễ và tăng throughput.</p>
+          <h3>Đặc điểm</h3>
+          <ul>
+            <li>Tối ưu cho gaming với độ trễ cực thấp</li>
+            <li>Sử dụng BORE scheduler thay vì CFS</li>
+            <li>Tích hợp các bản vá từ Liquorix</li>
+            <li>Hỗ trợ TCP BBR cho kết nối mạng nhanh hơn</li>
+            <li>Các bản vá âm thanh cho trải nghiệm chơi game tốt hơn</li>
+          </ul>
+          <h3>Cài đặt XanMod trên Gaming Edition</h3>
+          <div class="md-code"># Cài đặt XanMod Kernel
+sudo nix profile install nixpkgs#linux_xanmod
+
+# Kiểm tra sau khi cài
+uname -r
+# Kết quả: 6.8.7-xanmod1</div>
+
+          <h2>So sánh chi tiết</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Tiêu chí</th>
+                <th>LTS</th>
+                <th>Zen</th>
+                <th>XanMod</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Ổn định</td>
+                <td>⭐⭐⭐⭐⭐</td>
+                <td>⭐⭐⭐⭐</td>
+                <td>⭐⭐⭐</td>
+              </tr>
+              <tr>
+                <td>Hiệu năng Desktop</td>
+                <td>⭐⭐⭐</td>
+                <td>⭐⭐⭐⭐⭐</td>
+                <td>⭐⭐⭐⭐⭐</td>
+              </tr>
+              <tr>
+                <td>Hiệu năng Gaming</td>
+                <td>⭐⭐</td>
+                <td>⭐⭐⭐⭐</td>
+                <td>⭐⭐⭐⭐⭐</td>
+              </tr>
+              <tr>
+                <td>Độ trễ (latency)</td>
+                <td>Thấp</td>
+                <td>Rất thấp</td>
+                <td>Cực thấp</td>
+              </tr>
+              <tr>
+                <td>Tương thích phần cứng</td>
+                <td>Rất cao</td>
+                <td>Cao</td>
+                <td>Trung bình</td>
+              </tr>
+              <tr>
+                <td>Tần suất cập nhật</td>
+                <td>Thấp (vá bảo mật)</td>
+                <td>Cao (theo mainline)</td>
+                <td>Cao (theo mainline)</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2>Chuyển đổi kernel</h2>
+          <p>Bạn có thể chuyển đổi kernel bất kỳ lúc nào:</p>
+          <div class="md-code"># Chuyển sang Zen
+sudo nix profile install nixpkgs#linux_zen
+
+# Chuyển sang LTS
+sudo nix profile install nixpkgs#linux_lts
+
+# Chuyển sang XanMod
+sudo nix profile install nixpkgs#linux_xanmod</div>
+          <p>Sau khi cài đặt, khởi động lại máy và chọn kernel mới trong GRUB.</p>
+
+          <div class="md-tip">⚠️ <strong>Lưu ý:</strong> Khi chuyển kernel, một số driver hoặc module có thể không tương thích. Luôn giữ lại kernel cũ trong GRUB để rollback nếu cần.</div>
+
+          <h2>Kernel parameters</h2>
+          <p>Bạn có thể chỉnh sửa kernel parameters khi boot để gỡ rối hoặc tối ưu:</p>
+          <div class="md-code"># Tham số thường dùng:
+nomodeset       # Bỏ qua driver GPU (khi màn hình đen)
+mitigations=off # Tắt các bản vá bảo mật CPU (tăng hiệu năng)
+acpi=off        # Tắt ACPI (khi không boot được)
+quiet           # Ẩn log khi boot
+systemd.debug-shell=1  # Mở shell debug sớm</div>
+
+          <div class="md-tip">📖 <strong>Xem thêm:</strong> Trang <a href="../general/editions.html">Editions</a> để biết edition nào dùng kernel nào.</div>
+        </article>
+      </div>
+    </div>
+  </div>
+  <footer class="md-footer">
+    <div class="md-footer-meta">
+      <div class="md-footer-meta__inner md-grid">
+        <div class="md-copyright">
+          <span class="md-copyright__highlight">MIT License © 2026 BamOS Project</span>
+          Built with ❤️ for the Vietnamese Linux community
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+<script src="../js/include.js"></script>
+</body>
+</html>

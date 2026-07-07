@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5277C3"/>
+      <stop offset="100%" style="stop-color:#7EB4F8"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="100" fill="url(#bg)"/>
+  <g transform="translate(256,210)" stroke="white" stroke-width="16" stroke-linecap="round" fill="none">
+    <line x1="0" y1="-130" x2="0" y2="130"/>
+    <line x1="-113" y1="-65" x2="113" y2="65"/>
+    <line x1="-113" y1="65" x2="113" y2="-65"/>
+  </g>
+  <text x="256" y="400" text-anchor="middle" font-family="Arial" font-size="90" font-weight="bold" fill="white">BamOS</text>
+</svg>

@@ -1,0 +1,61 @@
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Editor
+.vscode/
+.idea/
+*.sublime-*
+
+# Nix build artifacts
+result
+result-*
+/iso/
+/tmp/
+*.qcow2
+nixos.qcow2
+
+# Nix development
+.direnv/
+.devenv/
+
+# Environment
+.env
+.env.local
+.env.*.local
+*.env
+
+# Dependencies (non-Nix)
+node_modules/
+vendor/
+.pnpm-store/
+target/
+__pycache__/
+*.pyc
+.venv/
+
+# Build artifacts (non-Nix)
+dist/
+build/
+out/
+*.o
+*.so
+*.dylib
+*.dll
+
+# Coverage
+coverage/
+*.lcov
+*.profraw
+
+# Secrets
+*.pem
+*.key
+credentials.json
+service-account.json
+
+# Project specific
+.nixos-version
