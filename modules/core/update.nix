@@ -80,8 +80,8 @@ let
               NEW_VERSIONS=$(echo "$CHANGELOG_DATA" | grep -E '^## \[' | sed 's/## \[\([^]]*\)\].*/\1/')
               for ver in $NEW_VERSIONS; do
                 if [ "$(printf '%s\n%s' "$LOCAL_VERSION" "$ver" | sort -V | tail -1)" = "$ver" ] && [ "$LOCAL_VERSION" != "$ver" ]; then
-                  CHANGES=$(echo "$CHANGELOG_DATA" | awk -v v="## [$ver]" '
-                    $0 ~ v {found=1; next}
+                  CHANGES=$(echo "$CHANGELOG_DATA" | awk -v ver="$ver" '
+                    index($0, "## [" ver "]") == 1 {found=1; next}
                     found && /^## \[/ {exit}
                     found && /^- / {print substr($0,3)}
                     found && /^### / {print}

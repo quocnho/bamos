@@ -387,14 +387,14 @@ case "${1:-help}" in
         if [ "$(printf '%s\n%s' "$LOCAL_VERSION" "$ver" | sort -V | tail -1)" = "$ver" ] && [ "$LOCAL_VERSION" != "$ver" ]; then
           echo ""
           echo "═══ v$ver ═══"
-          echo "$CHANGELOG_DATA" | awk -v v="## [$ver]" '
-            $0 ~ v {found=1; next}
+          echo "$CHANGELOG_DATA" | awk -v ver="$ver" '
+            index($0, "## [" ver "]") == 1 {found=1; next}
             found && /^## \[/ {exit}
             found {print}
           ' | head -20
           CHANGELOG_TEXT="${CHANGELOG_TEXT}BamOS $ver
-$(echo "$CHANGELOG_DATA" | awk -v v="## [$ver]" '
-  $0 ~ v {found=1; next}
+$(echo "$CHANGELOG_DATA" | awk -v ver="$ver" '
+  index($0, "## [" ver "]") == 1 {found=1; next}
   found && /^## \[/ {exit}
   found {print}
 ' | head -15)
@@ -572,8 +572,8 @@ $(echo "$CHANGELOG_DATA" | awk -v v="## [$ver]" '
         found=true
         echo ""
         echo "=== New in $ver ==="
-        echo "$remote" | awk -v v="## [$ver]" '
-          $0 ~ v {found=1; next}
+        echo "$remote" | awk -v ver="$ver" '
+          index($0, "## [" ver "]") == 1 {found=1; next}
           found && /^## \[/ {exit}
           found {print}
         ' | head -20
