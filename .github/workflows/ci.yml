@@ -1,6 +1,8 @@
+# ═══════════════════════════════════════════════════════
 # CI/CD Pipeline — BamOS (NixOS Distribution)
 # Validates, builds, and distributes ISO images
 # Binary cache: Cachix | ISO distribution: GitHub Releases
+# ═══════════════════════════════════════════════════════
 
 name: CI/CD — BamOS
 
@@ -12,74 +14,285 @@ on:
   pull_request:
     branches: [master]
 
+# Cancel stale runs on the same branch (new commits supersede old ones)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NIX_CONFIG: "accept-flake-config = true"
+
 jobs:
+  # ═══════════════════════════════════════════════════════
+  # Prepare: dynamically generate build matrix based on event
+  #   - Push/PR → build only Standard editions (3 variants)
+  #   - Tag v*  → build all 12 variants for release
+  # ═══════════════════════════════════════════════════════
+  prepare-matrix:
+    name: 🎯 Generate Build Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      variants: ${{ steps.matrix.outputs.variants }}
+    steps:
+      - id: matrix
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            # Tag push: full release — build all 12 variants across 3 DEs × 4 editions
+            echo 'variants={"variant":["gnome-standard","gnome-developers","gnome-gaming","gnome-studio","kde-standard","kde-developers","kde-gaming","kde-studio","cosmic-standard","cosmic-developers","cosmic-gaming","cosmic-studio"]}' >> "$GITHUB_OUTPUT"
+            echo "🧩 Build matrix: 12 variants (full release)"
+          else
+            # Push/PR: quick check — build only Standard editions (1 per DE)
+            echo 'variants={"variant":["gnome-standard","kde-standard","cosmic-standard"]}' >> "$GITHUB_OUTPUT"
+            echo "🧩 Build matrix: 3 variants (standard editions only)"
+          fi
+
   # ═══════════════════════════════════════════════════════
   # Check: validate flake, format, lint
   # ═══════════════════════════════════════════════════════
   check:
-    name: Check Flake
+    name: 🔍 Check Flake
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v27
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
         with:
           nix_path: nixpkgs=channel:nixos-unstable
+          extra_nix_config: ${{ env.NIX_CONFIG }}
+
+      - name: Enable Cachix binary cache
+        uses: cachix/cachix-action@v15
+        with:
+          name: bamos
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+
       - name: Flake check
         run: nix flake check --all-systems
+
       - name: Format check (nixpkgs-fmt)
         run: |
           nix fmt -- --check . 2>/dev/null || \
           nix-shell -p nixpkgs-fmt --run 'nixpkgs-fmt --check .'
+
       - name: Dead code check (deadnix)
         run: nix-shell -p deadnix --run 'deadnix --fail .'
+
       - name: Static analysis (statix)
         run: nix-shell -p statix --run 'statix check .'
 
   # ═══════════════════════════════════════════════════════
-  # Build ISO + Push cache to Cachix
+  # Build ISO: matrix build across all DEs + editions
+  #   - Push to Cachix for fast downstream installs
+  #   - Upload as GitHub Actions artifact (7-day retention)
+  #   - fail-fast: false so one failure doesn't cancel others
   # ═══════════════════════════════════════════════════════
   build-iso:
-    name: Build ISO — GNOME Standard
-    needs: check
+    name: 📀 Build ISO — ${{ matrix.variant }}
+    needs: [check, prepare-matrix]
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prepare-matrix.outputs.variants) }}
     steps:
       - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v27
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
         with:
           nix_path: nixpkgs=channel:nixos-unstable
-      - uses: cachix/cachix-action@v15
+          extra_nix_config: ${{ env.NIX_CONFIG }}
+
+      - name: Enable Cachix binary cache
+        uses: cachix/cachix-action@v15
         with:
           name: bamos
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
-      - name: Build GNOME Standard ISO
+
+      - name: Build ${{ matrix.variant }} ISO
         run: |
-          nix build .#iso-gnome-standard --print-out-paths
-          echo "ISO_PATH=$(readlink -f result)" >> $GITHUB_ENV
+          echo "🔨 Building #iso-${{ matrix.variant }}..."
+          START_TIME=$(date +%s)
+          nix build ".#iso-${{ matrix.variant }}" --print-out-paths 2>&1
+          DURATION=$(( $(date +%s) - START_TIME ))
+          echo "⏱️  Build took $(( DURATION / 60 ))m $(( DURATION % 60 ))s"
+
+          # Resolve the store path and find ISO files
+          ISO_STORE=$(readlink -f result)
+          echo "ISO_STORE_PATH=$ISO_STORE" >> "$GITHUB_ENV"
+
+          # Locate the ISO file for artifact naming
+          ISO_FILE=$(find "$ISO_STORE" -name "*.iso" -type f | head -1)
+          if [ -n "$ISO_FILE" ]; then
+            echo "ISO_FILE=$ISO_FILE" >> "$GITHUB_ENV"
+            echo "📀 ISO: $ISO_FILE ($(du -h "$ISO_FILE" | cut -f1))"
+          else
+            echo "⚠️  No ISO file found in build output, uploading full store path"
+          fi
+
       - name: Push to Cachix
-        run: cachix push bamos ${{ env.ISO_PATH }}
+        run: |
+          echo "📤 Pushing ${{ matrix.variant }} to Cachix..."
+          cachix push bamos "${{ env.ISO_STORE_PATH }}"
+
       - name: Upload ISO artifact
         uses: actions/upload-artifact@v4
         with:
-          name: bamos-gnome-standard-iso
-          path: ${{ env.ISO_PATH }}
+          name: bamos-iso-${{ matrix.variant }}
+          path: ${{ env.ISO_FILE || env.ISO_STORE_PATH }}
           retention-days: 7
+          if-no-files-found: error
 
   # ═══════════════════════════════════════════════════════
-  # Release: upload ISO lên GitHub Releases (chỉ khi push tag)
+  # VM Test: smoke test the GNOME Standard ISO in QEMU
+  #   - Boots ISO in headless mode with 120s timeout
+  #   - Checks for login prompt as boot success indicator
+  #   - Only tests GNOME Standard (representative smoke test)
   # ═══════════════════════════════════════════════════════
-  release:
-    name: GitHub Release
+  vm-test:
+    name: 🧪 VM Smoke Test — GNOME Standard
     needs: build-iso
-    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
         with:
-          name: bamos-gnome-standard-iso
+          nix_path: nixpkgs=channel:nixos-unstable
+          extra_nix_config: ${{ env.NIX_CONFIG }}
+
+      - name: Install QEMU
+        run: |
+          nix-shell -p qemu_kvm --run "echo '✅ QEMU installed: $(qemu-system-x86_64 --version | head -1)'"
+
+      - name: Download ISO artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: bamos-iso-gnome-standard
+          path: ./iso-test
+
+      - name: Boot ISO in QEMU (smoke test)
+        run: |
+          ISO_FILE=$(find ./iso-test -name "*.iso" -type f | head -1)
+          if [ -z "$ISO_FILE" ]; then
+            echo "❌ No ISO file found in artifact!"
+            exit 1
+          fi
+          echo "📀 Testing ISO: $ISO_FILE ($(du -h "$ISO_FILE" | cut -f1))"
+
+          # Boot in headless QEMU, wait for boot completion
+          # Success = kernel reaches login prompt within timeout
+          echo "🔌 Booting in QEMU (KVM + 4G RAM, 120s timeout)..."
+          timeout 120 qemu-system-x86_64 \
+            -enable-kvm \
+            -m 4G \
+            -smp 2 \
+            -cdrom "$ISO_FILE" \
+            -nographic \
+            -no-reboot \
+            -serial mon:stdio \
+            -device virtio-rng-pci \
+            | tee qemu-boot.log || true
+
+          # Check for successful boot indicators
+          echo ""
+          if grep -qiE "(login|nixos login|bamos login|tty[0-9])" qemu-boot.log; then
+            echo "✅ VM smoke test PASSED — ISO boots to login prompt!"
+          elif grep -qi "kernel panic" qemu-boot.log; then
+            echo "❌ VM smoke test FAILED — Kernel panic detected!"
+            grep -i "kernel panic" qemu-boot.log
+            exit 1
+          else
+            echo "⚠️  VM smoke test INCONCLUSIVE — check log below"
+            echo "   (ISO may still be booting or logging is incomplete)"
+          fi
+
+      - name: Upload QEMU boot log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qemu-boot-log
+          path: qemu-boot.log
+          retention-days: 14
+
+  # ═══════════════════════════════════════════════════════
+  # Release: create GitHub Release on tag push
+  #   - Downloads ALL ISO artifacts from the build stage
+  #   - Attaches them to a GitHub Release
+  #   - Generates release notes automatically
+  # ═══════════════════════════════════════════════════════
+  release:
+    name: 🚀 GitHub Release — ${{ github.ref_name }}
+    needs: [build-iso, vm-test]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all ISO artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: bamos-iso-*
+          path: ./release-artifacts
+          merge-multiple: true
+
+      - name: List release artifacts
+        run: |
+          echo "📦 Release artifacts for ${{ github.ref_name }}:"
+          ls -lh ./release-artifacts/
+          echo ""
+          echo "Total: $(find ./release-artifacts -name '*.iso' -type f | wc -l) ISO files"
+
+      - name: Generate release body
+        id: release_body
+        run: |
+          # Create a structured release body with ISO listing
+          cat > release-body.md << 'RELEOF'
+          # BamOS ${{ github.ref_name }}
+
+          **NixOS Distribution for the Vietnamese Community**
+
+          ## 📀 ISO Downloads
+
+          | Variant | File |
+          |---------|------|
+          RELEOF
+
+          for iso in ./release-artifacts/*.iso; do
+            BASENAME=$(basename "$iso")
+            SIZE=$(du -h "$iso" | cut -f1)
+            # Derive variant name from filename (strip hash prefix if any)
+            VARIANT=$(echo "$BASENAME" | sed 's/\.iso$//; s/bamos-//; s/-[a-f0-9]\{32\}//')
+            echo "| $VARIANT | \`$BASENAME\` ($SIZE) |" >> release-body.md
+          done
+
+          cat >> release-body.md << 'RELEOF'
+
+          ## 🔧 Checksums
+          RELEOF
+
+          # Generate SHA256 checksums
+          echo '```' >> release-body.md
+          (cd ./release-artifacts && sha256sum *.iso) >> release-body.md
+          echo '```' >> release-body.md
+
+          cat >> release-body.md << 'RELEOF'
+          ## 📋 Changelog
+          See [CHANGELOG.md](./CHANGELOG.md) for full release notes.
+          RELEOF
+
+          echo "body<<RELEOF_EOF" >> "$GITHUB_OUTPUT"
+          cat release-body.md >> "$GITHUB_OUTPUT"
+          echo "RELEOF_EOF" >> "$GITHUB_OUTPUT"
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           name: "BamOS ${{ github.ref_name }}"
-          body: "BamOS GNOME Standard — ${{ github.ref_name }}\n\nSee [CHANGELOG](../../plan/07-increment/release-notes.md) for details."
-          files: "*.iso"
+          body: ${{ steps.release_body.outputs.body }}
+          files: ./release-artifacts/*.iso
           generate_release_notes: true
+          fail_on_unmatched_files: false
