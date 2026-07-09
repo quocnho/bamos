@@ -12,15 +12,15 @@
   # ═══════════════════════════════════════════════════════
   programs.git = {
     enable = true;
-    userName = "Nguyen Quoc Nho";
-    userEmail = "quocnho@gmail.com";
+    settings = {
+      user.name = "Nguyen Quoc Nho";
+      user.email = "quocnho@gmail.com";
+      init.defaultBranch = "main";
+      pull.rebase = true;
+    };
     signing = {
       key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILtLHChwq5J5sjJEMBqAKAcqGC+fhRNLsz5Y2KVF8NV8";
       signByDefault = true;
-    };
-    extraConfig = {
-      init.defaultBranch = "main";
-      pull.rebase = true;
     };
   };
 
