@@ -22,6 +22,8 @@
       "com/system76/CosmicApplet" = {
         "windows" = true;
       };
+      # COSMIC Files /data bookmark (TODO: enable when API stable)
+      # "com/system76/CosmicFiles" = { bookmarks = ["file:///data"]; };
     };
   }];
 }

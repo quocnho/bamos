@@ -39,5 +39,19 @@
         ButtonsOnRight=IMX
       '';
     };
+
+    # ═══════════════════════════════════════════════════
+    # Dolphin sidebar: Ổ D (/data) bookmark
+    # ═══════════════════════════════════════════════════
+    "skel/.config/dolphinrc" = {
+      text = ''
+        [Places]
+        PlacesCount=2
+        Place0[Url]=file:///data
+        Place0[Name]=Ổ D (DATA)
+        Place1[Url]=file:///home
+        Place1[Name]=Home
+      '';
+    };
   };
 }
