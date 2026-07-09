@@ -38,8 +38,8 @@ in
         "laptop-ac-powersave"
         "virtual-guest"
       ];
-      default = "balanced";
-      description = "tuned profile mặc định";
+      default = "desktop";
+      description = "tuned profile mặc định (desktop cho Standard edition)";
     };
 
     ppdSupport = lib.mkOption {

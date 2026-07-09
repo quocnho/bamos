@@ -50,15 +50,6 @@ in
   ];
 
   # ═══════════════════════════════════════════════════════
-  # Kvantum SVG theme engine
-  # ═══════════════════════════════════════════════════════
-  programs.kvantum = {
-    enable = true;
-    theme = "Nordic";
-    package = pkgs.nordic;
-  };
-
-  # ═══════════════════════════════════════════════════════
   # KDE Global Settings (kdeglobals) — colors, fonts, icons
   # ═══════════════════════════════════════════════════════
   environment.etc."xdg/kdeglobals".text = ''

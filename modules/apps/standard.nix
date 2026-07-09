@@ -2,8 +2,8 @@
 # Standard Edition applications — người dùng phổ thông
 # Bao gồm: browser, office, media, utilities
 { pkgs, lib, ... }: {
-  # tuned profile: desktop — kích hoạt sched_autogroup cho desktop mượt mà
-  bamos.power-management.profile = lib.mkDefault "desktop";
+  # tuned profile: desktop - default từ power-management module
+  # Edition-specific profiles (developers/gaming/studio) override via editions/*.nix
   environment.systemPackages = with pkgs; [
     # Web
     firefox
