@@ -17,7 +17,7 @@ let
   # Script cập nhật tự động
   updateScript = pkgs.writeShellApplication {
     name = "bamos-auto-update";
-    runtimeInputs = with pkgs; [ nix nixos-rebuild coreutils gnugrep gawk systemd curl ];
+    runtimeInputs = with pkgs; [ nix nixos-rebuild coreutils gnugrep gawk systemd curl git ];
     text = ''
             set -euo pipefail
 
@@ -214,6 +214,7 @@ in
           gnugrep
           gawk
           systemd
+          git
         ];
         onFailure = lib.mkIf cfg.enableNotifications [ "bamos-update-notify-failure.service" ];
         serviceConfig = {
