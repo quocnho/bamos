@@ -17,7 +17,9 @@ in
   # ═══════════════════════════════════════════════════════
   boot.plymouth.enable = true;
   boot.plymouth.logo = "${brandingPkg}/share/icons/hicolor/scalable/apps/bamos-logo.svg";
-  boot.plymouth.theme = "bgrt"; # Uses firmware logo + spinner by default
+  # spinner: hiển thị logo bamboo + spinner animation khi boot
+  # Không dùng bgrt vì trong VM không có firmware logo
+  boot.plymouth.theme = "spinner";
 
   # ═══════════════════════════════════════════════════════
   # Logo trong /etc/os-release (logo icon)

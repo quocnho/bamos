@@ -7,7 +7,7 @@
 #   sudo bam update                                # Same via bam CLI
 #
 {
-  description = "BamOS — My Configuration";
+  description = "BamOS — Configuration";
 
   inputs = {
     # Nixpkgs stable channel
