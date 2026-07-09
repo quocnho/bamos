@@ -5,6 +5,6 @@
   imports = [
     ./lg
     ./iso
-    # ./vm  # QEMU test VM (Sprint 2+)
+    ./vm # QEMU test VM
   ];
 }
