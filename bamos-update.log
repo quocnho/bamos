@@ -1,0 +1,63 @@
+[Thứ năm, 09 Tháng 7 năm 2026 15:52:11 +07] === BamOS Auto-Update ===
+[INFO] Running nix flake update...
+warning: Git tree '/etc/nixos' is dirty
+unpacking 'github:chaotic-cx/nyx/fc42e1f9ac04681807b5a1817a64bd23da11657b' into the Git cache...
+unpacking 'github:nixos/nixpkgs/d407951447dcd00442e97087bf374aad70c04cea' into the Git cache...
+warning: updating lock file "/etc/nixos/flake.lock":
+• Added input 'chaotic':
+    'github:chaotic-cx/nyx/fc42e1f9ac04681807b5a1817a64bd23da11657b?narHash=sha256-1bsu5QvYGE4uyeAKmvU2B3/NpibZtX1sqFMfjdjY0tg%3D' (2026-07-08)
+• Added input 'chaotic/flake-schemas':
+    'https://api.flakehub.com/f/pinned/DeterminateSystems/flake-schemas/0.5.0/019e83cf-9af3-78b1-ac5b-70e68ad1efe1/source.tar.gz?narHash=sha256-HiRPtA0spK%2BDkgbhz/1zW9glXxNVB%2BL4Rj2VYmdawb8%3D' (2026-06-01)
+• Added input 'chaotic/home-manager':
+    'github:nix-community/home-manager/cee3f0e7fec85d80c149c7afc29926747f7bd3c2?narHash=sha256-d/JatqgG%2BPmo%2BIuCTZfnrEAPWU3fdha48GQeXuFO%2BbE%3D' (2026-07-08)
+• Added input 'chaotic/home-manager/nixpkgs':
+    follows 'chaotic/nixpkgs'
+• Added input 'chaotic/nixpkgs':
+    'github:NixOS/nixpkgs/d407951447dcd00442e97087bf374aad70c04cea?narHash=sha256-8i/87eeoqiGE4yOTjwSA3Eh/ziJRQEmd/unYU%2BK27sk%3D' (2026-07-05)
+• Updated input 'nixpkgs':
+    'github:nixos/nixpkgs/b5aa0fbd538984f6e3d201be0005b4463d8b09f8?narHash=sha256-oPXCU/SSUokcGaJREHibG1CBX3%2Bs/W7orDWQOZDsEeQ%3D' (2026-06-29)
+  → 'github:nixos/nixpkgs/d407951447dcd00442e97087bf374aad70c04cea?narHash=sha256-8i/87eeoqiGE4yOTjwSA3Eh/ziJRQEmd/unYU%2BK27sk%3D' (2026-07-05)
+[31;1merror:[0m executing [35;1m"git"[0m: [35;1mNo such file or directory[0m
+[31;1merror:[0m executing [35;1m"git"[0m: [35;1mNo such file or directory[0m
+error:
+       … while updating the lock file of flake 'git+file:///etc/nixos'
+
+       error: program "git" failed with exit code 1
+[FAIL] nix flake update failed
+No status data could be sent: $NOTIFY_SOCKET was not set
+[Thứ năm, 09 Tháng 7 năm 2026 19:11:28 +07] === BamOS Auto-Update ===
+[INFO] Running nix flake update...
+warning: Git tree '/etc/nixos' is dirty
+unpacking 'github:quocnho/bamos/33549900ef0d8598ec1a4dba73ddd808a5f29b7a' into the Git cache...
+unpacking 'github:ryantm/agenix/b027ee29d959fda4b60b57566d64c98a202e0feb' into the Git cache...
+unpacking 'github:nix-community/home-manager/f4d01c1d87c7c2ec909549165d5a8338f1bd3315' into the Git cache...
+warning: updating lock file "/etc/nixos/flake.lock":
+• Updated input 'bamos':
+    'github:quocnho/bamos/42c4809e9eecf135338bc808ba608fac66397252?narHash=sha256-kVogQfqxrhFr2vkCznpBX0EX4xZpN5EiIEN/R7ex5jo%3D' (2026-07-09)
+  → 'github:quocnho/bamos/33549900ef0d8598ec1a4dba73ddd808a5f29b7a?narHash=sha256-p%2BYFOmEScLTqr9WuEsBSFnr89/oAeQYIIijqwNBDmHQ%3D' (2026-07-09)
+• Added input 'bamos/agenix':
+    'github:ryantm/agenix/b027ee29d959fda4b60b57566d64c98a202e0feb?narHash=sha256-9VnK6Oqai65puVJ4WYtCTvlJeXxMzAp/69HhQuTdl/I%3D' (2026-02-04)
+• Added input 'bamos/agenix/darwin':
+    'github:lnl7/nix-darwin/43975d782b418ebf4969e9ccba82466728c2851b?narHash=sha256-dyN%2BteG9G82G%2Bm%2BPX/aSAagkC%2BvUv0SgUw3XkPhQodQ%3D' (2025-04-12)
+• Added input 'bamos/agenix/darwin/nixpkgs':
+    follows 'bamos/agenix/nixpkgs'
+• Added input 'bamos/agenix/home-manager':
+    'github:nix-community/home-manager/abfad3d2958c9e6300a883bd443512c55dfeb1be?narHash=sha256-YZCh2o9Ua1n9uCvrvi5pRxtuVNml8X2a03qIFfRKpFs%3D' (2025-04-24)
+• Added input 'bamos/agenix/home-manager/nixpkgs':
+    follows 'bamos/agenix/nixpkgs'
+• Added input 'bamos/agenix/nixpkgs':
+    'github:NixOS/nixpkgs/59e69648d345d6e8fef86158c555730fa12af9de?narHash=sha256-IiiXB3BDTi6UqzAZcf2S797hWEPCRZOwyNThJIYhUfk%3D' (2025-08-01)
+• Added input 'bamos/agenix/systems':
+    'github:nix-systems/default/da67096a3b9bf56a91d16901293e51ba5b49a27e?narHash=sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768%3D' (2023-04-09)
+• Added input 'bamos/home-manager':
+    'github:nix-community/home-manager/f4d01c1d87c7c2ec909549165d5a8338f1bd3315?narHash=sha256-qbbZUk9IG9dLNwCPwdPBs6I5clxwugRpP%2B1YU%2BGPK20%3D' (2026-07-08)
+• Added input 'bamos/home-manager/nixpkgs':
+    follows 'bamos/nixpkgs'
+[31;1merror:[0m executing [35;1m"git"[0m: [35;1mNo such file or directory[0m
+[31;1merror:[0m executing [35;1m"git"[0m: [35;1mNo such file or directory[0m
+error:
+       … while updating the lock file of flake 'git+file:///etc/nixos'
+
+       error: program "git" failed with exit code 1
+[FAIL] nix flake update failed
+No status data could be sent: $NOTIFY_SOCKET was not set

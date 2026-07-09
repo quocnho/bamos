@@ -13,7 +13,7 @@
   programs.git = {
     enable = true;
     settings = {
-      user.name = "Nguyen Quoc Nho";
+      user.name = "quocnho";
       user.email = "quocnho@gmail.com";
       init.defaultBranch = "main";
       pull.rebase = true;
