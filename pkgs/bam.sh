@@ -432,6 +432,8 @@ $(echo "$CHANGELOG_DATA" | awk -v v="## [$ver]" '
 
     # ── Download version files from GitHub ──
     echo "→ Downloading VERSION from GitHub..."
+    # Xóa symlink trước (vì /etc/bamos/version là symlink đến Nix store read-only)
+    rm -f "$BAMOS_VERSION_DIR/version" "$BAMOS_VERSION_DIR/CHANGELOG.md" 2>/dev/null || true
     if command -v curl &>/dev/null; then
       curl -sfL "$GITHUB_BASE/VERSION" -o "$BAMOS_VERSION_DIR/version" 2>/dev/null && \
         echo "  ✅ VERSION updated: $(cat "$BAMOS_VERSION_DIR/version")" || \
@@ -440,6 +442,7 @@ $(echo "$CHANGELOG_DATA" | awk -v v="## [$ver]" '
         echo "  ✅ CHANGELOG.md updated" || \
         echo "  ⚠ Failed to update CHANGELOG.md"
     elif command -v wget &>/dev/null; then
+      rm -f "$BAMOS_VERSION_DIR/version" "$BAMOS_VERSION_DIR/CHANGELOG.md" 2>/dev/null || true
       wget -qO "$BAMOS_VERSION_DIR/version" "$GITHUB_BASE/VERSION" 2>/dev/null && \
         echo "  ✅ VERSION updated: $(cat "$BAMOS_VERSION_DIR/version")" || \
         echo "  ⚠ Failed to update VERSION"
