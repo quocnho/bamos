@@ -10,6 +10,7 @@ This directory contains technology assessment documents produced by the `tech` s
 | [tech-assessment-software-center.md](tech-assessment-software-center.md) | Software Center: GNOME Software vs KDE Discover vs custom | 🟢 Complete | 2026-07-05 |
 | [tech-assessment-btrfs-backup.md](tech-assessment-btrfs-backup.md) | Btrfs Backup: btrbk vs snapper vs timeshift | 🟢 Complete | 2026-07-07 |
 | [tech-assessment-calamares.md](tech-assessment-calamares.md) | Calamares: Unified installer architecture | 🟢 Complete | 2026-07-07 |
+| [tech-assessment-glfos-iso-strategy.md](tech-assessment-glfos-iso-strategy.md) | GLF-OS ISO strategy: single unified ISO with GPU/edition runtime detection | 🟢 Complete | 2026-07-09 |
 
 ## Pending Tech Assessments
 Use the `/tech` skill to fill these in:
