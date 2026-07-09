@@ -35,18 +35,11 @@
                     nixosConfiguration = top.self.nixosConfigurations.${name};
                   };
                 }) [
-                "iso-gnome-standard"
-                "iso-gnome-developers"
-                "iso-gnome-gaming"
-                "iso-gnome-studio"
-                "iso-kde-standard"
-                "iso-kde-developers"
-                "iso-kde-gaming"
-                "iso-kde-studio"
-                "iso-cosmic-standard"
-                "iso-cosmic-developers"
-                "iso-cosmic-gaming"
-                "iso-cosmic-studio"
+                # Unified ISOs — 3 ISOs thay 12
+                # Edition + Machine Type chọn trong Calamares
+                "iso-gnome-unified"
+                "iso-kde-unified"
+                "iso-cosmic-unified"
               ]);
 
             # Nix formatter
@@ -73,7 +66,7 @@
                   name = "iso-export";
                   text = ''
                     set -euo pipefail
-                    VARIANT="''${1:-iso-gnome-standard}"
+                    VARIANT="''${1:-iso-gnome-unified}"
                     echo "🔨 Building $VARIANT..."
                     OUT="./result-''${VARIANT}"
                     nix build ".#$VARIANT" --out-link "$OUT" 2>&1 | tail -3
@@ -103,7 +96,7 @@
                   text = ''
                     set -e
                     echo "Building ISO..."
-                    nix build .#iso-gnome-standard --no-link --print-out-paths | while read -r path; do
+                    nix build .#iso-gnome-unified --no-link --print-out-paths | while read -r path; do
                       echo "Pushing to Cachix: $path"
                       cachix push bamos "$path"
                     done

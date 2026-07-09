@@ -1,8 +1,8 @@
 # 🧭 Project Plan — Navigation Hub
 
 > **Last Updated:** 2026-07-09
-> **Project Phase:** 🟢 Execution — Sprint 6 Active
-> **Current Sprint:** [Sprint 6: Unified Calamares Installer](05-sprints/sprint-06-unified-installer/)
+> **Project Phase:** 🟢 Execution — Sprint 7 Active
+> **Current Sprint:** [Sprint 7: Unified ISO — 3 ISOs thay 12](05-sprints/sprint-07-unified-iso/)
 
 ---
 
@@ -34,12 +34,12 @@
 
 ## Current Sprint at a Glance
 
-**Sprint 6: Unified Calamares Installer** (2026-07-07 → TBD)
-- 🎯 Goal: Unified installer với edition + machine type selector
+**Sprint 7: Unified ISO — 3 ISOs thay 12** (2026-07-09 → 2026-07-09)
+- 🎯 Goal: Gộp 12 ISO variants thành 3 unified ISO (GNOME/KDE/COSMIC)
 - 📊 Status: 🟡 Active
-- 📋 [Full plan](05-sprints/sprint-06-unified-installer/sprint-plan.md)
+- 📋 [Full plan](05-sprints/sprint-07-unified-iso/sprint-plan.md)
 
-**Sprint 5: Auto-Detect Hardware + Theming** — ✅ Complete! [Review](05-sprints/sprint-05-auto-detect-theming/sprint-review.md)
+**Sprint 6: Unified Calamares Installer** — ✅ Complete! [Review](05-sprints/sprint-06-unified-installer/sprint-plan.md)
 
 ---
 

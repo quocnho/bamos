@@ -37,13 +37,13 @@ jobs:
       - id: matrix
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            # Tag push: full release — build all 12 variants across 3 DEs × 4 editions
-            echo 'variants={"variant":["gnome-standard","gnome-developers","gnome-gaming","gnome-studio","kde-standard","kde-developers","kde-gaming","kde-studio","cosmic-standard","cosmic-developers","cosmic-gaming","cosmic-studio"]}' >> "$GITHUB_OUTPUT"
-            echo "🧩 Build matrix: 12 variants (full release)"
+            # Tag push: full release — build all 3 unified ISOs
+            echo 'variants={"variant":["gnome-unified","kde-unified","cosmic-unified"]}' >> "$GITHUB_OUTPUT"
+            echo "🧩 Build matrix: 3 unified ISOs (full release)"
           else
-            # Push/PR: quick check — build only Standard editions (1 per DE)
-            echo 'variants={"variant":["gnome-standard","kde-standard","cosmic-standard"]}' >> "$GITHUB_OUTPUT"
-            echo "🧩 Build matrix: 3 variants (standard editions only)"
+            # Push/PR: quick check — build GNOME unified only
+            echo 'variants={"variant":["gnome-unified"]}' >> "$GITHUB_OUTPUT"
+            echo "🧩 Build matrix: 1 variant (GNOME unified)"
           fi
 
   # ═══════════════════════════════════════════════════════
@@ -147,10 +147,10 @@ jobs:
   # VM Test: smoke test the GNOME Standard ISO in QEMU
   #   - Boots ISO in headless mode with 120s timeout
   #   - Checks for login prompt as boot success indicator
-  #   - Only tests GNOME Standard (representative smoke test)
+  #   - Only tests GNOME Unified (representative smoke test)
   # ═══════════════════════════════════════════════════════
   vm-test:
-    name: 🧪 VM Smoke Test — GNOME Standard
+    name: 🧪 VM Smoke Test — GNOME Unified
     needs: build-iso
     runs-on: ubuntu-latest
     steps:
@@ -169,7 +169,7 @@ jobs:
       - name: Download ISO artifact
         uses: actions/download-artifact@v4
         with:
-          name: bamos-iso-gnome-standard
+          name: bamos-iso-gnome-unified
           path: ./iso-test
 
       - name: Boot ISO in QEMU (smoke test)
