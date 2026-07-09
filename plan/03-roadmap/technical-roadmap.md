@@ -111,21 +111,39 @@
 - [x] `bam changelog` — xem changelog các version mới
 
 ## Phase 9 — Unified Calamares Installer 🟡 (Đang thực hiện — Sprint 6)
+**Timeline:** 2026-07-07 → TBD
 
 ### Milestones
-- [ ] Factory Reset Desktop
+- [x] `modules/boot/calamares.nix` — Calamares config với partition + mount
+- [x] Edition selector: packagechooser 4 editions (Standard/Developers/Gaming/Studio)
+- [x] Machine type selector: Laptop/Desktop/Server — auto power profile
+- [x] Ổ D integration: /data mount + custom drive icon + Nautilus bookmark
+- [x] Calamares branding: Logo bamboo, Nord colors, slideshow
+- [x] `iso-cfg/` template: flake.nix, configuration.nix, customized.nix, customConfig/
+- [x] Custom Python module bamos-config: copy template → /etc/nixos/ + apply selections
+- [x] Post-install flake: `github:quocnho/bamos` — dễ update
+- [x] `environment.etc."nixos-template/..."` — expose iso-cfg lên ISO live
+- [ ] Drive icon SVG → PNG (cần librsvg fix)
+- [ ] Calamares screenshots cho packagechooser
+- [ ] Unified ISO: 3 ISOs (GNOME/KDE/COSMIC) thay 12 hiện tại
+- [ ] First-boot GPU detection tích hợp trong Calamares
+
+## Phase 10 — BamOS Portal (Tương lai)
+
+### Milestones
+- [ ] Factory Reset Desktop (1-click restore UI)
 - [ ] Driver Manager (NVIDIA, AMD auto-install)
 - [ ] System Info Dashboard
 - [ ] Edition Switcher
 
-## Phase 9 — Hoàn thiện ma trận 3×4 (Tương lai)
+## Phase 11 — Hoàn thiện ma trận 3×4 (Tương lai)
 
 ### Milestones
-- [ ] COSMIC Standard/Developers/Gaming ISO
-- [ ] Complete 12/12 production-quality ISOs
-- [ ] ISO size < 2.5GB
+- [ ] Unified ISO cho tất cả DE
+- [ ] Testing: QEMU VM + CI/CD tự động test ISO
+- [ ] Binary cache đầy đủ — build lần đầu, cache mãi mãi
 
-## Phase 10 — Community (Tương lai)
+## Phase 12 — Community (Tương lai)
 
 ### Milestones
 - [ ] Home Manager integration
