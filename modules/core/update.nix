@@ -29,8 +29,6 @@ let
 
             exec > >(tee -a "$LOG_FILE") 2>&1
 
-            FLAKE_PATH="/etc/nixos"
-            FLAKE_LOCK_PATH="/etc/nixos/flake.lock"
             BAMOS_VERSION_DIR="/etc/bamos"
             GITHUB_BASE="https://raw.githubusercontent.com/quocnho/bamos/main"
 
@@ -88,8 +86,8 @@ let
                     found && /^- / {print substr($0,3)}
                     found && /^### / {print}
                   ' | head -15)
-                  CHANGELOG_TEXT="${CHANGELOG_TEXT}BamOS $ver
-      ${CHANGES}
+                  CHANGELOG_TEXT="''${CHANGELOG_TEXT}BamOS $ver
+      ''${CHANGES}
 
       "
                 fi
