@@ -1,7 +1,7 @@
 # Technical Roadmap
 
-> **Last Updated:** 2026-07-06
-> **Updated by:** Sprint 1-4 actual progress + Phase 7
+> **Last Updated:** 2026-07-09
+> **Updated by:** Sprint 1-5 actual progress + Phases 7-8 complete
 
 ---
 
@@ -76,17 +76,41 @@
 - [x] Docs website (32+ trang, bazzite-style)
 - [x] Technical docs (architecture, modules, iso-build, kernel)
 
-## Phase 7 — Auto-Detect Hardware 🟡 (Đang thực hiện)
-**Timeline:** 2026-07-06
+## Phase 7 — Auto-Detect Hardware ✅ (Hoàn thành)
+**Timeline:** 2026-07-06 (Sprint 5)
 
 ### Milestones
 - [x] `modules/hardware/detect.nix` — auto-detect module
 - [x] `bamos-detect-hardware` script — GPU detection via lspci
-- [ ] Detect NVIDIA + AMD + Intel GPU and PCI bus IDs
-- [ ] First-boot service chạy auto-detect
-- [ ] Tích hợp lên Calamares GUI installer
+- [x] Detect NVIDIA + AMD + Intel GPU and PCI bus IDs
+- [x] `services.xserver.videoDrivers` fix via nvidia.nix (hardware.video.nvidia)
+- [x] **tuned** (Red Hat) thay PPD: dynamic_tuning, PPD bridge, profile theo edition
+- [x] **Case study LG Gram**: i5-10210U, GTX 1650, NVMe — CPU governor powersave
+- [x] **Battery optimization**: ASPM powersupersave, WiFi power save, runtime PM, swap 16GB
+- [x] **RakuOS Theming**: WhiteSur icons, Bibata cursors, Nordic GTK, Maple Mono NF
+- [x] **Hardware tools**: pciutils, usbutils, dmidecode, inxi, mesa-demos trong mọi edition
+- [ ] First-boot service chạy auto-detect (⏳ deferred)
+- [ ] Tích hợp lên Calamares GUI installer (⏳ deferred)
 
-## Phase 8 — BamOS Portal (Tương lai)
+## Phase 8 — Btrfs Backup & Restore + Auto Update ✅ (Hoàn thành)
+**Timeline:** 2026-07-07 (Sprint 6 prep)
+
+### Milestones
+- [x] `modules/hardware/backup.nix` — btrbk snapshot engine
+- [x] Retention policy: 24 hourly, 7 daily, 4 weekly, 3 monthly
+- [x] Auto snapshot: systemd timer hourly, pruning tự động
+- [x] `bam backup [-s] [-h] [-d]` — selective backup
+- [x] `bam restore [-s] [-h] [-d]` — selective restore + interactive menu
+- [x] `bam clean [--keep N]` — dọn Nix generations + Btrfs snapshots
+- [x] `modules/core/update.nix` — auto-upgrade engine (GLF-OS pattern)
+- [x] Systemd timer: 1 phút sau boot, lặp lại mỗi 12h
+- [x] Version checking: local vs GitHub, changelog notification
+- [x] `modules/core/version.nix` — /etc/os-release branding (NAME=BamOS)
+- [x] `bam update` — flake update → rebuild → gc → regen boot
+- [x] `bam rollback [gen]` — rollback generation
+- [x] `bam changelog` — xem changelog các version mới
+
+## Phase 9 — Unified Calamares Installer 🟡 (Đang thực hiện — Sprint 6)
 
 ### Milestones
 - [ ] Factory Reset Desktop

@@ -212,13 +212,19 @@ BamOS cung cấp **12 phiên bản ISO** khác nhau, tổ hợp từ 3 Desktop E
   - Flatpak: flatpak + xdg-desktop-portal-gtk/kde
   - Container: Podman + Docker compat + Distrobox
   - **BamOS CLI (bam)**: Universal command manager như dnf/apt
-    - `bam run <cmd>` — Chạy binary trong FHS env (Ventoy, Zoom, MATLAB)
     - `bam install <pkg>` — Cài package (nix profile + flatpak)
     - `bam remove <pkg>` — Gỡ package
     - `bam search <q>` — Tìm trong nixpkgs
-    - `bam info` — System info (CPU, GPU, RAM, Disk)
-    - `bam update` — Cập nhật flake + rebuild + dọn rác
+    - `bam run <cmd>` — Chạy binary trong FHS env (Ventoy, Zoom, MATLAB)
     - `bam shell <pkg>` — Shell tạm với package
+    - `bam update` — Flake update → rebuild → GC → regen boot
+    - `bam info` — System info (CPU, GPU, RAM, Disk, Backups)
+    - `bam clean [--keep N]` — Dọn Nix generations + Btrfs snapshots
+    - `bam rollback [gen]` — Rollback về generation trước
+    - `bam changelog` — Xem changelog các version mới (so sánh local vs GitHub)
+    - `bam backup [-s] [-h] [-d]` — Backup system/home/data vào /data/backups/
+    - `bam restore [-s] [-h] [-d]` — Restore theo flags hoặc interactive menu
+    - `bam restore --list` — Xem danh sách backup
     - Được build từ pkgs/bam-cli/default.nix + third-party.nix
   - Wine (optional, Gaming edition): wine-wayland, winetricks
   - Codecs: ffmpeg, gstreamer-full, intel-vaapi, nvidia-vaapi
@@ -237,17 +243,17 @@ BamOS cung cấp **12 phiên bản ISO** khác nhau, tổ hợp từ 3 Desktop E
 ## Key Features (MVP → Future)
 
 ### Phase 1 — Core Foundation ✅ (Hoàn thành)
-1. flake-parts foundation với `mkFlake`
-2. Zen kernel (`linuxPackages_zen`) — cho OS sau cài đặt
-3. GNOME desktop (GDM + Wayland)
-4. systemd-boot, EFI support
-5. Dev environment (`nix develop`)
-6. Cấu trúc modules/flake-parts có thể tái sử dụng
+239. flake-parts foundation với `mkFlake`
+240. Zen kernel (`linuxPackages_zen`) — cho OS sau cài đặt
+241. GNOME desktop (GDM + Wayland)
+242. systemd-boot, EFI support
+243. Dev environment (`nix develop`) — nil, nixd, nixpkgs-fmt, deadnix, statix, cachix
+244. Custom packages overlay (bamos-branding, bam-cli)
 
 ### Phase 2 — Bản địa hóa ✅ (Hoàn thành)
-7. Fcitx5 + Bamboo — gõ tiếng Việt Telex, VNI
-8. Locale Việt Nam (`Asia/Ho_Chi_Minh`, `vi_VN`)
-9. PipeWire audio (ALSA + PulseAudio + 32-bit)
+247. Fcitx5 + Bamboo — gõ tiếng Việt Telex, VNI
+248. Locale Việt Nam (`Asia/Ho_Chi_Minh`, `vi_VN`)
+249. PipeWire audio (ALSA + PulseAudio + 32-bit)
 10. Tối ưu dịch vụ (tắt printing, avahi, power-profiles-daemon)
 11. Vietnamese fonts (Noto Sans, Fira Code, JetBrains Mono)
 
@@ -291,78 +297,111 @@ BamOS cung cấp **12 phiên bản ISO** khác nhau, tổ hợp từ 3 Desktop E
 42. Docs website — 32+ trang (bazzite-style)
 43. Technical docs — architecture, modules, iso-build, kernel
 
-### Phase 7 — Auto-Detect Hardware + Power Management 🟡 (Hoàn thiện)
-44. `modules/hardware/detect.nix` — auto-detect GPU, PCI bus IDs
-45. `pkgs/bamos-detect-hardware.sh` — script quét hardware (lspci)
-46. First-boot GPU detection: chạy `sudo bamos-detect-hardware`
-47. Tự động sinh bus IDs + NVIDIA stable driver 595.84
-48. GPU driver chỉ load khi phát hiện có GPU tương ứng
-49. `services.xserver.videoDrivers` fix — kích hoạt hardware.video.nvidia module
-50. **tuned** (Red Hat) thay PPD: dynamic_tuning, PPD bridge, profile theo edition
-51. **Case study LG Gram**: i5-10210U, GTX 1650, NVMe — CPU governor powersave, ~4W GPU idle
-52. **Battery optimization**: ASPM powersupersave, WiFi power save, runtime PM, swap 16GB
-53. **Hardware tools**: pciutils, usbutils, dmidecode, inxi, mesa-demos trong mọi edition
+### Phase 7 — Auto-Detect Hardware + Power Management ✅ (Hoàn thành)
+294. `modules/hardware/detect.nix` — auto-detect GPU, PCI bus IDs
+295. `pkgs/bamos-detect-hardware.sh` — script quét hardware (lspci)
+296. First-boot GPU detection: chạy `sudo bamos-detect-hardware`
+297. Tự động sinh bus IDs + NVIDIA stable driver 595.84
+298. GPU driver chỉ load khi phát hiện có GPU tương ứng
+299. `services.xserver.videoDrivers` fix — kích hoạt hardware.video.nvidia module
+300. **tuned** (Red Hat) thay PPD: dynamic_tuning, PPD bridge, profile theo edition
+301. **Case study LG Gram**: i5-10210U, GTX 1650, NVMe — CPU governor powersave, ~4W GPU idle
+302. **Battery optimization**: ASPM powersupersave, WiFi power save, runtime PM, swap 16GB
+303. **Hardware tools**: pciutils, usbutils, dmidecode, inxi, mesa-demos trong mọi edition
 
-### Phase 8 — Btrfs Backup & Restore + Auto Update 🟡 (Hoàn thiện)
-54. **btrbk engine**: snapshot + send/receive cho @home + @data
-55. **Retention policy**: 24 hourly, 7 daily, 4 weekly, 3 monthly
-56. **Auto snapshot**: systemd timer hourly, pruning tự động
-57. **`bam backup [-s] [-h] [-d]`**: backup chọn lọc — system config, home config, data
+### Phase 8 — Btrfs Backup & Restore + Auto Update ✅ (Hoàn thành)
+306. **btrbk engine**: snapshot + send/receive cho @home + @data
+307. **Retention policy**: 24 hourly, 7 daily, 4 weekly, 3 monthly
+308. **Auto snapshot**: systemd timer hourly, pruning tự động
+309. **`bam backup [-s] [-h] [-d]`**: backup chọn lọc — system config, home config, data
     - Default: `-s -h` (system + home)
     - Home chỉ backup `.config`, `.local/share`, `.bashrc`, `.profile`, `.ssh`
     - Exclude: `.cache`, `.npm`, `.cargo`, flatpak, Steam, caches
     - Lưu vào `/data/backups/{system,home,data}/`
-58. **`bam restore [-s] [-h] [-d]`**: restore chọn lọc theo flags
-59. **`bam clean`**: dọn Nix generations + Btrfs snapshots cũ
-60. **Auto-upgrade engine** (GLF-OS pattern):
-    - Systemd timer: 1 phút sau boot, lặp lại mỗi 12h
-    - Script: flake update → rebuild boot → gc → notify
-    - So sánh flake.lock hash trước/sau, chỉ rebuild khi có thay đổi
-    - Notify qua libnotify khi thành công/thất bại
-    - `bamos.update.autoUpgrade` option (default: true)
-    - Retention: `nix.gc.automatic` weekly, `--delete-older-than 5d`
-61. **`bam update`**: flake update → rebuild switch → gc → regen boot
-62. **`bam rollback [gen]`**: rollback generation (interactive nếu không có đối số)
-63. **`bam changelog`**: `nix store diff-closures` + generations + update log
-64. **BamOS version** (`/etc/os-release`): NAME=BamOS, ID=bamos
-65. **ISO live**: tạo sẵn `/data/backups/{system,home,data}/` cho mọi edition
+310. **`bam restore [-s] [-h] [-d]`**: restore chọn lọc theo flags
+311. **`bam clean [--keep N]`**: dọn Nix generations + Btrfs snapshots cũ
+312. **Auto-upgrade engine** — check-only, interactive apply:
+    - **Systemd timer** (`bamos-auto-update`): chạy 1 phút sau boot, lặp lại mỗi 12h
+    - **Check-only**: Timer chỉ check VERSION + CHANGELOG từ GitHub và tạo `/etc/bamos/update_change`, KHÔNG tự rebuild
+    - **Desktop notification**: Khi có version mới, gửi notify kèm tóm tắt changelog, hướng dẫn chạy `sudo bam update`
+    - **`/etc/bamos/update_change`**: File text chứa changelog của tất cả version mới (từ local→remote)
+    - **`bamos.update.autoUpgrade`** option (default: true)
 
-### Phase 9 — Unified Calamares Installer 🟡 (Đang phát triển)
-61. **Unified ISO**: 3 ISOs (GNOME/KDE/COSMIC) thay 12 — edition chọn khi install
-62. **Edition selector**: packagechooser với 4 edition (Standard/Developers/Gaming/Studio)
-63. **Machine type selector**: Laptop/Desktop/Server — auto power profile
-64. **Ổ D integration**: /data mount + custom drive icon + Nautilus bookmark
-65. **Calamares branding**: Logo, colors, fonts, slideshow (GLF-OS inspired)
-66. **iso-cfg template → /etc/nixos/**:
-    - Calamares bundle iso-cfg/ → copy vào /etc/nixos/ lúc cài đặt
-    - `flake.nix` — inputs: nixpkgs + github:quocnho/bamos
-    - `configuration.nix` — hostname, locale, user
-    - `customized.nix` — edition + machine type (Calamares điền)
-    - `customConfig/default.nix` — user customization (không bị ghi đè)
-67. **Custom Python module**: bamos-config — copy template + apply selections
-68. **Hardware detect tích hợp**: lspci + dmidecode chạy trong Calamares
-69. **Update workflow**: `sudo bam update` — flake update → rebuild → gc → regen boot
-70. **Auto update timer**: systemd timer daily — flake update + boot + gc
-71. **Theming RakuOS**: hoàn thiện WhiteSur-dark icons + Bibata cursors + Nordic theme
+313. **`bam update`** — Quy trình update tương tác:
+    ```
+    sudo bam update         # Check → show changelog → confirm → apply
+    sudo bam update --check # Chỉ check, không apply
+    ```
+    - Bước 1: Đọc `/etc/bamos/version` (local) vs `github.com/quocnho/bamos/main/VERSION` (remote)
+    - Bước 2: Nếu có version mới, fetch `CHANGELOG.md` từ GitHub, extract tất cả sections từ local→remote
+    - Bước 3: Hiển thị danh sách thay đổi (nếu đã có `/etc/bamos/update_change` từ auto-update timer thì dùng file đó)
+    - Bước 4: Hỏi xác nhận: "Apply update vX.Y.Z → vA.B.C now? [Y/n]"
+    - Bước 5: Nếu đồng ý:
+      a. Ghi `/etc/bamos/update_change` (audit trail)
+      b. Download `VERSION` + `CHANGELOG.md` từ GitHub → ghi đè `/etc/bamos/`
+      c. `nix flake update --flake /etc/nixos`
+      d. `nixos-rebuild switch --flake /etc/nixos`
+      e. `nix-collect-garbage --delete-older-than 5d`
+      f. `nixos-rebuild boot` (regen boot menu)
+    - `bam update` yêu cầu `sudo` (root) để ghi vào `/etc/bamos/` và `/etc/nixos/`
+
+314. **`bam rollback [gen]`**: rollback generation (interactive nếu không có đối số)
+
+315. **`bam changelog`**:
+    - Kiểm tra `/etc/bamos/update_change` trước (nếu có update pending từ timer)
+    - Nếu không, fetch `CHANGELOG.md` từ GitHub và hiển thị thay đổi từ local→remote
+
+316. **Permission model**:
+    - `/etc/bamos/version` — root:root, 644 (environment.etc, chỉ ghi được bởi root)
+    - `/etc/bamos/CHANGELOG.md` — root:root, 644
+    - `/etc/bamos/update_change` — root:root, 644 (tạo bởi systemd service hoặc `sudo bam update`)
+    - `bam update` yêu cầu `sudo` — chạy với quyền root, có thể ghi đè tất cả
+
+317. **VERSION + CHANGELOG lifecycle**:
+    - **Source of truth**: `VERSION` + `CHANGELOG.md` trong git repo `github.com/quocnho/bamos`
+    - **Build time**: Nix build copies `VERSION` + `CHANGELOG.md` vào `/etc/bamos/` qua `environment.etc`
+    - **Runtime**: `sudo bam update` download file mới từ GitHub → ghi đè `/etc/bamos/`
+    - **Sau reboot**: File trong `/etc/bamos/` giữ nguyên (không bị reset) vì là file config, không phải store symlink
+      (Lưu ý: `/etc/bamos/` được quản lý bởi `environment.etc` nên sẽ bị ghi đè khi `nixos-rebuild switch`. Nếu muốn giữ version mới,
+      cần rebuild với flake mới nhất, sau đó file trong `/etc/bamos/` sẽ được cập nhật từ source mới.)
+
+318. **ISO live**: tạo sẵn `/data/backups/{system,home,data}/` cho mọi edition
+
+### Phase 9 — Unified Calamares Installer 🟡 (Đang phát triển — Sprint 6)
+330. **Unified ISO**: 3 ISOs (GNOME/KDE/COSMIC) thay 12 — edition chọn khi install
+331. **Edition selector**: packagechooser với 4 edition (Standard/Developers/Gaming/Studio)
+332. **Machine type selector**: Laptop/Desktop/Server — auto power profile
+333. **Ổ D integration**: /data mount + custom drive icon + Nautilus bookmark
+334. **Calamares branding**: Logo, Nord colors, fonts, slideshow (GLF-OS inspired)
+335. **iso-cfg template → /etc/nixos/**:
+    - `iso-cfg/flake.nix` — inputs: nixpkgs + github:quocnho/bamos
+    - `iso-cfg/configuration.nix` — hostname, locale, user
+    - `iso-cfg/customized.nix` — edition + machine type (Calamares điền)
+    - `iso-cfg/customConfig/default.nix` — user customization (không bị ghi đè)
+336. **Custom Python module**: bamos-config — copy template + apply selections (`modules/boot/calamares.nix`)
+337. **Hardware detect tích hợp**: lspci + dmidecode chạy trong Calamares
+338. **Update workflow**: `sudo bam update` — flake update → rebuild → gc → regen boot
+339. **Auto update timer**: systemd timer 12h — flake update + boot + gc (`modules/core/update.nix`)
+340. **Drive icon SVG → PNG**: cần fix với librsvg (`modules/boot/calamares.nix` L26-47)
 
 ### Phase 10 — BamOS Portal (Tương lai)
-72. Factory Reset Desktop (1-click restore UI)
-73. Driver Manager (NVIDIA, AMD, Intel auto-install)
-74. System Info Dashboard
-75. Edition Switcher (chuyển edition không cần cài lại)
+348. Factory Reset Desktop (1-click restore UI)
+349. Driver Manager (NVIDIA, AMD, Intel auto-install)
+350. System Info Dashboard
+351. Edition Switcher (chuyển edition không cần cài lại)
 
 ### Phase 10 — Hoàn thiện ma trận (Tương lai)
-76. Unified ISO cho tất cả DE
-77. Testing: QEMU VM + CI/CD tự động test ISO
-78. Binary cache đầy đủ — build lần đầu, cache mãi mãi
+354. Unified ISO cho tất cả DE
+355. Testing: QEMU VM + CI/CD tự động test ISO
+356. Binary cache đầy đủ — build lần đầu, cache mãi mãi
 
 ### Phase 11 — Community (Tương lai)
-79. Home Manager integration cho user-level config
-80. Custom packages (`pkgs/`) cho phần mềm Việt
-81. Overlays (`overlays/`) tùy biến nixpkgs
-82. Documentation website + Hướng dẫn tiếng Việt
-83. Community modules registry
-84. Cộng đồng 500+ người dùng
+359. Home Manager integration cho user-level config
+360. Custom packages (`pkgs/`) cho phần mềm Việt
+361. Overlays (`overlays/`) tùy biến nixpkgs
+362. Documentation website + Hướng dẫn tiếng Việt
+363. Community modules registry
+364. Cộng đồng 500+ người dùng
 
 ---
 
@@ -451,42 +490,51 @@ bamos/
 │   ├── default.nix                     #   Aggregator — imports core + hardware + desktop
 │   │
 │   ├── core/                           # 🧱 Lõi hệ thống (bắt buộc, mọi edition)
-│   │   ├── system.nix                  #     Boot, kernel, hostname, nix settings, cachix
+│   │   ├── system.nix                  #     Boot, kernel, hostname, nix settings, cachix, overlays
 │   │   ├── locale.nix                  #     VN locale, timezone, default language
 │   │   ├── audio.nix                   #     PipeWire (ALSA + PulseAudio + 32-bit)
 │   │   ├── input-method.nix            #     Fcitx5 + Bamboo (Telex, VNI, VIQR)
-│   │   ├── optimization.nix            #     Tắt dịch vụ không cần thiết
-│   │   ├── packages.nix                #     Common packages cho mọi edition
+│   │   ├── optimization.nix            #     Tắt dịch vụ không cần, tắt documentation
+│   │   ├── packages.nix                #     Common packages cho mọi edition + hardware tools
 │   │   ├── fonts.nix                   #     Fonts (Noto, Fira, JetBrains Mono)
-│   │   └── user.nix                    #     Default user (bamos) với bamos.user.* options
+│   │   ├── user.nix                    #     Default user (bamos) với bamos.user.* options
+│   │   ├── third-party.nix            #     AppImage, Flatpak, FHS, Podman, Wine, codecs, fonts
+│   │   ├── version.nix                #     /etc/os-release + /etc/lsb-release branding (BamOS)
+│   │   └── update.nix                 #     Auto-upgrade engine: systemd timer + notify + GC
 │   │
 │   ├── boot/                           # 🚀 Boot & Disk Partitioning
 │   │   ├── disko-btrfs.nix             #     Disko declarative partitioning (Ổ C — Ổ D)
-│   │   └── calamares.nix              #     Calamares installer GUI config (mount, partition)
+│   │   └── calamares.nix              #     Calamares installer GUI (edition, machine type, iso-cfg)
 │   │
 │   ├── desktop/                        # 🖥 Desktop Environments
 │   │   ├── gnome.nix                   #     GNOME + GDM + dconf (window buttons)
 │   │   ├── kde.nix                     #     KDE Plasma + SDDM + kwinrc
 │   │   ├── cosmic.nix                  #     COSMIC + cosmic-greeter
-│   │   └── software-center.nix         #     DE-aware Software Center (GNOME/KDE Discover)
+│   │   └── software-center.nix         #     DE-aware Software Center (GNOME/KDE Discover) + Flatpak + AppImage
 │   │
 │   ├── hardware/                       # 🔧 Phần cứng
 │   │   ├── bluetooth.nix               #     Bluetooth + auto power-on
 │   │   ├── network.nix                 #     NetworkManager (Wi-Fi + Ethernet)
-│   │   ├── nvidia.nix                 #     NVIDIA GPU: driver, Optimus/PRIME, CUDA, PowerMgt
-│   │   └── detect.nix                 #     Auto-detect hardware: GPU, PCI bus IDs, kernel modules
+│   │   ├── nvidia.nix                  #     NVIDIA GPU: driver, Optimus/PRIME, CUDA, PowerMgt
+│   │   ├── detect.nix                  #     Auto-detect hardware: GPU, PCI bus IDs, kernel modules
+│   │   ├── power-management.nix        #     tuned (Red Hat) + kernel tuning + battery optimization
+│   │   └── backup.nix                  #     Btrfs backup engine (btrbk) + auto snapshot timer
 │   │
 │   ├── editions/                       # 📦 Edition-specific features
 │   │   ├── default.nix                 #     Aggregator
 │   │   ├── developers.nix              #     Developers: devenv, podman, dev tools
-│   │   ├── gaming.nix                  #     Gaming: Steam, Lutris, GameScope, MangoHud
+│   │   ├── gaming.nix                  #     Gaming: XanMod kernel, Steam, Lutris, GameScope, MangoHud
 │   │   └── studio.nix                  #     Studio: low-latency audio, creative apps
 │   │
 │   ├── apps/                           # 📱 Ứng dụng theo edition
-│   │   └── standard.nix                #     Standard apps: Firefox, LibreOffice, VLC...
+│   │   └── standard.nix                #     Standard apps: Firefox, Chromium, VLC, MPV
 │   │
-└── theming/                        # 🎨 Giao diện & thương hiệu
-    ├── bamos-branding.nix          #     BamOS branding (wallpaper, logo, plymouth)
+│   └── theming/                        # 🎨 Giao diện & thương hiệu
+│       ├── bamos-branding.nix          #     BamOS branding (wallpaper, logo, plymouth)
+│       ├── gtk-theme.nix               #     GTK/icon/cursor theme + font config (Nordic/WhiteSur/Bibata)
+│       ├── gnome-theme.nix             #     GNOME Shell theme: dconf, fonts, extensions, GTK settings
+│       ├── kde-theme.nix               #     KDE Plasma theme: kvantum, kwinrc
+│       └── cosmic-theme.nix            #     COSMIC DE theme: dconf, settings
     ├── gtk-theme.nix              #     GTK/icon/cursor theme + font config (Nordic/WhiteSur/Bibata)
     ├── gnome-theme.nix            #     GNOME Shell theme: dconf, GTK settings, extensions, fonts
     ├── kde-theme.nix              #     KDE Plasma theme: kvantum, kwinrc, kdeglobals, Aurorae
@@ -508,34 +556,49 @@ bamos/
 │   └── cosmic-studio.nix               #   COSMIC + Studio apps + low-latency
 │
 ├── hosts/                              # 🖥️ Hosts = Phần cứng cụ thể + tham số
-│   ├── default.nix                     #   Aggregator
-├── lg/                             #   🖥️ Developer laptop (LG Gram)
-│   ├── default.nix                 #     flake-parts module → nixosConfigurations.lg
-│   ├── configuration.nix           #     Host-specific config (hostname, apps)
-│   └── hardware-configuration.nix  #     Auto-generated hardware scan
-├── iso/                            #   💿 ISO builder
-│   ├── default.nix                 #     flake-parts module → mkISOVariant
-│   ├── configuration.nix           #     ISO-specific config (GLF-OS inspired)
-│   └── customConfig/               #     User customization slot
-│       └── default.nix
-└── vm/                             #   🖳️ QEMU test VM (⏳ Sprint 2+)
+│   ├── default.nix                     #   Aggregator (imports lg + iso + vm)
+│   ├── lg/                             #   🖥️ Developer laptop (LG Gram, i5-10210U, GTX 1650)
+│   │   ├── default.nix                 #     flake-parts module → nixosConfigurations.lg
+│   │   ├── configuration.nix           #     Host-specific config: NVIDIA, power, VM, dev tools
+│   │   └── hardware-configuration.nix  #     Auto-generated hardware scan
+│   ├── iso/                            #   💿 ISO builder — 12 variants
+│   │   ├── default.nix                 #     flake-parts module → mkISOVariant (12 configs)
+│   │   ├── configuration.nix           #     GNOME ISO config
+│   │   ├── configuration-kde.nix       #     KDE ISO config
+│   │   ├── configuration-studio.nix    #     Studio ISO config
+│   │   └── customConfig/               #     User customization slot
+│   │       └── default.nix
+│   └── vm/                             #   🖳️ QEMU test VM
 │       └── default.nix
 │
 ├── pkgs/                               # 📦 Custom Nix packages
-│   ├── default.nix                     #   ✅ Aggregator
+│   ├── default.nix                     #   ✅ Aggregator (bamos-branding)
+│   ├── bam-cli/                        #   BamOS CLI (bam) — FHS env + bam.sh wrapper
+│   │   └── default.nix
 │   ├── bamos-branding/                 #   BamOS branding: logos, wallpapers, GNOME XML
 │   │   └── default.nix
-│   └── bamos-detect-hardware.sh        #   Hardware detection script (GPU, PCI)
+│   └── bamos-detect-hardware.sh        #   Hardware detection script (GPU, PCI bus IDs)
 │
 ├── overlays/                           # 🔄 Nixpkgs overlays
 │   └── default.nix                     #   ✅ Aggregator
 │   # kernel.nix, mesa.nix, wine.nix, packages.nix → ⏳ Sprint 2+
 │   # kernel.nix, mesa.nix, wine.nix, packages.nix → ⏳ Sprint 2+
 │
+├── iso-cfg/                            # 💿 ISO user template (copy vào /etc/nixos/ khi cài)
+│   ├── flake.nix                       #   Flake tham chiếu github:quocnho/bamos
+│   ├── configuration.nix               #   Base config (hostname, locale, user)
+│   ├── customized.nix                  #   Edition + Machine type config
+│   └── customConfig/                   #   User customizations (không bị ghi đè)
+│
 ├── assets/                             # 🎨 Static assets
 │   ├── wallpapers/
+│   ├── logo/
 │   ├── icons/
 │   └── plymouth/
+│
+├── VERSION                             # Phiên bản BamOS hiện tại (2.0.0)
+├── CHANGELOG.md                        # Lịch sử thay đổi (Keep a Changelog)
+├── ARCHITECH.md                        # Architecture design document
 │
 ├── docs/                               # 📖 Documentation
 │   ├── README.md                       #   Navigation hub
@@ -831,10 +894,14 @@ hosts/lg/
 
 ### Daily Development
 ```bash
-nix develop          # Enter dev shell (nil, nixd, nixpkgs-fmt, deadnix, statix)
+nix develop          # Enter dev shell (nil, nixd, nixpkgs-fmt, deadnix, statix, cachix)
 nix fmt              # Format all .nix files
-nix flake check      # Validate flake (12 ISOs + hosts/lg)
+nix flake check --all-systems  # Validate flake (12 ISOs + hosts/lg)
 nix flake show       # Show all outputs
+
+# Kiểm tra code
+deadnix --fail .     # Dead code check
+statix check .       # Static analysis
 ```
 
 ### Hardware Detection Workflow
@@ -887,7 +954,7 @@ qemu-system-x86_64 -enable-kvm -m 4G -cdrom iso/*.iso
 
 ### Binary Cache & Distribution
 ```bash
-# CI tự động push cache (GitHub Actions)
+# CI tự động push cache (GitHub Actions — .github/workflows/ci.yml)
 # - cachix/cachix-action@v15 tự động push build artifacts
 # - Không cần làm gì thêm
 
@@ -896,6 +963,9 @@ nix build .#iso-gnome-standard --no-link --print-out-paths | xargs -I{} cachix p
 
 # Hoặc dùng convenience app:
 nix run .#push-cachix
+
+# One-command: build → switch → push cache
+nix run .#update
 
 # Upload ISO lên GitHub Releases (CI tự động khi push tag v*)
 # ISO file: iso/*.iso

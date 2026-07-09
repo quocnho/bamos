@@ -1,859 +1,970 @@
-<!doctype html>
-<html lang="vi">
+﻿<!doctype html>
+<html lang="vi" data-bs-theme="auto">
     <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>BamOS — NixOS cho Cộng đồng Việt</title>
-        <link rel="stylesheet" href="css/fonts.css" />
-        <link rel="stylesheet" href="css/bazzite-main.min.css" />
-        <link rel="stylesheet" href="css/bamos-overrides.css" />
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="robots" content="noindex, follow" />
+        <meta name="theme-color" content="#2d8a4e" />
+        <meta
+            name="description"
+            content="BamOS — Hệ điều hành cho người Việt. Driver NVIDIA sẵn sàng, WPS Office, Zoom, Zalo, Chrome, bộ gõ tiếng Việt. Không lo virus, rollback như mới."
+        />
+        <title>BamOS — Hệ điều hành cho người Việt</title>
+        <link rel="icon" type="image/svg+xml" href="svg/logo-bamos.svg" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+            crossorigin="anonymous"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+        />
+        <link rel="stylesheet" href="css/style.css" />
     </head>
-    <body data-page="home">
-        <div class="md-container">
-            <header class="md-header">
-                <nav class="md-header__inner md-grid">
-                    <a
-                        href="index.html"
-                        class="md-header__button md-logo"
-                        title="BamOS"
-                    >
-                        <svg viewBox="0 0 512 512" width="32">
-                            <rect
-                                width="512"
-                                height="512"
-                                rx="100"
-                                fill="var(--md-primary-fg-color)"
-                            />
-                            <g
-                                transform="translate(256,210)"
-                                stroke="white"
-                                stroke-width="12"
-                                stroke-linecap="round"
-                                fill="none"
-                            >
-                                <line x1="0" y1="-130" x2="0" y2="130" />
-                                <line x1="-113" y1="-65" x2="113" y2="65" />
-                                <line x1="-113" y1="65" x2="113" y2="-65" />
-                            </g>
-                            <text
-                                x="256"
-                                y="380"
-                                text-anchor="middle"
-                                font-family="Arial"
-                                font-size="80"
-                                fill="white"
-                            >
-                                Bam
-                            </text>
-                        </svg>
+    <body>
+        <!-- ========================================
+     Header
+     ======================================== -->
+        <header class="bam-header" id="header">
+            <div class="container">
+                <nav class="bam-nav">
+                    <a href="#" class="bam-brand">
+                        <img
+                            src="svg/logo-bamos-nav.svg"
+                            alt="BamOS Logo"
+                            width="36"
+                            height="36"
+                        />
+                        <span class="nav-bam">Bam</span
+                        ><span class="nav-os">OS</span>
                     </a>
-                    <div class="md-header__title">
-                        <span class="md-header__topic"
-                            ><span class="md-ellipsis"
-                                >BamOS Documentation</span
-                            ></span
-                        >
-                    </div>
-                    <div class="md-header__option">
-                        <div class="md-search">
-                            <input
-                                type="search"
-                                class="md-search__input"
-                                placeholder="Search..."
-                                onkeyup="doSearch(this.value)"
-                            />
-                            <div
-                                id="search-results"
-                                class="md-search-results"
-                            ></div>
-                        </div>
-                    </div>
-                    <a href="https://github.com/quocnho/bamos" class="md-source"
-                        ><svg viewBox="0 0 16 16" width="16">
-                            <path
-                                fill="currentColor"
-                                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-                            />
-                        </svg>
-                        GitHub</a
+                    <ul class="bam-nav-links">
+                        <li><a href="#features">Tính năng</a></li>
+                        <li><a href="#download">Tải về</a></li>
+                        <li><a href="#nixos-power">Sức mạnh NixOS</a></li>
+                        <li><a href="#flakes">Flakes</a></li>
+                        <li><a href="#community">Cộng đồng</a></li>
+                    </ul>
+                    <button
+                        class="theme-toggle"
+                        id="themeToggle"
+                        aria-label="Chuyển đổi giao diện"
+                        title="Sáng / Tối"
                     >
-                    <label class="md-header__button" for="__drawer">☰</label>
+                        <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+                    </button>
                 </nav>
-            </header>
-            <input
-                type="checkbox"
-                id="__drawer"
-                class="md-toggle"
-                style="display: none"
-            />
-            <div class="md-main">
-                <div class="md-main__inner md-grid">
-                    <nav class="md-sidebar md-sidebar--primary" id="sidebar">
-                        <div class="md-sidebar__scrollwrap">
-                            <div class="md-sidebar__inner">
-                                <nav class="md-nav md-nav--primary">
-                                    <ul class="md-nav__list">
-                                        <li
-                                            class="md-nav__item md-nav__item--section"
-                                        >
-                                            <span
-                                                class="md-nav__link md-nav__container"
-                                                ><span class="md-ellipsis"
-                                                    >Getting Started</span
-                                                ></span
-                                            >
-                                            <nav class="md-nav">
-                                                <ul class="md-nav__list">
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="index.html"
-                                                            class="md-nav__link md-nav__link--active"
-                                                            data-page="home"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >🏠 Home</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="faq.html"
-                                                            class="md-nav__link"
-                                                            data-page="faq"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >❓ FAQ</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                </ul>
-                                            </nav>
-                                        </li>
-                                        <li
-                                            class="md-nav__item md-nav__item--section"
-                                        >
-                                            <span
-                                                class="md-nav__link md-nav__container"
-                                                ><span class="md-ellipsis"
-                                                    >Installation</span
-                                                ></span
-                                            >
-                                            <nav class="md-nav">
-                                                <ul class="md-nav__list">
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="installation/guide.html"
-                                                            class="md-nav__link"
-                                                            data-page="install-guide"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >📖 Guide</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="installation/post-install.html"
-                                                            class="md-nav__link"
-                                                            data-page="install-post"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >🔧
-                                                                Post-Install</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="installation/troubleshoot.html"
-                                                            class="md-nav__link"
-                                                            data-page="install-troubleshoot"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >🛠
-                                                                Troubleshoot</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="installation/legacy.html"
-                                                            class="md-nav__link"
-                                                            data-page="install-legacy"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >💻 Legacy</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="installation/alternative.html"
-                                                            class="md-nav__link"
-                                                            data-page="install-alt"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >🔄
-                                                                Alternative</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                </ul>
-                                            </nav>
-                                        </li>
-                                        <li
-                                            class="md-nav__item md-nav__item--section"
-                                        >
-                                            <span
-                                                class="md-nav__link md-nav__container"
-                                                ><span class="md-ellipsis"
-                                                    >General</span
-                                                ></span
-                                            >
-                                            <nav class="md-nav">
-                                                <ul class="md-nav__list">
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="general/editions.html"
-                                                            class="md-nav__link"
-                                                            data-page="general-editions"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >📋
-                                                                Editions</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="general/comparison.html"
-                                                            class="md-nav__link"
-                                                            data-page="general-comparison"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >🔄
-                                                                Comparison</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="general/tweaks.html"
-                                                            class="md-nav__link"
-                                                            data-page="general-tweaks"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >⚙ Tweaks</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="general/vpn.html"
-                                                            class="md-nav__link"
-                                                            data-page="general-vpn"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >🔒 VPN</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="general/uninstalling.html"
-                                                            class="md-nav__link"
-                                                            data-page="general-uninstalling"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >🗑
-                                                                Uninstalling</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                </ul>
-                                            </nav>
-                                        </li>
-                                        <li
-                                            class="md-nav__item md-nav__item--section"
-                                        >
-                                            <span
-                                                class="md-nav__link md-nav__container"
-                                                ><span class="md-ellipsis"
-                                                    >Gaming</span
-                                                ></span
-                                            >
-                                            <nav class="md-nav">
-                                                <ul class="md-nav__list">
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="gaming/introduction.html"
-                                                            class="md-nav__link"
-                                                            data-page="gaming-intro"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >🎮
-                                                                Introduction</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="gaming/launchers.html"
-                                                            class="md-nav__link"
-                                                            data-page="gaming-launchers"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >🚀
-                                                                Launchers</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="gaming/launch-options.html"
-                                                            class="md-nav__link"
-                                                            data-page="gaming-options"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >⚙ Options</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                </ul>
-                                            </nav>
-                                        </li>
-                                        <li
-                                            class="md-nav__item md-nav__item--section"
-                                        >
-                                            <span
-                                                class="md-nav__link md-nav__container"
-                                                ><span class="md-ellipsis"
-                                                    >Software</span
-                                                ></span
-                                            >
-                                            <nav class="md-nav">
-                                                <ul class="md-nav__list">
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="software/center.html"
-                                                            class="md-nav__link"
-                                                            data-page="software-center"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >🖥 Center</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="software/flatpak.html"
-                                                            class="md-nav__link"
-                                                            data-page="software-flatpak"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >📂
-                                                                Flatpak</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="software/containers.html"
-                                                            class="md-nav__link"
-                                                            data-page="software-containers"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >🐳
-                                                                Containers</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="software/distrobox.html"
-                                                            class="md-nav__link"
-                                                            data-page="software-distrobox"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >📦
-                                                                Distrobox</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="software/appimage.html"
-                                                            class="md-nav__link"
-                                                            data-page="software-appimage"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >🗜
-                                                                AppImage</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="software/waydroid.html"
-                                                            class="md-nav__link"
-                                                            data-page="software-waydroid"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >📱
-                                                                Waydroid</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="software/updates.html"
-                                                            class="md-nav__link"
-                                                            data-page="software-updates"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >🔄
-                                                                Updates</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                </ul>
-                                            </nav>
-                                        </li>
-                                        <li
-                                            class="md-nav__item md-nav__item--section"
-                                        >
-                                            <span
-                                                class="md-nav__link md-nav__container"
-                                                ><span class="md-ellipsis"
-                                                    >Advanced</span
-                                                ></span
-                                            >
-                                            <nav class="md-nav">
-                                                <ul class="md-nav__list">
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="advanced/cli.html"
-                                                            class="md-nav__link"
-                                                            data-page="advanced-cli"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >⌨ CLI</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="advanced/custom-image.html"
-                                                            class="md-nav__link"
-                                                            data-page="advanced-custom"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >🛠 Custom
-                                                                Image</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="advanced/reset-password.html"
-                                                            class="md-nav__link"
-                                                            data-page="advanced-password"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >🔑
-                                                                Password</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                </ul>
-                                            </nav>
-                                        </li>
-                                        <li
-                                            class="md-nav__item md-nav__item--section"
-                                        >
-                                            <span
-                                                class="md-nav__link md-nav__container"
-                                                ><span class="md-ellipsis"
-                                                    >Community</span
-                                                ></span
-                                            >
-                                            <nav class="md-nav">
-                                                <ul class="md-nav__list">
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="community/contributing.html"
-                                                            class="md-nav__link"
-                                                            data-page="community-contributing"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >🤝
-                                                                Contribute</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="community/bugs.html"
-                                                            class="md-nav__link"
-                                                            data-page="community-bugs"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >🐛 Bugs</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="community/links.html"
-                                                            class="md-nav__link"
-                                                            data-page="community-links"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >🔗 Links</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                </ul>
-                                            </nav>
-                                        </li>
-                                        <li
-                                            class="md-nav__item md-nav__item--section"
-                                        >
-                                            <span
-                                                class="md-nav__link md-nav__container"
-                                                ><span class="md-ellipsis"
-                                                    >Resources</span
-                                                ></span
-                                            >
-                                            <nav class="md-nav">
-                                                <ul class="md-nav__list">
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="resources/specs.html"
-                                                            class="md-nav__link"
-                                                            data-page="resources-specs"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >🔧 Specs</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="resources/kernel.html"
-                                                            class="md-nav__link"
-                                                            data-page="resources-kernel"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >🧠 Kernel</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="resources/cache.html"
-                                                            class="md-nav__link"
-                                                            data-page="resources-cache"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >💾 Cache</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                    <li class="md-nav__item">
-                                                        <a
-                                                            href="resources/download.html"
-                                                            class="md-nav__link"
-                                                            data-page="resources-download"
-                                                            ><span
-                                                                class="md-ellipsis"
-                                                                >⬇
-                                                                Download</span
-                                                            ></a
-                                                        >
-                                                    </li>
-                                                </ul>
-                                            </nav>
-                                        </li>
-                                    </ul>
-                                </nav>
-                            </div>
+            </div>
+        </header>
+
+        <!-- ========================================
+     Hero — "Bạn Làm Chủ" (Pop!_OS style)
+     ======================================== -->
+        <section class="hero" id="hero">
+            <div class="container">
+                <div class="hero-logo fade-in-up floating">
+                    <img
+                        src="svg/logo-bamos.svg"
+                        alt="BamOS"
+                        class="bamboo-logo"
+                        width="140"
+                        height="140"
+                    />
+                </div>
+                <h1 class="fade-in-up delay-1">
+                    <span class="hero-bam">Bam</span
+                    ><span class="hero-os">OS</span>
+                </h1>
+                <p class="tagline fade-in-up delay-2">
+                    <strong> Hệ điều hành cho người Việt Nam </strong><br />
+                    mạnh mẽ, an toàn, sẵn sàng cho công việc và giải trí.<br />
+                    Dựa trên nền tảng <strong>NixOS</strong> với triết lý
+                    <em>"Cây tre trăm đốt"</em>.
+                </p>
+                <div class="philosophy fade-in-up delay-3">
+                    <span
+                        >🎋 Mỗi đốt tre là một module — Độc lập, liên kết, bền
+                        chặt</span
+                    >
+                </div>
+                <!-- Compact maintenance bar -->
+                <div class="maintenance-bar fade-in-up delay-3">
+                    <span class="maintenance-bar-icon">🛠️</span>
+                    <span class="maintenance-bar-text"
+                        >Website đang bảo trì — Ra mắt
+                        <strong>06/06/2026</strong></span
+                    >
+                    <div class="countdown-inline" id="countdown">
+                        <div class="ci-item">
+                            <span class="ci-num" id="days">00</span
+                            ><span class="ci-lbl">Ngày</span>
                         </div>
-                    </nav>
-                    <div class="md-content">
-                        <article class="md-content__inner md-typeset">
-                            <h1>
-                                Chào mừng đến với BamOS <small>v0.4.0</small>
-                            </h1>
-                            <p>
-                                <strong>BamOS</strong> là bản phân phối NixOS
-                                dành cho cộng đồng người dùng Việt Nam —
-                                immutable, atomic, và sẵn sàng sử dụng tiếng
-                                Việt ngay sau cài đặt.
-                            </p>
-
-                            <div class="bamos-video-placeholder">
-                                <img
-                                    src="assets/images/placeholder.svg"
-                                    alt="BamOS Hero"
-                                    style="max-width: 700px"
-                                />
-                                <p>
-                                    🎬 BamOS Demo — Xem tổng quan hệ thống (sẽ
-                                    cập nhật sau)
-                                </p>
-                            </div>
-
-                            <div class="grid cards">
-                                <ul>
-                                    <li>
-                                        <h3>
-                                            📖
-                                            <a href="installation/guide.html"
-                                                >Cài đặt BamOS</a
-                                            >
-                                        </h3>
-                                        <p>
-                                            BamOS hỗ trợ hầu hết PC hiện đại và
-                                            laptop. Từ desktop đến Framework,
-                                            ThinkPad, Dell XPS.
-                                        </p>
-                                    </li>
-                                    <li>
-                                        <h3>
-                                            🎮
-                                            <a href="gaming/introduction.html"
-                                                >Chơi Game</a
-                                            >
-                                        </h3>
-                                        <p>
-                                            BamOS tích hợp sẵn Steam và Lutris.
-                                            Hỗ trợ Proton, GameScope, MangoHud
-                                            và tay cầm chơi game.
-                                        </p>
-                                    </li>
-                                    <li>
-                                        <h3>
-                                            🖥
-                                            <a href="software/center.html"
-                                                >Cài đặt Phần mềm</a
-                                            >
-                                        </h3>
-                                        <p>
-                                            Flatpak, AppImage, Container
-                                            (Podman/Distrobox) — tha hồ lựa
-                                            chọn. Software Center đồ họa cho mọi
-                                            DE.
-                                        </p>
-                                    </li>
-                                    <li>
-                                        <h3>
-                                            🔄
-                                            <a href="software/updates.html"
-                                                >Cập nhật & Rollback</a
-                                            >
-                                        </h3>
-                                        <p>
-                                            Cập nhật không đau đầu. Rollback dễ
-                                            dàng. Hệ thống immutable bảo vệ bạn.
-                                        </p>
-                                    </li>
-                                    <li>
-                                        <h3>
-                                            📱
-                                            <a href="software/waydroid.html"
-                                                >Ứng dụng Android</a
-                                            >
-                                        </h3>
-                                        <p>
-                                            Chạy ứng dụng Android trong
-                                            container với Waydroid. Hỗ trợ
-                                            Google Play và F-Droid.
-                                        </p>
-                                    </li>
-                                    <li>
-                                        <h3>
-                                            🤝
-                                            <a
-                                                href="community/contributing.html"
-                                                >Đóng góp</a
-                                            >
-                                        </h3>
-                                        <p>
-                                            BamOS là mã nguồn mở. Fork, sửa,
-                                            build ISO riêng — bất kỳ ai cũng có
-                                            thể đóng góp.
-                                        </p>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <h2>✨ Tính năng nổi bật</h2>
-
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Tính năng</th>
-                                        <th>Mô tả</th>
-                                        <th>Trạng thái</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Gõ tiếng Việt OOTB</td>
-                                        <td>
-                                            Fcitx5 + Bamboo — gõ Telex, VNI,
-                                            VIQR ngay sau cài đặt
-                                        </td>
-                                        <td>
-                                            <span
-                                                class="bamos-tag bamos-tag-stable"
-                                                >✅ Stable</span
-                                            >
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Btrfs Storage</td>
-                                        <td>
-                                            Phân vùng Ổ C — Ổ D tự động
-                                            (Documents, Downloads → /data)
-                                        </td>
-                                        <td>
-                                            <span
-                                                class="bamos-tag bamos-tag-stable"
-                                                >✅ Stable</span
-                                            >
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Immutable Core</td>
-                                        <td>
-                                            Hệ thống gốc chỉ đọc, atomic
-                                            updates, rollback an toàn
-                                        </td>
-                                        <td>
-                                            <span
-                                                class="bamos-tag bamos-tag-stable"
-                                                >✅ Stable</span
-                                            >
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Multi-kernel</td>
-                                        <td>
-                                            LTS (ISO) + Zen (mặc định) + XanMod
-                                            (Gaming)
-                                        </td>
-                                        <td>
-                                            <span
-                                                class="bamos-tag bamos-tag-stable"
-                                                >✅ Stable</span
-                                            >
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>12 ISO Variants</td>
-                                        <td>
-                                            3 DE (GNOME, KDE, COSMIC) × 4
-                                            Editions
-                                        </td>
-                                        <td>
-                                            <span
-                                                class="bamos-tag bamos-tag-new"
-                                                >🟢 GNOME+KDE</span
-                                            ><span class="bamos-future"
-                                                >COSMIC sắp ra mắt</span
-                                            >
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Cachix Binary Cache</td>
-                                        <td>
-                                            Build nhanh hơn nhờ binary cache,
-                                            CI/CD tự động
-                                        </td>
-                                        <td>
-                                            <span
-                                                class="bamos-tag bamos-tag-stable"
-                                                >✅ Stable</span
-                                            >
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Software Center</td>
-                                        <td>
-                                            GNOME Software / KDE Discover / Gear
-                                            Lever
-                                        </td>
-                                        <td>
-                                            <span
-                                                class="bamos-tag bamos-tag-new"
-                                                >✅ Có</span
-                                            >
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Gear Lever</td>
-                                        <td>
-                                            Quản lý AppImage bằng giao diện đồ
-                                            họa
-                                        </td>
-                                        <td>
-                                            <span
-                                                class="bamos-tag bamos-tag-new"
-                                                >✅ Có</span
-                                            >
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>BamOS Portal</td>
-                                        <td>GUI quản lý hệ thống toàn diện</td>
-                                        <td>
-                                            <span class="bamos-future"
-                                                >✨ Tương lai</span
-                                            >
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-
-                            <h2>📦 Tải BamOS ngay</h2>
-                            <p>
-                                <a
-                                    href="resources/download.html"
-                                    class="md-button md-button--primary"
-                                    >⬇ Tải ISO mới nhất</a
-                                >
-                                <a
-                                    href="general/editions.html"
-                                    class="md-button"
-                                    >📋 Xem các phiên bản</a
-                                >
-                            </p>
-
-                            <p>
-                                <small
-                                    >Được cập nhật: 06/07/2026 · Phiên bản mới
-                                    nhất: v0.4.0</small
-                                >
-                            </p>
-                        </article>
+                        <span class="ci-sep">:</span>
+                        <div class="ci-item">
+                            <span class="ci-num" id="hours">00</span
+                            ><span class="ci-lbl">Giờ</span>
+                        </div>
+                        <span class="ci-sep">:</span>
+                        <div class="ci-item">
+                            <span class="ci-num" id="minutes">00</span
+                            ><span class="ci-lbl">Phút</span>
+                        </div>
+                        <span class="ci-sep">:</span>
+                        <div class="ci-item">
+                            <span class="ci-num" id="seconds">00</span
+                            ><span class="ci-lbl">Giây</span>
+                        </div>
                     </div>
                 </div>
             </div>
-            <footer class="md-footer">
-                <div class="md-footer-meta">
-                    <div class="md-footer-meta__inner md-grid">
-                        <div class="md-copyright">
-                            <span class="md-copyright__highlight"
-                                >MIT License © 2026 BamOS Project</span
-                            >
-                            Built with ❤️ for the Vietnamese Linux community
+        </section>
+
+        <!-- ========================================
+     Tính năng nổi bật (Pop!_OS style grid)
+     ======================================== -->
+        <section class="features-grid-section" id="features">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Mọi thứ có sẵn trong BamOS</h2>
+                    <p>Cài xong là dùng. Không cần cài thêm.</p>
+                </div>
+                <div class="row g-4">
+                    <!-- Row 1 -->
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="feature-card fade-in-up delay-1">
+                            <span class="feature-icon">🎮</span>
+                            <h3>Driver NVIDIA</h3>
+                            <p>
+                                Sẵn sàng cho gaming và đồ họa. Không lo đụng
+                                driver.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="feature-card fade-in-up delay-2">
+                            <span class="feature-icon">📝</span>
+                            <h3>WPS Office</h3>
+                            <p>
+                                Soạn thảo văn bản, bảng tính, trình chiếu —
+                                tương thích Microsoft Office.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="feature-card fade-in-up delay-1">
+                            <span class="feature-icon"
+                                ><i
+                                    class="bi bi-chat-dots-fill"
+                                    style="color: #0068ff"
+                                ></i
+                            ></span>
+                            <h3>Zoom &amp; Zalo</h3>
+                            <p>
+                                Họp hành, chat chit, kết nối — có sẵn ngay từ
+                                lần đầu khởi động.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="feature-card fade-in-up delay-2">
+                            <span class="feature-icon">🌐</span>
+                            <h3>Chrome</h3>
+                            <p>
+                                Trình duyệt quen thuộc, đồng bộ bookmark, mật
+                                khẩu, tiện ích.
+                            </p>
+                        </div>
+                    </div>
+                    <!-- Row 2 -->
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="feature-card fade-in-up delay-1">
+                            <span class="feature-icon">🎨</span>
+                            <h3>Chỉnh sửa ảnh &amp; video</h3>
+                            <p>
+                                Công cụ sáng tạo tích hợp sẵn — GIMP, Kdenlive
+                                và hơn thế nữa.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="feature-card fade-in-up delay-2">
+                            <span class="feature-icon">⌨️</span>
+                            <h3>Bộ gõ tiếng Việt</h3>
+                            <p>
+                                UniKey, Bamboo — gõ tiếng Việt mọi lúc mọi nơi,
+                                không cần cài thêm.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="feature-card fade-in-up delay-1">
+                            <span class="feature-icon">🛡️</span>
+                            <h3>Không lo virus</h3>
+                            <p>
+                                Hệ thống bất biến (immutable) — không ai có thể
+                                phá hoại dữ liệu của bạn.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="feature-card fade-in-up delay-2">
+                            <span class="feature-icon">🔄</span>
+                            <h3>Rollback như mới</h3>
+                            <p>
+                                Hỏng gì cũng quay lại được. Mỗi lần khởi động là
+                                một phiên bản sạch.
+                            </p>
                         </div>
                     </div>
                 </div>
-            </footer>
-        </div>
-        <script src="js/include.js"></script>
+            </div>
+        </section>
+
+        <!-- ========================================
+     Download Section (GLF OS style)
+     ======================================== -->
+        <section class="download-section" id="download">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Tải về BamOS</h2>
+                    <p>
+                        Phiên bản hiện tại: <strong>RỒNG TINH VÂN</strong> — ra
+                        mắt ngày <strong>1 tháng 6 năm 2026</strong>
+                    </p>
+                </div>
+
+                <!-- Edition Cards -->
+                <div class="editions-grid">
+                    <!-- Minimum -->
+                    <div class="edition-card fade-in-up">
+                        <div class="edition-badge">Minimum</div>
+                        <h3 class="edition-name">BamOS Minimum</h3>
+                        <p class="edition-desc">
+                            Nhẹ nhất, chỉ những gì cần thiết. Lý tưởng cho máy
+                            cấu hình thấp hoặc người dùng tối giản.
+                        </p>
+                        <ul class="edition-features">
+                            <li>🐧 Kernel 6.18 LTS</li>
+                            <li>🖥️ Hyprland / Sway</li>
+                            <li>📝 WPS Office</li>
+                            <li>🌐 Chrome</li>
+                        </ul>
+                        <div class="edition-buttons">
+                            <a
+                                href="#"
+                                class="btn btn-primary btn-sm"
+                                onclick="return false;"
+                                >⬇ Direct</a
+                            >
+                            <a
+                                href="#"
+                                class="btn btn-outline btn-sm"
+                                onclick="return false;"
+                                >🌊 Torrent</a
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Standard -->
+                    <div class="edition-card fade-in-up delay-1">
+                        <div class="edition-badge edition-badge-pop">
+                            Standard
+                        </div>
+                        <h3 class="edition-name">BamOS Standard</h3>
+                        <p class="edition-desc">
+                            Trải nghiệm đầy đủ cho công việc và giải trí hàng
+                            ngày. Phù hợp với hầu hết người dùng.
+                        </p>
+                        <ul class="edition-features">
+                            <li>🐧 Kernel 6.18 LTS</li>
+                            <li>🖥️ GNOME / KDE</li>
+                            <li>📝 WPS Office</li>
+                            <li>🌐 Chrome</li>
+                            <li>💬 Zoom &amp; Zalo</li>
+                        </ul>
+                        <div class="edition-buttons">
+                            <a
+                                href="#"
+                                class="btn btn-primary btn-sm"
+                                onclick="return false;"
+                                >⬇ Direct</a
+                            >
+                            <a
+                                href="#"
+                                class="btn btn-outline btn-sm"
+                                onclick="return false;"
+                                >🌊 Torrent</a
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Studio -->
+                    <div class="edition-card fade-in-up delay-2">
+                        <div class="edition-badge">Studio</div>
+                        <h3 class="edition-name">BamOS Studio</h3>
+                        <p class="edition-desc">
+                            Cho nhà sáng tạo nội dung. Chỉnh sửa ảnh, video, âm
+                            thanh chuyên nghiệp.
+                        </p>
+                        <ul class="edition-features">
+                            <li>🐧 Kernel 6.18 LTS</li>
+                            <li>🖥️ GNOME / KDE</li>
+                            <li>🎨 GIMP, Kdenlive</li>
+                            <li>🎥 OBS Studio</li>
+                            <li>🎵 Audacity, LMMS</li>
+                        </ul>
+                        <div class="edition-buttons">
+                            <a
+                                href="#"
+                                class="btn btn-primary btn-sm"
+                                onclick="return false;"
+                                >⬇ Direct</a
+                            >
+                            <a
+                                href="#"
+                                class="btn btn-outline btn-sm"
+                                onclick="return false;"
+                                >🌊 Torrent</a
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Gaming -->
+                    <div class="edition-card fade-in-up delay-3">
+                        <div class="edition-badge edition-badge-pop">
+                            Gaming
+                        </div>
+                        <h3 class="edition-name">BamOS Gaming</h3>
+                        <p class="edition-desc">
+                            Tối ưu cho game thủ. Driver NVIDIA, Steam, tối ưu
+                            hiệu năng.
+                        </p>
+                        <ul class="edition-features">
+                            <li>🐧 Kernel 6.18 LTS</li>
+                            <li>🎮 NVIDIA driver 590.48</li>
+                            <li>🚀 Faugus / Steam</li>
+                            <li>📊 GOverlay + MangoHud</li>
+                            <li>🖥️ GPU RTX 30/40/50</li>
+                        </ul>
+                        <div class="edition-buttons">
+                            <a
+                                href="#"
+                                class="btn btn-primary btn-sm"
+                                onclick="return false;"
+                                >⬇ Direct</a
+                            >
+                            <a
+                                href="#"
+                                class="btn btn-outline btn-sm"
+                                onclick="return false;"
+                                >🌊 Torrent</a
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Requirements -->
+                <div class="download-sysreq fade-in-up delay-4">
+                    <div class="sysreq-header">
+                        <i class="bi bi-cpu"></i>
+                        <span>Cấu hình tối thiểu</span>
+                    </div>
+                    <div class="sysreq-grid">
+                        <div class="sysreq-item">
+                            <strong>RAM</strong>
+                            <span>8 GB (16 GB cho bản Studio / Gaming)</span>
+                        </div>
+                        <div class="sysreq-item">
+                            <strong>Ổ cứng</strong>
+                            <span>60 GB SSD khuyến nghị</span>
+                        </div>
+                        <div class="sysreq-item">
+                            <strong>GPU</strong>
+                            <span>AMD / Intel / NVIDIA ≥ GTX 1650</span>
+                        </div>
+                    </div>
+                    <p class="sysreq-tool">
+                        <i class="bi bi-usb-plug"></i>
+                        Công cụ tạo USB:
+                        <a
+                            href="https://etcher.balena.io/"
+                            target="_blank"
+                            rel="noopener"
+                            >Balena Etcher</a
+                        >
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================
+     Tại sao BamOS? — 4 trụ cột
+     ======================================== -->
+        <section class="why-section" id="why">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Tại sao chọn BamOS?</h2>
+                    <p>
+                        Kết hợp tinh hoa công nghệ NixOS và triết lý Việt Nam.
+                    </p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="pillar-card fade-in-up delay-1">
+                            <span class="pillar-icon">🎋</span>
+                            <h3>Triết lý Tre Trăm Đốt</h3>
+                            <p>
+                                Module độc lập, liên kết chặt chẽ. Gãy một đốt,
+                                cây vẫn vững — giống như BamOS:
+                                <strong>modular, minh bạch, tái tạo được</strong
+                                >.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="pillar-card fade-in-up delay-2">
+                            <span class="pillar-icon">🇻🇳</span>
+                            <h3>Cho người Việt Nam</h3>
+                            <p>
+                                Giao diện tiếng Việt toàn diện. Từ lập trình
+                                viên đến người dùng phổ thông —
+                                <strong>BamOS nói ngôn ngữ của bạn</strong>.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="pillar-card fade-in-up delay-3">
+                            <span class="pillar-icon">🔒</span>
+                            <h3>Ổn định &amp; An toàn</h3>
+                            <p>
+                                Dựa trên <strong>NixOS</strong> — mỗi thay đổi
+                                được cô lập. Rollback về phiên bản trước chỉ
+                                trong vài giây.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="pillar-card fade-in-up delay-4">
+                            <span class="pillar-icon">⚡</span>
+                            <h3>Khai báo &amp; Tái tạo</h3>
+                            <p>
+                                Cấu hình hệ thống bằng code. Chia sẻ môi trường
+                                dev chỉ với một file.
+                                <strong
+                                    >"It works on my machine" không còn là vấn
+                                    đề.</strong
+                                >
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================
+     Sức mạnh NixOS trong BamOS
+     ======================================== -->
+        <section class="nixos-power-section" id="nixos-power">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Sức mạnh NixOS trong BamOS</h2>
+                    <p>
+                        BamOS kế thừa toàn bộ sức mạnh của NixOS — hệ điều hành
+                        khai báo (declarative) hàng đầu thế giới.
+                    </p>
+                </div>
+                <div class="nixos-grid">
+                    <div class="nixos-card fade-in-up">
+                        <span class="nixos-card-icon">🛠️</span>
+                        <h4>Môi trường dev luôn sẵn sàng</h4>
+                        <p>
+                            Không còn "trên máy tôi chạy được mà". Môi trường
+                            phát triển đồng nhất, tái tạo chính xác trên mọi
+                            máy.
+                        </p>
+                    </div>
+                    <div class="nixos-card fade-in-up delay-1">
+                        <span class="nixos-card-icon">🌐</span>
+                        <h4>Một công cụ, mọi ngôn ngữ</h4>
+                        <p>
+                            Dù bạn dùng Python, Rust, Node.js hay Go — tất cả
+                            cùng chung một cách build, một cách deploy.
+                        </p>
+                    </div>
+                    <div class="nixos-card fade-in-up delay-2">
+                        <span class="nixos-card-icon">☁️</span>
+                        <h4>Từ code đến cloud</h4>
+                        <p>
+                            Build Docker image, Amazon EC2, Google Cloud — tất
+                            cả từ một file cấu hình duy nhất. DevOps chưa bao
+                            giờ dễ hơn.
+                        </p>
+                    </div>
+                    <div class="nixos-card fade-in-up">
+                        <span class="nixos-card-icon">⏪</span>
+                        <h4>Rollback bất cứ lúc nào</h4>
+                        <p>
+                            Nix không bao giờ ghi đè file. Mỗi lần cập nhật là
+                            một phiên bản mới — rollback chỉ trong tích tắc.
+                        </p>
+                    </div>
+                    <div class="nixos-card fade-in-up delay-1">
+                        <span class="nixos-card-icon">🧪</span>
+                        <h4>Thử nghiệm không sợ hãi</h4>
+                        <p>
+                            Cài phần mềm mới, thử nghiệm bleeding-edge — không
+                            lo hệ thống bị hỏng. Môi trường làm việc luôn nguyên
+                            vẹn.
+                        </p>
+                    </div>
+                    <div class="nixos-card fade-in-up delay-2">
+                        <span class="nixos-card-icon">🤝</span>
+                        <h4>Cộng đồng là sức mạnh</h4>
+                        <p>
+                            Đóng góp chỉ với một Pull Request. Cộng đồng toàn
+                            cầu sẵn sàng review, hướng dẫn, và cùng bạn xây
+                            dựng.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================
+     Code Example — Flakes &amp; Commands
+     ======================================== -->
+        <section class="code-section" id="flakes">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Khai báo. Tái tạo. Linh hoạt.</h2>
+                    <p>
+                        BamOS dùng <strong>Nix Flakes</strong> — chuẩn hiện đại
+                        để khai báo toàn bộ hệ thống. Một file, mọi thứ.
+                    </p>
+                </div>
+
+                <div class="row g-4 align-items-start">
+                    <!-- Left: flake.nix -->
+                    <div class="col-12 col-lg-6">
+                        <h3 style="font-weight: 700; margin-bottom: 1rem">
+                            🎯 flake.nix — Toàn bộ hệ thống
+                        </h3>
+                        <p
+                            style="
+                                color: var(--bam-text-secondary);
+                                line-height: 1.8;
+                            "
+                        >
+                            Với Flakes, mọi thứ được khai báo trong
+                            <code>flake.nix</code>. Từ kernel, desktop, driver
+                            NVIDIA, đến từng package — tất cả đều
+                            <strong>tái tạo chính xác</strong> trên mọi máy.
+                        </p>
+                        <!-- Code Editor Mockup -->
+                        <div class="code-mockup floating">
+                            <!-- Title bar -->
+                            <div class="code-mockup-bar">
+                                <span class="cm-dot cm-dot-red"></span>
+                                <span class="cm-dot cm-dot-yellow"></span>
+                                <span class="cm-dot cm-dot-green"></span>
+                                <span class="cm-title"
+                                    >flake.nix — BamOS RỒNG TINH VÂN</span
+                                >
+                            </div>
+                            <!-- Code body -->
+                            <div class="code-mockup-body">
+                                <span class="cm-keyword">description</span> =
+                                <span class="cm-string"
+                                    >"Hệ điều hành cho người Việt"</span
+                                >;<br /><br />
+                                <span class="cm-keyword">outputs</span> = {
+                                self, nixpkgs, bamos, ... }: {<br />
+                                &nbsp;&nbsp;<span class="cm-keyword"
+                                    >nixosConfigurations</span
+                                >.bamos = nixpkgs.lib.nixosSystem {<br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span class="cm-prop"
+                                    >system</span
+                                >
+                                =
+                                <span class="cm-string">"x86_64-linux"</span
+                                >;<br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span class="cm-prop"
+                                    >modules</span
+                                >
+                                = [<br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bamos.nixosModules.default<br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    class="cm-comment"
+                                    ># Môi trường Desktop</span
+                                ><br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    class="cm-prop"
+                                    >bamos.desktop</span
+                                >
+                                =
+                                <span class="cm-string">"hyprland"</span>;<br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    class="cm-comment"
+                                    ># Driver NVIDIA sẵn sàng</span
+                                ><br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    class="cm-prop"
+                                    >services.xserver.videoDrivers</span
+                                >
+                                = [
+                                <span class="cm-string">"nvidia"</span> ];<br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    class="cm-comment"
+                                    ># Ứng dụng cho người Việt</span
+                                ><br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    class="cm-prop"
+                                    >environment.systemPackages</span
+                                >
+                                = <span class="cm-keyword">with</span> pkgs;
+                                [<br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;unikey
+                                google-chrome wpsoffice<br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;zoom-us
+                                zalo vscode docker<br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;];<br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;];<br />
+                                &nbsp;&nbsp;};<br />
+                                };<br />
+                                <span class="cm-prompt">➜ ~ </span
+                                ><span class="cm-cursor">_</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: BamOS Builder -->
+                    <div class="col-12 col-lg-6">
+                        <h3 style="font-weight: 700; margin-bottom: 1rem">
+                            ⚡ BamOS Builder — Tùy biến hệ điều hành của riêng
+                            bạn
+                        </h3>
+                        <p
+                            style="
+                                color: var(--bam-text-secondary);
+                                line-height: 1.7;
+                                margin-bottom: 1.25rem;
+                                font-size: 0.9rem;
+                            "
+                        >
+                            Chọn môi trường, GPU và edition — Builder sẽ sinh
+                            <code>flake.nix</code> tối ưu cho phần cứng &amp;
+                            nhu cầu của bạn.
+                        </p>
+
+                        <div class="builder-card">
+                            <!-- Step 1: Desktop -->
+                            <div class="builder-step">
+                                <label class="builder-label"
+                                    >1. Môi trường Desktop</label
+                                >
+                                <div class="builder-options">
+                                    <button class="builder-opt active">
+                                        Hyprland
+                                    </button>
+                                    <button class="builder-opt">GNOME</button>
+                                    <button class="builder-opt">
+                                        KDE Plasma
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: GPU -->
+                            <div class="builder-step">
+                                <label class="builder-label"
+                                    >2. Đồ họa (GPU)</label
+                                >
+                                <div class="builder-options">
+                                    <button class="builder-opt active">
+                                        NVIDIA (Proprietary)
+                                    </button>
+                                    <button class="builder-opt">
+                                        AMD / Intel (Mesa)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Step 3: Edition -->
+                            <div class="builder-step">
+                                <label class="builder-label"
+                                    >3. Chọn Edition</label
+                                >
+                                <div class="builder-options">
+                                    <button class="builder-opt">Minimum</button>
+                                    <button class="builder-opt active">
+                                        Standard
+                                    </button>
+                                    <button class="builder-opt">Studio</button>
+                                    <button class="builder-opt">Gaming</button>
+                                </div>
+                            </div>
+
+                            <!-- Specs & Generate -->
+                            <div class="builder-footer">
+                                <div class="builder-specs">
+                                    <span
+                                        ><i class="bi bi-memory"></i> RAM ≥ 8
+                                        GB</span
+                                    >
+                                    <span
+                                        ><i class="bi bi-hdd"></i> Storage ≥ 20
+                                        GB</span
+                                    >
+                                </div>
+                                <button class="builder-generate">
+                                    <i class="bi bi-lightning-charge-fill"></i>
+                                    Sinh flake.nix &amp; Build ISO
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================
+     Cộng đồng
+     ======================================== -->
+        <section class="community-section" id="community">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Tham gia cộng đồng</h2>
+                    <p>
+                        Dự án mã nguồn mở — được xây dựng bởi cộng đồng, cho
+                        cộng đồng.
+                    </p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <a href="#" class="community-card">
+                            <span class="community-icon"
+                                ><i
+                                    class="bi bi-discord"
+                                    style="color: #5865f2"
+                                ></i
+                            ></span>
+                            <h4>Discord</h4>
+                            <p>
+                                Kênh chat chính — trao đổi, hỗ trợ nhanh, kết
+                                nối cộng đồng.
+                            </p>
+                            <span class="arrow">Tham gia ngay →</span>
+                        </a>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <a href="#" class="community-card">
+                            <span class="community-icon"
+                                ><i
+                                    class="bi bi-github"
+                                    style="color: var(--bam-text)"
+                                ></i
+                            ></span>
+                            <h4>GitHub</h4>
+                            <p>Mã nguồn, issue tracker, tài liệu phát triển.</p>
+                            <span class="arrow">Xem repository →</span>
+                        </a>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <a href="#" class="community-card">
+                            <span class="community-icon"
+                                ><i
+                                    class="bi bi-chat-square-text"
+                                    style="color: #4bac00"
+                                ></i
+                            ></span>
+                            <h4>Matrix</h4>
+                            <p>
+                                Không gian phi tập trung, tự do. Kết nối trực
+                                tiếp với dev.
+                            </p>
+                            <span class="arrow">Tham gia phòng →</span>
+                        </a>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <a href="#" class="community-card">
+                            <span class="community-icon"
+                                ><i
+                                    class="bi bi-journal-bookmark-fill"
+                                    style="color: var(--bam-gold)"
+                                ></i
+                            ></span>
+                            <h4>Tài liệu &amp; Wiki</h4>
+                            <p>
+                                Hướng dẫn cài đặt, sử dụng. Tài liệu tiếng Việt
+                                đầy đủ.
+                            </p>
+                            <span class="arrow">Đọc tài liệu →</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================
+     Footer
+     ======================================== -->
+        <footer class="bam-footer">
+            <div class="container">
+                <div class="row g-4">
+                    <div class="col-12 col-lg-4">
+                        <div class="footer-logo">
+                            <img
+                                src="svg/logo-bamos-nav.svg"
+                                alt="BamOS"
+                                width="28"
+                                height="28"
+                            />
+                            <span
+                                ><span style="color: #2d8a4e">Bam</span>OS</span
+                            >
+                        </div>
+                        <p
+                            style="
+                                color: var(--bam-text-secondary);
+                                font-size: 0.9rem;
+                                line-height: 1.7;
+                                max-width: 320px;
+                            "
+                        >
+                            Hệ điều hành cho người Việt Nam, dựa trên triết lý
+                            "Cây tre trăm đốt". Kết hợp sức mạnh NixOS — vững
+                            chắc, linh hoạt, khai báo và tái tạo.
+                        </p>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <h5>Dự án</h5>
+                        <ul>
+                            <li><a href="#">Trang chủ</a></li>
+                            <li><a href="#">Tải về</a></li>
+                            <li><a href="#">Tài liệu</a></li>
+                            <li><a href="#">Blog</a></li>
+                            <li><a href="#">Lộ trình</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <h5>Cộng đồng</h5>
+                        <ul>
+                            <li><a href="#">Discord</a></li>
+                            <li><a href="#">GitHub</a></li>
+                            <li><a href="#">Matrix</a></li>
+                            <li><a href="#">Diễn đàn</a></li>
+                            <li><a href="#">Đóng góp</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-12 col-md-4 col-lg-2">
+                        <h5>Nền tảng</h5>
+                        <ul>
+                            <li>
+                                <a
+                                    href="https://nixos.org"
+                                    target="_blank"
+                                    rel="noopener"
+                                    >NixOS →</a
+                                >
+                            </li>
+                            <li>
+                                <a
+                                    href="https://nixos.wiki"
+                                    target="_blank"
+                                    rel="noopener"
+                                    >NixOS Wiki →</a
+                                >
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <span
+                        >© 2026 BamOS — Dự án mã nguồn mở của cộng đồng người
+                        Việt.</span
+                    >
+                    <div class="footer-social">
+                        <a href="#" title="GitHub"
+                            ><i class="bi bi-github"></i
+                        ></a>
+                        <a href="#" title="Discord"
+                            ><i class="bi bi-discord"></i
+                        ></a>
+                        <a href="#" title="Matrix"
+                            ><i class="bi bi-chat-square-text"></i
+                        ></a>
+                        <a href="#" title="RSS"><i class="bi bi-rss"></i></a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Mobile Bottom Navigation -->
+        <nav class="mobile-nav" id="mobileNav">
+            <a
+                href="#hero"
+                class="mobile-nav-item active"
+                data-section="hero"
+                title="Trang chủ"
+                aria-label="Trang chủ"
+            >
+                <i class="bi bi-house-fill"></i>
+            </a>
+            <a
+                href="#features"
+                class="mobile-nav-item"
+                data-section="features"
+                title="Tính năng"
+                aria-label="Tính năng"
+            >
+                <i class="bi bi-grid-fill"></i>
+            </a>
+            <a
+                href="#download"
+                class="mobile-nav-item"
+                data-section="download"
+                title="Tải về"
+                aria-label="Tải về"
+            >
+                <i class="bi bi-download"></i>
+            </a>
+            <a
+                href="#flakes"
+                class="mobile-nav-item"
+                data-section="flakes"
+                title="Flakes"
+                aria-label="Flakes"
+            >
+                <i class="bi bi-terminal"></i>
+            </a>
+            <a
+                href="#community"
+                class="mobile-nav-item"
+                data-section="community"
+                title="Cộng đồng"
+                aria-label="Cộng đồng"
+            >
+                <i class="bi bi-people-fill"></i>
+            </a>
+        </nav>
+
+        <!-- Scripts -->
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+            crossorigin="anonymous"
+        ></script>
+        <script src="js/main.js"></script>
     </body>
 </html>

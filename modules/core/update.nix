@@ -262,5 +262,6 @@ in
           ExecStart = "${notifyFailureScript}/bin/bamos-update-notify-failure";
         };
       };
-    };
-    }
+    })
+  ];
+}
