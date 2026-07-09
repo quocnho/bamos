@@ -127,7 +127,8 @@ in
         # Network: WiFi power saving
         "iwlwifi.power_save=1"
         # Intel P-state: on battery
-        "intel_idle.max_cstate=4"
+        # intel_idle.max_cstate=2: ngăn C3/C6 gây mất wakeup keyboard (LG Gram issue)
+        "intel_idle.max_cstate=2"
       ];
 
       kernelModules = lib.optionals cfg.batteryOptimized [
@@ -170,6 +171,10 @@ in
     services.udev.extraRules = lib.mkIf cfg.batteryOptimized ''
       # PCI Runtime PM: cho phép PCI devices tự động sleep
       ACTION=="add", SUBSYSTEM=="pci", ATTR{power/control}="auto"
+
+      # PS/2 keyboard wakeup: đảm bảo bàn phím có thể đánh thức máy từ suspend
+      # Fix cho LG Gram: serio0 là AT Translated Set 2 keyboard
+      ACTION=="add", SUBSYSTEM=="serio", DRIVER=="atkbd", ATTR{power/wakeup}="enabled"
     '';
 
     # ═══════════════════════════════════════════════════════

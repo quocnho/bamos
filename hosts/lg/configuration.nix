@@ -66,6 +66,11 @@
   };
 
   # ═══════════════════════════════════════════════
+  # Auto-update (GLF-OS pattern)
+  # ═══════════════════════════════════════════════
+  bamos.update.autoUpgrade = true;
+
+  # ═══════════════════════════════════════════════
   # Power Management — case study LG Gram
   #   CPU: i5-10210U (8 cores, 1.6-4.2 GHz)
   #   GPU: Intel UHD + NVIDIA GTX 1650 (offload)

@@ -95,6 +95,12 @@ in
     gnomeExtensions.blur-my-shell
     gnomeExtensions.user-themes
     gsettingsActivator # First-login activator
+
+    # Terminal emulator
+    ptyxis
+
+    # Nautilus context menu: Open in Terminal
+    nautilus-open-any-terminal
   ];
 
   # ═══════════════════════════════════════════════════════
@@ -120,27 +126,24 @@ in
   # GNOME apps to exclude (minimalism — RakuOS-inspired)
   # ═══════════════════════════════════════════════════════
   environment.gnome.excludePackages = with pkgs; [
-    gnome-console
     epiphany
     geary
     totem
     gedit
     cheese
-    gnome-music
+    # gnome-music
     gnome-logs
     gnome-characters
     gnome-tour
     gnome-weather
     gnome-maps
-    gnome-clocks
+    # gnome-clocks
     gnome-contacts
-    gnome-calculator
-    gnome-calendar
+    # gnome-calculator
+    # gnome-calendar
     gnome-user-docs
     xterm
-    kitty
     gnome-remote-desktop
-    gnome-tour
     gnome-connections
   ];
 
@@ -171,6 +174,9 @@ in
       };
       "org/gnome/nautilus/preferences" = {
         bookmarks = [ "file:///data" ];
+      };
+      "com/github/stunkymonkey/nautilus-open-any-terminal" = {
+        terminal = "ptyxis";
       };
       "org/gnome/shell" = {
         enabled-extensions = [

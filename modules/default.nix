@@ -7,10 +7,14 @@
     ./hardware/bluetooth.nix
     ./hardware/network.nix
     ./hardware/power-management.nix
+    ./hardware/backup.nix
     ./desktop/gnome.nix
     ./core/audio.nix
     ./core/user.nix
     ./core/optimization.nix
+    ./core/third-party.nix
+    ./core/version.nix
+    ./core/update.nix
     ./theming/bamos-branding.nix
     ./theming/gtk-theme.nix
   ];

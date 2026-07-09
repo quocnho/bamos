@@ -3,6 +3,9 @@
   # tuned profile: latency-performance — độ trễ thấp cho gaming
   bamos.power-management.profile = lib.mkDefault "latency-performance";
 
+  # Third-party: Wine cho Windows games
+  bamos.third-party.wine = true;
+
   programs.steam = {
     enable = true;
     remotePlay.openFirewall = true;

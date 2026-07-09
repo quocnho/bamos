@@ -5,6 +5,7 @@
   nixpkgs.overlays = [
     (final: prev: {
       bamos-branding = final.callPackage ../../pkgs/bamos-branding { };
+      bam-cli = final.callPackage ../../pkgs/bam-cli { };
     })
   ];
 

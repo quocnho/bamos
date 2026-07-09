@@ -207,6 +207,24 @@ BamOS cung cấp **12 phiên bản ISO** khác nhau, tổ hợp từ 3 Desktop E
   - Post-install /iso-cfg: flake template `github:quocnho/bamos`
 - **Hardware Detection Tools (mọi edition):**
   - pciutils (lspci), usbutils (lsusb), dmidecode, inxi, mesa-demos (glxinfo)
+- **Third-Party Runtime (modules/core/third-party.nix):**
+  - AppImage: appimage-run + Gear Lever + binfmt
+  - Flatpak: flatpak + xdg-desktop-portal-gtk/kde
+  - Container: Podman + Docker compat + Distrobox
+  - **BamOS CLI (bam)**: Universal command manager như dnf/apt
+    - `bam run <cmd>` — Chạy binary trong FHS env (Ventoy, Zoom, MATLAB)
+    - `bam install <pkg>` — Cài package (nix profile + flatpak)
+    - `bam remove <pkg>` — Gỡ package
+    - `bam search <q>` — Tìm trong nixpkgs
+    - `bam info` — System info (CPU, GPU, RAM, Disk)
+    - `bam update` — Cập nhật flake + rebuild + dọn rác
+    - `bam shell <pkg>` — Shell tạm với package
+    - Được build từ pkgs/bam-cli/default.nix + third-party.nix
+  - Wine (optional, Gaming edition): wine-wayland, winetricks
+  - Codecs: ffmpeg, gstreamer-full, intel-vaapi, nvidia-vaapi
+  - Fonts: Noto CJK, Liberation, DejaVu, Inter, Maple Mono
+  - Archive: file-roller, 7z, unzip, unrar, zstd
+  - Network: curl, wget, openssl, nmap, mtr, wireguard
 - **File Manager Integration:**
   - Ổ D (/data) tự động mount + bookmark trong Nautilus sidebar
   - Custom drive icon (SVG) — giống Windows D drive
@@ -285,35 +303,66 @@ BamOS cung cấp **12 phiên bản ISO** khác nhau, tổ hợp từ 3 Desktop E
 52. **Battery optimization**: ASPM powersupersave, WiFi power save, runtime PM, swap 16GB
 53. **Hardware tools**: pciutils, usbutils, dmidecode, inxi, mesa-demos trong mọi edition
 
-### Phase 8 — Unified Calamares Installer 🟡 (Đang phát triển)
-51. **Unified ISO**: 3 ISOs (GNOME/KDE/COSMIC) thay 12 — edition chọn khi install
-52. **Edition selector**: packagechooser với 4 edition (Standard/Developers/Gaming/Studio)
-53. **Machine type selector**: Laptop/Desktop/Server — auto power profile
-54. **Ổ D integration**: /data mount + custom drive icon + Nautilus bookmark
-55. **Calamares branding**: Logo, colors, fonts, slideshow (GLF-OS inspired)
-56. **/iso-cfg**: Post-install flake template `github:quocnho/bamos` — dễ update
-57. **Custom Python module**: bamos-config — sinh edition-config.nix động
-58. **Hardware detect tích hợp**: lspci + dmidecode chạy trong Calamares
-59. **Update workflow**: `cd /iso-cfg && sudo nix flake update && sudo nixos-rebuild switch`
-60. **Theming RakuOS**: hoàn thiện WhiteSur-dark icons + Bibata cursors + Nordic theme
+### Phase 8 — Btrfs Backup & Restore + Auto Update 🟡 (Hoàn thiện)
+54. **btrbk engine**: snapshot + send/receive cho @home + @data
+55. **Retention policy**: 24 hourly, 7 daily, 4 weekly, 3 monthly
+56. **Auto snapshot**: systemd timer hourly, pruning tự động
+57. **`bam backup [-s] [-h] [-d]`**: backup chọn lọc — system config, home config, data
+    - Default: `-s -h` (system + home)
+    - Home chỉ backup `.config`, `.local/share`, `.bashrc`, `.profile`, `.ssh`
+    - Exclude: `.cache`, `.npm`, `.cargo`, flatpak, Steam, caches
+    - Lưu vào `/data/backups/{system,home,data}/`
+58. **`bam restore [-s] [-h] [-d]`**: restore chọn lọc theo flags
+59. **`bam clean`**: dọn Nix generations + Btrfs snapshots cũ
+60. **Auto-upgrade engine** (GLF-OS pattern):
+    - Systemd timer: 1 phút sau boot, lặp lại mỗi 12h
+    - Script: flake update → rebuild boot → gc → notify
+    - So sánh flake.lock hash trước/sau, chỉ rebuild khi có thay đổi
+    - Notify qua libnotify khi thành công/thất bại
+    - `bamos.update.autoUpgrade` option (default: true)
+    - Retention: `nix.gc.automatic` weekly, `--delete-older-than 5d`
+61. **`bam update`**: flake update → rebuild switch → gc → regen boot
+62. **`bam rollback [gen]`**: rollback generation (interactive nếu không có đối số)
+63. **`bam changelog`**: `nix store diff-closures` + generations + update log
+64. **BamOS version** (`/etc/os-release`): NAME=BamOS, ID=bamos
+65. **ISO live**: tạo sẵn `/data/backups/{system,home,data}/` cho mọi edition
 
-### Phase 9 — BamOS Portal (Tương lai)
-61. Factory Reset Desktop (1-click restore UI)
-62. Driver Manager (NVIDIA, AMD, Intel auto-install)
-63. System Info Dashboard
-64. Edition Switcher (chuyển edition không cần cài lại)
+### Phase 9 — Unified Calamares Installer 🟡 (Đang phát triển)
+61. **Unified ISO**: 3 ISOs (GNOME/KDE/COSMIC) thay 12 — edition chọn khi install
+62. **Edition selector**: packagechooser với 4 edition (Standard/Developers/Gaming/Studio)
+63. **Machine type selector**: Laptop/Desktop/Server — auto power profile
+64. **Ổ D integration**: /data mount + custom drive icon + Nautilus bookmark
+65. **Calamares branding**: Logo, colors, fonts, slideshow (GLF-OS inspired)
+66. **iso-cfg template → /etc/nixos/**:
+    - Calamares bundle iso-cfg/ → copy vào /etc/nixos/ lúc cài đặt
+    - `flake.nix` — inputs: nixpkgs + github:quocnho/bamos
+    - `configuration.nix` — hostname, locale, user
+    - `customized.nix` — edition + machine type (Calamares điền)
+    - `customConfig/default.nix` — user customization (không bị ghi đè)
+67. **Custom Python module**: bamos-config — copy template + apply selections
+68. **Hardware detect tích hợp**: lspci + dmidecode chạy trong Calamares
+69. **Update workflow**: `sudo bam update` — flake update → rebuild → gc → regen boot
+70. **Auto update timer**: systemd timer daily — flake update + boot + gc
+71. **Theming RakuOS**: hoàn thiện WhiteSur-dark icons + Bibata cursors + Nordic theme
+
+### Phase 10 — BamOS Portal (Tương lai)
+72. Factory Reset Desktop (1-click restore UI)
+73. Driver Manager (NVIDIA, AMD, Intel auto-install)
+74. System Info Dashboard
+75. Edition Switcher (chuyển edition không cần cài lại)
 
 ### Phase 10 — Hoàn thiện ma trận (Tương lai)
-65. Unified ISO cho tất cả DE
-66. Testing: QEMU VM + CI/CD tự động test ISO
-67. Binary cache đầy đủ — build lần đầu, cache mãi mãi
+76. Unified ISO cho tất cả DE
+77. Testing: QEMU VM + CI/CD tự động test ISO
+78. Binary cache đầy đủ — build lần đầu, cache mãi mãi
 
 ### Phase 11 — Community (Tương lai)
-68. Home Manager integration cho user-level config
-69. Custom packages (`pkgs/`) cho phần mềm Việt
-70. Overlays (`overlays/`) tùy biến nixpkgs
-71. Documentation website + Hướng dẫn tiếng Việt
-72. Cộng đồng 500+ người dùng
+79. Home Manager integration cho user-level config
+80. Custom packages (`pkgs/`) cho phần mềm Việt
+81. Overlays (`overlays/`) tùy biến nixpkgs
+82. Documentation website + Hướng dẫn tiếng Việt
+83. Community modules registry
+84. Cộng đồng 500+ người dùng
 
 ---
 
