@@ -67,13 +67,13 @@
                   text = ''
                     set -euo pipefail
                     VARIANT="''${1:-iso-gnome}"
+                    OUTDIR="/tmp/bamos-iso-''${VARIANT}"
                     echo "🔨 Building $VARIANT..."
-                    OUT="./result-''${VARIANT}"
-                    nix build ".#$VARIANT" --out-link "$OUT" 2>&1 | tail -3
+                    nix build ".#$VARIANT" --out-link "$OUTDIR" 2>&1 | tail -3
                     echo ""
-                    echo "📀 Copying ISO to /iso/..."
+                    echo "📀 Copying ISO to iso/..."
                     mkdir -p iso
-                    ISO_FILE=$(find "$OUT/iso" -name "*.iso" -type f | head -1)
+                    ISO_FILE=$(find "$OUTDIR/iso" -name "*.iso" -type f | head -1)
                     if [ -n "$ISO_FILE" ]; then
                       cp "$ISO_FILE" iso/
                       echo "✅ ISO copied: iso/$(basename "$ISO_FILE")"
@@ -81,7 +81,7 @@
                     else
                       echo "⚠ No ISO file found in build output"
                     fi
-                    ln -sfn "$OUT" result-latest 2>/dev/null || true
+                    rm -f "$OUTDIR" 2>/dev/null || true
                   '';
                 }) + "/bin/iso-export";
             };
