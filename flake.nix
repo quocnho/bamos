@@ -37,9 +37,9 @@
                 }) [
                 # Unified ISOs — 3 ISOs thay 12
                 # Edition + Machine Type chọn trong Calamares
-                "iso-gnome-unified"
-                "iso-kde-unified"
-                "iso-cosmic-unified"
+                "iso-gnome"
+                "iso-kde"
+                "iso-cosmic"
               ]);
 
             # Nix formatter
@@ -66,7 +66,7 @@
                   name = "iso-export";
                   text = ''
                     set -euo pipefail
-                    VARIANT="''${1:-iso-gnome-unified}"
+                    VARIANT="''${1:-iso-gnome}"
                     echo "🔨 Building $VARIANT..."
                     OUT="./result-''${VARIANT}"
                     nix build ".#$VARIANT" --out-link "$OUT" 2>&1 | tail -3
@@ -96,7 +96,7 @@
                   text = ''
                     set -e
                     echo "Building ISO..."
-                    nix build .#iso-gnome-unified --no-link --print-out-paths | while read -r path; do
+                    nix build .#iso-gnome --no-link --print-out-paths | while read -r path; do
                       echo "Pushing to Cachix: $path"
                       cachix push bamos "$path"
                     done

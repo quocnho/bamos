@@ -43,9 +43,9 @@ let
   # 3 unified ISOs — mỗi ISO chứa tất cả 4 editions
   # Người dùng chọn edition + machine type trong Calamares
   variants = [
-    { name = "iso-gnome-unified"; profile = "gnome-standard"; desktop = "gnome"; isoConfig = "configuration.nix"; }
-    { name = "iso-kde-unified"; profile = "kde-standard"; desktop = "plasma6"; isoConfig = "configuration-kde.nix"; }
-    { name = "iso-cosmic-unified"; profile = "cosmic-standard"; desktop = "cosmic"; isoConfig = "configuration.nix"; }
+    { name = "iso-gnome"; profile = "gnome-standard"; desktop = "gnome"; isoConfig = "configuration.nix"; }
+    { name = "iso-kde"; profile = "kde-standard"; desktop = "plasma6"; isoConfig = "configuration-kde.nix"; }
+    { name = "iso-cosmic"; profile = "cosmic-standard"; desktop = "cosmic"; isoConfig = "configuration.nix"; }
   ];
 in
 {

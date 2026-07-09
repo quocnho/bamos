@@ -38,11 +38,11 @@ jobs:
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             # Tag push: full release — build all 3 unified ISOs
-            echo 'variants={"variant":["gnome-unified","kde-unified","cosmic-unified"]}' >> "$GITHUB_OUTPUT"
+            echo 'variants={"variant":["gnome","kde","cosmic"]}' >> "$GITHUB_OUTPUT"
             echo "🧩 Build matrix: 3 unified ISOs (full release)"
           else
-            # Push/PR: quick check — build GNOME unified only
-            echo 'variants={"variant":["gnome-unified"]}' >> "$GITHUB_OUTPUT"
+            # Push/PR: quick check — build GNOME only
+            echo 'variants={"variant":["gnome"]}' >> "$GITHUB_OUTPUT"
             echo "🧩 Build matrix: 1 variant (GNOME unified)"
           fi
 
@@ -169,7 +169,7 @@ jobs:
       - name: Download ISO artifact
         uses: actions/download-artifact@v4
         with:
-          name: bamos-iso-gnome-unified
+          name: bamos-iso-gnome
           path: ./iso-test
 
       - name: Boot ISO in QEMU (smoke test)
