@@ -7,6 +7,8 @@
     ./hardware/bluetooth.nix
     ./hardware/network.nix
     ./hardware/power-management.nix
+    ./hardware/nvidia.nix
+    ./hardware/detect.nix
     ./hardware/backup.nix
     ./desktop/gnome.nix
     ./core/audio.nix
