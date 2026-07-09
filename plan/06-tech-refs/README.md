@@ -6,15 +6,16 @@ This directory contains technology assessment documents produced by the `tech` s
 
 | Document | Topic | Status | Date |
 |----------|-------|--------|------|
-| [tech-assessment.md](tech-assessment.md) | Stack Overview — BamOS technology choices & rationale | 🟡 Draft | 2026-07-03 |
+| [tech-assessment.md](tech-assessment.md) | Stack Overview — BamOS technology choices & rationale | 🟢 Complete | 2026-07-03 |
+| [tech-assessment-software-center.md](tech-assessment-software-center.md) | Software Center: GNOME Software vs KDE Discover vs custom | 🟢 Complete | 2026-07-05 |
+| [tech-assessment-btrfs-backup.md](tech-assessment-btrfs-backup.md) | Btrfs Backup: btrbk vs snapper vs timeshift | 🟢 Complete | 2026-07-07 |
+| [tech-assessment-calamares.md](tech-assessment-calamares.md) | Calamares: Unified installer architecture | 🟢 Complete | 2026-07-07 |
 
 ## Pending Tech Assessments
 Use the `/tech` skill to fill these in:
 
 | Topic | Question | Priority |
 |-------|----------|----------|
-| ISO Builders | nixos-generators vs nixos-anywhere vs custom? | 🔥 High |
-| Installer | Calamares vs custom NixOS installer? | 🔥 High |
 | Binary Cache | Cachix vs self-hosted (attic, garnix)? | 🟡 Medium |
 | Gaming Stack | Bazzite vs Nobara approach for Gaming Edition? | 🟡 Medium |
 | COSMIC Readiness | Is COSMIC stable enough for production ISO? | 🔵 Low |
