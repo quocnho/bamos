@@ -178,20 +178,15 @@ in
   };
 
   config = lib.mkMerge [
-    # ── Current BamOS version (luôn active) ──
+    # ── BamOS version (luôn active — chỉ định nghĩa 1 lần) ──
     {
       bamos.version.currentVersion = lib.mkDefault (builtins.readFile ../../VERSION);
-      environment.etc."bamos/version".text = (builtins.readFile ../../VERSION);
+      environment.etc."bamos/version".text = config.bamos.version.currentVersion;
       environment.etc."bamos/CHANGELOG.md".source = ../../CHANGELOG.md;
     }
 
     # ── Auto-upgrade engine ──
     (lib.mkIf cfg.autoUpgrade {
-      # ═══════════════════════════════════════════════════════
-      # /etc/bamos/version — version hiện tại
-      # ═══════════════════════════════════════════════════════
-      environment.etc."bamos/version".text = config.bamos.version.currentVersion;
-      environment.etc."bamos/CHANGELOG.md".source = ../../CHANGELOG.md;
 
       # Garbage collection tự động (GLF-OS pattern)
       nix.gc = {
