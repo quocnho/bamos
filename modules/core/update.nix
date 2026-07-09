@@ -17,126 +17,118 @@ let
   # Script cập nhật tự động
   updateScript = pkgs.writeShellApplication {
     name = "bamos-auto-update";
-    runtimeInputs = with pkgs; [ nix nixos-rebuild coreutils gnugrep gawk systemd ];
+    runtimeInputs = with pkgs; [ nix nixos-rebuild coreutils gnugrep gawk systemd curl ];
     text = ''
-      set -euo pipefail
+            set -euo pipefail
 
-      STATE_DIR="/var/lib/bamos"
-      STATE_FILE="$STATE_DIR/last-rebuild-status"
-      LOG_FILE="/var/log/bamos-update.log"
-      mkdir -p "$STATE_DIR"
-      touch "$LOG_FILE" 2>/dev/null || true
+            STATE_DIR="/var/lib/bamos"
+            STATE_FILE="$STATE_DIR/last-rebuild-status"
+            LOG_FILE="/var/log/bamos-update.log"
+            mkdir -p "$STATE_DIR"
+            touch "$LOG_FILE" 2>/dev/null || true
 
-      exec > >(tee -a "$LOG_FILE") 2>&1
+            exec > >(tee -a "$LOG_FILE") 2>&1
 
-      FLAKE_PATH="/etc/nixos"
-      FLAKE_NAME="bamos"
-      FLAKE_LOCK_PATH="/etc/nixos/flake.lock"
+            FLAKE_PATH="/etc/nixos"
+            FLAKE_LOCK_PATH="/etc/nixos/flake.lock"
+            BAMOS_VERSION_DIR="/etc/bamos"
+            GITHUB_BASE="https://raw.githubusercontent.com/quocnho/bamos/main"
 
-      echo "[$(date)] === BamOS Auto-Update ==="
+            echo "[$(date)] === BamOS Auto-Update (check only) ==="
 
-      # Check flake.lock exists
-      if [ ! -f "$FLAKE_LOCK_PATH" ]; then
-        echo "[SKIP] No flake.lock at $FLAKE_PATH — skipping auto-update"
-        echo "ok|no-flake" > "$STATE_FILE"
-        exit 0
-      fi
-
-      # ── Check for new version ──
-      LOCAL_VERSION=$(cat /etc/bamos/version 2>/dev/null || echo "0.0.0")
-      REMOTE_VERSION=""
-      if command -v curl &>/dev/null; then
-        REMOTE_VERSION=$(curl -sfL "https://raw.githubusercontent.com/quocnho/bamos/main/VERSION" 2>/dev/null || echo "")
-      elif command -v wget &>/dev/null; then
-        REMOTE_VERSION=$(wget -qO- "https://raw.githubusercontent.com/quocnho/bamos/main/VERSION" 2>/dev/null || echo "")
-      fi
-      if [ -n "$REMOTE_VERSION" ] && [ "$(printf '%s\n%s' "$LOCAL_VERSION" "$REMOTE_VERSION" | sort -V | tail -1)" = "$REMOTE_VERSION" ] && [ "$LOCAL_VERSION" != "$REMOTE_VERSION" ]; then
-        echo "[INFO] New version available: $LOCAL_VERSION → $REMOTE_VERSION"
-        # Fetch changelog of new versions
-        CHANGELOG_TEXT=""
-        CHANGELOG_URL="https://raw.githubusercontent.com/quocnho/bamos/main/CHANGELOG.md"
-        if command -v curl &>/dev/null; then
-          CHANGELOG_DATA=$(curl -sfL "$CHANGELOG_URL" 2>/dev/null || echo "")
-        elif command -v wget &>/dev/null; then
-          CHANGELOG_DATA=$(wget -qO- "$CHANGELOG_URL" 2>/dev/null || echo "")
-        fi
-        if [ -n "$CHANGELOG_DATA" ]; then
-          # Build notification text từ các version mới hơn local
-          NEW_VERSIONS=$(echo "$CHANGELOG_DATA" | grep -E '^## \[' | sed 's/## \[\([^]]*\)\].*/\1/')
-          for ver in $NEW_VERSIONS; do
-            if [ "$(printf '%s\n%s' "$LOCAL_VERSION" "$ver" | sort -V | tail -1)" = "$ver" ] && [ "$LOCAL_VERSION" != "$ver" ]; then
-              # Lấy các dòng thay đổi của version này
-              CHANGES=$(echo "$CHANGELOG_DATA" | awk -v v="## [$ver]" '
-                $0 ~ v {found=1; next}
-                found && /^## \[/ {exit}
-                found && /^- / {print substr($0,3); count++}
-                found && /^### / {print}
-              ' | head -15)
-              CHANGELOG_TEXT="${CHANGELOG_TEXT}BamOS $ver available!\n${CHANGES}\n\n"
+            # ── Check for new version ──
+            LOCAL_VERSION=$(cat "$BAMOS_VERSION_DIR/version" 2>/dev/null || echo "0.0.0")
+            REMOTE_VERSION=""
+            if command -v curl &>/dev/null; then
+              REMOTE_VERSION=$(curl -sfL "$GITHUB_BASE/VERSION" 2>/dev/null || echo "")
+            elif command -v wget &>/dev/null; then
+              REMOTE_VERSION=$(wget -qO- "$GITHUB_BASE/VERSION" 2>/dev/null || echo "")
             fi
-          done
-        fi
-        if [ -n "$CHANGELOG_TEXT" ]; then
-          # Notify user
-          for path in /run/user/*; do
-            uid=$(basename "$path")
-            user=$(id -nu "$uid" 2>/dev/null) || continue
-            [ -z "$user" ] && continue
-            runuser -u "$user" -- env \
-              XDG_RUNTIME_DIR="/run/user/$uid" \
-              DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" \
-              notify-send \
-                -u normal \
-                -a "BamOS-Update" \
-                -i "/run/current-system/sw/share/icons/hicolor/scalable/apps/bamos-logo.svg" \
-                "BamOS $REMOTE_VERSION Available" \
-                "$CHANGELOG_TEXT" 2>/dev/null || true
-          done
-        fi
-      else
-        echo "[INFO] Version $LOCAL_VERSION is up to date"
-      fi
+            if [ -z "$REMOTE_VERSION" ]; then
+              echo "[INFO] Cannot reach GitHub — skipping version check"
+              echo "ok|no-network" > "$STATE_FILE"
+              exit 0
+            fi
 
-      # Lấy hash hiện tại
-      INITIAL_HASH=$(sha256sum "$FLAKE_LOCK_PATH" | awk '{print $1}')
+            # Compare versions
+            NEWER="$(printf '%s\n%s' "$LOCAL_VERSION" "$REMOTE_VERSION" | sort -V | tail -1)"
+            if [ "$NEWER" = "$LOCAL_VERSION" ] && [ "$LOCAL_VERSION" != "$REMOTE_VERSION" ]; then
+              echo "[INFO] Remote version ($REMOTE_VERSION) is older than local ($LOCAL_VERSION)."
+              echo "ok|older-remote" > "$STATE_FILE"
+              rm -f "$BAMOS_VERSION_DIR/update_change" 2>/dev/null || true
+              exit 0
+            fi
 
-      # Flake update
-      echo "[INFO] Running nix flake update..."
-      if ! nix flake update --flake "$FLAKE_PATH" 2>&1; then
-        echo "[FAIL] nix flake update failed"
-        echo "failed|$(date -Is)|flake-update" > "$STATE_FILE"
-        systemd-notify --status=\"Update failed: flake update error\" || true
-        exit 1
-      fi
+            if [ "$LOCAL_VERSION" = "$REMOTE_VERSION" ]; then
+              echo "[INFO] Version $LOCAL_VERSION is up to date"
+              rm -f "$BAMOS_VERSION_DIR/update_change" 2>/dev/null || true
+              echo "ok|uptodate" > "$STATE_FILE"
+              exit 0
+            fi
 
-      # So sánh hash
-      UPDATED_HASH=$(sha256sum "$FLAKE_LOCK_PATH" | awk '{print $1}')
+            # ── New version available ──
+            echo "[INFO] New version available: $LOCAL_VERSION → $REMOTE_VERSION"
 
-      if [ "$INITIAL_HASH" = "$UPDATED_HASH" ]; then
-        echo "[OK] No changes detected. System is up to date."
-        echo "ok|uptodate" > "$STATE_FILE"
-        exit 0
-      fi
+            # Fetch changelog of new versions
+            CHANGELOG_TEXT=""
+            CHANGELOG_URL="$GITHUB_BASE/CHANGELOG.md"
+            if command -v curl &>/dev/null; then
+              CHANGELOG_DATA=$(curl -sfL "$CHANGELOG_URL" 2>/dev/null || echo "")
+            elif command -v wget &>/dev/null; then
+              CHANGELOG_DATA=$(wget -qO- "$CHANGELOG_URL" 2>/dev/null || echo "")
+            fi
 
-      echo "[INFO] Changes detected! Rebuilding..."
+            if [ -n "$CHANGELOG_DATA" ]; then
+              NEW_VERSIONS=$(echo "$CHANGELOG_DATA" | grep -E '^## \[' | sed 's/## \[\([^]]*\)\].*/\1/')
+              for ver in $NEW_VERSIONS; do
+                if [ "$(printf '%s\n%s' "$LOCAL_VERSION" "$ver" | sort -V | tail -1)" = "$ver" ] && [ "$LOCAL_VERSION" != "$ver" ]; then
+                  CHANGES=$(echo "$CHANGELOG_DATA" | awk -v v="## [$ver]" '
+                    $0 ~ v {found=1; next}
+                    found && /^## \[/ {exit}
+                    found && /^- / {print substr($0,3)}
+                    found && /^### / {print}
+                  ' | head -15)
+                  CHANGELOG_TEXT="${CHANGELOG_TEXT}BamOS $ver
+      ${CHANGES}
 
-      # Rebuild
-      if ! nixos-rebuild boot --flake "$FLAKE_PATH#$FLAKE_NAME" --accept-flake-config 2>&1; then
-        echo "[FAIL] Rebuild failed"
-        echo "failed|$(date -Is)|rebuild-failed" > "$STATE_FILE"
-        systemd-notify --status=\"Update failed: rebuild error\" || true
-        exit 1
-      fi
+      "
+                fi
+              done
+            fi
 
-      # Garbage collect
-      echo "[INFO] Cleaning old generations..."
-      nix-collect-garbage --delete-older-than 5d 2>&1 || true
+            # ── Save update_change file for 'bam update' ──
+            mkdir -p "$BAMOS_VERSION_DIR"
+            if [ -n "$CHANGELOG_TEXT" ]; then
+              echo -e "Update available: $LOCAL_VERSION → $REMOTE_VERSION\n\n$CHANGELOG_TEXT" \
+                > "$BAMOS_VERSION_DIR/update_change"
+              echo "[INFO] Update changes saved to $BAMOS_VERSION_DIR/update_change"
+            fi
 
-      # Ghi trạng thái thành công
-      GENERATION=$(readlink /nix/var/nix/profiles/system 2>/dev/null | grep -oP 'system-\K\d+' || echo "?")
-      echo "ok|success|generation=$GENERATION" > "$STATE_FILE"
+            # ── Notify user (desktop notification) ──
+            NOTIFY_MSG="BamOS $REMOTE_VERSION Available"
+            NOTIFY_BODY="From v$LOCAL_VERSION → v$REMOTE_VERSION"
+            if [ -n "$CHANGELOG_TEXT" ]; then
+              NOTIFY_BODY="$(echo "$CHANGELOG_TEXT" | head -8)\n\nRun: sudo bam update"
+            fi
+            for path in /run/user/*; do
+              uid=$(basename "$path")
+              user=$(id -nu "$uid" 2>/dev/null) || continue
+              [ -z "$user" ] && continue
+              runuser -u "$user" -- env \
+                XDG_RUNTIME_DIR="/run/user/$uid" \
+                DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" \
+                notify-send \
+                  -u normal \
+                  -a "BamOS-Update" \
+                  -i "/run/current-system/sw/share/icons/hicolor/scalable/apps/bamos-logo.svg" \
+                  "$NOTIFY_MSG" \
+                  "$NOTIFY_BODY" 2>/dev/null || true
+            done
 
-      echo "[OK] Update completed. Generation: $GENERATION"
+            # Auto-update only CHECKS and NOTIFIES — does NOT rebuild.
+            # User must run 'sudo bam update' to apply interactively.
+            echo "[INFO] Update available. Run 'sudo bam update' to apply."
+            echo "ok|notified|version=$REMOTE_VERSION" > "$STATE_FILE"
     '';
   };
 

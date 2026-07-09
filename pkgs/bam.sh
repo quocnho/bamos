@@ -47,9 +47,10 @@ Package:
 
 System:
   run <cmd>         Run binary in FHS environment
-  update            Flake update + rebuild + clean + regen boot
+  update            Check, confirm, then update: flake + version files + rebuild
+  update --check    Only check for available update (no action)
   rollback [gen]    Rollback to previous generation
-  changelog         Show system changelog + package diff
+  changelog         Show changelog of newer versions (from GitHub)
   info              System information
   clean [--keep N]  Clean Btrfs snapshots + Nix generations
 
@@ -68,6 +69,8 @@ Examples:
   sudo bam backup -s -d        # Backup system + data only
   sudo bam restore -h          # Restore home only
   sudo bam restore --list      # List all backups
+  sudo bam update              # Check + confirm + update system
+  sudo bam update --check      # Only check for updates
 EOF
 }
 
@@ -316,7 +319,138 @@ case "${1:-help}" in
   run) shift; exec @fhsEnv@/bin/bam-fhs "$@" ;;
   update)
     require_root "update"
-    # Flake luôn ở /etc/nixos/ (được Calamares copy vào khi cài đặt)
+    CHECK_ONLY=0
+    case "${2:-}" in --check|-c) CHECK_ONLY=1;; esac
+
+    BAMOS_VERSION_DIR="/etc/bamos"
+    LOCAL_VERSION=$(cat "$BAMOS_VERSION_DIR/version" 2>/dev/null || echo "0.0.0")
+    REMOTE_VERSION=""
+    GITHUB_BASE="https://raw.githubusercontent.com/quocnho/bamos/main"
+
+    echo "=============================="
+    echo "  BamOS Update Check"
+    echo "=============================="
+    echo ""
+
+    # ── Fetch remote version ──
+    if command -v curl &>/dev/null; then
+      REMOTE_VERSION=$(curl -sfL "$GITHUB_BASE/VERSION" 2>/dev/null || echo "")
+    elif command -v wget &>/dev/null; then
+      REMOTE_VERSION=$(wget -qO- "$GITHUB_BASE/VERSION" 2>/dev/null || echo "")
+    fi
+
+    if [ -z "$REMOTE_VERSION" ]; then
+      echo "❌ Cannot reach GitHub. Check your internet connection."
+      echo ""
+      echo "Local version: $LOCAL_VERSION"
+      echo ""
+      exit 1
+    fi
+
+    echo "  Local:  v$LOCAL_VERSION"
+    echo "  Remote: v$REMOTE_VERSION"
+    echo ""
+
+    # ── Compare versions ──
+    NEWER="$(printf '%s\n%s' "$LOCAL_VERSION" "$REMOTE_VERSION" | sort -V | tail -1)"
+    if [ "$NEWER" = "$LOCAL_VERSION" ] && [ "$LOCAL_VERSION" != "$REMOTE_VERSION" ]; then
+      echo "⚠ Remote version is OLDER than local. Skipping."
+      exit 0
+    fi
+    if [ "$LOCAL_VERSION" = "$REMOTE_VERSION" ]; then
+      echo "✅ Your system is up to date (v$LOCAL_VERSION)."
+      exit 0
+    fi
+
+    # ── New version available: fetch changelog ──
+    echo "📦 New version available: v$LOCAL_VERSION → v$REMOTE_VERSION"
+    echo ""
+    echo "--- Changelog ---"
+
+    CHANGELOG_TEXT=""
+    CHANGELOG_DATA=""
+    if command -v curl &>/dev/null; then
+      CHANGELOG_DATA=$(curl -sfL "$GITHUB_BASE/CHANGELOG.md" 2>/dev/null || echo "")
+    elif command -v wget &>/dev/null; then
+      CHANGELOG_DATA=$(wget -qO- "$GITHUB_BASE/CHANGELOG.md" 2>/dev/null || echo "")
+    fi
+
+    # Check for pre-fetched update_change from auto-update timer
+    if [ -f "$BAMOS_VERSION_DIR/update_change" ] && [ -z "$CHANGELOG_DATA" ]; then
+      cat "$BAMOS_VERSION_DIR/update_change"
+      CHANGELOG_TEXT="$(cat "$BAMOS_VERSION_DIR/update_change")"
+    fi
+
+    if [ -n "$CHANGELOG_DATA" ]; then
+      NEW_VERSIONS=$(echo "$CHANGELOG_DATA" | grep -E '^## \[' | sed 's/## \[\([^]]*\)\].*/\1/')
+      for ver in $NEW_VERSIONS; do
+        if [ "$(printf '%s\n%s' "$LOCAL_VERSION" "$ver" | sort -V | tail -1)" = "$ver" ] && [ "$LOCAL_VERSION" != "$ver" ]; then
+          echo ""
+          echo "═══ v$ver ═══"
+          echo "$CHANGELOG_DATA" | awk -v v="## [$ver]" '
+            $0 ~ v {found=1; next}
+            found && /^## \[/ {exit}
+            found {print}
+          ' | head -20
+          CHANGELOG_TEXT="${CHANGELOG_TEXT}BamOS $ver
+$(echo "$CHANGELOG_DATA" | awk -v v="## [$ver]" '
+  $0 ~ v {found=1; next}
+  found && /^## \[/ {exit}
+  found {print}
+' | head -15)
+
+"
+        fi
+      done
+    fi
+
+    echo ""
+    echo "---"
+    echo ""
+
+    # ── Check-only mode ──
+    if [ "$CHECK_ONLY" -eq 1 ]; then
+      echo "Use: sudo bam update"
+      echo "to apply the update."
+      exit 0
+    fi
+
+    # ── Ask confirmation ──
+    echo -n "Apply update v$LOCAL_VERSION → v$REMOTE_VERSION now? [Y/n]: "
+    read -r confirm
+    case "$confirm" in
+      n|N|no|NO) echo "Cancelled."; exit 0 ;;
+      *) echo "Proceeding..." ;;
+    esac
+    echo ""
+
+    # ── Save update_change ──
+    if [ -n "$CHANGELOG_TEXT" ]; then
+      echo "$CHANGELOG_TEXT" > "$BAMOS_VERSION_DIR/update_change"
+      echo "✅ Update change saved to $BAMOS_VERSION_DIR/update_change"
+    fi
+
+    # ── Download version files from GitHub ──
+    echo "→ Downloading VERSION from GitHub..."
+    if command -v curl &>/dev/null; then
+      curl -sfL "$GITHUB_BASE/VERSION" -o "$BAMOS_VERSION_DIR/version" 2>/dev/null && \
+        echo "  ✅ VERSION updated: $(cat "$BAMOS_VERSION_DIR/version")" || \
+        echo "  ⚠ Failed to update VERSION"
+      curl -sfL "$GITHUB_BASE/CHANGELOG.md" -o "$BAMOS_VERSION_DIR/CHANGELOG.md" 2>/dev/null && \
+        echo "  ✅ CHANGELOG.md updated" || \
+        echo "  ⚠ Failed to update CHANGELOG.md"
+    elif command -v wget &>/dev/null; then
+      wget -qO "$BAMOS_VERSION_DIR/version" "$GITHUB_BASE/VERSION" 2>/dev/null && \
+        echo "  ✅ VERSION updated: $(cat "$BAMOS_VERSION_DIR/version")" || \
+        echo "  ⚠ Failed to update VERSION"
+      wget -qO "$BAMOS_VERSION_DIR/CHANGELOG.md" "$GITHUB_BASE/CHANGELOG.md" 2>/dev/null && \
+        echo "  ✅ CHANGELOG.md updated" || \
+        echo "  ⚠ Failed to update CHANGELOG.md"
+    fi
+
+    echo ""
+
+    # ── Perform actual Nix update ──
     echo "→ Updating flake in /etc/nixos..."
     nix flake update --flake /etc/nixos 2>&1 | tail -3
     echo "→ Rebuilding system..."
@@ -325,7 +459,7 @@ case "${1:-help}" in
     nix-collect-garbage --delete-older-than 5d
     # Regen boot menu sau cleanup (GLF-OS pattern)
     nixos-rebuild boot --flake /etc/nixos 2>&1 | tail -1
-    echo "✅ System updated!" ;;
+    echo "✅ System updated to v$(cat "$BAMOS_VERSION_DIR/version")!" ;;
   info)
     echo "=== BamOS $BAM_VERSION ==="
     echo "NixOS $(nixos-version 2>/dev/null || echo '?')"
@@ -333,7 +467,18 @@ case "${1:-help}" in
     @lspci@ 2>/dev/null | grep -E "VGA|3D" | head -1
     free -h | grep Mem
     df -h / 2>/dev/null | tail -1
-    echo "Backups: $(ls -1 "$SYSTEM_DIR" 2>/dev/null | wc -l) system, $(ls -1 "$HOME_DIR" 2>/dev/null | wc -l) home, $(ls -1 "$DATA_DIR" 2>/dev/null | wc -l) data" ;;
+    echo "Backups: $(ls -1 "$SYSTEM_DIR" 2>/dev/null | wc -l) system, $(ls -1 "$HOME_DIR" 2>/dev/null | wc -l) home, $(ls -1 "$DATA_DIR" 2>/dev/null | wc -l) data"
+    # Check for pending update
+    if [ -f /etc/bamos/version ]; then
+      local_ver=$(cat /etc/bamos/version)
+      echo "BamOS version: $local_ver"
+      if [ -f /etc/bamos/update_change ]; then
+        remote_ver=$(head -1 /etc/bamos/update_change 2>/dev/null | grep -oP 'v\K[^ ]+' || echo "?")
+        echo "⚠ Update available: v$local_ver → v$remote_ver"
+        echo "  Run: sudo bam update"
+      fi
+    fi
+    ;;
   clean)
     require_root "clean"
     keep="${2:-5}"
@@ -383,6 +528,20 @@ case "${1:-help}" in
     echo ""
     local_version=$(cat /etc/bamos/version 2>/dev/null || echo "0.0.0")
     echo "Local version: $local_version"
+    echo ""
+
+    # Check for pre-fetched update_change from auto-update timer
+    if [ -f /etc/bamos/update_change ]; then
+      echo "📋 Pending update found!"
+      echo "========================"
+      cat /etc/bamos/update_change
+      echo "========================"
+      echo ""
+      echo "Run: sudo bam update"
+      echo ""
+      exit 0
+    fi
+
     echo "Fetching latest changes from GitHub..."
     echo ""
     # Fetch CHANGELOG.md từ GitHub raw
@@ -396,6 +555,7 @@ case "${1:-help}" in
       # Fallback: đọc local
       if [ -f /etc/bamos/CHANGELOG.md ]; then
         remote=$(cat /etc/bamos/CHANGELOG.md)
+        echo "(Offline mode — showing local changelog)"
       else
         echo "(No network. Run 'bam update' to fetch latest changelog.)"
         exit 0
@@ -405,12 +565,10 @@ case "${1:-help}" in
     new_versions=$(echo "$remote" | grep -E '^## \[' | sed 's/## \[\([^]]*\)\].*/\1/')
     found=false
     for ver in $new_versions; do
-      # So sánh version (simple string compare — assumes semver)
       if [ "$ver" != "$local_version" ] && [ "$(printf '%s\n%s' "$local_version" "$ver" | sort -V | tail -1)" = "$ver" ]; then
         found=true
         echo ""
         echo "=== New in $ver ==="
-        # Extract content for this version
         echo "$remote" | awk -v v="## [$ver]" '
           $0 ~ v {found=1; next}
           found && /^## \[/ {exit}
