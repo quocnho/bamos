@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/NixOS/nixos-artwork/master/logo/nixos-logo-only-hires.png" width="120" alt="NixOS Logo"/>
+  <img src="https://raw.githubusercontent.com/quocnho/bamos/main/assets/logo/bamos-logo.svg" width="140" height="140" alt="BamOS Bamboo Logo"/>
 
   # ⚡ BamOS
 
@@ -22,6 +22,10 @@
     <img src="https://img.shields.io/badge/Version-2.0.0-blue?style=flat-square" alt="Version"/>
     <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License"/>
   </p>
+
+  <p align="center">
+    <sub><em>Logo: Mosaic lục giác tre — "Cây tre trăm đốt", mỗi đốt là một module Nix</em></sub>
+  </p>
 </div>
 
 ---
@@ -37,11 +41,12 @@
 - ✅ Btrfs Ổ C — Ổ D: `/data` an toàn tuyệt đối khi cài lại
 - ✅ NVIDIA Optimus: GTX 1650, driver 595.84, PRIME Offload
 - ✅ Power Management: **tuned** (Red Hat) — dynamic tuning, battery optimized
-- ✅ **bam CLI** — universal package manager (install/remove/search/run), backup/restore, update, rollback, changelog, clean
+- ✅ **bam CLI** — install/remove/search/run, backup/restore, update (interactive + changelog), rollback, changelog, clean
 - ✅ Theming RakuOS-inspired: Nordic, WhiteSur icons, Bibata cursors
+- ✅ Bamboo branding: logo mosaic lục giác tre, 13 bộ wallpaper, Plymouth boot splash
 - ✅ AppImage + Flatpak + Software Center + FHS compatibility
 - ✅ Btrfs snapshot engine (btrbk) — auto hourly/daily/weekly snapshots
-- ✅ Auto-upgrade engine — systemd timer, version checking, desktop notifications
+- ✅ Auto-upgrade engine: check-only timer + interactive `sudo bam update` with changelog preview + confirmation
 - ✅ Calamares Unified Installer — chọn Edition + Machine Type khi cài đặt
 - ✅ Hardware auto-detect: GPU, PCI bus IDs, kernel modules
 - ✅ Binary Cache: [bamos.cachix.org](https://bamos.cachix.org)
@@ -56,8 +61,9 @@
 # Tải ISO từ GitHub Releases (sắp có)
 # Boot ISO → Calamares installer → chọn Edition + Machine Type → Cài đặt
 
-# Sau cài đặt, cập nhật hệ thống:
-sudo bam update
+# Sau cài đặt, kiểm tra và cập nhật hệ thống:
+sudo bam update              # Check → show changelog → confirm → apply
+sudo bam update --check      # Chỉ kiểm tra, không apply
 ```
 
 ### Build ISO từ source
@@ -91,17 +97,17 @@ sudo nixos-rebuild switch --flake .#lg
 |-----------|-----------|
 | **Nền tảng** | NixOS 26.11 (nixos-unstable) |
 | **Framework** | [flake-parts](https://flake.parts/) (hercules-ci) |
-| **Kernel** | Linux Zen (`linuxPackages_zen`) |
+| **Kernel** | Linux Zen (`linuxPackages_zen`) — Gaming: XanMod |
 | **Desktop** | GNOME + GDM / KDE + SDDM / COSMIC (Wayland) |
 | **Gõ tiếng Việt** | Fcitx5 + Bamboo (Telex, VNI, VIQR) |
 | **Âm thanh** | PipeWire (ALSA + PulseAudio + 32-bit) |
 | **Hệ thống file** | Btrfs subvolumes: `@`, `@home`, `@nix`, `@data` |
-| **Boot** | systemd-boot (UEFI) |
+| **Boot** | systemd-boot (UEFI) — Plymouth bamboo logo |
 | **GPU** | NVIDIA 595.84 stable + Intel iGPU (Optimus) |
 | **Power** | tuned (Red Hat), dynamic tuning, PPD bridge |
 | **Installer** | Calamares + custom Python module |
-| **CLI** | `bam` — universal command manager |
-| **Snapshot** | btrbk — Btrfs incremental snapshot engine |
+| **CLI** | `bam` — universal command manager (13 commands) |
+| **Snapshot** | btrbk — Btrfs incremental snapshot engine (24h/7d/4w/3m) |
 | **Partitioning** | Disko — declarative disk layout |
 
 ---
@@ -112,7 +118,7 @@ sudo nixos-rebuild switch --flake .#lg
 bamos/
 ├── flake.nix                        # Entry point — flake-parts mkFlake
 ├── flake.lock                       # Pinned dependencies
-├── VERSION                          # Phiên bản BamOS hiện tại
+├── VERSION                          # Phiên bản BamOS hiện tại (2.0.0)
 ├── CHANGELOG.md                     # Lịch sử thay đổi (Keep a Changelog)
 ├── idea.md                          # Project vision & requirements
 ├── README.md                        # File này
@@ -136,7 +142,7 @@ bamos/
 │   │   ├── user.nix               #     User accounts
 │   │   ├── third-party.nix        #     AppImage, Flatpak, FHS, containers, codecs
 │   │   ├── version.nix            #     /etc/os-release + /etc/lsb-release branding
-│   │   └── update.nix             #     Auto-upgrade engine, changelog, rollback
+│   │   └── update.nix             #     Auto-upgrade engine: check-only timer + notify
 │   ├── boot/                       #   🚀 Boot & Partition
 │   │   ├── disko-btrfs.nix        #     Disko partitioning (Ổ C — Ổ D)
 │   │   └── calamares.nix          #     Calamares unified installer
@@ -157,9 +163,9 @@ bamos/
 │   │   ├── gaming.nix             #     Steam, GameScope, MangoHud, XanMod
 │   │   └── studio.nix             #     Creative apps, low-latency audio
 │   ├── apps/                       #   📱 Ứng dụng
-│   │   └── standard.nix           #     Firefox, Chromium, VLC, MPV, LibreOffice...
-│   └── theming/                    #   🎨 Giao diện
-│       ├── bamos-branding.nix     #     Logo, wallpaper, Plymouth
+│   │   └── standard.nix           #     Firefox, Chromium, VLC, MPV...
+│   └── theming/                    #   🎨 Giao diện & thương hiệu
+│       ├── bamos-branding.nix     #     Bamboo logo, 26 wallpapers, Plymouth
 │       ├── gtk-theme.nix          #     GTK/icon/cursor options
 │       ├── gnome-theme.nix        #     GNOME: Nordic + WhiteSur + Bibata
 │       ├── kde-theme.nix          #     KDE: Plasma theme + Kvantum
@@ -196,9 +202,9 @@ bamos/
 │
 ├── pkgs/                           # 📦 Custom packages
 │   ├── default.nix                #   Aggregator
-│   ├── bam-cli/                   #   BamOS CLI (bam) — universal command manager
+│   ├── bam-cli/                   #   BamOS CLI (bam) — 13 commands
 │   │   └── default.nix            #     FHS env + bam.sh wrapper
-│   ├── bamos-branding/            #   Logos, wallpapers, GNOME XML
+│   ├── bamos-branding/            #   Bamboo logos, 26 wallpapers, GNOME XML
 │   │   └── default.nix
 │   └── bamos-detect-hardware.sh   #   Hardware detection script
 │
@@ -211,21 +217,24 @@ bamos/
 ├── overlays/                       # 🔄 Nixpkgs overlays
 │   └── default.nix
 │
-├── assets/                         # 🎨 Static assets
-│   ├── wallpapers/                #   BamOS wallpapers
-│   ├── logo/                      #   Logo SVG
-│   ├── icons/                     #   Theme icons
+├── assets/                         # 🎨 Static assets (92 MB)
+│   ├── logo/                      #   Bamboo SVG + PNG logos (6 sizes)
+│   │   └── ref/                   #     Reference PNGs (dark + light)
+│   ├── wallpapers/                #   13 bộ background (light + dark)
+│   │   └── ref/                   #     BamOS Dalle, Leather, Vintage, Frost...
+│   ├── css/                       #   Website CSS
+│   ├── js/                        #   Website JS
 │   ├── cursors/                   #   Cursor themes
-│   └── fonts/                     #   Font files
+│   ├── fonts/                     #   Font files
+│   └── icons/                     #   Theme icons
 │
 ├── docs/                           # 📖 Documentation website
-│   ├── installation/              #   Hướng dẫn cài đặt
-│   ├── general/                   #   Editions, tweaks, comparison
-│   ├── gaming/                    #   Gaming guide
-│   ├── software/                  #   Software Center, Flatpak, containers
-│   └── advanced/                  #   CLI, custom ISO, troubleshooting
+│   ├── user/                      #   Website (32+ trang, bazzite-style)
+│   │   └── index.html             #     Landing page
+│   ├── technical/                 #   Architecture, modules, ISO build
+│   └── ...                        #   Installation, gaming, software guides
 │
-├── plan/                           # 📋 Project planning (sprints)
+├── plan/                           # 📋 Project planning (sprints + lean canvas)
 ├── .github/workflows/              # 🚀 CI/CD pipelines
 └── .zed/                           # Zed editor config
 ```
@@ -236,7 +245,7 @@ bamos/
 
 | Edition | Đối tượng | Tính năng chính | tuned profile | Kernel |
 |---------|-----------|----------------|---------------|--------|
-| **Standard** | Người dùng phổ thông | Firefox, Chromium, VLC, MPV, LibreOffice, GNOME Software | `desktop` | Zen |
+| **Standard** | Người dùng phổ thông | Firefox, Chromium, VLC, MPV, GNOME Software | `desktop` | Zen |
 | **Developers** | Lập trình viên | devenv, Podman, Distrobox, VS Code, Git, VM tools | `throughput-performance` | Zen |
 | **Gaming** | Game thủ | Steam, Lutris, Heroic, GameScope, MangoHud, ProtonGE, OBS, Discord | `latency-performance` | **XanMod** |
 | **Studio** | Sáng tạo | Blender, GIMP, Krita, Ardour, OBS, low-latency audio | `latency-performance` | Zen |
@@ -253,6 +262,13 @@ bamos/
 
 ## ⚙️ Key Features
 
+### 🎋 Thương hiệu BamOS
+- **Bamboo Logo**: Mosaic lục giác tre 6 cánh — "Cây tre trăm đốt"
+- **26 Wallpapers**: 13 bộ light+dark — Default, Dalle, Leather, Vintage, Frost (2/4/5/Phoenix), Gaming, Mini, Studio, Quasar, Solid
+- **GNOME Background**: Tất cả có sẵn trong Settings → Background (13 XML properties)
+- **Plymouth Boot**: Logo bamboo khi khởi động
+- **Multi-size Logos**: SVG + PNG từ 16×16 → 256×256
+
 ### 🇻🇳 Tiếng Việt
 - **Fcitx5 + Bamboo**: Telex, VNI, VIQR — Wayland-native
 - **Locale**: `Asia/Ho_Chi_Minh`, `vi_VN.UTF-8`
@@ -262,7 +278,7 @@ bamos/
 - **Ổ C** (`@`, `@home`, `@nix`): Có thể ghi đè khi cài lại
 - **Ổ D** (`@data`): An toàn tuyệt đối — Documents, Downloads, Pictures
 - **Nautilus bookmark**: `/data` hiển thị trong sidebar với icon riêng
-- **XDG User Dir redirect**: `~/Documents` → `/data/Documents`, v.v.
+- **XDG User Dir redirect**: `~/Documents` → `/data/Documents`
 
 ### 🖥️ NVIDIA Optimus
 - Driver **NVIDIA 595.84** stable (GeForce GTX 1650)
@@ -278,7 +294,7 @@ bamos/
 - **Battery optimized**: ASPM powersupersave, WiFi power saving, runtime PM
 - **Profile per edition**: desktop / throughput-performance / latency-performance
 
-### 🛠️ BamOS CLI (`bam`)
+### 🛠️ BamOS CLI (`bam`) — 13 commands
 
 | Command | Chức năng | Ví dụ |
 |---------|-----------|-------|
@@ -287,11 +303,12 @@ bamos/
 | `search` | Tìm trong nixpkgs | `bam search video` |
 | `shell` | Shell tạm với package | `bam shell python` |
 | `run` | Chạy binary trong FHS env | `sudo bam run ./VentoyWeb.sh` |
-| `update` | Flake update + rebuild + GC + regen boot | `sudo bam update` |
-| `info` | System info (CPU, GPU, RAM, Disk, Backups) | `bam info` |
+| `update` | Check → show changelog → confirm → rebuild | `sudo bam update` |
+| `update --check` | Chỉ kiểm tra, không apply | `sudo bam update --check` |
+| `info` | System info (CPU, GPU, RAM, Disk, Backups, Version) | `bam info` |
 | `clean [--keep N]` | Dọn Nix generations + Btrfs snapshots | `sudo bam clean --keep 7` |
 | `rollback [gen]` | Rollback về generation trước | `sudo bam rollback` |
-| `changelog` | Xem changelog các version mới | `bam changelog` |
+| `changelog` | Xem changelog các version mới (từ GitHub hoặc update_change) | `bam changelog` |
 | `backup [-s] [-h] [-d]` | Backup system/home/data | `sudo bam backup` |
 | `restore [-s] [-h] [-d]` | Restore system/home/data | `sudo bam restore --list` |
 
@@ -307,27 +324,41 @@ bamos/
 
 ### 🔄 Auto-Update Engine
 
-- **Systemd timer**: chạy 1 phút sau boot, lặp lại mỗi 12h
-- **Version check**: so sánh local vs GitHub raw → notification khi có version mới
-- **Changelog notification**: hiển thị danh sách tính năng mới từ CHANGELOG.md
-- **Tự động rebuild + GC + regen boot menu** (GLF-OS pattern)
-- **Failure notification**: cảnh báo desktop nếu update thất bại
+```
+┌─────────────────────────────────────────────────────────────┐
+│  1. Auto timer (systemd, 12h) — check-only                 │
+│     ├── So sánh /etc/bamos/version vs GitHub VERSION        │
+│     ├── Nếu mới → tạo /etc/bamos/update_change             │
+│     └── Desktop notification: "Run: sudo bam update"       │
+├─────────────────────────────────────────────────────────────┤
+│  2. sudo bam update — interactive apply                    │
+│     ├── Hiển thị changelog (từ update_change hoặc GitHub)   │
+│     ├── Hỏi xác nhận "Apply now? [Y/n]"                    │
+│     ├── Download VERSION + CHANGELOG.md → ghi đè /etc/bamos/│
+│     ├── nix flake update → nixos-rebuild switch → GC       │
+│     └── nixos-rebuild boot (regen boot menu)               │
+└─────────────────────────────────────────────────────────────┘
+```
+
+- **Check-only timer**: KHÔNG tự rebuild — chỉ check + notify
+- **Interactive update**: changelog preview → confirmation → apply
+- **Version lifecycle**: `/etc/bamos/version` được cập nhật từ GitHub mỗi lần update
+- **Failure notification**: desktop cảnh báo nếu update thất bại
 
 ### 🎨 Theming (RakuOS-inspired)
 - **GTK Theme**: Nordic (~ OrigamiPaper, Nord color scheme)
 - **Icons**: WhiteSur-dark
 - **Cursor**: Bibata-Modern-Classic
-- **Font**: Inter 11 (UI) + Maple Mono NF 11 (monospace) / JetBrains Mono (code)
+- **Font**: Inter 11 (UI) + Maple Mono NF 11 (monospace)
 - **GNOME Extensions**: dash-to-dock, appindicator, blur-my-shell, no-overview, user-themes, vitals, gsconnect
-- **Plymouth boot splash**: logo + spinner
-- **Wallpaper**: BamOS Default (dark/light pair)
+- **Plymouth boot splash**: Bamboo logo + spinner
 
 ### 📦 Calamares Unified Installer
 - **Edition selector**: Standard / Developers / Gaming / Studio
 - **Machine type**: Laptop / Desktop / Server
 - **Custom Python module**: sinh `/etc/nixos/` + `customized.nix` động
 - **Post-install flake**: `github:quocnho/bamos` — dễ update
-- **Branding**: Logo Nord + slideshow (GLF-OS inspired)
+- **Branding**: Logo bamboo, Nord colors, slideshow
 - **Ổ D drive icon + Nautilus bookmark**: tự động tạo
 
 ### 📦 Third-Party Runtime
@@ -394,7 +425,7 @@ nix run .#iso-export -- iso-gnome-standard
 # Push cache
 nix run .#push-cachix
 
-# One-command update + push cache
+# One-command build + push
 nix run .#update
 ```
 
@@ -408,8 +439,8 @@ nix run .#update
 | Sprint 2 | KDE + Standard Apps | ✅ Done |
 | Sprint 3 | Developers + Gaming | ✅ Done |
 | Sprint 4 | COSMIC + Studio | ✅ Done |
-| Sprint 5 | Auto-Detect + Theming + Power Mgmt (tuned) | ✅ Done |
-| Sprint 6 | Btrfs Backup & Restore + Auto Update | ✅ Done |
+| Sprint 5 | Auto-Detect Hardware + RakuOS Theming | ✅ Done |
+| Sprint 6 | Btrfs Backup & Restore + Auto Update Engine | ✅ Done |
 | Sprint 7 | Unified Calamares Installer | 🟡 Active |
 | Sprint 8 | BamOS Portal + Community | 🔮 Future |
 
@@ -439,5 +470,5 @@ MIT License
   <br />
   <sub><a href="https://bamos.cachix.org">Cachix Cache</a> · <a href="https://github.com/quocnho/bamos">GitHub</a></sub>
   <br />
-  <sub><strong>Version 2.0.0</strong></sub>
+  <sub><strong>Version 2.0.0</strong> — Logo: <a href="assets/logo/bamos-logo.svg">Bamboo Mosaic</a></sub>
 </div>
