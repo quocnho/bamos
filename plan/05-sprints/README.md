@@ -41,3 +41,4 @@
 | v0.4.0 | COSMIC + Studio | 12 ISOs, docs website, modules refactor |
 | v0.5.0 | **Auto-Detect + Theming** | 🟢 Done — see Sprint 5 review |
 | v0.6.0 | **Unified Installer** | 🟡 Active — Sprint 6 |
+| v0.7.0 | **Update Engine** | 🔴 Planned — Sprint 7 |
