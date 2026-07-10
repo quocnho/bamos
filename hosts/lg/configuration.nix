@@ -121,9 +121,8 @@
     delta
 
     # Editors
-    vscode
+    # vscode
     zed-editor
-    vim
 
     # Terminal (giữ lại tmux, zsh)
     tmux
@@ -145,11 +144,11 @@
     # GNOME extensions
     gnomeExtensions.dash-to-dock
     gnomeExtensions.vitals
-    gnomeExtensions.gsconnect
+    # gnomeExtensions.gsconnect
     gnomeExtensions.user-themes
     gnomeExtensions.clipboard-indicator
     gnomeExtensions.caffeine
-    gnomeExtensions.gtile
+    # gnomeExtensions.gtile
     gnomeExtensions.appindicator
   ];
 
