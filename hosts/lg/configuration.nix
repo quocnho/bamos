@@ -3,8 +3,6 @@
 {
   imports = [
     ./hardware-configuration.nix
-    ../../modules/hardware/nvidia.nix
-    ../../modules/hardware/detect.nix
     ../../modules/desktop/software-center.nix
   ];
 

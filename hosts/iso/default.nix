@@ -31,9 +31,6 @@ let
           (import ../../modules/boot/disko-btrfs.nix)
           (import ../../modules/boot/calamares.nix)
 
-          # Hardware detection
-          (import ../../modules/hardware/detect.nix)
-
           # ISO-specific config
           ./${isoConfig}
         ];
