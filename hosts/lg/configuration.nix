@@ -180,7 +180,8 @@
   # Secrets được giải mã
   age.secrets = {
     deepseek-api-key = {
-      file = ../secrets/deepseek-api-key.age;
+      # ../../secrets/ vì file này ở hosts/lg/, cần lên 2 cấp để tới project root
+      file = ../../secrets/deepseek-api-key.age;
       mode = "0440";
       owner = config.bamos.user.name;
       group = "users";
