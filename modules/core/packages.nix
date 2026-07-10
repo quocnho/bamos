@@ -10,6 +10,11 @@
     # vim
     zed-editor
     # bluez
+    # Secret management
+    age
+    ssh-to-age
+    agenix
+
     nil
     nixpkgs-fmt
     nixd

@@ -19,4 +19,11 @@ in
 {
   # GitHub Personal Access Token — cho nix flakes + cachix
   "github-token.age".publicKeys = [ users.quocnho ];
+
+  # DeepSeek API Key — cho Zed Editor AI assistant
+  "deepseek-api-key.age".publicKeys = [ users.quocnho ];
+
+  # Có thể thêm các key khác vào đây, ví dụ:
+  # "cachix-token.age".publicKeys = [ users.quocnho ];
+  # "ssh-key.age".publicKeys = [ users.quocnho ];
 }

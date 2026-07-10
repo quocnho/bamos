@@ -158,4 +158,17 @@
     "podman"
     "vboxusers"
   ];
+
+  # ═══════════════════════════════════════════════════════
+  # Agenix secrets — tự động giải mã tại build time
+  # File .age mã hóa → giải mã vào /run/secrets/
+  # ═══════════════════════════════════════════════════════
+  age.secrets = {
+    deepseek-api-key = {
+      file = ../secrets/deepseek-api-key.age;
+      mode = "0440";
+      owner = config.bamos.user.name;
+      group = "users";
+    };
+  };
 }
