@@ -167,9 +167,17 @@
   ];
 
   # ═══════════════════════════════════════════════════════
-  # Agenix secrets — tự động giải mã tại build time
+  # ragenix secrets management
   # File .age mã hóa → giải mã vào /run/secrets/
   # ═══════════════════════════════════════════════════════
+  # SSH host key (bắt buộc cho ragenix để giải mã .age files)
+  # Được tạo tự động bởi NixOS activation script
+  age.identityPaths = [
+    "/etc/ssh/ssh_host_ed25519_key"
+    "/etc/ssh/ssh_host_rsa_key"
+  ];
+
+  # Secrets được giải mã
   age.secrets = {
     deepseek-api-key = {
       file = ../secrets/deepseek-api-key.age;
@@ -178,4 +186,7 @@
       group = "users";
     };
   };
+
+  # Đảm bảo SSH host keys được tạo (cần cho ragenix)
+  services.openssh.enable = true;
 }
