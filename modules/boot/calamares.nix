@@ -16,7 +16,7 @@
 #   2. /etc/calamares/bamos-modules/  (custom Python module)
 #   3. Package calamares-nixos-extensions (mặc định)
 
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, ... }: with lib;
 
 let
   # ═══════════════════════════════════════════════════════════
@@ -556,7 +556,7 @@ let
     availableFileSystemTypes = [ "ext4" "btrfs" "xfs" "f2fs" ];
     showNotEncryptedBootMessage = false;
     partitionLayout = [{
-      name = "root";
+      name = "BamOS (Btrfs)";
       filesystem = "btrfs";
       noEncrypt = false;
       mountPoint = "/";
@@ -660,7 +660,7 @@ let
   settingsConf = builtins.toJSON {
     modules-search = [
       "local"
-      "/nix/store/1jwbzck0dvj00vqvxnymgpc3s4k8yl2z-calamares-nixos-extensions-0.3.23/lib/calamares/modules"
+      "${pkgs.calamares-nixos-extensions}/lib/calamares/modules"
       "${bamosModulePkg}/lib/calamares/modules"
     ];
     instances = [
