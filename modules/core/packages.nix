@@ -7,9 +7,9 @@
     git
     fzf
     ripgrep
-    vim
+    # vim
     zed-editor
-    bluez
+    # bluez
     nil
     nixpkgs-fmt
     nixd
