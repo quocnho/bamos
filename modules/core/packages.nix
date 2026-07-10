@@ -10,10 +10,10 @@
     # vim
     zed-editor
     # bluez
-    # Secret management
+    # Secret management (age encryption)
     age
     ssh-to-age
-    agenix
+    ragenix # agenix CLI (ragenix = Rust implementation)
 
     nil
     nixpkgs-fmt
