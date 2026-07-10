@@ -13,7 +13,9 @@
 
   <p>
     <img src="https://img.shields.io/badge/NixOS-26.11-7EB5E5?style=flat-square&logo=nixos&logoColor=white" alt="NixOS"/>
-    <img src="https://github.com/quocnho/bamos/actions/workflows/ci.yml/badge.svg?branch=master" alt="CI/CD"/>
+    <img src="https://github.com/quocnho/bamos/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"/>
+    <img src="https://github.com/quocnho/bamos/actions/workflows/release.yml/badge.svg?branch=main" alt="Release"/>
+    <img src="https://github.com/quocnho/bamos/actions/workflows/release-cd.yml/badge.svg?branch=main" alt="CD"/>
     <img src="https://img.shields.io/badge/Kernel-Zen-ed791a?style=flat-square&logo=linux&logoColor=white" alt="Kernel Zen"/>
     <img src="https://img.shields.io/badge/Desktop-GNOME%20|%20KDE%20|%20COSMIC-lightgrey?style=flat-square" alt="Desktop"/>
     <img src="https://img.shields.io/badge/Framework-flake--parts-5277C3?style=flat-square" alt="flake-parts"/>

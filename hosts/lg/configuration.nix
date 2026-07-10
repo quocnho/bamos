@@ -3,6 +3,15 @@
 {
   imports = [
     ./hardware-configuration.nix
+
+    # ═══════════════════════════════════════════════════════
+    # Hardware modules — defined in modules/hardware/
+    # Đã được import qua self.nixosModules.default → modules/default.nix
+    # Nhưng explicit import ở đây để rõ dependency, maintainability
+    # ═══════════════════════════════════════════════════════
+    ../../modules/hardware/detect.nix # bamos.hardware.detect
+    ../../modules/hardware/nvidia.nix # bamos.nvidia.*
+
     ../../modules/desktop/software-center.nix
   ];
 

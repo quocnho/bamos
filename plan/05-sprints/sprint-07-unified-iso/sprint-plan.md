@@ -1,6 +1,6 @@
 # Sprint 7: Unified ISO — 3 ISOs thay 12, giữ nguyên keyboard + cấu hình
 
-**Dates:** 2026-07-09 → 2026-07-09
+**Dates:** 2026-07-09 → 2026-07-10
 **Branch:** `sprint/07/unified-iso`
 **Target:** v0.7.0
 
@@ -29,7 +29,11 @@ Gộp 12 ISO variants thành 3 unified ISO (GNOME/KDE/COSMIC). Edition + Machine
 - [ ] BamOS chỉ cần us layout + Fcitx5 Bamboo cho tiếng Việt
 - [ ] Giữ nguyên `keyboard-setup` nếu có, không thêm mới
 
-### US-07-04: Update CI/CD pipeline
+### US-07-04: Update CI/CD pipeline (ublue-os pattern)
+- [ ] `ci.yml` — Refactor: chỉ chạy cho PR + non-main, build GNOME + VM test
+- [ ] `release.yml` — NEW: push to main → build 3 ISOs, auto tag, GitHub Release
+- [ ] `release-cd.yml` — NEW: tag push → deploy ISOs lên Cloudflare R2 + Cosign sign
+- [ ] `.github/scripts/generate-changelog.py` — Script sinh changelog từ git history
 - [ ] Build matrix: 3 unified ISOs instead of 12
 - [ ] VM test chỉ cần test GNOME unified
 
@@ -45,8 +49,16 @@ Gộp 12 ISO variants thành 3 unified ISO (GNOME/KDE/COSMIC). Edition + Machine
 ### Day 1 (2026-07-09): Core Implementation
 1. Update `hosts/iso/default.nix` — 3 unified variants
 2. Update `flake.nix` — 3 ISO packages
-3. Update `.github/workflows/ci.yml` — build matrix
+3. Update `.github/workflows/ci.yml` — build matrix + refactor
 4. Update docs
+
+### Day 2 (2026-07-10): CI/CD Pipeline (ublue-os pattern)
+1. Create `.github/workflows/release.yml` — auto-release on push to main
+2. Create `.github/workflows/release-cd.yml` — Cloudflare R2 deploy + signing
+3. Create `.github/scripts/generate-changelog.py` — changelog generator
+4. Create `.github/scripts/generate-metadata.sh` — metadata generator
+5. Test validation: `nix flake check`, workflow lint
+6. Update sprint docs + daily scrum
 
 ---
 
@@ -56,4 +68,7 @@ Gộp 12 ISO variants thành 3 unified ISO (GNOME/KDE/COSMIC). Edition + Machine
 2. ✅ 3 ISO builds work: `nix build .#iso-gnome-unified`
 3. ✅ Edition selection in Calamares works
 4. ✅ All existing keyboard config preserved
-5. ✅ CI/CD updated
+5. ✅ `ci.yml` — quick validation cho PR (build GNOME + VM test)
+6. ✅ `release.yml` — main → build 3 ISOs + Cachix + auto tag + GitHub Release
+7. ✅ `release-cd.yml` — tag → Cloudflare R2 + Cosign sign + metadata
+8. ✅ `generate-changelog.py` — auto-changelog từ conventional commits

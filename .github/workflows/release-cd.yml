@@ -1,0 +1,324 @@
+# ═══════════════════════════════════════════════════════
+# Release CD — Deploy ISOs to Cloudflare R2 + Sign
+#   Trigger: workflow_dispatch (from release.yml) or tag push
+#   Purpose: Download release ISOs, upload to Cloudflare R2,
+#            sign with Cosign, publish latest metadata
+# ═══════════════════════════════════════════════════════
+
+name: 📤 CD — Deploy to Cloudflare R2
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to deploy (e.g., v4.0.0.20260710.1)"
+        required: true
+        type: string
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  # ── Cloudflare R2 Configuration ──
+  RCLONE_CONFIG_R2_TYPE: s3
+  RCLONE_CONFIG_R2_PROVIDER: Cloudflare
+  RCLONE_CONFIG_R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+  RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  RCLONE_CONFIG_R2_REGION: auto
+  RCLONE_CONFIG_R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+  R2_BUCKET: ${{ secrets.R2_BUCKET || 'bamos' }}
+  R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL || 'cdn.bamos.io' }}
+
+jobs:
+  # ══════════════════════════════════════════════
+  # Phase 1: Prepare — resolve tag + validate
+  # ══════════════════════════════════════════════
+  prepare:
+    name: 🎯 Prepare Deployment
+    runs-on: ubuntu-latest
+    outputs:
+      release_tag: ${{ steps.resolve.outputs.release_tag }}
+      is_latest: ${{ steps.resolve.outputs.is_latest }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve release tag
+        id: resolve
+        run: |
+          # Determine tag from input or push event
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+          echo "release_tag=$TAG" >> "$GITHUB_OUTPUT"
+
+          # Check if this is the latest stable release
+          LATEST_STABLE=$(git tag -l "v*" | grep -v -E "(alpha|beta|rc|dev|test)" | sort -V | tail -1)
+          if [ "$TAG" = "$LATEST_STABLE" ]; then
+            echo "is_latest=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_latest=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "### 📤 CD Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "| Key | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | \`$TAG\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Event | ${{ github.event_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Latest | $([ \"$TAG\" = \"$LATEST_STABLE\" ] && echo '✅ Yes' || echo '❌ No') |" >> $GITHUB_STEP_SUMMARY
+          echo "| R2 Bucket | \`${{ env.R2_BUCKET }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| R2 Public | \`${{ env.R2_PUBLIC_URL }}\` |" >> $GITHUB_STEP_SUMMARY
+
+  # ══════════════════════════════════════════════
+  # Phase 2: Download release assets from GitHub
+  # ══════════════════════════════════════════════
+  download:
+    name: 📥 Download Release Assets
+    needs: prepare
+    runs-on: ubuntu-latest
+    outputs:
+      iso_dir: ${{ steps.download.outputs.iso_dir }}
+    steps:
+      - name: Create download directory
+        run: mkdir -p ./iso-download
+
+      - name: Download assets from GitHub Release
+        id: download
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ needs.prepare.outputs.release_tag }}"
+          echo "📥 Downloading assets from release $TAG..."
+
+          # Use gh CLI to download all release assets
+          gh release download "$TAG" \
+            --repo "${{ github.repository }}" \
+            --dir ./iso-download \
+            --clobber
+
+          echo "iso_dir=./iso-download" >> "$GITHUB_OUTPUT"
+
+      - name: List downloaded assets
+        run: |
+          echo "📦 Downloaded assets:"
+          ls -lh ./iso-download/
+          echo ""
+          echo "### 📥 Downloaded Assets" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -lh ./iso-download/ >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  # ══════════════════════════════════════════════
+  # Phase 3: Upload ISOs to Cloudflare R2
+  # ══════════════════════════════════════════════
+  upload-r2:
+    name: ☁️ Upload to Cloudflare R2
+    needs: [prepare, download]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install rclone
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq rclone
+
+      - name: Upload to R2
+        run: |
+          TAG="${{ needs.prepare.outputs.release_tag }}"
+          ISO_DIR="${{ needs.download.outputs.iso_dir }}"
+          R2_PATH="${R2_BUCKET}/releases/${TAG}"
+
+          echo "☁️ Uploading to Cloudflare R2: ${R2_PATH}"
+
+          # Upload all files (ISO + SHA256)
+          rclone copy "${ISO_DIR}/" "R2:${R2_PATH}" \
+            --progress \
+            --checksum \
+            --verbose
+
+          # If latest release, also update "latest" directory
+          if [ "${{ needs.prepare.outputs.is_latest }}" = "true" ]; then
+            echo "🏆 Updating 'latest' pointer..."
+            rclone copy "${ISO_DIR}/" "R2:${R2_BUCKET}/releases/latest" \
+              --progress \
+              --checksum
+          fi
+
+          echo "✅ Upload complete!"
+          echo ""
+          echo "### ☁️ R2 Upload Complete" >> $GITHUB_STEP_SUMMARY
+          echo "- Bucket: \`${R2_BUCKET}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Path: \`releases/${TAG}/\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Public URL: https://${R2_PUBLIC_URL}/releases/${TAG}/" >> $GITHUB_STEP_SUMMARY
+          echo "- Files:" >> $GITHUB_STEP_SUMMARY
+          ls -lh "${ISO_DIR}/" | sed 's/^/  - /' >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.prepare.outputs.is_latest }}" = "true" ]; then
+            echo "- ✅ Updated \`releases/latest/\` pointer" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ══════════════════════════════════════════════
+  # Phase 4: Sign ISOs with Cosign
+  # ══════════════════════════════════════════════
+  sign:
+    name: 🔐 Sign ISOs
+    needs: [prepare, download]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.8.1
+        with:
+          cosign-release: "v2.4.3"
+
+      - name: Sign ISO files
+        id: sign
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          if [ -z "$COSIGN_PRIVATE_KEY" ]; then
+            echo "⚠️  COSIGN_PRIVATE_KEY not set — skipping signing"
+            echo "ℹ️  To enable:"
+            echo "   1. cosign generate-key-pair"
+            echo "   2. Add COSIGN_PRIVATE_KEY + COSIGN_PASSWORD to GitHub Secrets"
+            echo "signing=skipped" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          ISO_DIR="${{ needs.download.outputs.iso_dir }}"
+
+          echo "🔐 Signing ISO files..."
+          for iso in "${ISO_DIR}"/*.iso; do
+            if [ -f "$iso" ]; then
+              BASENAME=$(basename "$iso")
+              echo "  → Signing: ${BASENAME}"
+              cosign sign-blob --yes \
+                --key env://COSIGN_PRIVATE_KEY \
+                "$iso" \
+                --output-signature "${iso}.sig" \
+                --output-certificate "${iso}.crt"
+              echo "    ✅ Signed: ${BASENAME}.sig + ${BASENAME}.crt"
+            fi
+          done
+
+          echo "signing=done" >> "$GITHUB_OUTPUT"
+
+          echo "### 🔐 Cosign Signing" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: ✅ Done" >> $GITHUB_STEP_SUMMARY
+          echo "- Files signed: $(ls -1 "${ISO_DIR}"/*.sig 2>/dev/null | wc -l)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload signatures to R2
+        if: steps.sign.outputs.signing == 'done'
+        run: |
+          ISO_DIR="${{ needs.download.outputs.iso_dir }}"
+          TAG="${{ needs.prepare.outputs.release_tag }}"
+          R2_PATH="${R2_BUCKET}/releases/${TAG}"
+
+          sudo apt-get install -y -qq rclone
+          rclone copy "${ISO_DIR}/" "R2:${R2_PATH}" \
+            --include "*.sig" --include "*.crt" \
+            --progress --checksum
+
+          if [ "${{ needs.prepare.outputs.is_latest }}" = "true" ]; then
+            rclone copy "${ISO_DIR}/" "R2:${R2_BUCKET}/releases/latest" \
+              --include "*.sig" --include "*.crt" \
+              --progress --checksum
+          fi
+
+          echo "✅ Signatures uploaded to R2"
+
+  # ══════════════════════════════════════════════
+  # Phase 5: Publish Release Metadata
+  # ══════════════════════════════════════════════
+  metadata:
+    name: 📋 Publish Release Metadata
+    needs: [prepare, upload-r2]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate release metadata
+        run: |
+          TAG="${{ needs.prepare.outputs.release_tag }}"
+          DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          REPO="${{ github.repository }}"
+          PUBLIC_URL="${{ env.R2_PUBLIC_URL }}"
+          IS_LATEST="${{ needs.prepare.outputs.is_latest }}"
+
+          # Generate metadata as JSON using jq (available in ubuntu-latest)
+          jq -n \
+            --arg version "$TAG" \
+            --arg date "$DATE" \
+            --arg r2_url "https://${PUBLIC_URL}/releases/${TAG}/" \
+            --arg gh_url "https://github.com/${REPO}/releases/tag/${TAG}" \
+            --argjson is_latest ${IS_LATEST,,} \
+            '{
+              "version": $version,
+              "release_date": $date,
+              "download": {
+                "r2": $r2_url,
+                "github": $gh_url
+              },
+              "is_latest": $is_latest,
+              "variants": ["gnome", "kde", "cosmic"],
+              "checksums": {}
+            }' > release-metadata.json
+
+          echo "📋 Metadata generated:"
+          cat release-metadata.json
+
+      - name: Upload metadata to R2
+        run: |
+          TAG="${{ needs.prepare.outputs.release_tag }}"
+          R2_PATH="${R2_BUCKET}/releases/${TAG}"
+
+          sudo apt-get install -y -qq rclone
+          rclone copy release-metadata.json "R2:${R2_PATH}/"
+
+          if [ "${{ needs.prepare.outputs.is_latest }}" = "true" ]; then
+            # Write latest.json
+            cp release-metadata.json latest.json
+            rclone copy latest.json "R2:${R2_BUCKET}/releases/latest/"
+            echo "✅ Updated \`releases/latest/release-metadata.json\`"
+          fi
+
+          echo "### 📋 Metadata" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Published to \`releases/${TAG}/release-metadata.json\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Public URL: https://${{ env.R2_PUBLIC_URL }}/releases/${TAG}/release-metadata.json" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.prepare.outputs.is_latest }}" = "true" ]; then
+            echo "- ✅ Also published to \`releases/latest/\`" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ══════════════════════════════════════════════
+  # Phase 6: Attest Build Provenance (optional)
+  # ══════════════════════════════════════════════
+  attest:
+    name: 🛡️ Attest Build Provenance
+    needs: [prepare, download]
+    runs-on: ubuntu-latest
+    permissions:
+      attestations: write
+      id-token: write
+    steps:
+      - name: Download assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p ./iso-attest
+          gh release download "${{ needs.prepare.outputs.release_tag }}" \
+            --repo "${{ github.repository }}" \
+            --dir ./iso-attest \
+            --pattern "*.iso" \
+            --clobber
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: ./iso-attest/*.iso

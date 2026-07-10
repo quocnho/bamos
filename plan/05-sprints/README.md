@@ -1,9 +1,7 @@
 # 📊 Sprint Dashboard
 
 > **One glance — every sprint, every status, every link.**
-> Last updated: 2026-07-09
->
-> 📌 **Sync completed:** Phases 7-8 marked ✅. See [sync-analysis](../03-roadmap/sync-analysis.md) for full gap analysis.
+> Last updated: 2026-07-10
 
 ---
 
@@ -17,7 +15,7 @@
 | [Sprint 4](sprint-04-cosmic-studio/) | COSMIC + Studio edition | 07-06 → 07-06 | 35 | 🟢 Done | `sprint/04/cosmic-studio` | v0.4.0 |
 | [Sprint 5](sprint-05-auto-detect-theming/) | Auto-Detect Hardware + RakuOS Theming | 07-06 → 07-06 | — | 🟢 Done | `sprint/05/auto-detect-theming` | v0.5.0 |
 | [Sprint 6](sprint-06-unified-installer/) | Unified Calamares Installer | 07-07 → 07-09 | — | 🟢 Done | `sprint/06/unified-installer` | v0.6.0 |
-| [Sprint 7](sprint-07-unified-iso/) | Unified ISO — 3 ISOs thay 12 | 07-09 → 07-09 | — | 🟡 Active | `sprint/07/unified-iso` | v0.7.0 |
+| [Sprint 7](sprint-07-unified-iso/) | Unified ISO + CI/CD (ublue-os pattern) | 07-09 → 07-10 | — | 🟡 Active | `sprint/07/unified-iso` | v0.7.0 |
 
 ---
 
@@ -42,4 +40,4 @@
 | v0.4.0 | COSMIC + Studio | 12 ISOs, docs website, modules refactor |
 | v0.5.0 | **Auto-Detect + Theming** | 🟢 Done — see Sprint 5 review |
 | v0.6.0 | **Unified Installer** | 🟡 Active — Sprint 6 |
-| v0.7.0 | **Update Engine** | 🔴 Planned — Sprint 7 |
+| v0.7.0 | **Unified ISO + CI/CD** | 🟡 Active — Sprint 7 |
