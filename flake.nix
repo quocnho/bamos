@@ -22,15 +22,19 @@
           ./hosts
         ];
 
-        # Áp dụng overlays (calamares config, branding packages)
-        # Import trực tiếp — không qua self.overlays để tránh circular dependency
-        nixpkgs.overlays = [
-          (import ./overlays { inherit inputs; }).default
-        ];
-
         perSystem =
           { pkgs, system, ... }:
+          let
+            # Overlays: calamares config tùy chỉnh, branding packages
+            bamosOverlay = (import ./overlays { inherit inputs; }).default;
+          in
           {
+            # Apply overlays vào pkgs
+            _module.args.pkgs = import inputs.nixpkgs {
+              inherit system;
+              config = { };
+              overlays = [ bamosOverlay ];
+            };
             # Custom packages + ISO builds
             packages =
               (import ./pkgs pkgs)
