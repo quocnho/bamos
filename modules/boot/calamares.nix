@@ -688,6 +688,18 @@ let
 
 in
 {
+  # ═══════════════════════════════════════════════════════
+  # XDG_CONFIG_DIRS: Calamares dùng --xdg-config nên đọc
+  # settings.conf từ $XDG_CONFIG_DIRS/calamares/
+  # Cần set /etc/xdg để override file từ package default
+  # ═══════════════════════════════════════════════════════
+  # Đảm bảo /etc/xdg nằm trong XDG_CONFIG_DIRS để Calamares tìm thấy
+  # settings.conf override của chúng ta ở /etc/xdg/calamares/settings.conf
+  # Calamares wrapper sẽ prepend thêm path của calamares-nixos-extensions
+  environment.sessionVariables = {
+    XDG_CONFIG_DIRS = lib.mkDefault "/etc/xdg";
+  };
+
   environment.etc = {
     "calamares/modules/partition.conf".text = partitionConf;
     "calamares/modules/mount.conf".text = mountConf;
