@@ -22,6 +22,11 @@
           ./hosts
         ];
 
+        # Áp dụng overlays (calamares config, branding packages)
+        nixpkgs.overlays = [
+          self.overlays.default
+        ];
+
         perSystem =
           { pkgs, system, ... }:
           {

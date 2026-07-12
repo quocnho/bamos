@@ -64,19 +64,20 @@ let
     } ''
     mkdir -p $out/share/calamares/branding/bamos/images
 
-    # ── Logo (SVG) ──
-    cat > $out/share/calamares/branding/bamos/images/bamos-logo.svg << 'SVGEOF'
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-      <defs>
-        <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#4CAF50"/>
-          <stop offset="100%" style="stop-color:#2E7D32"/>
-        </linearGradient>
-      </defs>
-      <circle cx="64" cy="64" r="60" fill="url(#g)"/>
-      <text x="64" y="80" font-family="sans-serif" font-size="48" font-weight="bold" fill="white" text-anchor="middle">B</text>
-    </svg>
-    SVGEOF
+    # ── Logo (SVG) — copy từ assets/logo/bamos-logo.svg ──
+    cp ${../../assets/logo/bamos-logo.svg} $out/share/calamares/branding/bamos/images/bamos-logo.svg
+    cp ${../../assets/logo/bamos-logo-nav.svg} $out/share/calamares/branding/bamos/images/bamos-logo-nav.svg
+
+    # ── Logo PNG — convert từ SVG ──
+    if command -v rsvg-convert >/dev/null 2>&1; then
+      rsvg-convert -w 128 -h 128 \
+        $out/share/calamares/branding/bamos/images/bamos-logo.svg \
+        -o $out/share/calamares/branding/bamos/images/bamos-logo.png
+    else
+      # Fallback: symlink SVG as PNG
+      cp $out/share/calamares/branding/bamos/images/bamos-logo.svg \
+         $out/share/calamares/branding/bamos/images/bamos-logo.png
+    fi
 
     # ── Edition screenshots (placeholders) ──
     for img in standard developers gaming studio laptop desktop server; do
