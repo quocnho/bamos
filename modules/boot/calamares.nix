@@ -11,10 +11,12 @@
 #   6. /iso-cfg: post-install flake template cho updates
 # ═══════════════════════════════════════════════════════════════
 #
-# Calamares config load từ:
-#   1. /etc/calamares/modules/*.conf  (cao nhất — override)
-#   2. /etc/calamares/bamos-modules/  (custom Python module)
-#   3. Package calamares-nixos-extensions (mặc định)
+# Calamares config load (XDG_CONFIG_DIRS order):
+#   1. /etc/xdg/calamares/settings.conf  (cao nhất — override của BamOS)
+#   2. ${calamares-nixos-extensions}/etc/calamares/settings.conf (mặc định)
+#
+# Module configs (partition, mount, packagechooser):
+#   /etc/calamares/modules/*.conf  ("local" trong modules-search)
 
 { config, lib, pkgs, ... }: with lib;
 
@@ -691,7 +693,9 @@ in
     "calamares/modules/mount.conf".text = mountConf;
     "calamares/modules/packagechooser-edition.conf".text = editionConf;
     "calamares/modules/packagechooser-machine.conf".text = machineConf;
-    "calamares/settings.conf".text = settingsConf;
+    # Calamares dùng --xdg-config, nên settings.conf phải nằm trong XDG_CONFIG_DIRS
+    # để ghi đè package default từ calamares-nixos-extensions
+    "xdg/calamares/settings.conf".text = settingsConf;
     "calamares/branding/bamos/branding.desc".source = "${calamaresBranding}/share/calamares/branding/bamos/branding.desc";
   };
 
