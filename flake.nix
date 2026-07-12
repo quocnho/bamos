@@ -23,8 +23,9 @@
         ];
 
         # Áp dụng overlays (calamares config, branding packages)
+        # Import trực tiếp — không qua self.overlays để tránh circular dependency
         nixpkgs.overlays = [
-          self.overlays.default
+          (import ./overlays { inherit inputs; }).default
         ];
 
         perSystem =
