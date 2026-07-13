@@ -165,9 +165,11 @@ in
 {
   # ── Wayland environment cho Calamares (fix DPI nhỏ / font nhỏ) ──
   # Kết hợp với autostart fix trong calamares-overlay.nix (sudo --preserve-env)
+  # Dùng mkForce để ghi đè giá trị từ installation-cd-graphical-calamares-gnome.nix
   environment.variables = {
     # Qt Wayland: ưu tiên wayland, fallback xcb
-    QT_QPA_PLATFORM = "wayland;xcb";
+    # Dùng mkForce để ghi đè giá trị shell từ installation-cd-graphical-calamares-gnome.nix
+    QT_QPA_PLATFORM = lib.mkForce "wayland;xcb";
     # Tự động scale trên màn hình HiDPI
     QT_AUTO_SCREEN_SCALE_FACTOR = "1";
     # GTK backend (cho file dialogs)
