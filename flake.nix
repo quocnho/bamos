@@ -13,125 +13,124 @@
 
   outputs =
     inputs@{ flake-parts, ... }:
-    flake-parts.lib.mkFlake { inherit inputs; }
-      (
-        top@{ self, ... }: {
-          systems = [ "x86_64-linux" ];
+    flake-parts.lib.mkFlake { inherit inputs; } (
+      top@{ self, ... }: {
+        systems = [ "x86_64-linux" ];
 
-          # Import internal flake modules (host definitions + ISO)
-          imports = [
-            ./hosts
-          ];
+        # Import internal flake modules (host definitions + ISO)
+        imports = [
+          ./hosts
+        ];
 
-          perSystem =
-            { pkgs, system, ... }:
+        perSystem =
+          { pkgs, system, ... }:
+          {
             # Custom packages + ISO builds
             packages =
-          (import ./pkgs pkgs)
-          // builtins.listToAttrs (map
-          (name: {
-          inherit name;
-          value = import ./lib/mkISO.nix {
-            nixosConfiguration = top.self.nixosConfigurations.${name};
+              (import ./pkgs pkgs)
+              // builtins.listToAttrs (map
+                (name: {
+                  inherit name;
+                  value = import ./lib/mkISO.nix {
+                    nixosConfiguration = top.self.nixosConfigurations.${name};
+                  };
+                }) [
+                # Unified ISOs — 3 ISOs thay 12
+                # Edition + Machine Type chọn trong Calamares
+                "iso-gnome"
+                "iso-kde"
+                "iso-cosmic"
+              ]);
+
+            # Nix formatter
+            formatter = pkgs.nixpkgs-fmt;
+
+            # Dev shell cho Nix development
+            devShells.default = pkgs.mkShell {
+              packages = with pkgs; [
+                nil
+                nix-output-monitor
+                nixpkgs-fmt
+                deadnix
+                statix
+                nixd
+                cachix
+              ];
+            };
+
+            # Convenience: build ISO + copy to /iso/
+            apps.iso-export = {
+              type = "app";
+              program = builtins.toString
+                (pkgs.writeShellApplication {
+                  name = "iso-export";
+                  text = ''
+                    set -euo pipefail
+                    VARIANT="''${1:-iso-gnome}"
+                    OUTDIR="/tmp/bamos-iso-''${VARIANT}"
+                    echo "🔨 Building $VARIANT..."
+                    nix build ".#$VARIANT" --out-link "$OUTDIR" 2>&1 | tail -3
+                    echo ""
+                    echo "📀 Copying ISO to iso/..."
+                    mkdir -p iso
+                    ISO_FILE=$(find "$OUTDIR/iso" -name "*.iso" -type f | head -1)
+                    if [ -n "$ISO_FILE" ]; then
+                      cp "$ISO_FILE" iso/
+                      echo "✅ ISO copied: iso/$(basename "$ISO_FILE")"
+                      ls -lh "iso/$(basename "$ISO_FILE")"
+                    else
+                      echo "⚠ No ISO file found in build output"
+                    fi
+                    rm -f "$OUTDIR" 2>/dev/null || true
+                  '';
+                }) + "/bin/iso-export";
+            };
+
+            # Convenience: push built ISO to Cachix cache
+            apps.push-cachix = {
+              type = "app";
+              program = builtins.toString
+                (pkgs.writeShellApplication {
+                  name = "push-cachix";
+                  runtimeInputs = [ pkgs.cachix ];
+                  text = ''
+                    set -e
+                    echo "Building ISO..."
+                    nix build .#iso-gnome --no-link --print-out-paths | while read -r path; do
+                      echo "Pushing to Cachix: $path"
+                      cachix push bamos "$path"
+                    done
+                    echo "Done! Cache pushed to https://bamos.cachix.org"
+                  '';
+                }) + "/bin/push-cachix";
+            };
+
+            # One-command: switch + push cache
+            apps.update = {
+              type = "app";
+              program = builtins.toString
+                (pkgs.writeShellScriptBin "bamos-update" ''
+                  set -e
+                  echo "=== 1. Rebuild system ==="
+                  sudo nixos-rebuild switch --flake .#
+                  echo ""
+                  echo "=== 2. Push ISO to Cachix ==="
+                  nix run .#push-cachix
+                  echo ""
+                  echo "✅ Done! System updated + cache pushed."
+                '') + "/bin/bamos-update";
+            };
           };
-        }
-      ) [
-      # Unified ISOs — 3 ISOs thay 12
-      # Edition + Machine Type chọn trong Calamares
-      "iso-gnome"
-      "iso-kde"
-      "iso-cosmic"
-    ]);
 
-  # Nix formatter
-  formatter = pkgs.nixpkgs-fmt;
+        flake = {
+          # NixOS modules có thể tái sử dụng
+          nixosModules = {
+            default = import ./modules;
+          };
 
-  # Dev shell cho Nix development
-  devShells.default = pkgs.mkShell {
-    packages = with pkgs; [
-      nil
-      nix-output-monitor
-      nixpkgs-fmt
-      deadnix
-      statix
-      nixd
-      cachix
-    ];
-  };
-
-  # Convenience: build ISO + copy to /iso/
-  apps.iso-export = {
-    type = "app";
-    program = builtins.toString
-      (pkgs.writeShellApplication {
-        name = "iso-export";
-        text = ''
-          set -euo pipefail
-          VARIANT="''${1:-iso-gnome}"
-          OUTDIR="/tmp/bamos-iso-''${VARIANT}"
-          echo "🔨 Building $VARIANT..."
-          nix build ".#$VARIANT" --out-link "$OUTDIR" 2>&1 | tail -3
-          echo ""
-          echo "📀 Copying ISO to iso/..."
-          mkdir -p iso
-          ISO_FILE=$(find "$OUTDIR/iso" -name "*.iso" -type f | head -1)
-          if [ -n "$ISO_FILE" ]; then
-            cp "$ISO_FILE" iso/
-            echo "✅ ISO copied: iso/$(basename "$ISO_FILE")"
-            ls -lh "iso/$(basename "$ISO_FILE")"
-          else
-            echo "⚠ No ISO file found in build output"
-          fi
-          rm -f "$OUTDIR" 2>/dev/null || true
-        '';
-      }) + "/bin/iso-export";
-  };
-
-  # Convenience: push built ISO to Cachix cache
-  apps.push-cachix = {
-    type = "app";
-    program = builtins.toString
-      (pkgs.writeShellApplication {
-        name = "push-cachix";
-        runtimeInputs = [ pkgs.cachix ];
-        text = ''
-          set -e
-          echo "Building ISO..."
-          nix build .#iso-gnome --no-link --print-out-paths | while read -r path; do
-            echo "Pushing to Cachix: $path"
-            cachix push bamos "$path"
-          done
-          echo "Done! Cache pushed to https://bamos.cachix.org"
-        '';
-      }) + "/bin/push-cachix";
-  };
-
-  # One-command: switch + push cache
-  apps.update = {
-    type = "app";
-    program = builtins.toString
-      (pkgs.writeShellScriptBin "bamos-update" ''
-        set -e
-        echo "=== 1. Rebuild system ==="
-        sudo nixos-rebuild switch --flake .#
-        echo ""
-        echo "=== 2. Push ISO to Cachix ==="
-        nix run .#push-cachix
-        echo ""
-        echo "✅ Done! System updated + cache pushed."
-      '') + "/bin/bamos-update";
-  };
-};
-
-flake = {
-# NixOS modules có thể tái sử dụng
-nixosModules = {
-default = import ./modules;
-};
-
-# Overlays cho nixpkgs
-overlays = import ./overlays { inherit inputs; };
-};
-}
-);
+          # Overlays cho nixpkgs
+          overlays = import ./overlays { inherit inputs; };
+        };
+      }
+    );
 }
