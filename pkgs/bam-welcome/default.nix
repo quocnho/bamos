@@ -59,19 +59,19 @@ stdenvNoCC.mkDerivation {
       echo ""
     fi
 
-    # ─── bam CLI Guide ───
-    echo -e "  ${BOLD}📋 BamOS Quick Commands${NC}"
+    # ─── bam CLI Guide (end-user) ───
+    echo -e "  ${BOLD}📋 Hướng dẫn nhanh — BamOS CLI${NC}"
     echo -e "  ─────────────────────────────────────────────"
-    echo -e "  ${GREEN}bam info${NC}         System information"
-    echo -e "  ${GREEN}sudo bam switch${NC}  Apply system changes"
-    echo -e "  ${GREEN}sudo bam update${NC}  Check + apply updates"
-    echo -e "  ${GREEN}bam iso${NC}          Build ISO image"
-    echo -e "  ${GREEN}bam vm${NC}           Run VM with ISO"
-    echo -e "  ${GREEN}bam usb /dev/sda${NC} Write ISO to USB"
-    echo -e "  ${GREEN}sudo bam backup${NC}  Backup system + home"
-    echo -e "  ${GREEN}bam --help${NC}       Show all commands"
+    echo -e "  ${GREEN}bam info${NC}           Xem thông tin máy"
+    echo -e "  ${GREEN}bam install <app>${NC}  Cài ứng dụng (VD: bam install firefox)"
+    echo -e "  ${GREEN}bam search <app>${NC}   Tìm ứng dụng"
+    echo -e "  ${GREEN}sudo bam update${NC}     Cập nhật hệ thống"
+    echo -e "  ${GREEN}sudo bam backup${NC}     Sao lưu dữ liệu"
+    echo -e "  ${GREEN}sudo bam switch${NC}     Áp dụng thay đổi"
+    echo -e "  ${GREEN}bam --help${NC}         Xem tất cả lệnh"
     echo ""
-    echo -e "  ${DIM}💡 Config:${NC} ${DIM}/etc/nixos/${NC}  │  ${DIM}Docs:${NC} ${DIM}bamos.io${NC}"
+    echo -e "  ${DIM}💡 Mẹo: Gõ ${NC}bam --help${DIM} để xem đầy đủ tính năng${NC}"
+    echo -e "  ${DIM}📖 Tài liệu:${NC} ${DIM}https://bamos.io${NC}"
     echo ""
     WELCOMEEOF
 

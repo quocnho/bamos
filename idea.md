@@ -258,7 +258,7 @@ BamOS cung cấp **12 phiên bản ISO** khác nhau, tổ hợp từ 3 Desktop E
       - `bam snapshot share <name>` — Đóng gói snapshot để chia sẻ
       - `bam share export` — Xuất /etc/nixos/ dưới dạng portable archive
       - `bam share iso [variant]` — Build custom ISO với user config
-    - **Welcome Banner (bam-welcome)**: Hiển thị khi mở terminal — thông tin hệ thống, bam CLI guide, update notification
+    - **Welcome Banner (bam-welcome)**: Hiển thị khi mở terminal — thông tin hệ thống + hướng dẫn các câu lệnh bam CLI cơ bản cho người dùng cuối (cài app, cập nhật, sao lưu)
         - Chạy 1 lần/ngày (dùng timestamp cache)
         - Tích hợp qua `programs.bash.interactiveShellInit` + `programs.zsh.interactiveShellInit`
         - Package: `pkgs/bam-welcome`, Module: `modules/core/welcome.nix`
