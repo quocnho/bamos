@@ -7,5 +7,6 @@
   # Default overlay — adds BamOS custom packages to nixpkgs
   default = final: prev: {
     bamos-branding = final.callPackage ../pkgs/bamos-branding { };
+    bam-welcome = final.callPackage ../pkgs/bam-welcome { };
   };
 }

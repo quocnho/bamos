@@ -10,4 +10,5 @@ pkgs:
 
 {
   bamos-branding = pkgs.callPackage ./bamos-branding { };
+  bam-welcome = pkgs.callPackage ./bam-welcome { };
 }

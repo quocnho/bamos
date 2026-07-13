@@ -17,6 +17,7 @@
     ./core/third-party.nix
     ./core/version.nix
     ./core/update.nix
+    ./core/welcome.nix
     ./theming/bamos-branding.nix
     ./theming/gtk-theme.nix
   ];
