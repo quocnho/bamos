@@ -47,6 +47,10 @@ Package:
 
 System:
   run <cmd>         Run binary in FHS environment
+  switch            Rebuild system: nixos-rebuild switch
+  switch --test     Rebuild test (no switch)
+  switch --boot     Rebuild + add to boot menu
+  switch --flake    Rebuild with custom flake URL
   update            Check, confirm, then update: flake + version files + rebuild
   update --check    Only check for available update (no action)
   rollback [gen]    Rollback to previous generation
@@ -54,10 +58,30 @@ System:
   info              System information
   clean [--keep N]  Clean Btrfs snapshots + Nix generations
 
+ISO & VM:
+  iso [variant]     Build ISO (gnome|kde|cosmic, default: gnome)
+  iso --clean       Clean old artifacts + build fresh
+  iso --vm          Build + boot in QEMU VM
+  iso --vm --disk  G  Set VM disk size (default: 32G)
+  vm                Run QEMU VM with latest built ISO
+  vm --disk  G      Custom disk size
+  vm --ram  G       Custom RAM (default: 4G)
+  vm --uefi         Use UEFI (OVMF)
+  usb <device>      Write ISO to USB (e.g., /dev/sda)
+  usb <device> --iso <path>  Write specific ISO to USB
+
 Backup & Restore:
   backup [-s] [-h] [-d]    Selective backup (default: -s -h)
   restore [-s] [-h] [-d]   Selective restore (interactive if no flags)
   restore --list           List all backups
+
+Snapshot & Share:
+  snapshot create [name]  Create portable system snapshot (config+home+data)
+  snapshot list           List all snapshots
+  snapshot restore <name> Restore from snapshot
+  snapshot share <name>   Package snapshot for sharing (tar.zst)
+  share export            Export /etc/nixos/ as portable archive
+  share iso [variant]     Build custom ISO with current user config baked in
 
 Flags:
   -s    System config (/etc/nixos/)
@@ -65,12 +89,17 @@ Flags:
   -d    Data volume (/data/)
 
 Examples:
-  sudo bam backup              # Backup system + home
-  sudo bam backup -s -d        # Backup system + data only
-  sudo bam restore -h          # Restore home only
-  sudo bam restore --list      # List all backups
-  sudo bam update              # Check + confirm + update system
-  sudo bam update --check      # Only check for updates
+  bam iso                           # Build GNOME ISO
+  bam iso kde --vm                  # Build KDE ISO + boot in VM
+  bam vm                            # Boot VM with latest ISO
+  bam switch                        # Rebuild system
+  bam switch --flake github:quocnho/bamos#lg  # Rebuild from GitHub
+  bam usb /dev/sda                  # Write ISO to USB
+  bam snapshot create my-backup     # Create portable snapshot
+  bam snapshot share my-backup      # Package for sharing
+  bam share iso                     # Build custom ISO with my config
+  sudo bam backup                   # Backup system + home
+  sudo bam update                   # Check + confirm + update system
 EOF
 }
 
@@ -299,6 +328,34 @@ perform_restore() {
   echo "Restore completed!"
 }
 
+# ═══════════════════════════════════════════════════════════
+# Helper functions
+# ═══════════════════════════════════════════════════════════
+
+# --- Detect current flake location ---
+find_flake() {
+  if [ -f /etc/nixos/flake.nix ]; then
+    echo "/etc/nixos"
+  elif [ -f "${HOME}/Projects/bamos/flake.nix" ]; then
+    echo "${HOME}/Projects/bamos"
+  else
+    echo "/etc/nixos"
+  fi
+}
+
+# --- Get default ISO variant ---
+get_default_variant() {
+  echo "gnome"
+}
+
+# --- Find latest ISO in result/ ---
+find_latest_iso() {
+  local dir="${1:-result}"
+  local iso
+  iso=$(find "$dir" -name "*.iso" -type f 2>/dev/null | head -1)
+  echo "$iso"
+}
+
 # ─── Main CLI ───
 case "${1:-help}" in
   install)
@@ -317,6 +374,349 @@ case "${1:-help}" in
   search) shift; nix search nixpkgs "$*" 2>&1 | head -20 ;;
   shell) shift; exec nix shell "nixpkgs#$*" -c "${SHELL:-bash}" ;;
   run) shift; exec @fhsEnv@/bin/bam-fhs "$@" ;;
+
+  # ─── System: switch ───
+  switch)
+    FLAKE=$(find_flake)
+    case "${2:-}" in
+      --test)  echo "🔄 Testing config..."; sudo nixos-rebuild test --flake "$FLAKE" ;;
+      --boot)  echo "🔄 Building + adding to boot menu..."; sudo nixos-rebuild boot --flake "$FLAKE" ;;
+      --flake) shift 2; sudo nixos-rebuild switch --flake "$*" ;;
+      *)       echo "🔄 Rebuilding system..."; sudo nixos-rebuild switch --flake "$FLAKE" ;;
+    esac ;;
+
+  # ─── ISO: build ISO ───
+  iso)
+    VARIANT="${2:-$(get_default_variant)}"
+    CLEAN=false
+    BOOT_VM=false
+    DISK_SIZE="32G"
+    shift
+
+    # Parse options
+    while [ $# -gt 0 ]; do
+      case "$1" in
+        --clean) CLEAN=true; shift ;;
+        --vm)    BOOT_VM=true; shift ;;
+        --disk)  DISK_SIZE="$2"; shift 2 ;;
+        gnome|kde|cosmic) VARIANT="$1"; shift ;;
+        *) shift ;;
+      esac
+    done
+
+    if $CLEAN; then
+      echo "🧹 Cleaning old artifacts..."
+      rm -rf result iso/ bamos-vm.qcow2 2>/dev/null || true
+    fi
+
+    echo "💿 Building ISO: $VARIANT"
+    FLAKE=$(find_flake)
+    nix build "$FLAKE#iso-$VARIANT" --refresh 2>&1 | tail -5
+
+    if [ $? -ne 0 ]; then
+      echo "❌ ISO build failed!"
+      exit 1
+    fi
+
+    ISO_FILE=$(find_latest_iso)
+    if [ -n "$ISO_FILE" ]; then
+      echo "✅ ISO ready: $ISO_FILE ($(du -h "$ISO_FILE" | cut -f1))"
+
+      # Copy to iso/ directory
+      mkdir -p iso
+      cp "$ISO_FILE" iso/
+      echo "📂 Copied to: iso/$(basename "$ISO_FILE")"
+
+      if $BOOT_VM; then
+        echo ""
+        echo "🖳️  Booting VM..."
+        if [ ! -f bamos-vm.qcow2 ]; then
+          qemu-img create -f qcow2 bamos-vm.qcow2 "$DISK_SIZE"
+        fi
+        qemu-system-x86_64 -enable-kvm -m 4G -smp 2 \
+          -cdrom "$ISO_FILE" \
+          -drive file=bamos-vm.qcow2,format=qcow2 \
+          -boot d &
+        echo "✅ VM started in background (PID: $!)"
+      fi
+    else
+      echo "❌ No ISO file found in build output!"
+      exit 1
+    fi ;;
+
+  # ─── VM: run QEMU with ISO ───
+  vm)
+    DISK_SIZE="32G"
+    RAM="4G"
+    UEFI=false
+    shift
+
+    while [ $# -gt 0 ]; do
+      case "$1" in
+        --disk) DISK_SIZE="$2"; shift 2 ;;
+        --ram)  RAM="$2"; shift 2 ;;
+        --uefi) UEFI=true; shift ;;
+        *) shift ;;
+      esac
+    done
+
+    # Find ISO
+    ISO_FILE=$(find_latest_iso)
+    if [ -z "$ISO_FILE" ]; then
+      ISO_FILE=$(find iso -name "*.iso" -type f 2>/dev/null | head -1)
+    fi
+
+    if [ -z "$ISO_FILE" ]; then
+      echo "❌ No ISO found! Build one first: bam iso"
+      exit 1
+    fi
+
+    echo "📀 ISO: $ISO_FILE ($(du -h "$ISO_FILE" | cut -f1))"
+
+    # Create disk if not exists
+    if [ ! -f bamos-vm.qcow2 ]; then
+      echo "💾 Creating disk image ($DISK_SIZE)..."
+      qemu-img create -f qcow2 bamos-vm.qcow2 "$DISK_SIZE"
+    fi
+
+    # Build QEMU command
+    QEMU_CMD="qemu-system-x86_64 -enable-kvm -m $RAM -smp 2"
+    QEMU_CMD+=" -cdrom \"$ISO_FILE\""
+    QEMU_CMD+=" -drive file=bamos-vm.qcow2,format=qcow2"
+    if $UEFI; then
+      QEMU_CMD+=" -bios ${OVMF:-/run/current-system/sw/share/ovmf/ovmf_x64.bin}"
+    fi
+    QEMU_CMD+=" -boot d"
+
+    echo "🖳️  Starting VM..."
+    echo "   RAM: $RAM | Disk: $DISK_SIZE | UEFI: $UEFI"
+    echo ""
+    eval "$QEMU_CMD" ;;
+
+  # ─── USB: write ISO to USB ───
+  usb)
+    DEVICE="${2:-}"
+    ISO_FILE=""
+    shift
+
+    while [ $# -gt 0 ]; do
+      case "$1" in
+        --iso) ISO_FILE="$2"; shift 2 ;;
+        /dev/*) DEVICE="$1"; shift ;;
+        *) shift ;;
+      esac
+    done
+
+    if [ -z "$DEVICE" ]; then
+      echo "❌ Usage: bam usb /dev/sdX [--iso path]"
+      echo "⚠️  Available disks:"
+      lsblk -d -o NAME,SIZE,TYPE,MOUNTPOINT | grep -E "disk"
+      exit 1
+    fi
+
+    # Find ISO if not specified
+    if [ -z "$ISO_FILE" ]; then
+      ISO_FILE=$(find_latest_iso)
+      if [ -z "$ISO_FILE" ]; then
+        ISO_FILE=$(find iso -name "*.iso" -type f 2>/dev/null | head -1)
+      fi
+    fi
+
+    if [ -z "$ISO_FILE" ] || [ ! -f "$ISO_FILE" ]; then
+      echo "❌ ISO not found! Build one: bam iso"
+      exit 1
+    fi
+
+    echo "⚠️  WARNING: This will OVERWRITE $DEVICE!"
+    echo "📀 ISO: $ISO_FILE ($(du -h "$ISO_FILE" | cut -f1))"
+    echo "💾 Device: $DEVICE"
+    echo -n "Continue? [y/N]: "
+    read -r confirm
+    case "$confirm" in
+      y|Y|yes|YES)
+        echo "💿 Writing ISO to $DEVICE..."
+        sudo dd if="$ISO_FILE" of="$DEVICE" bs=4M status=progress conv=fsync
+        echo "✅ Done! USB is ready to boot."
+        ;;
+      *) echo "Cancelled." ;;
+    esac ;;
+
+  # ─── Snapshot: create portable system snapshot ───
+  snapshot)
+    SNAPSHOT_DIR="/data/snapshots"
+    mkdir -p "$SNAPSHOT_DIR"
+
+    case "${2:-}" in
+      create)
+        NAME="${3:-bamos-$(date +%Y%m%d-%H%M%S)}"
+        echo "📸 Creating snapshot: $NAME"
+
+        SNAPSHOT_PATH="$SNAPSHOT_DIR/$NAME"
+        mkdir -p "$SNAPSHOT_PATH"
+
+        # 1. System config (/etc/nixos/)
+        echo "   └─ System config..."
+        if [ -d /etc/nixos ]; then
+          tar -caf "$SNAPSHOT_PATH/system.tar.zst" \
+            --exclude='hardware-configuration.nix' \
+            -C /etc nixos/ 2>/dev/null
+        fi
+
+        # 2. Home config (~/.config, .local, etc.)
+        echo "   └─ Home config..."
+        if [ -d /home ]; then
+          tar -caf "$SNAPSHOT_PATH/home.tar.zst" \
+            -C /home . \
+            --exclude='.cache' --exclude='.npm' --exclude='.cargo' \
+            --exclude='.local/share/flatpak' --exclude='.local/share/Steam' \
+            --exclude='.var' --exclude='snap' --exclude='go/pkg' \
+            2>/dev/null || true
+        fi
+
+        # 3. Installed packages list
+        echo "   └─ Package list..."
+        nix profile list 2>/dev/null > "$SNAPSHOT_PATH/nix-profile.txt" || true
+        flatpak list --app 2>/dev/null > "$SNAPSHOT_PATH/flatpak-apps.txt" || true
+
+        # 4. System metadata
+        echo "   └─ System info..."
+        {
+          echo "# BamOS Snapshot: $NAME"
+          echo "Created: $(date -Iseconds)"
+          echo "Hostname: $(hostname)"
+          echo "Kernel: $(uname -r)"
+          echo "BamOS Version: $(cat /etc/bamos/version 2>/dev/null || echo 'unknown')"
+          echo "NixOS Version: $(nixos-version 2>/dev/null || echo 'unknown')"
+        } > "$SNAPSHOT_PATH/metadata.txt"
+
+        # Summary
+        echo ""
+        echo "✅ Snapshot created: $NAME"
+        echo "   Location: $SNAPSHOT_PATH"
+        du -sh "$SNAPSHOT_PATH"
+        echo ""
+        echo "📋 Contents:"
+        ls -lh "$SNAPSHOT_PATH/"
+        echo ""
+        echo "💡 Share with: bam snapshot share $NAME" ;;
+
+      list)
+        echo "📸 BamOS Snapshots:"
+        echo ""
+        if [ ! -d "$SNAPSHOT_DIR" ] || [ -z "$(ls -A "$SNAPSHOT_DIR" 2>/dev/null)" ]; then
+          echo "   (no snapshots found)"
+          exit 0
+        fi
+        for snap in "$SNAPSHOT_DIR"/*/; do
+          name=$(basename "$snap")
+          size=$(du -sh "$snap" 2>/dev/null | cut -f1)
+          created=$(cat "$snap/metadata.txt" 2>/dev/null | grep "Created:" | cut -d' ' -f2- || echo "unknown")
+          echo "   📁 $name"
+          echo "      Size: $size | Created: $created"
+        done ;;
+
+      restore)
+        NAME="${3:-}"
+        if [ -z "$NAME" ]; then
+          echo "❌ Usage: bam snapshot restore <name>"
+          echo "   Run 'bam snapshot list' to see available snapshots."
+          exit 1
+        fi
+        SNAPSHOT_PATH="$SNAPSHOT_DIR/$NAME"
+        if [ ! -d "$SNAPSHOT_PATH" ]; then
+          echo "❌ Snapshot '$NAME' not found!"
+          exit 1
+        fi
+        echo "⚠️  Restoring snapshot: $NAME"
+        echo "   This will overwrite current config!"
+        echo -n "Continue? [y/N]: "
+        read -r confirm
+        case "$confirm" in
+          y|Y|yes|YES)
+            [ -f "$SNAPSHOT_PATH/system.tar.zst" ] && tar -xaf "$SNAPSHOT_PATH/system.tar.zst" -C / 2>/dev/null && echo "   ✅ System config restored"
+            [ -f "$SNAPSHOT_PATH/home.tar.zst" ] && tar -xaf "$SNAPSHOT_PATH/home.tar.zst" -C / 2>/dev/null && echo "   ✅ Home config restored"
+            echo "✅ Done! Run 'sudo bam switch' to apply system config."
+            ;;
+          *) echo "Cancelled." ;;
+        esac ;;
+
+      share)
+        NAME="${3:-}"
+        if [ -z "$NAME" ]; then
+          echo "❌ Usage: bam snapshot share <name>"
+          exit 1
+        fi
+        SNAPSHOT_PATH="$SNAPSHOT_DIR/$NAME"
+        if [ ! -d "$SNAPSHOT_PATH" ]; then
+          echo "❌ Snapshot '$NAME' not found!"
+          exit 1
+        fi
+        ARCHIVE="$SNAPSHOT_DIR/${NAME}.tar.zst"
+        echo "📦 Packaging snapshot for sharing..."
+        tar -caf "$ARCHIVE" -C "$SNAPSHOT_DIR" "$NAME"
+        echo "✅ Share archive: $ARCHIVE ($(du -h "$ARCHIVE" | cut -f1))"
+        echo ""
+        echo "💡 To restore on another machine:"
+        echo "   1. Copy file: scp $ARCHIVE user@other-pc:/tmp/"
+        echo "   2. Extract: sudo tar -xaf $ARCHIVE -C /data/snapshots/"
+        echo "   3. Restore: sudo bam snapshot restore $NAME"
+        echo "   4. Rebuild: sudo bam switch" ;;
+
+      *) echo "Usage: bam snapshot [create|list|restore|share]" ;;
+    esac ;;
+
+  # ─── Share: export config for sharing ───
+  share)
+    SHARE_DIR="/tmp/bamos-share"
+    mkdir -p "$SHARE_DIR"
+
+    case "${2:-}" in
+      export)
+        echo "📦 Exporting /etc/nixos/ config..."
+        ARCHIVE="$SHARE_DIR/bamos-config-export.tar.zst"
+        if [ -d /etc/nixos ]; then
+          tar -caf "$ARCHIVE" \
+            --exclude='hardware-configuration.nix' \
+            --exclude='result' --exclude='iso' \
+            -C /etc nixos/
+          echo "✅ Config exported: $ARCHIVE"
+          du -h "$ARCHIVE"
+          echo ""
+          echo "💡 Share with:"
+          echo "   scp $ARCHIVE user@friend:/tmp/"
+          echo ""
+          echo "💡 On friend's machine:"
+          echo "   sudo tar -xaf $ARCHIVE -C /"
+          echo "   sudo bam switch"
+        else
+          echo "❌ /etc/nixos/ not found!"
+          exit 1
+        fi ;;
+
+      iso)
+        VARIANT="${3:-$(get_default_variant)}"
+        echo "🔨 Building custom ISO with current config..."
+        echo "   Variant: $VARIANT"
+        echo ""
+        echo "⚠️  Custom ISO building requires the BamOS source flake."
+        echo "   Building from github:quocnho/bamos..."
+        nix build "github:quocnho/bamos#iso-$VARIANT" --refresh 2>&1 | tail -3
+
+        if [ $? -eq 0 ]; then
+          ISO_FILE=$(find_latest_iso)
+          if [ -n "$ISO_FILE" ]; then
+            echo "✅ Custom ISO built: $ISO_FILE"
+            mkdir -p iso
+            cp "$ISO_FILE" "iso/bamos-custom-$VARIANT-$(date +%Y%m%d).iso"
+            echo "📂 Copied to: iso/bamos-custom-$VARIANT-$(date +%Y%m%d).iso"
+          fi
+        else
+          echo "❌ Build failed!"
+          exit 1
+        fi ;;
+
+      *) echo "Usage: bam share [export|iso]" ;;
+    esac ;;
   update)
     require_root "update"
     CHECK_ONLY=0

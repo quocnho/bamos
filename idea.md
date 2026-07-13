@@ -231,19 +231,30 @@ BamOS cung cấp **12 phiên bản ISO** khác nhau, tổ hợp từ 3 Desktop E
   - Flatpak: flatpak + xdg-desktop-portal-gtk/kde
   - Container: Podman + Docker compat + Distrobox
   - **BamOS CLI (bam)**: Universal command manager như dnf/apt
-    - `bam install <pkg>` — Cài package (nix profile + flatpak)
-    - `bam remove <pkg>` — Gỡ package
-    - `bam search <q>` — Tìm trong nixpkgs
-    - `bam run <cmd>` — Chạy binary trong FHS env (Ventoy, Zoom, MATLAB)
-    - `bam shell <pkg>` — Shell tạm với package
-    - `bam update` — Flake update → rebuild → GC → regen boot
-    - `bam info` — System info (CPU, GPU, RAM, Disk, Backups)
-    - `bam clean [--keep N]` — Dọn Nix generations + Btrfs snapshots
-    - `bam rollback [gen]` — Rollback về generation trước
-    - `bam changelog` — Xem changelog các version mới (so sánh local vs GitHub)
-    - `bam backup [-s] [-h] [-d]` — Backup system/home/data vào /data/backups/
-    - `bam restore [-s] [-h] [-d]` — Restore theo flags hoặc interactive menu
-    - `bam restore --list` — Xem danh sách backup
+      - `bam install <pkg>` — Cài package (nix profile + flatpak)
+      - `bam remove <pkg>` — Gỡ package
+      - `bam search <q>` — Tìm trong nixpkgs
+      - `bam run <cmd>` — Chạy binary trong FHS env (Ventoy, Zoom, MATLAB)
+      - `bam shell <pkg>` — Shell tạm với package
+      - `bam switch` — Rebuild system (nixos-rebuild switch alias)
+      - `bam switch --test|--boot|--flake` — Test/build/flake options
+      - `bam update` — Flake update → rebuild → GC → regen boot
+      - `bam info` — System info (CPU, GPU, RAM, Disk, Backups)
+      - `bam clean [--keep N]` — Dọn Nix generations + Btrfs snapshots
+      - `bam rollback [gen]` — Rollback về generation trước
+      - `bam changelog` — Xem changelog các version mới (so sánh local vs GitHub)
+      - `bam backup [-s] [-h] [-d]` — Backup system/home/data vào /data/backups/
+      - `bam restore [-s] [-h] [-d]` — Restore theo flags hoặc interactive menu
+      - `bam restore --list` — Xem danh sách backup
+      - `bam iso [variant] [--clean|--vm]` — Build ISO (gnome/kde/cosmic)
+      - `bam vm [--disk|--ram|--uefi]` — Chạy VM với ISO
+      - `bam usb <device>` — Ghi ISO vào USB
+      - `bam snapshot create [name]` — Tạo portable system snapshot
+      - `bam snapshot list` — Liệt kê snapshots
+      - `bam snapshot restore <name>` — Khôi phục từ snapshot
+      - `bam snapshot share <name>` — Đóng gói snapshot để chia sẻ
+      - `bam share export` — Xuất /etc/nixos/ dưới dạng portable archive
+      - `bam share iso [variant]` — Build custom ISO với user config
     - Được build từ pkgs/bam-cli/default.nix + third-party.nix
   - Wine (optional, Gaming edition): wine-wayland, winetricks
   - Codecs: ffmpeg, gstreamer-full, intel-vaapi, nvidia-vaapi
@@ -409,11 +420,20 @@ BamOS cung cấp **12 phiên bản ISO** khác nhau, tổ hợp từ 3 Desktop E
 339. **Auto update timer**: systemd timer 12h — flake update + boot + gc (`modules/core/update.nix`)
 340. **Drive icon SVG → PNG**: cần fix với librsvg (`modules/boot/calamares.nix` L26-47)
 
-### Phase 10 — BamOS Portal (Tương lai)
-348. Factory Reset Desktop (1-click restore UI)
-349. Driver Manager (NVIDIA, AMD, Intel auto-install)
-350. System Info Dashboard
-351. Edition Switcher (chuyển edition không cần cài lại)
+### Phase 10 — BamOS CLI Nâng cao 🟡 (Đang phát triển)
+348. ✅ `bam switch` — Rebuild system alias (switch/test/boot/flake)
+349. ✅ `bam iso [variant]` — Build ISO với auto-clean, --vm option
+350. ✅ `bam vm` — QEMU VM runner với disk/RAM/UEFI options
+351. ✅ `bam usb <device>` — Write ISO to USB
+352. 🟡 `bam snapshot create|list|restore|share` — Portable system snapshot
+353. 🟡 `bam share export|iso` — Export config / build custom ISO
+
+### Phase 11 — BamOS Portal (Tương lai)
+354. Factory Reset Desktop (1-click restore UI)
+355. Driver Manager (NVIDIA, AMD, Intel auto-install)
+356. System Info Dashboard
+357. Edition Switcher (chuyển edition không cần cài lại)
+358. GUI Snapshot Manager (kết hợp với CLI)
 
 ### Phase 10 — Hoàn thiện ma trận (Tương lai)
 354. Unified ISO cho tất cả DE
@@ -605,7 +625,8 @@ bamos/
 ├── pkgs/                               # 📦 Custom Nix packages
 │   ├── default.nix                     #   ✅ Aggregator (bamos-branding)
 │   ├── bam-cli/                        #   BamOS CLI (bam) — FHS env + bam.sh wrapper
-│   │   └── default.nix
+│   │   └── default.nix                 #   Commands: install, switch, iso, vm, usb,
+│   │                                   #            snapshot, share, backup, update,...
 │   ├── bamos-branding/                 #   BamOS branding: logos, wallpapers, GNOME XML
 │   │   └── default.nix
 │   └── bamos-detect-hardware.sh        #   Hardware detection script (GPU, PCI bus IDs)
