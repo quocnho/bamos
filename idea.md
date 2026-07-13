@@ -72,10 +72,18 @@ BamOS giải quyết triệt để các vấn đề trên bằng **4 trụ cột
 - **Loại bỏ build dependencies**: `includeSystemBuildDependencies = false` — ISO chỉ chứa runtime.
 - **Dual-kernel**: LTS (ISO) → Zen (cài xong) — tốt nhất của cả hai thế giới.
 
-### Trụ cột 6 — Binary Cache & Phân Phối (Cachix + GitHub Releases)
+### Trụ cột 6 — Binary Cache & Phân Phối (Cachix + Cloudflare R2 + GitHub Releases)
 - **Cachix Binary Cache**: Cache tất cả build artifacts lên `bamos.cachix.org` — build nhanh, CI/CD nhanh.
 - **GitHub Releases**: ISO artifacts được upload lên GitHub Releases — download miễn phí, không giới hạn bandwidth.
-- **CI/CD Pipeline**: Mỗi push → auto-build ISO → push cache lên Cachix → upload ISO lên Releases.
+- **Cloudflare R2**: ISOs được deploy lên Cloudflare R2 (S3-compatible) — CDN global, không giới hạn bandwidth.
+- **Cosign Signing**: ISO files được ký số với Cosign để xác thực tính toàn vẹn.
+- **CI/CD Pipeline (ublue-os pattern)**:
+  - 3 workflows riêng biệt theo pattern từ ublue-os (Bazzite):
+    - **`ci.yml`** — PR + non-main pushes: check flake, build GNOME ISO, VM smoke test
+    - **`release.yml`** — Push to main: build 3 unified ISOs, push Cachix, auto-tag, GitHub Release
+    - **`release-cd.yml`** — Tag push v*: deploy ISOs lên Cloudflare R2, Cosign sign, metadata JSON
+- **Auto-tag strategy**: `v{VERSION}.{YYYYMMDD}.{BUILD}` (ví dụ: `v4.0.0.20260710.1`)
+- **Changelog tự động**: Sinh từ conventional commits qua `generate-changelog.py`
 - **Hướng dẫn setup Cachix**:
   ```bash
   nix profile install nixpkgs#cachix        # Cài Cachix CLI
@@ -90,6 +98,10 @@ BamOS giải quyết triệt để các vấn đề trên bằng **4 trụ cột
     with:
       name: bamos
       authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+  ```
+- **Rebuild từ GitHub (không cần clone)**:
+  ```bash
+  sudo nixos-rebuild switch --flake github:quocnho/bamos#lg --refresh
   ```
 - **Người dùng hưởng lợi**: Khi cài BamOS, `nixos-rebuild` tự động pull từ Cachix cache → không cần build lại từ source.
 
@@ -198,13 +210,20 @@ BamOS cung cấp **12 phiên bản ISO** khác nhau, tổ hợp từ 3 Desktop E
   - PPD bridge: GNOME Settings → Power vẫn điều khiển được
   - Profile mặc định theo edition: desktop / throughput-performance / latency-performance
   - Battery optimization cho laptop: ASPM powersupersave, WiFi power saving, runtime PM
-- **Calamares Unified Installer:**
-  - Custom Python module `bamos-config`: sinh edition-config.nix động
+- **Calamares Unified Installer (GLF-OS pattern):**
+  - **Override package** `calamares-nixos-extensions` via `overrideAttrs` + `postInstall` (GLF-OS pattern)
+  - **Overlay áp dụng** qua `nixpkgs.overlays` TRONG `nixosSystem` (không phải perSystem) — đảm bảo áp dụng đúng cho ISO config
+  - Config files ở `modules/boot/patches/calamares/` (settings.conf + module configs)
+  - Custom Python module `bamos-config` (scripts/patches/calamares/bamos-config/main.py)
   - Packagechooser Edition: Standard / Developers / Gaming / Studio
   - Packagechooser Machine Type: Laptop / Desktop / Server
-  - Branding: logo, Nord color palette, slideshow (GLF-OS inspired)
+  - **Wayland fix**: `sudo --preserve-env=WAYLAND_DISPLAY,...` trong autostart `.desktop` (GLF-OS pattern)
+  - **DPI fix**: `QT_QPA_PLATFORM=wayland;xcb` + `QT_AUTO_SCREEN_SCALE_FACTOR=1`
+  - Btrfs mặc định + Ổ D (/data subvolume) trong partition step
+  - Branding: Logo BamOS thật từ `assets/logo/bamos-logo.svg`, Nord color palette, slideshow
   - Ổ D drive icon + Nautilus bookmark
   - Post-install /iso-cfg: flake template `github:quocnho/bamos`
+  - `lib.mkForce` cho `QT_QPA_PLATFORM` để ghi đè giá trị từ `installation-cd-graphical-calamares-gnome.nix`
 - **Hardware Detection Tools (mọi edition):**
   - pciutils (lspci), usbutils (lsusb), dmidecode, inxi, mesa-demos (glxinfo)
 - **Third-Party Runtime (modules/core/third-party.nix):**
@@ -367,18 +386,24 @@ BamOS cung cấp **12 phiên bản ISO** khác nhau, tổ hợp từ 3 Desktop E
 
 318. **ISO live**: tạo sẵn `/data/backups/{system,home,data}/` cho mọi edition
 
-### Phase 9 — Unified Calamares Installer 🟡 (Đang phát triển — Sprint 6)
-330. **Unified ISO**: 3 ISOs (GNOME/KDE/COSMIC) thay 12 — edition chọn khi install
-331. **Edition selector**: packagechooser với 4 edition (Standard/Developers/Gaming/Studio)
-332. **Machine type selector**: Laptop/Desktop/Server — auto power profile
-333. **Ổ D integration**: /data mount + custom drive icon + Nautilus bookmark
-334. **Calamares branding**: Logo, Nord colors, fonts, slideshow (GLF-OS inspired)
-335. **iso-cfg template → /etc/nixos/**:
+### Phase 9 — Unified Calamares Installer ✅ (Hoàn thành — Sprint 6-7)
+330. ✅ **Unified ISO**: 3 ISOs (GNOME/KDE/COSMIC) thay 12 cũ — edition + machine type chọn khi install
+331. ✅ **Edition selector**: packagechooser với 4 edition (Standard/Developers/Gaming/Studio)
+332. ✅ **Machine type selector**: Laptop/Desktop/Server — auto power profile
+333. ✅ **Ổ D integration**: /data mount + custom drive icon + Nautilus bookmark
+334. ✅ **Calamares branding**: Logo, Nord colors, fonts, slideshow (GLF-OS inspired)
+335. ✅ **iso-cfg template → /etc/nixos/**:
     - `iso-cfg/flake.nix` — inputs: nixpkgs + github:quocnho/bamos
     - `iso-cfg/configuration.nix` — hostname, locale, user
     - `iso-cfg/customized.nix` — edition + machine type (Calamares điền)
     - `iso-cfg/customConfig/default.nix` — user customization (không bị ghi đè)
-336. **Custom Python module**: bamos-config — copy template + apply selections (`modules/boot/calamares.nix`)
+336. ✅ **Custom Python module**: bamos-config (trong `modules/boot/patches/calamares/bamos-config/main.py`)
+337. ✅ **Override package pattern (GLF-OS)**:
+    - `overrideAttrs` + `postInstall` trên `calamares-nixos-extensions`
+    - `nixpkgs.overlays` trong nixosSystem (module `calamares-overlay.nix`)
+    - Config files ở `modules/boot/patches/calamares/`
+    - Wayland autostart: `sudo --preserve-env=WAYLAND_DISPLAY,...`
+    - DPI fix: `QT_QPA_PLATFORM=wayland;xcb` + `mkForce`apply selections (`modules/boot/calamares.nix`)
 337. **Hardware detect tích hợp**: lspci + dmidecode chạy trong Calamares
 338. **Update workflow**: `sudo bam update` — flake update → rebuild → gc → regen boot
 339. **Auto update timer**: systemd timer 12h — flake update + boot + gc (`modules/core/update.nix`)
@@ -450,7 +475,11 @@ BamOS cung cấp **12 phiên bản ISO** khác nhau, tổ hợp từ 3 Desktop E
 - [nixos-generators](https://github.com/nix-community/nixos-generators) — Build ISO từ NixOS config
 - [Disko](https://github.com/nix-community/disko) — Declarative disk partitioning
 - [Bazzite OS](https://github.com/ublue-os/bazzite) — Gaming-focused immutable OS (Fedora Atomic)
-- [GLF-OS](https://framagit.org/gaming-linux-fr/glf-os/glf-os) — Community gaming distro (Pháp)
+- [GLF-OS](https://framagit.org/gaming-linux-fr/glf-os/glf-os) — Community gaming distro (Pháp). Nguồn cho:
+  - Pattern `overrideAttrs` + `postInstall` trên `calamares-nixos-extensions`
+  - `nixpkgs.overlays` TRONG nixosSystem (không phải perSystem)
+  - Wayland autostart: `sudo --preserve-env=WAYLAND_DISPLAY,...`
+  - Custom settings.conf + module configs qua patches/
 - [Nobara Project](https://nobara.ml/) — Gaming-optimized Fedora by GloriousEggroll
 - [devenv](https://devenv.sh/) — Fast, declarative, reproducible dev environments
 - [Podman](https://podman.io/) — Daemonless container engine (Docker alternative)
@@ -504,7 +533,9 @@ bamos/
 │   │
 │   ├── boot/                           # 🚀 Boot & Disk Partitioning
 │   │   ├── disko-btrfs.nix             #     Disko declarative partitioning (Ổ C — Ổ D)
-│   │   └── calamares.nix              #     Calamares installer GUI (edition, machine type, iso-cfg)
+│   │   ├── calamares.nix              #     Calamares installer GUI (edition, machine type, iso-cfg)
+│   │   ├── calamares-overlay.nix      #     Override calamares-nixos-extensions (GLF-OS pattern)
+│   │   └── patches/calamares/         #     Config files: settings.conf, partition.conf, mount.conf, packagechooser-*
 │   │
 │   ├── desktop/                        # 🖥 Desktop Environments
 │   │   ├── gnome.nix                   #     GNOME + GDM + dconf (window buttons)
@@ -737,11 +768,14 @@ cachix                 → Binary cache push
 ```
 
 #### 2. Secret Management — Agenix
+- **Secret Management — ragenix**
 
-[Agenix](https://github.com/ryantm/agenix) là tool quản lý secrets cho NixOS:
-- Mã hóa file `.nix` chứa secrets bằng `age` keys (SSH key–based)
-- Decrypt tự động khi build NixOS configuration
+[ragenix](https://github.com/yorickvP/ragenix) (Rust rewrite của agenix) là tool quản lý secrets cho NixOS:
+- Mã hóa file `.age` bằng SSH keys (Ed25519/RSA)
+- Decrypt tự động khi build NixOS configuration qua `age.secrets`
 - Secrets được commit vào git an toàn (đã mã hóa)
+- **Yêu cầu**: `age.identityPaths` phải trỏ tới SSH host keys (ví dụ: `/etc/ssh/ssh_host_ed25519_key`)
+- **Yêu cầu**: `services.openssh.enable = true` để sinh SSH host keys (cần cho decrypt)
 
 ```nix
 # Cấu trúc secrets
@@ -926,9 +960,15 @@ sudo nixos-rebuild switch --flake .#lg
 
 ### Testing on Developer Machine
 ```bash
+# Từ git repo local
 sudo nixos-rebuild switch --flake .#lg     # Apply config to current machine
 sudo nixos-rebuild test --flake .#lg       # Test without making boot entry
-sudo nixos-rebuild boot --flake .#lg       # Build, add to boot menu, reboot later
+
+# Từ GitHub trực tiếp (không cần git pull)
+sudo nixos-rebuild switch --flake github:quocnho/bamos#lg --refresh
+
+# Hoặc dùng alias trong home.nix:
+# nrs = "sudo nixos-rebuild switch --flake /etc/nixos";
 ```
 
 ### Build ISO Variants
@@ -968,8 +1008,25 @@ nix run .#push-cachix
 nix run .#update
 
 # Upload ISO lên GitHub Releases (CI tự động khi push tag v*)
-# ISO file: iso/*.iso
+# ISO file: result/iso/*.iso
 # Upload qua CI: gh release create v0.1.0 iso/*.iso
+
+# Deploy lên Cloudflare R2 (CD tự động qua release-cd.yml)
+# R2 bucket structure:
+#   bamos/releases/v4.0.0.YYYYMMDD.N/
+#   ├── bamos-gnome-*.iso
+#   ├── bamos-gnome-*.iso.sha256
+#   ├── bamos-kde-*.iso
+#   ├── bamos-cosmic-*.iso
+#   └── release-metadata.json
+
+# GitHub Secrets cần setup:
+# - CACHIX_AUTH_TOKEN: Auth token cho Cachix
+# - R2_ACCESS_KEY_ID: Cloudflare R2 Access Key
+# - R2_SECRET_ACCESS_KEY: Cloudflare R2 Secret Key
+# - R2_ENDPOINT: R2 endpoint URL
+# - COSIGN_PRIVATE_KEY: (Optional) Cosign key để ký ISO
+# - COSIGN_PASSWORD: (Optional) Password cho Cosign key
 ```
 
 ### Cachix Setup (one-time)
