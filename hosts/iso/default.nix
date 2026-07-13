@@ -26,10 +26,12 @@ let
           (installer desktop)
           "${inputs.nixpkgs}/nixos/modules/installer/cd-dvd/channel.nix"
 
-          # Disk partitioning + Calamares config
+          # Disk partitioning + Calamares config + overlay (GLF-OS pattern)
           inputs.disko.nixosModules.disko
           (import ../../modules/boot/disko-btrfs.nix)
           (import ../../modules/boot/calamares.nix)
+          # Override calamares-nixos-extensions package (settings.conf + Wayland fix)
+          (import ../../modules/boot/calamares-overlay.nix)
 
           # ISO-specific config
           ./${isoConfig}

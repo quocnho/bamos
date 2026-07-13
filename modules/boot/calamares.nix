@@ -163,6 +163,17 @@ let
 
 in
 {
+  # ── Wayland environment cho Calamares (fix DPI nhỏ / font nhỏ) ──
+  # Kết hợp với autostart fix trong calamares-overlay.nix (sudo --preserve-env)
+  environment.variables = {
+    # Qt Wayland: ưu tiên wayland, fallback xcb
+    QT_QPA_PLATFORM = "wayland;xcb";
+    # Tự động scale trên màn hình HiDPI
+    QT_AUTO_SCREEN_SCALE_FACTOR = "1";
+    # GTK backend (cho file dialogs)
+    GDK_BACKEND = "wayland,x11";
+  };
+
   # ── Calamares branding & data drive icon ──
   # bamos-config Python module đã bundle trong calamares-nixos-extensions (overlay)
   environment.systemPackages = with pkgs; [
