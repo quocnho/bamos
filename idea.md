@@ -232,6 +232,7 @@ BamOS cung cấp **12 phiên bản ISO** khác nhau, tổ hợp từ 3 Desktop E
   - AppImage: appimage-run + Gear Lever + binfmt
   - Flatpak: flatpak + xdg-desktop-portal-gtk/kde
   - Container: Podman + Docker compat + Distrobox
+  - **Welcome Banner (bam-welcome)**: Hiển thị khi mở terminal — thông tin hệ thống, hướng dẫn bam CLI, thông báo cập nhật. Chạy 1 lần/ngày qua timestamp cache. Tích hợp bash + zsh.
   - **BamOS CLI (bam)**: Universal command manager như dnf/apt
       - `bam install <pkg>` — Cài package (nix profile + flatpak)
       - `bam remove <pkg>` — Gỡ package
@@ -257,6 +258,10 @@ BamOS cung cấp **12 phiên bản ISO** khác nhau, tổ hợp từ 3 Desktop E
       - `bam snapshot share <name>` — Đóng gói snapshot để chia sẻ
       - `bam share export` — Xuất /etc/nixos/ dưới dạng portable archive
       - `bam share iso [variant]` — Build custom ISO với user config
+    - **Welcome Banner (bam-welcome)**: Hiển thị khi mở terminal — thông tin hệ thống, bam CLI guide, update notification
+        - Chạy 1 lần/ngày (dùng timestamp cache)
+        - Tích hợp qua `programs.bash.interactiveShellInit` + `programs.zsh.interactiveShellInit`
+        - Package: `pkgs/bam-welcome`, Module: `modules/core/welcome.nix`
     - Được build từ pkgs/bam-cli/default.nix + third-party.nix
   - Wine (optional, Gaming edition): wine-wayland, winetricks
   - Codecs: ffmpeg, gstreamer-full, intel-vaapi, nvidia-vaapi
@@ -551,7 +556,8 @@ bamos/
 │   │   ├── user.nix                    #     Default user (bamos) với bamos.user.* options
 │   │   ├── third-party.nix            #     AppImage, Flatpak, FHS, Podman, Wine, codecs, fonts
 │   │   ├── version.nix                #     /etc/os-release + /etc/lsb-release branding (BamOS)
-│   │   └── update.nix                 #     Auto-upgrade engine: systemd timer + notify + GC
+│   │   ├── update.nix                 #     Auto-upgrade engine: systemd timer + notify + GC
+│   │   └── welcome.nix                #     Welcome banner: system info + bam CLI guide trên terminal
 │   │
 │   ├── boot/                           # 🚀 Boot & Disk Partitioning
 │   │   ├── disko-btrfs.nix             #     Disko declarative partitioning (Ổ C — Ổ D)
