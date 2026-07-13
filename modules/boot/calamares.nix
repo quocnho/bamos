@@ -185,8 +185,21 @@ in
 
   # ── Expose iso-cfg template to ISO live environment ──
   # Calamares Python module sẽ copy từ đây vào /etc/nixos/ khi cài đặt
+  # Cấu trúc template:
+  #   /etc/nixos-template/flake.nix          ← Định nghĩa inputs + outputs
+  #   /etc/nixos-template/configuration.nix   ← Hostname, locale, user
+  #   /etc/nixos-template/customized.nix      ← Edition + Machine Type
+  #   /etc/nixos-template/modules/default.nix ← User modules (mở rộng)
+  #   /etc/nixos-template/customConfig/       ← User customizations (never overwritten)
+  #   /etc/nixos-template/README.md           ← Hướng dẫn sử dụng
+  #   /etc/nixos-template/home.nix            ← Home-manager (optional)
+  #   /etc/nixos-template/secrets/README.md   ← Secrets management (optional)
   environment.etc."nixos-template/flake.nix".source = ../../iso-cfg/flake.nix;
   environment.etc."nixos-template/configuration.nix".source = ../../iso-cfg/configuration.nix;
   environment.etc."nixos-template/customized.nix".source = ../../iso-cfg/customized.nix;
+  environment.etc."nixos-template/modules/default.nix".source = ../../iso-cfg/modules/default.nix;
   environment.etc."nixos-template/customConfig/default.nix".source = ../../iso-cfg/customConfig/default.nix;
+  environment.etc."nixos-template/README.md".source = ../../iso-cfg/README.md;
+  environment.etc."nixos-template/home.nix".source = ../../iso-cfg/home.nix;
+  environment.etc."nixos-template/secrets/README.md".source = ../../iso-cfg/secrets/README.md;
 }

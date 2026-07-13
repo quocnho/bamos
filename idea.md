@@ -222,8 +222,10 @@ BamOS cung cấp **12 phiên bản ISO** khác nhau, tổ hợp từ 3 Desktop E
   - Btrfs mặc định + Ổ D (/data subvolume) trong partition step
   - Branding: Logo BamOS thật từ `assets/logo/bamos-logo.svg`, Nord color palette, slideshow
   - Ổ D drive icon + Nautilus bookmark
-  - Post-install /iso-cfg: flake template `github:quocnho/bamos`
-  - `lib.mkForce` cho `QT_QPA_PLATFORM` để ghi đè giá trị từ `installation-cd-graphical-calamares-gnome.nix`
+  - Post-install /etc/nixos/: flake template chuyên nghiệp với cấu trúc modules/
+    - `flake.nix`, `configuration.nix`, `customized.nix`, `modules/`, `customConfig/`, `README.md`, `home.nix`, `secrets/`
+    - `customConfig/default.nix` 🛡️ KHÔNG bị ghi đè khi cài lại
+- `lib.mkForce` cho `QT_QPA_PLATFORM` để ghi đè giá trị từ `installation-cd-graphical-calamares-gnome.nix`
 - **Hardware Detection Tools (mọi edition):**
   - pciutils (lspci), usbutils (lsusb), dmidecode, inxi, mesa-demos (glxinfo)
 - **Third-Party Runtime (modules/core/third-party.nix):**
@@ -637,10 +639,17 @@ bamos/
 │   # kernel.nix, mesa.nix, wine.nix, packages.nix → ⏳ Sprint 2+
 │
 ├── iso-cfg/                            # 💿 ISO user template (copy vào /etc/nixos/ khi cài)
-│   ├── flake.nix                       #   Flake tham chiếu github:quocnho/bamos
+│   ├── flake.nix                       #   Flake: inputs (nixpkgs + bamos) + outputs
 │   ├── configuration.nix               #   Base config (hostname, locale, user)
 │   ├── customized.nix                  #   Edition + Machine type config
-│   └── customConfig/                   #   User customizations (không bị ghi đè)
+│   ├── README.md                       #   Hướng dẫn sử dụng cho người dùng cuối
+│   ├── modules/                        #   User modules (mở rộng)
+│   │   └── default.nix                #     Aggregator
+│   ├── customConfig/                   #   🛡️ User customizations (không bị ghi đè!)
+│   │   └── default.nix
+│   ├── home.nix                        #   Home-manager template (optional)
+│   └── secrets/                        #   🔐 Encrypted secrets (optional)
+│       └── README.md
 │
 ├── assets/                             # 🎨 Static assets
 │   ├── wallpapers/

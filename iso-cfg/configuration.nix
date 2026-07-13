@@ -5,7 +5,12 @@
 # Cấu trúc:
 #   ./configuration.nix        ← File này: hostname, locale, user
 #   ./customized.nix           ← Sinh bởi installer (edition + machine type)
-#   ./customConfig/default.nix  ← Người dùng tự thêm (không bị ghi đè)
+#   ./modules/                 ← User modules (thêm theo nhu cầu)
+#   ./customConfig/default.nix ← Config cá nhân (không bị ghi đè)
+#
+# ▶️ Xem thêm:
+#   ./README.md                ← Hướng dẫn sử dụng
+#   ./customConfig/default.nix ← Thêm cấu hình cá nhân vào đây!
 #
 { config, pkgs, lib, ... }:
 
@@ -23,7 +28,7 @@
   services.xserver.xkb.layout = "us";
 
   # ════════════════════════════════════════════════════════
-  # User account
+  # User account (mặc định: bamos)
   # ════════════════════════════════════════════════════════
   users.users.bamos = {
     isNormalUser = true;
@@ -32,7 +37,22 @@
   };
 
   # ════════════════════════════════════════════════════════
-  # State version (không thay đổi)
+  # State version (không thay đổi — NixOS tự quản lý)
   # ════════════════════════════════════════════════════════
   system.stateVersion = "26.05";
+
+  # ════════════════════════════════════════════════════════
+  # NetworkManager
+  # ════════════════════════════════════════════════════════
+  networking.networkmanager.enable = true;
+
+  # ════════════════════════════════════════════════════════
+  # Auto-upgrade (BamOS update engine)
+  # ════════════════════════════════════════════════════════
+  bamos.update.autoUpgrade = true;
+
+  # ════════════════════════════════════════════════════════
+  # Flatpak + Flathub
+  # ════════════════════════════════════════════════════════
+  services.flatpak.enable = true;
 }

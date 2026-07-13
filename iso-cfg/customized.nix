@@ -8,12 +8,16 @@
 #   - bamos.nixosModules.gaming
 #   - bamos.nixosModules.studio
 #
+# 📝 Bạn có thể thay đổi edition bất cứ lúc nào:
+#   1. Sửa dòng imports bên dưới
+#   2. sudo nixos-rebuild switch --flake /etc/nixos#bamos
+#
 { lib, ... }:
 
 {
+  # Edition chọn khi cài đặt (standard/developers/gaming/studio)
+  # Được Calamares điền tự động — có thể sửa tay
   imports = [
-    # Edition chọn khi cài đặt (standard/developers/gaming/studio)
-    # Được Calamares điền tự động
     bamos.nixosModules.standard
   ];
 
@@ -26,6 +30,6 @@
     batteryOptimized = false;
   };
 
-  # Third-party runtime
+  # Third-party runtime (AppImage, Flatpak, FHS)
   bamos.third-party.fhs-compat = true;
 }

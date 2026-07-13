@@ -1,14 +1,28 @@
-# customConfig/default.nix
-# 👤 User customizations — không bị ghi đè bởi Calamares hay bam CLI
+# customConfig/default.nix — 🛡️ User Customizations
+# File này KHÔNG bị ghi đè khi cài lại hệ thống!
+# Đây là nơi an toàn để thêm cấu hình cá nhân của bạn.
 #
-# Thêm cấu hình cá nhân của bạn ở đây:
-#   - Programs: programs.steam.enable = true;
-#   - Services: services.openssh.enable = true;
-#   - Hardware: bamos.nvidia.enable = true;
+# 📝 Cách dùng:
+#   Thêm các tùy chỉnh của bạn vào đây, ví dụ:
+#
+#   - Bật NVIDIA (nếu có GPU rời):
+#     bamos.nvidia.enable = true;
+#     bamos.nvidia.mode = "nvidia"; # hoặc "sync", "async"
+#
+#   - Cài thêm packages:
+#     environment.systemPackages = with pkgs; [ htop neofetch ];
+#
+#   - Bật dịch vụ:
+#     services.openssh.enable = true;
+#     services.flatpak.enable = true;
+#
+#   - Edition override:
+#     bamos.edition = "standard"; # standard | developers | gaming | studio
 #
 { ... }:
 
 {
-  # === Thêm cấu hình của bạn bên dưới ===
-
+  # ═══════════════════════════════════════════════════════
+  # 👤 Thêm cấu hình cá nhân của bạn bên dưới:
+  # ═══════════════════════════════════════════════════════
 }
