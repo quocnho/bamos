@@ -1,0 +1,103 @@
+{
+  // ============================================================
+  // Antigravity IDE — cấu hình chuẩn cho developer (VS Code-based)
+  // Áp dụng qua systemd user service "antigravity-settings" (modules/packages.nix)
+  // Font local: JetBrainsMono Nerd Font Mono (xem assets/fonts)
+  // ============================================================
+
+  // ---- Giao diện (Workbench) ----
+  "workbench.colorTheme": "Catppuccin Mocha",
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.startupEditor": "none",
+  "workbench.tree.indent": 16,
+  "window.zoomLevel": 0,
+  "window.titleBarStyle": "custom",
+  "window.commandCenter": true,
+  "breadcrumbs.enabled": true,
+
+  // ---- Editor: font lớn rõ ràng, thoải mái cho lập trình dài ----
+  "editor.fontFamily": "'JetBrainsMono Nerd Font Mono', 'FiraCode Nerd Font Mono', monospace",
+  "editor.fontSize": 17,
+  "editor.fontWeight": "450",
+  "editor.fontLigatures": true,
+  "editor.lineHeight": 1.6,
+  "editor.letterSpacing": 0.3,
+  "editor.tabSize": 2,
+  "editor.detectIndentation": true,
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.minimap.enabled": true,
+  "editor.minimap.renderCharacters": false,
+  "editor.smoothScrolling": true,
+  "editor.cursorBlinking": "smooth",
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": "active",
+  "editor.renderWhitespace": "selection",
+  "editor.rulers": [80, 120],
+  "editor.wordWrap": "off",
+  "editor.scrollBeyondLastLine": false,
+  "editor.stickyScroll.enabled": true,
+
+  // ---- Files ----
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+
+  // ---- Terminal tích hợp ----
+  "terminal.integrated.fontFamily": "'JetBrainsMono Nerd Font Mono'",
+  "terminal.integrated.fontSize": 15,
+  "terminal.integrated.defaultProfile.linux": "zsh",
+  "terminal.integrated.cursorBlinking": true,
+
+  // ---- Git ----
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "gitlens.views.branches.files.layout": "tree",
+
+  // ---- direnv + devenv (môi trường lập trình Nix) ----
+  "direnv.restart.automatic": true,
+  "direnv.enabledLanguages": ["nix", "php", "python", "javascript", "typescript", "dart", "ruby", "go"],
+
+  // ---- PHP (Laravel / CodeIgniter) ----
+  "php.validate.enable": false,
+  "[php]": {
+    "editor.defaultFormatter": "bmewburn.vscode-intelephense-client",
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true
+  },
+  "[blade]": {
+    "editor.defaultFormatter": "shufo.vscode-blade-formatter"
+  },
+  "intelephense.completion.triggerParameterHints": true,
+  "intelephense.format.enable": true,
+  "intelephense.files.maxSize": 5000000,
+  "bladeFormatter.format.indentSize": 4,
+
+  // ---- TypeScript / JavaScript / PWA ----
+  "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode", "editor.tabSize": 2 },
+  "[typescriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[jsonc]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[yaml]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[markdown]": { "editor.formatOnSave": false },
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "eslint.codeActionsOnSave": { "source.fixAll.eslint": "explicit" },
+  "prettier.singleQuote": true,
+  "prettier.trailingComma": "all",
+  "prettier.printWidth": 100,
+
+  // ---- Trợ giúp trực quan ----
+  "errorLens.enabled": true,
+  "errorLens.fontSize": 12,
+  "diffEditor.ignoreTrimWhitespace": false,
+
+  // ---- MySQL / Database ----
+  "sqltools.useNodeRuntime": true
+}

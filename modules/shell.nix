@@ -37,6 +37,10 @@
       # Khác
       grep = "grep --color=auto";
       zi = "zoxide query -i";   # chọn thư mục bằng fzf
+
+      # Antigravity IDE (binary là antigravity-ide) + CLI (agy)
+      antigravity = "antigravity-ide";
+      agy = "agy";
       # ==== NixOS rebuild & flake shortcuts ====
       sw   = "sudo nixos-rebuild switch --flake /etc/nixos#lg";
       bt   = "sudo nixos-rebuild boot --flake /etc/nixos#lg";

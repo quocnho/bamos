@@ -1,0 +1,51 @@
+{
+  // ============================================================
+  // Antigravity MCP servers — merge vào ~/.gemini/config/mcp_config.json
+  // qua systemd user service "antigravity-settings" (modules/packages.nix)
+  // __HOME__ sẽ được thay bằng thư mục nhà khi đồng bộ.
+  // Các server dùng npx => cần nodejs (đã cài sẵn trong packages.nix).
+  // ============================================================
+  "mcpServers": {
+    // Truy cập file hệ thống (đọc/ghi file ngoài workspace, thư mục nhà)
+    "fs": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "__HOME__"],
+      "disabled": false
+    },
+    // Tra cứu tài liệu chính thức mới nhất (Laravel, Flutter, React, Node...)
+    // https://context7.com — hỗ trợ rất tốt cho stack của bạn
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"],
+      "disabled": false
+    },
+    // Bộ nhớ dài hạn: agent nhớ thông tin giữa các phiên
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "disabled": false
+    },
+    // Đọc nội dung web / URL (tài liệu, issue, blog...)
+    "fetch": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"],
+      "disabled": false
+    },
+    // MySQL: agent có thể truy vấn DB trực tiếp.
+    // MẶC ĐỊNH TẮT — bật lại rồi điền mật khẩu DB của bạn:
+    //   agy mcp enable mysql
+    //   (hoặc mở IDE → More Options (…) → MCP Servers → enable + sửa env)
+    "mysql": {
+      "command": "npx",
+      "args": ["-y", "@benborla29/mcp-server-mysql"],
+      "env": {
+        "MYSQL_HOST": "127.0.0.1",
+        "MYSQL_PORT": "3306",
+        "MYSQL_USER": "root",
+        "MYSQL_PASSWORD": "",
+        "MYSQL_DB": ""
+      },
+      "disabled": true
+    }
+  }
+}
