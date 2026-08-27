@@ -94,6 +94,12 @@ in
         # khi dùng pin. Có thể bật lại nếu thích mượt.
         "org/gnome/desktop/interface" = {
           enable-animations = false;
+
+          # Rendering font kiểu Windows (ClearType): subpixel AA + full hinting.
+          # Đồng bộ với fonts.fontconfig trong assets.nix — Firefox & app GTK đều đậm nét hơn.
+          font-antialiasing = "rgba";
+          font-hinting = "full";
+          font-rgba-order = "rgb";
         };
 
         "org/gnome/desktop/wm/keybindings" = {
