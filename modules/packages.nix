@@ -144,10 +144,10 @@ PY
   };
 
   # ==== Antigravity IDE + CLI: cấu hình chuyên nghiệp (declarative) ====
-  # Asset nằm ở assets/antigravity/ (settings.json, mcp_config.json, skills/).
+  # Asset nằm ở assets/antigravity/ (settings.json, mcp_config.jsonc, skills/).
   # User service chạy mỗi lần đăng nhập:
   #   1. MERGE settings.json vào ~/.config/Antigravity IDE/User/settings.json
-  #   2. MERGE mcp_config.json vào ~/.gemini/config/mcp_config.json (giữ entry đã có)
+  #   2. MERGE mcp_config.jsonc (JSONC) vào ~/.gemini/config/mcp_config.json (giữ entry đã có)
   #   3. Đồng bộ skills/ vào ~/.gemini/config/skills/ (assets là nguồn chuẩn)
   # Sửa asset rồi rebuild (hoặc đăng nhập lại) để áp dụng.
   systemd.user.services.antigravity-settings = {
@@ -222,7 +222,7 @@ mcp_path = gemini / "mcp_config.json"
 mcp = load(mcp_path)
 servers = mcp.setdefault("mcpServers", {})
 
-with (assets / "mcp_config.json").open() as f:
+with (assets / "mcp_config.jsonc").open() as f:
     asset_mcp = jsonc_loads(f.read())["mcpServers"]
 
 for name, cfg in asset_mcp.items():

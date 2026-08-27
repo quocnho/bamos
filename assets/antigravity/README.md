@@ -9,7 +9,7 @@ Cấu hình chuẩn cho **Antigravity IDE** (VS Code-based) + **Antigravity CLI*
 assets/antigravity/
 ├── settings.json        # IDE settings: font 17 (JetBrainsMono Nerd Font), theme Catppuccin,
 │                        #   formatter theo ngôn ngữ, direnv, terminal zsh...
-├── mcp_config.json      # MCP servers (fs, context7, memory, fetch, mysql;
+├── mcp_config.jsonc     # MCP servers (JSONC: fs, context7, memory, fetch, mysql;
 │                        #   datacloud_dataproc_remote + knowledge_catalog tắt mặc định)
 └── skills/              # Skills cho agent (đọc/ghi từng thư mục con):
     ├── php-laravel/     #   artisan, migration, Eloquent, queue, testing, Pint, xdebug
@@ -27,10 +27,10 @@ Systemd user service **`antigravity-settings`** (định nghĩa trong
 
 1. **settings.json** → merge vào `~/.config/Antigravity IDE/User/settings.json`
    (giá trị trong assets là chuẩn, ghi đè).
-2. **mcp_config.json** → merge vào `~/.gemini/config/mcp_config.json`:
-   - Thêm server chưa có;
-   - Đồng bộ lại server đang giống template (vd: thay `__HOME__`);
-   - **Giữ nguyên** server đã được bạn sửa tay (không đè).
+2. **mcp_config.jsonc** (JSONC) → merge vào `~/.gemini/config/mcp_config.json`:
+    - Thêm server chưa có;
+    - Đồng bộ lại server đang giống template (vd: thay `__HOME__`);
+    - **Giữ nguyên** server đã được bạn sửa tay (không đè).
 3. **skills/** → copy đè vào `~/.gemini/config/skills/` (assets là nguồn chuẩn).
 
 Muốn áp dụng ngay không cần đăng nhập lại:
@@ -130,6 +130,7 @@ for ext in \
 ```
 
 Ghi chú:
+
 - **Lighthouse PWA** không còn trên marketplace — dùng `npx lighthouse <url>` (đã có nodejs) hoặc Chrome DevTools.
 - Extension được lưu ở `~/.antigravity-ide/extensions/`; `ms-python.python`,
   `ms-toolsai.jupyter*`, `googlecloudtools.datacloud`… do IDE tự cài khi cần.
