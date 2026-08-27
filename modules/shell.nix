@@ -32,6 +32,7 @@
       gl = "git log --oneline --graph --decorate -20";
       gp = "git push";
       gpl = "git pull";
+      gac = "git add -A && git commit -m \"Update\"";
 
       # Khác
       grep = "grep --color=auto";
@@ -51,7 +52,6 @@
 
       # ==== Tiện ích ====
       setopt autocd           # gõ tên thư mục là cd vào ngay
-      setopt extended_glob    # glob nâng cao (** , [^...], ...)
       setopt no_beep
 
       # ==== Phím tắt: di chuyển theo từ với Ctrl+←/→ ====
