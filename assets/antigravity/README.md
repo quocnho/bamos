@@ -9,7 +9,8 @@ Cấu hình chuẩn cho **Antigravity IDE** (VS Code-based) + **Antigravity CLI*
 assets/antigravity/
 ├── settings.json        # IDE settings: font 17 (JetBrainsMono Nerd Font), theme Catppuccin,
 │                        #   formatter theo ngôn ngữ, direnv, terminal zsh...
-├── mcp_config.json      # MCP servers (fs, context7, memory, fetch, mysql)
+├── mcp_config.json      # MCP servers (fs, context7, memory, fetch, mysql;
+│                        #   datacloud_dataproc_remote + knowledge_catalog tắt mặc định)
 └── skills/              # Skills cho agent (đọc/ghi từng thư mục con):
     ├── php-laravel/     #   artisan, migration, Eloquent, queue, testing, Pint, xdebug
     ├── php-codeigniter/ #   spark, model, migration, validation, Query Builder
@@ -60,6 +61,40 @@ agy mcp list
 ```
 
 Hoặc mở IDE → **More Options (…) → MCP Servers** → bật + sửa env.
+
+## Data Cloud MCP (Dataproc + Knowledge Catalog — tắt mặc định)
+
+Extension **Google Cloud Data Agent Kit** (`googlecloudtools.datacloud`, IDE tự cài)
+đăng ký 2 MCP server **remote** vào `~/.gemini/config/mcp_config.json`:
+
+| Server                               | Endpoint                                        | Dùng cho                     |
+| ------------------------------------ | ----------------------------------------------- | ---------------------------- |
+| `datacloud_dataproc_remote`          | `https://dataproc-${REGION}.googleapis.com/mcp` | Managed Spark / Dataproc     |
+| `datacloud_knowledge_catalog_remote` | `https://dataplex.googleapis.com/mcp`           | Knowledge Catalog / Dataplex |
+
+Chúng yêu cầu **đăng nhập Google Cloud + project/region GCP**
+(`authProviderType: google_credentials`) — nếu chưa cấu hình, IDE sẽ báo lỗi kết nối
+khi khởi động. Assets để `disabled: true` và systemd service **ép tắt lại mỗi lần
+đăng nhập** (kể cả khi extension ghi đè entry khi khởi động).
+
+- **Không dùng BigQuery/Dataproc/Dataplex** → không cần làm gì thêm, lỗi sẽ hết
+  sau khi `systemctl --user restart antigravity-settings` + reload IDE.
+- **Muốn dùng** → cấu hình đầy đủ rồi bật:
+
+```bash
+# 1. Cài gcloud (thêm google-cloud-sdk vào packages.nix) + đăng nhập
+#    (gcloud auth application-default login, hoặc sign-in trong IDE)
+gcloud auth application-default login
+# 2. Chọn project + region
+gcloud config set project <PROJECT_ID>
+gcloud config set compute/region <REGION>
+# 3. Bật 2 server (hoặc mở IDE → More Options (…) → MCP Servers)
+agy mcp enable datacloud_dataproc_remote
+agy mcp enable datacloud_knowledge_catalog_remote
+```
+
+> `serverUrl` của dataproc chứa `${REGION}` — phải có region (từ `google.cloud.region`
+> trong IDE settings hoặc gcloud config) thì URL mới hợp lệ.
 
 ## Extensions cần thiết cho stack (cài 1 lần, cần mạng)
 

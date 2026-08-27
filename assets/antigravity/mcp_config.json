@@ -46,6 +46,24 @@
         "MYSQL_DB": ""
       },
       "disabled": true
+    },
+    // Google Cloud Data Agent Kit (extension googlecloudtools.datacloud) tự đăng ký
+    // 2 MCP server REMOTE (Dataproc/Spark + Knowledge Catalog/Dataplex) vào đây.
+    // MẶC ĐỊNH TẮT — chúng cần gcloud + project/region GCP mới chạy được, nếu
+    // không sẽ báo lỗi kết nối mỗi lần mở IDE (xem README "Data Cloud MCP").
+    "datacloud_dataproc_remote": {
+      "authProviderType": "google_credentials",
+      "headers": { "User-Agent": "datacloud.antigravity" },
+      "oauth": {},
+      "serverUrl": "https://dataproc-${REGION}.googleapis.com/mcp",
+      "disabled": true
+    },
+    "datacloud_knowledge_catalog_remote": {
+      "authProviderType": "google_credentials",
+      "headers": { "User-Agent": "datacloud.antigravity" },
+      "oauth": {},
+      "serverUrl": "https://dataplex.googleapis.com/mcp",
+      "disabled": true
     }
   }
 }

@@ -52,31 +52,93 @@
 
   # ==== Zed editor: font lớn + cấu hình chuyên nghiệp (declarative) ====
   # File settings nằm ở assets/zed/settings.json — sửa ở đó rồi rebuild.
-  # User service chạy mỗi lần đăng nhập, MERGE cấu hình mặc định vào
-  # ~/.config/zed/settings.json — KHÔNG đè block "agent" (quyền hạn Zed
-  # agent đã được bạn duyệt sẽ được giữ nguyên).
+  # User service chạy mỗi lần đăng nhập:
+  #   1. MERGE settings.json vào ~/.config/zed/settings.json (KHÔNG đè "agent")
+  #   2. Đồng bộ skills/ vào ~/.config/zed/skills/ (assets là nguồn chuẩn)
+  # Thay __HOME__ trong settings (dùng cho context server fs).
   systemd.user.services.zed-settings = {
     wantedBy = [ "default.target" ];
     path = [ pkgs.python3 ];
     script = ''
       mkdir -p "$HOME/.config/zed"
-      python3 - ${./../assets/zed/settings.json} <<'PY'
-import json, sys, pathlib
+      python3 - ${./../assets/zed} <<'PY'
+import json, os, pathlib, shutil, sys
 
-settings_path = pathlib.Path.home() / ".config/zed/settings.json"
-with open(sys.argv[1]) as f:
-    defaults = json.load(f)
+assets = pathlib.Path(sys.argv[1])
+home = pathlib.Path.home()
+
+def jsonc_loads(text):
+    # Parse JSONC: bỏ comment // bên ngoài chuỗi + dấu phẩy thừa
+    out, in_str, i, pending_comma = [], False, 0, False
+    while i < len(text):
+        c = text[i]
+        if in_str:
+            out.append(c)
+            if c == '\\':
+                out.append(text[i + 1]); i += 2; continue
+            if c == '"':
+                in_str = False
+        else:
+            if c == '"':
+                if pending_comma:
+                    out.append(','); pending_comma = False
+                in_str = True; out.append(c)
+            elif c == '/' and i + 1 < len(text) and text[i + 1] == '/':
+                if pending_comma:
+                    out.append(','); pending_comma = False
+                while i < len(text) and text[i] != '\n':
+                    i += 1
+                continue
+            elif c == ',':
+                pending_comma = True
+            elif c in ' \t\r\n':
+                out.append(c)
+            elif c in '}]':
+                if not pending_comma:
+                    out.append(c)
+                else:
+                    pending_comma = False
+                    out.append(c)
+            else:
+                if pending_comma:
+                    out.append(','); pending_comma = False
+                out.append(c)
+        i += 1
+    return json.loads("".join(out))
+
+settings_path = home / ".config/zed/settings.json"
+with (assets / "settings.json").open() as f:
+    defaults = jsonc_loads(f.read().replace("__HOME__", str(home)))
 
 merged = {}
 if settings_path.exists():
     try:
-        merged = json.loads(settings_path.read_text())
+        merged = jsonc_loads(settings_path.read_text())
     except Exception:
         merged = {}
 
-# Áp dụng cấu hình mặc định (font, theme...), KHÔNG đụng "agent"
+# Áp dụng cấu hình mặc định (font, theme, context_servers...), KHÔNG đụng "agent"
 merged.update({k: v for k, v in defaults.items() if k != "agent"})
-settings_path.write_text(json.dumps(merged, indent=2))
+settings_path.write_text(json.dumps(merged, indent=2) + "\n")
+
+# Đồng bộ skills (assets là nguồn chuẩn)
+def make_writable(path):
+    for root, dirs, files in os.walk(path, topdown=False):
+        for f in files:
+            os.chmod(os.path.join(root, f), 0o644)
+        os.chmod(root, 0o755)
+    os.chmod(path, 0o755)
+
+skills_dst = home / ".config/zed/skills"
+skills_dst.mkdir(parents=True, exist_ok=True)
+for src in (assets / "skills").iterdir():
+    if src.is_dir():
+        dst = skills_dst / src.name
+        if dst.exists():
+            make_writable(dst)
+            shutil.rmtree(dst)
+        shutil.copytree(src, dst)
+        make_writable(dst)
 PY
     '';
   };
@@ -99,8 +161,8 @@ assets = pathlib.Path(sys.argv[1])
 home = pathlib.Path.home()
 
 def jsonc_loads(text):
-    # Parse JSONC: bỏ comment // bên ngoài chuỗi (giữ nguyên https:// bên trong)
-    out, in_str, i = [], False, 0
+    # Parse JSONC: bỏ comment // bên ngoài chuỗi + dấu phẩy thừa
+    out, in_str, i, pending_comma = [], False, 0, False
     while i < len(text):
         c = text[i]
         if in_str:
@@ -111,12 +173,28 @@ def jsonc_loads(text):
                 in_str = False
         else:
             if c == '"':
+                if pending_comma:
+                    out.append(','); pending_comma = False
                 in_str = True; out.append(c)
             elif c == '/' and i + 1 < len(text) and text[i + 1] == '/':
+                if pending_comma:
+                    out.append(','); pending_comma = False
                 while i < len(text) and text[i] != '\n':
                     i += 1
                 continue
+            elif c == ',':
+                pending_comma = True
+            elif c in ' \t\r\n':
+                out.append(c)
+            elif c in '}]':
+                if not pending_comma:
+                    out.append(c)
+                else:
+                    pending_comma = False
+                    out.append(c)
             else:
+                if pending_comma:
+                    out.append(','); pending_comma = False
                 out.append(c)
         i += 1
     return json.loads("".join(out))
@@ -154,6 +232,14 @@ for name, cfg in asset_mcp.items():
     elif json.dumps(servers[name], sort_keys=True) == template:
         servers[name] = json.loads(template)  # giống template → đồng bộ lại (vd: thay __HOME__)
     # khác template → giữ nguyên bản người dùng đã sửa (không đè)
+
+# Data Cloud (datacloud): ép tắt 2 MCP server remote — extension/IDE có thể
+# ghi lại entry này (bỏ "disabled") mỗi lần khởi động; khi chưa có gcloud +
+# project/region GCP thì chúng luôn báo lỗi kết nối. Bật lại khi cần:
+# xoá 2 dòng dưới + làm theo README (mục "Data Cloud MCP").
+for name in ("datacloud_dataproc_remote", "datacloud_knowledge_catalog_remote"):
+    if name in servers:
+        servers[name]["disabled"] = True
 
 mcp_path.write_text(json.dumps(mcp, indent=2) + "\n")
 
