@@ -10,13 +10,13 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # Suspend nông (s2idle) thay vì S3 (deep):
-    # S3 quá sâu trên máy LG → bàn phím không đánh thức lại được sau khi mở nắp.
+    # ==== Suspend nông (s2idle) — qua kernel param, KHÔNG qua sleep.conf ====
+    # `mem_sleep_default=s2idle` → kernel chọn s2idle làm mặc định cho "mem".
+    # ⚠️ KHÔNG dùng systemd.sleep.settings nữa: `SuspendMode=` đã bị REMOVE
+    # trong systemd 261+ → gây lỗi "Requested suspend operation not
+    # supported" → gấp nắp không sleep (chỉ tắt màn hình). Đã xác nhận trong
+    # journalctl. Kernel param tự đảm nhiệm việc chọn s2idle.
     boot.kernelParams = [ "mem_sleep_default=s2idle" ];
-    systemd.sleep.settings.Sleep = {
-      SuspendState = "s2idle";
-      SuspendMode = "s2idle";
-    };
 
     services.power-profiles-daemon.enable = false;
     services.tlp.enable = true;
