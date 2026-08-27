@@ -4,21 +4,15 @@
 { config, lib, pkgs, ... }:
 
 {
-  imports = [
-    ./hardware-configuration.nix
-    ./modules/default.nix
-  ];
+  imports = [ ./modules/default.nix ];
 
   # ==== Bật/tắt module ====
   my.boot.enable = true;              # Bootloader, Plymouth, kernel params
   my.gpu.enable = true;               # NVIDIA (GTX 1650) + Intel UHD
   my.gpu.intelBusId = "PCI:0:2:0";
   my.gpu.nvidiaBusId = "PCI:2:0:0";
-  my.gnome.enable = true;             # GNOME + GDM + extensions + GNOME Software
-  my.macos.enable = true;             # Giao diện giống macOS (WhiteSur + dock + menu)
+  my.gnome.enable = true;             # GNOME + GDM
   my.power.enable = true;             # Suspend s2idle + TLP + thức dậy bằng bàn phím
-  my.audio.enable = true;             # PipeWire + mic ảo khử tiếng ồn (rnnoise)
-  my.assets.enable = true;            # Fonts + wallpapers cục bộ (offline)
 
   # ==== Cấu hình riêng của host này ====
   networking.hostName = "lg";

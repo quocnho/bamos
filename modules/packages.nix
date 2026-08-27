@@ -24,6 +24,12 @@
     # Dev Environment (devenv — devshell kiểu Nix, chạy cùng direnv)
     devenv
 
+    # ==== Antigravity (Google — AI IDE + CLI, unfree) ====
+    # - antigravity-ide: IDE nhánh VSCode 1.107 (bản 2.5.5 — dòng "Antigravity 2.0")
+    # - antigravity-cli:  TUI agent client, lệnh `agy`
+    antigravity-ide
+    antigravity-cli
+
     # Touchpad Gestures
     libinput-gestures
     xdotool
