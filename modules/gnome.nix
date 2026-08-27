@@ -34,19 +34,19 @@ in
       # ==== GNOME Extensions (bộ của GLF-OS) ====
       gnomeExtensions.caffeine
       gnomeExtensions.appindicator
-      gnomeExtensions.gsconnect
+      # gnomeExtensions.gsconnect
       gnomeExtensions.dash-to-dock
-      gnomeExtensions.dash-to-panel
+      # gnomeExtensions.dash-to-panel
       gnomeExtensions.arcmenu
       gnomeExtensions.blur-my-shell
-      gnomeExtensions.open-bar
+      # gnomeExtensions.open-bar
       gnomeExtensions.burn-my-windows
       gnomeExtensions.tiling-shell
       gnomeExtensions.vitals
       gnomeExtensions.quick-settings-audio-panel
       gnomeExtensions.rounded-window-corners-reborn
       gnomeExtensions.bluetooth-battery-meter
-      gnomeExtensions.bing-wallpaper-changer
+      # gnomeExtensions.bing-wallpaper-changer
     ];
 
     programs.dconf.profiles.user.databases = [{
