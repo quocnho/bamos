@@ -18,6 +18,12 @@
     zip
     unrar
 
+    # Audio / Ghi âm (tham khảo GLF-OS)
+    ffmpeg
+
+    # Dev Environment (devenv — devshell kiểu Nix, chạy cùng direnv)
+    devenv
+
     # Touchpad Gestures
     libinput-gestures
     xdotool
@@ -31,9 +37,7 @@
     direnv
     podman-compose
 
-    # GNOME Extensions & Tools
-    gnomeExtensions.caffeine
-    gnomeExtensions.appindicator
+    # GNOME Extensions & Tools (bản đầy đủ trong modules/gnome.nix)
     gnome-extension-manager
   ];
 }

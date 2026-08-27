@@ -5,7 +5,10 @@
     ./boot.nix
     ./gpu.nix
     ./power.nix
+    ./audio.nix
     ./gnome.nix
+    ./macos.nix
+    ./assets.nix
     ./users.nix
     ./i18n.nix
     ./shell.nix

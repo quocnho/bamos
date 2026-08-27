@@ -1,4 +1,4 @@
-# Ngôn ngữ, bộ gõ và fonts.
+# Ngôn ngữ và bộ gõ. (Fonts đã chuyển sang modules/assets.nix — offline.)
 { config, lib, pkgs, ... }:
 
 {
@@ -8,9 +8,4 @@
     type = "fcitx5";
     fcitx5.addons = with pkgs; [ qt6Packages.fcitx5-unikey ];
   };
-
-  fonts.packages = with pkgs; [
-    nerd-fonts.jetbrains-mono
-    nerd-fonts.fira-code
-  ];
 }
