@@ -1,0 +1,18 @@
+{
+  "theme": "One Dark",
+  "ui_font_size": 16,
+  "buffer_font_size": 16,
+  "ui_font_family": "Inter",
+  "buffer_font_family": "JetBrainsMono Nerd Font Mono",
+  "buffer_line_height": "comfortable",
+  "tab_size": 4,
+  "indent_guides": {
+    "enabled": true
+  },
+  "format_on_save": "on",
+  "autosave": "on_focus_change",
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
+  }
+}

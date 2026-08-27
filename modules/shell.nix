@@ -37,6 +37,14 @@
       # Khác
       grep = "grep --color=auto";
       zi = "zoxide query -i";   # chọn thư mục bằng fzf
+      # ==== NixOS rebuild & flake shortcuts ====
+      sw   = "sudo nixos-rebuild switch --flake /etc/nixos#lg";
+      bt   = "sudo nixos-rebuild boot --flake /etc/nixos#lg";
+      bu   = "sudo nixos-rebuild build --flake /etc/nixos#lg";
+      dry  = "sudo nixos-rebuild dry-build --flake /etc/nixos#lg";
+      fu   = "nix flake update /etc/nixos";
+      chk  = "nix flake check /etc/nixos";
+      ngc  = "sudo nix-collect-garbage -d";
     };
 
     promptInit = ''
