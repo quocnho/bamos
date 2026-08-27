@@ -12,7 +12,6 @@
     distrobox
     mesa-demos
     pciutils
-    firefox
     gparted
     unzip
     zip
@@ -25,30 +24,20 @@
     devenv
 
     # ==== Python (môi trường lập trình — luôn sẵn sàng) ====
-    # - python3: 3.14 (kèm `venv` chuẩn của stdlib)
-    # - pip + virtualenv: cài package Python trong venv/project
-    # - uv: trình quản lý package Python hiện đại (nhanh, kết hợp tốt
-    #       với devenv/direnv — dùng cho mọi project Python mới)
     python3
     python3Packages.pip
     python3Packages.virtualenv
     uv
 
     # ==== Antigravity (Google — AI IDE + CLI, unfree) ====
-    # - antigravity-ide: IDE nhánh VSCode 1.107 (bản 2.5.5 — dòng "Antigravity 2.0")
-    # - antigravity-cli:  TUI agent client, lệnh `agy`
     antigravity-ide
     antigravity-cli
 
-    # Touchpad Gestures
-    libinput-gestures
-    xdotool
-
     # Terminal UI
-    starship
+    # (fzf + starship + zoxide được cài qua programs.* trong modules/shell.nix)
     fd
-    fzf
     bat
+    eza
     htop
     direnv
     podman-compose
@@ -56,4 +45,18 @@
     # GNOME Extensions & Tools (bản đầy đủ trong modules/gnome.nix)
     gnome-extension-manager
   ];
+
+  # ==== Firefox (cài qua programs.firefox để kèm policies tối ưu PIN) ====
+  # - VAAPI hardware video decode trên Intel iGPU (iHD): xem video tiết kiệm pin
+  # - Tự xả tab khi thiếu RAM
+  programs.firefox = {
+    enable = true;
+    policies = {
+      Preferences = {
+        "media.ffmpeg.vaapi.enabled" = true;
+        "media.hardware-video-decoding.enabled" = true;
+        "browser.tabs.unloadOnLowMemory" = true;
+      };
+    };
+  };
 }

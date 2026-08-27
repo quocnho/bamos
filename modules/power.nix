@@ -22,20 +22,27 @@ in
     services.tlp.enable = true;
     services.logind.settings.Login.HandleLidSwitch = "suspend";
 
+    # Intel Thermal Daemon: quản nhiệt chủ động → giảm throttling đột ngột,
+    # giữ hiệu năng ổn định và hiệu quả năng lượng tốt hơn khi tải.
+    services.thermald.enable = true;
+
     # ==== TLP 1.10.2 (bản mới nhất — upstream & nixpkgs đều là bản này) ====
-    # Defaults của TLP 1.10.2 đã tối ưu sẵn cho máy này (CPU_ENERGY_PERF_POLICY,
-    # WIFI_PWR, SOUND_POWER_SAVE, RUNTIME_PM on/auto, NMI_WATCHDOG=0, ...).
-    # Chỉ cần bổ sung vài thứ riêng cho laptop LG này:
+    # Defaults của TLP 1.10.2 đã tối ưu sẵn cho máy này (WIFI_PWR,
+    # SOUND_POWER_SAVE, RUNTIME_PM on/auto, NMI_WATCHDOG=0, ...).
+    # Bổ sung vài thứ riêng cho laptop LG này:
     services.tlp.settings = {
       # Battery care kiểu LG — tương đương "Battery Care Mode" trong
       # LG Control Center (Windows): chỉ sạc tới 80% để kéo dài tuổi thọ pin.
       # LG CHỈ hỗ trợ giá trị 80 hoặc 100, và KHÔNG có start threshold riêng.
-      # TLP nhận diện tự động qua plugin `35-lg` + module kernel lg_laptop
-      # (đã xác minh: lg_laptop đang chạy, ghi threshold 80 hoạt động).
+      # TLP nhận diện tự động qua plugin `35-lg` + module kernel lg_laptop.
       STOP_CHARGE_THRESH_BAT0 = "80";
 
+      # Ưu tiên PIN: EPP "power" khi chạy bằng pin (i5-10210U vẫn đủ mạnh
+      # cho Firefox + devenv). Nếu thấy máy ì, đổi lại "balance_power".
+      CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+
       # Không cho TLP can thiệp runtime-PM vào driver NVIDIA — tránh xung đột
-      # với hardware.nvidia.powerManagement trong modules/gpu.nix.
+      # với hardware.nvidia.powerManagement (RTD3) trong modules/gpu.nix.
       # (Đây cũng là giá trị mặc định của TLP 1.10.2.)
       RUNTIME_PM_DRIVER_DENYLIST = "amdgpu mei_me nouveau nvidia xhci_hcd";
     };

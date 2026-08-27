@@ -49,6 +49,14 @@ in
       # Quản lý năng lượng: PreserveVideoMemoryAllocations + suspend/resume.
       powerManagement.enable = true;
 
+      # ==== RTD3 (fine-grained power management) — tối ưu PIN ====
+      # Cho phép dGPU TẮT HẲN (runtime suspend, ~0W) khi không có ứng dụng
+      # nào dùng nó. Trước đây dGPU luôn "active" và ngốn ~2.7W liên tục
+      # (đã đo thực tế). Yêu cầu prime.offload.enable (đã bật ✓).
+      # Lưu ý: màn hình ngoài cắm HDMI khi dGPU đang ngủ sẽ đánh thức nó
+      # (hoạt động bình thường); nếu gặp vấn đề, đổi về `false`.
+      powerManagement.finegrained = true;
+
       prime = {
         # PRIME render offload: chạy ứng dụng trên dGPU bằng
         # `nvidia-offload <lệnh>`.
