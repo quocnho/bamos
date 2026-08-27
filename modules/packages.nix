@@ -24,6 +24,16 @@
     # Dev Environment (devenv — devshell kiểu Nix, chạy cùng direnv)
     devenv
 
+    # ==== Python (môi trường lập trình — luôn sẵn sàng) ====
+    # - python3: 3.14 (kèm `venv` chuẩn của stdlib)
+    # - pip + virtualenv: cài package Python trong venv/project
+    # - uv: trình quản lý package Python hiện đại (nhanh, kết hợp tốt
+    #       với devenv/direnv — dùng cho mọi project Python mới)
+    python3
+    python3Packages.pip
+    python3Packages.virtualenv
+    uv
+
     # ==== Antigravity (Google — AI IDE + CLI, unfree) ====
     # - antigravity-ide: IDE nhánh VSCode 1.107 (bản 2.5.5 — dòng "Antigravity 2.0")
     # - antigravity-cli:  TUI agent client, lệnh `agy`
