@@ -1,0 +1,54 @@
+# Quản lý năng lượng: suspend nông (s2idle) + TLP + đánh thức bằng bàn phím.
+{ config, lib, ... }:
+
+let
+  cfg = config.my.power;
+in
+{
+  options.my.power = {
+    enable = lib.mkEnableOption "power management (s2idle + TLP)";
+  };
+
+  config = lib.mkIf cfg.enable {
+    # Suspend nông (s2idle) thay vì S3 (deep):
+    # S3 quá sâu trên máy LG → bàn phím không đánh thức lại được sau khi mở nắp.
+    boot.kernelParams = [ "mem_sleep_default=s2idle" ];
+    systemd.sleep.settings.Sleep = {
+      SuspendState = "s2idle";
+      SuspendMode = "s2idle";
+    };
+
+    services.power-profiles-daemon.enable = false;
+    services.tlp.enable = true;
+    services.logind.settings.Login.HandleLidSwitch = "suspend";
+
+    # ==== TLP 1.10.2 (bản mới nhất — upstream & nixpkgs đều là bản này) ====
+    # Defaults của TLP 1.10.2 đã tối ưu sẵn cho máy này (CPU_ENERGY_PERF_POLICY,
+    # WIFI_PWR, SOUND_POWER_SAVE, RUNTIME_PM on/auto, NMI_WATCHDOG=0, ...).
+    # Chỉ cần bổ sung vài thứ riêng cho laptop LG này:
+    services.tlp.settings = {
+      # Battery care kiểu LG — tương đương "Battery Care Mode" trong
+      # LG Control Center (Windows): chỉ sạc tới 80% để kéo dài tuổi thọ pin.
+      # LG CHỈ hỗ trợ giá trị 80 hoặc 100, và KHÔNG có start threshold riêng.
+      # TLP nhận diện tự động qua plugin `35-lg` + module kernel lg_laptop
+      # (đã xác minh: lg_laptop đang chạy, ghi threshold 80 hoạt động).
+      STOP_CHARGE_THRESH_BAT0 = "80";
+
+      # Không cho TLP can thiệp runtime-PM vào driver NVIDIA — tránh xung đột
+      # với hardware.nvidia.powerManagement trong modules/gpu.nix.
+      # (Đây cũng là giá trị mặc định của TLP 1.10.2.)
+      RUNTIME_PM_DRIVER_DENYLIST = "amdgpu mei_me nouveau nvidia xhci_hcd";
+    };
+
+    # Cho phép bàn phím USB (kể cả receiver không dây) đánh thức máy từ suspend.
+    # Bật wakeup cho bàn phím HID (bInterfaceProtocol=01) — KHÔNG cho chuột (02).
+    services.udev.extraRules = ''
+      ACTION=="add", SUBSYSTEM=="usb", ATTR{bInterfaceClass}=="03", ATTR{bInterfaceProtocol}=="01", ATTR{power/wakeup}="enabled"
+      ACTION=="add", SUBSYSTEM=="usb", ATTR{bDeviceClass}=="09", ATTR{power/wakeup}="enabled"
+    '';
+
+    # Nếu bàn phím vẫn lờ đờ sau khi thức, bỏ comment dòng dưới:
+    # (Tắt USB autosuspend của TLP — tiêu tốn pin hơn một chút)
+    # services.tlp.settings.USB_AUTOSUSPEND = "0";
+  };
+}
