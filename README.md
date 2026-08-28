@@ -11,17 +11,23 @@ tham khảo sâu dự án [GLF-OS](https://framagit.org/gaming-linux-fr/glf-os/g
 
 ## Tính năng mặc định (khớp bamos.info — "Cài xong là dùng")
 
-| Website bamos.info                     | Trạng thái trong BamOS                                                   |
-| -------------------------------------- | ------------------------------------------------------------------------ |
-| Bộ gõ tiếng Việt (Unikey)              | ✅ fcitx5 + **fcitx5-unikey** mặc định                                   |
-| WPS Office (tương thích MS Office)     | ✅ **wpsoffice** cài sẵn                                                 |
-| Chrome                                 | ✅ **google-chrome** cài sẵn                                             |
-| Zoom                                   | ✅ **zoom-us** cài sẵn                                                   |
-| Zalo                                   | ⏳ chưa có package nixpkgs (hướng dẫn trong `customConfig/features.nix`) |
-| Chỉnh sửa ảnh & video (GIMP, Kdenlive) | ✅ tùy chọn (bỏ comment trong `features.nix`)                            |
-| Driver NVIDIA                          | ✅ màn chọn GPU trong Calamares (auto/nvidia/intel)                      |
-| Múi giờ Việt Nam                       | ✅ `Asia/Ho_Chi_Minh` mặc định                                           |
-| Không lo virus / Rollback              | ✅ bản chất immutable của NixOS                                          |
+| Website bamos.info                     | Trạng thái trong BamOS                                                             |
+| -------------------------------------- | ---------------------------------------------------------------------------------- |
+| Bộ gõ tiếng Việt (Unikey)              | ✅ fcitx5 + **fcitx5-unikey** mặc định                                             |
+| Văn phòng (tương thích MS Office)      | ✅ **LibreOffice** mặc định + **Google Docs/Sheets/Slides** web apps; WPS tùy chọn |
+| Chrome                                 | ✅ **google-chrome** cài sẵn                                                       |
+| Zoom                                   | ✅ **zoom-us** cài sẵn                                                             |
+| Zalo                                   | ⏳ chưa có package nixpkgs (hướng dẫn trong `customConfig/features.nix`)           |
+| Chỉnh sửa ảnh & video (GIMP, Kdenlive) | ✅ tùy chọn (bỏ comment trong `features.nix`)                                      |
+| Driver NVIDIA                          | ✅ màn chọn GPU trong Calamares (auto/nvidia/intel)                                |
+| Múi giờ Việt Nam                       | ✅ `Asia/Ho_Chi_Minh` mặc định                                                     |
+| Không lo virus / Rollback              | ✅ bản chất immutable của NixOS                                                    |
+
+> **Vì sao WPS → LibreOffice + Google?** WPS Office trên Linux hay lỗi font tiếng Việt
+> và symbol (ô vuông ☺☻) do thiếu font fallback. BamOS đã cài sẵn font MS (`corefonts`)
+>
+> - **`symbola`** (fix ô vuông) + `noto-fonts`, và để WPS thành tùy chọn — LibreOffice +
+>   Google Docs vừa ổn định font vừa đáp ứng nhu cầu văn phòng.
 
 ## Cấu trúc
 
@@ -41,7 +47,7 @@ tham khảo sâu dự án [GLF-OS](https://framagit.org/gaming-linux-fr/glf-os/g
 │   └── customConfig/          #   ★ nơi người dùng bật/tắt bằng cách comment
 │       ├── default.nix        #     import apps.nix + features.nix
 │       ├── apps.nix           #     ứng dụng thêm (comment để bật/tắt)
-│       └── features.nix       #     tính năng: timezone VN, fcitx5-unikey, WPS/Chrome/Zoom...
+│       └── features.nix       #     tính năng: timezone VN, fcitx5-unikey, LibreOffice + Google Docs...
 ├── installer/                 # cấu hình Calamares (nạp vào package qua override)
 │   └── calamares/
 │       ├── modules/nixos/     #   module Python: sinh config + dò GPU + nixos-install
@@ -123,7 +129,7 @@ Mọi thứ nằm trong `/etc/nixos/customConfig/`:
 
 ```bash
 sudo nano /etc/nixos/customConfig/apps.nix      # ứng dụng: bỏ # để cài, thêm # để gỡ
-sudo nano /etc/nixos/customConfig/features.nix  # tính năng: timezone, bộ gõ, WPS/Chrome/Zoom...
+sudo nano /etc/nixos/customConfig/features.nix  # tính năng: timezone, bộ gõ, văn phòng...
 sudo nixos-rebuild switch --flake /etc/nixos#bamos
 ```
 
@@ -162,7 +168,7 @@ bu   # build thử không áp dụng
 - **Hyprland / KDE Plasma**: website quảng cáo nhiều desktop — hiện BamOS cung cấp GNOME
   (profile desktop); roadmap: thêm option `bamos.desktop = "gnome" | "hyprland" | "kde"`.
 - **Edition Minimum/Standard/Studio/Gaming** (theo bamos.info): roadmap — chọn edition lúc cài
-  (như GLF-OS `packagechooser`), BamOS hiện là bản "Standard" (GNOME + WPS/Chrome/Zoom).
+  (như GLF-OS `packagechooser`), BamOS hiện là bản "Standard" (GNOME + LibreOffice + Google/Chrome/Zoom).
 - **Branding riêng**: hiện dùng branding `nixos` của package — có thể thêm
   `installer/calamares/branding/bamos/` và đổi `branding:` trong settings.conf.
 - **Binary cache (Attic)**: đẩy closure lên cache riêng để `nixos-install` tải nhanh hơn (GLF-OS dùng Attic + CI).

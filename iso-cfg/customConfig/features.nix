@@ -36,24 +36,84 @@
     fcitx5.addons = with pkgs; [ qt6Packages.fcitx5-unikey ];
   };
 
-  # ---------------- Ứng dụng cơ bản cho người dùng văn phòng ----------------
-  # Theo bamos.info: "Cài xong là dùng". WPS Office / Chrome / Zoom là phần
-  # mềm không tự do (unfree) nên cần cho phép:
+  # ---------------- Văn phòng: LibreOffice + Google (mặc định BamOS) ----------------
+  #
+  # ▶ LỰA CHỌN OFFICE (phân tích lỗi font/symbol của WPS):
+  #   1. LibreOffice (mặc định) — FOSS, ổn định, font tiếng Việt chuẩn (dùng fontconfig
+  #      hệ thống), KHÔNG lỗi symbol. Tương thích tốt tài liệu MS Office.
+  #   2. Google Docs/Sheets/Slides (web apps, cài sẵn) — nhẹ, miễn phí, đồng bộ đám mây,
+  #      không lỗi font (web render). Cần internet + tài khoản Google.
+  #   3. WPS Office (TÙY CHỌN — comment bên dưới) — tương thích MS Office tốt nhất NHƯNG
+  #      hay lỗi font tiếng Việt & symbol (ô vuông ☺☻); cần font MS + Symbola (đã cài).
+  #
+  # WPS Office / Chrome / Zoom là phần mềm không tự do (unfree) nên cần cho phép:
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs; [
-    # ---- Văn phòng (tương thích Microsoft Office — bamos.info) ----
-    wpsoffice # soạn thảo văn bản, bảng tính, trình chiếu
+    # ---- Văn phòng OFFLINE (mặc định: LibreOffice — ổn định font tiếng Việt) ----
+    libreoffice # soạn thảo văn bản, bảng tính, trình chiếu (tương thích MS Office)
+
+    # ---- WPS Office (TÙY CHỌN) — comment 2 dòng dưới để cài ----
+    # LƯU Ý: nếu thấy ô vuông ☺☻/lỗi font, kiểm tra font MS (corefonts) + Symbola
+    # (cả 2 đã được BamOS cài sẵn trong modules/assets.nix).
+    # wpsoffice
+
     # ---- Trình duyệt (đồng bộ bookmark, mật khẩu, tiện ích) ----
     google-chrome
     # ---- Họp hành trực tuyến ----
     zoom-us # họp online
     # Zalo: chưa có package trong nixpkgs — tải AppImage từ https://zalo.me
     #   hoặc cài qua: nixpkgs#distrobox + distrobox create -n zalo ...
-    # ---- Sáng tạo (tùy chọn — bỏ comment để cài) ----
-    # gimp        # chỉnh sửa ảnh
-    # kdenlive    # dựng video
-    # obs-studio  # quay màn hình / stream
+
+    # ---- Google Docs / Sheets / Slides — web apps cài sẵn (kiểu Bazzite) ----
+    # Mở như app riêng (cửa sổ không thanh tab), dùng chung tài khoản Google của Chrome.
+    # Cần internet; đăng nhập Google 1 lần ở Chrome là dùng được cả 3.
+    (pkgs.makeDesktopItem {
+      name = "google-docs";
+      desktopName = "Google Docs";
+      comment = "Soạn thảo văn bản trực tuyến (Google)";
+      exec = "google-chrome-stable --app=https://docs.google.com/document/u/0/";
+      icon = "x-office-document";
+      categories = [
+        "Office"
+        "Network"
+      ];
+      startupNotify = false;
+    })
+    (pkgs.makeDesktopItem {
+      name = "google-sheets";
+      desktopName = "Google Sheets";
+      comment = "Bảng tính trực tuyến (Google)";
+      exec = "google-chrome-stable --app=https://docs.google.com/spreadsheets/u/0/";
+      icon = "x-office-spreadsheet";
+      categories = [
+        "Office"
+        "Network"
+      ];
+      startupNotify = false;
+    })
+    (pkgs.makeDesktopItem {
+      name = "google-slides";
+      desktopName = "Google Slides";
+      comment = "Trình chiếu trực tuyến (Google)";
+      exec = "google-chrome-stable --app=https://docs.google.com/presentation/u/0/";
+      icon = "x-office-presentation";
+      categories = [
+        "Office"
+        "Network"
+      ];
+      startupNotify = false;
+    })
+    # Google Drive (thêm nếu cần — bỏ comment):
+    # (pkgs.makeDesktopItem {
+    #   name = "google-drive";
+    #   desktopName = "Google Drive";
+    #   comment = "Lưu trữ đám mây (Google)";
+    #   exec = "google-chrome-stable --app=https://drive.google.com";
+    #   icon = "folder-remote";
+    #   categories = [ "Network" ];
+    #   startupNotify = false;
+    # })
   ];
 
   # ---------------- Năng lượng ----------------

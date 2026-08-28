@@ -23,8 +23,10 @@
     # discord          # Discord
 
     # ---------------- Văn phòng ----------------
-    # libreoffice      # bộ văn phòng đầy đủ
+    # LibreOffice / Google Docs đã là mặc định của BamOS (xem features.nix)
     # onlyoffice-bin   # OnlyOffice (giao diện giống MS Office)
+    # wpsoffice        # WPS Office — nếu cài, nhớ kiểm tra font MS + Symbola
+    #                   #   (đã cài sẵn trong modules/assets.nix) để tránh ô vuông ☺☻
 
     # ---------------- Đa phương tiện ----------------
     # vlc              # xem phim / nghe nhạc
