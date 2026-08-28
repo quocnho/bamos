@@ -1,2 +1,5 @@
 # Kết quả build nixos-rebuild (symlink → /nix/store) — không cần track
 /result
+
+# Python bytecode
+__pycache__/
