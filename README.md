@@ -52,6 +52,9 @@ tham khảo sâu dự án [GLF-OS](https://framagit.org/gaming-linux-fr/glf-os/g
 │   └── calamares/
 │       ├── modules/nixos/     #   module Python: sinh config + dò GPU + nixos-install
 │       └── config/modules/    #   partition, users, welcome, gpu (NVIDIA/Intel), device (laptop/desktop)
+├── pkgs/bam/                  # ★ BamOS CLI (`bam`) — script bash thuần (package .#bam)
+│   ├── bam.sh                 #   nguồn script (sửa ở đây, chạy `bash -n` để kiểm tra)
+│   └── default.nix            #   gói: writeShellScriptBin "bam"
 ├── modules/                   # module dùng chung (my.*, bật qua my.X.enable)
 │   ├── default.nix            #   aggregator — xuất qua bamos.nixosModules.default
 │   └── (boot, gpu, power, audio, gnome, macos, assets, i18n, shell, ...)
@@ -78,11 +81,37 @@ tham khảo sâu dự án [GLF-OS](https://framagit.org/gaming-linux-fr/glf-os/g
 Muốn thêm máy mới: tạo `hosts/<máy>.nix` + thêm 1 entry `nixosConfigurations.<máy>`
 trong `flake.nix` (hoặc để ISO cài sẵn — máy đích chạy profile desktop từ repo).
 
+## Bam CLI (`bam`)
+
+Mọi thao tác hệ thống gói gọn trong **1 lệnh `bam`** — tiếng Việt, tự dò host
+(`lg` trên máy dev / `bamos` trên máy cài từ ISO), tự gắn tag
+`NixOS-YY.MM.DD-HH:MM` khi switch/boot. Cài sẵn trên mọi máy dùng BamOS
+(qua `modules/packages.nix`) — code tại `pkgs/bam/`.
+
+```bash
+bam switch            # rebuild + áp dụng ngay (tự gắn tag NixOS-YY.MM.DD-HH:MM)
+bam switch -u         # chạy nix flake update trước rồi rebuild
+bam boot              # rebuild, áp dụng khi khởi động lại (giữ hệ thống đang chạy)
+bam build             # build thử, không áp dụng
+bam iso               # build file ISO cài đặt (bamos-gnome-26.11-x86_64-linux.iso)
+bam gc 7              # dọn rác /nix/store, giữ generation 7 ngày + đồng bộ boot menu
+bam generations       # danh sách generation + khác biệt 2 bản gần nhất
+bam rollback          # quay về generation trước
+bam info              # thông tin hệ thống (host, kernel, GPU, RAM, disk...)
+bam doctor            # kiểm tra sức khỏe (flake, disk, generation, git...)
+bam publish "msg"      # (máy dev) commit → merge develop→main → push GitHub
+bam help              # hướng dẫn đầy đủ
+```
+
+Ghi đè mặc định bằng env: `BAM_FLAKE_DIR` (thư mục flake, mặc định `/etc/nixos`),
+`BAM_HOST` (tên host), `NO_COLOR` (tắt màu).
+
 ## Build ISO cài đặt (cho người dùng khác)
 
 ```bash
-nix build .#iso
-# ISO nằm ở result/iso/*.iso — ghi ra USB: dd if=result/iso/*.iso of=/dev/sdX bs=4M status=progress
+nix build .#iso          # hoặc: bam iso
+# ISO nằm ở result/iso/*.iso — tên file: bamos-gnome-26.11-x86_64-linux.iso
+# Ghi ra USB: dd if=result/iso/*.iso of=/dev/sdX bs=4M status=progress
 # (công cụ khuyên dùng theo bamos.info: Balena Etcher)
 ```
 
@@ -143,24 +172,28 @@ sudo nixos-rebuild switch --flake /etc/nixos#bamos
 ## Máy chính (LG)
 
 ```bash
-sw   # sudo env NIXOS_TAG="NixOS-$(date +%y.%m.%d-%H:%M)" nixos-rebuild switch --flake /etc/nixos#lg --impure
-bt   # boot thay vì switch (giữ generation cũ)
-bu   # build thử không áp dụng
+bam switch        # rebuild + áp dụng ngay (tự gắn tag NixOS-YY.MM.DD-HH:MM)
+bam switch -u     # kèm nix flake update
+bam boot          # boot thay vì switch (giữ generation cũ)
+bam build         # build thử không áp dụng
 ```
 
+- Alias cũ vẫn còn: `sw` = `bam switch`, `swu` = `bam switch -u`, `bt` = `bam boot`,
+  `bu` = `bam build`, `dry` = `bam dry`, `fu` = `bam update`, `ngc` = `bam gc` (xem `modules/shell.nix`).
 - Tag `NixOS-YY.MM.DD-HH:MM` tự gắn mỗi lần switch (xem `hosts/lg.nix`).
 - User `quocnho` khai báo trực tiếp trong `hosts/lg.nix` (không hardcode trong modules/).
 
 ## Tham khảo GLF-OS → BamOS
 
-| Tính năng               | GLF-OS                                                      | BamOS                                                                         |
-| ----------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| Flake hosts             | 1 `nixosConfiguration` / máy (`glf-installer`, `user-test`) | `hosts/*.nix` + `nixosConfigurations.*`                                       |
-| Profiles                | `glf.environment.edition` + `glf.features.*` (catalog)      | `profiles/*.nix` (import thuần, dễ ghép)                                      |
-| ISO                     | `installation-cd-graphical-calamares-gnome.nix`             | `installation-cd-graphical-calamares-gnome.nix` (giống GLF-OS)                |
-| Installer               | Calamares + module Python (sinh config, dò GPU, copy flake) | Calamares + module Python (`installer/calamares/`) + **GPU + Laptop/Desktop** |
-| Post-install /etc/nixos | copy `iso-cfg/` (flake input `glf`)                         | copy `iso-cfg/` (flake input `bamos` = github) + `customConfig/`              |
-| Update máy đích         | `glf-update` = `nix flake update` + `nixos-rebuild boot`    | `nix flake update` + `nixos-rebuild switch`                                   |
+| Tính năng               | GLF-OS                                                          | BamOS                                                                         |
+| ----------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Flake hosts             | 1 `nixosConfiguration` / máy (`glf-installer`, `user-test`)     | `hosts/*.nix` + `nixosConfigurations.*`                                       |
+| Profiles                | `glf.environment.edition` + `glf.features.*` (catalog)          | `profiles/*.nix` (import thuần, dễ ghép)                                      |
+| ISO                     | `installation-cd-graphical-calamares-gnome.nix`                 | `installation-cd-graphical-calamares-gnome.nix` (giống GLF-OS)                |
+| Installer               | Calamares + module Python (sinh config, dò GPU, copy flake)     | Calamares + module Python (`installer/calamares/`) + **GPU + Laptop/Desktop** |
+| Post-install /etc/nixos | copy `iso-cfg/` (flake input `glf`)                             | copy `iso-cfg/` (flake input `bamos` = github) + `customConfig/`              |
+| CLI                     | alias `glf-update/switch/build/clean/history/systeminfo` + `nh` | **`bam`** (1 lệnh, tiếng Việt, tự dò host, tự tag — `pkgs/bam/`)              |
+| Update máy đích         | `glf-update` = `nix flake update` + `nixos-rebuild boot`        | `bam update` + `bam switch` (hoặc `bam switch -u`)                            |
 
 ## Lộ trình nâng cấp (tùy chọn)
 
