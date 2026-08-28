@@ -51,7 +51,8 @@
   ];
 
   # ==== Tự đăng nhập root trên tty1 → chạy installer ngay ====
-  services.getty.autologinUser = "root";
+  # (mkForce: installation-cd mặc định autologin user "nixos")
+  services.getty.autologinUser = lib.mkForce "root";
 
   # Banner console hướng dẫn (hiện khi autologin)
   environment.etc."issue" = {
