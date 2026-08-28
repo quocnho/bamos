@@ -57,7 +57,7 @@
       bt = "bam boot";
       bu = "bam build";
       dry = "bam dry";
-      fu = "bam update";
+      fu = "bam lock";
       chk = "nix flake check /etc/nixos";
       ngc = "bam gc";
     };

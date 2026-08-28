@@ -11,7 +11,7 @@
 set -euo pipefail
 
 PROG="bam"
-VERSION="1.0.0"
+VERSION="1.1.0"
 
 # Thư mục chứa flake (mặc định: /etc/nixos — repo bamos hoặc flake máy đích)
 FLAKE_DIR="${BAM_FLAKE_DIR:-/etc/nixos}"
@@ -53,6 +53,17 @@ need_root() {
     warn "Lệnh cần quyền root — chạy lại qua sudo..."
     exec sudo "$0" "$@"
   fi
+}
+
+# Có yêu cầu xem trợ giúp (-h/--help) không? (chạy trước need_root để không hỏi mật khẩu)
+help_requested() {
+  local a
+  for a in "$@"; do
+    if [ "$a" = "-h" ] || [ "$a" = "--help" ]; then
+      return 0
+    fi
+  done
+  return 1
 }
 
 NIX_FLAGS="nix-command flakes"
@@ -121,16 +132,101 @@ rebuild() {
   ok "Hoàn tất — xem thông tin: bam info"
 }
 
-# ---------- Cập nhật flake.lock ----------
-cmd_update() {
+# ---------- Kiểm tra mạng / dung lượng ----------
+check_network() {
+  if command -v nm-online >/dev/null 2>&1 && nm-online -q --timeout 5 >/dev/null 2>&1; then
+    return 0
+  fi
+  if ping -c 1 -W 2 1.1.1.1 >/dev/null 2>&1 || ping -c 1 -W 2 api.github.com >/dev/null 2>&1; then
+    return 0
+  fi
+  warn "Không thấy kết nối internet — nếu tải cấu hình từ GitHub thất bại, hãy kiểm tra mạng rồi thử lại."
+}
+
+check_disk() {
+  local avail_kb avail_gb
+  avail_kb=$(df -k /nix/store | awk 'NR==2 {print $4}')
+  avail_gb=$((avail_kb / 1024 / 1024))
+  if [ "$avail_gb" -lt 5 ]; then
+    die "Dung lượng /nix/store chỉ còn ${avail_gb}GB (< 5GB) — không đủ để cập nhật. Dọn rác trước: bam gc"
+  fi
+  ok "Dung lượng /nix/store: ${avail_gb}GB trống (đủ)"
+}
+
+# Lấy short-rev của input $1 (vd: bamos) từ flake.lock — rỗng nếu không có input đó.
+# Máy đích (cài từ ISO) có input `bamos = github:quocnho/bamos/main` trong
+# /etc/nixos/flake.nix → rev này chính là phiên bản cấu hình đang dùng.
+lock_rev() {
+  local name="$1"
+  awk -v name="\"$name\":" '
+    $0 ~ name { found = 1 }
+    found && /"rev":/ {
+      gsub(/[",]/, "", $2)
+      print substr($2, 1, 7)
+      exit
+    }
+  ' "$FLAKE_DIR/flake.lock" 2>/dev/null || true
+}
+
+# ---------- Cập nhật flake.lock (tải cấu hình mới nhất từ GitHub) ----------
+update_lockfile() {
   flake_exists
-  info "Cập nhật flake.lock ($FLAKE_DIR)..."
+  info "Tải cấu hình mới nhất từ GitHub (nix flake update)..."
+  local before after owner
+  before=$(lock_rev bamos)
+  # Nhớ owner gốc của flake.lock (máy dev: user quocnho; máy đích: root) —
+  # khi chạy bằng root, khôi phục lại sau khi update để không đổi chủ sở hữu.
+  owner=$(stat -c %U:%G "$FLAKE_DIR/flake.lock" 2>/dev/null || true)
   nix --extra-experimental-features "$NIX_FLAGS" flake update --flake "$FLAKE_DIR"
-  ok "flake.lock đã được cập nhật."
+  if [ -n "$owner" ] && [ "$(id -u)" -eq 0 ]; then
+    chown "$owner" "$FLAKE_DIR/flake.lock" 2>/dev/null || true
+  fi
+  after=$(lock_rev bamos)
+  if [ -n "$after" ]; then
+    if [ -n "$before" ] && [ "$before" != "$after" ]; then
+      ok "Có bản mới từ GitHub: bamos ${before} → ${after} (main)"
+    else
+      ok "Bamos đang ở phiên bản mới nhất (@ ${after})"
+    fi
+  else
+    ok "flake.lock đã được cập nhật."
+  fi
+}
+
+# Chỉ cập nhật flake.lock, không rebuild (dành cho người muốn kiểm soát thủ công)
+cmd_lock() {
+  flake_exists
+  update_lockfile
+}
+
+# ---------- Cập nhật hệ thống: tải config mới nhất từ GitHub + rebuild ----------
+cmd_update() {
+  help_requested "$@" && { cmd_help update; return; }
+  need_root "$@"
+  local boot_only=0
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --boot) boot_only=1 ;; # rebuild boot — áp dụng khi khởi động lại (an toàn hơn)
+      -h | --help) cmd_help update; return ;;
+      *) die "Tùy chọn không hợp lệ: $1 (xem: bam help update)" ;;
+    esac
+    shift
+  done
+  check_network
+  update_lockfile
+  check_disk
+  if [ "$boot_only" -eq 1 ]; then
+    rebuild boot
+    ok "Đã cập nhật — thay đổi sẽ áp dụng khi bạn khởi động lại máy."
+  else
+    rebuild switch
+    ok "Cập nhật hoàn tất — hệ thống đang chạy cấu hình mới nhất từ GitHub."
+  fi
 }
 
 # ---------- Lệnh chính ----------
 cmd_switch() {
+  help_requested "$@" && { cmd_help switch; return; }
   need_root "$@"
   local update=0
   while [ $# -gt 0 ]; do
@@ -142,12 +238,13 @@ cmd_switch() {
     shift
   done
   if [ "$update" -eq 1 ]; then
-    cmd_update
+    update_lockfile
   fi
   rebuild switch
 }
 
 cmd_boot() {
+  help_requested "$@" && { cmd_help boot; return; }
   need_root "$@"
   local update=0
   while [ $# -gt 0 ]; do
@@ -159,7 +256,7 @@ cmd_boot() {
     shift
   done
   if [ "$update" -eq 1 ]; then
-    cmd_update
+    update_lockfile
   fi
   rebuild boot
 }
@@ -191,6 +288,7 @@ cmd_iso() {
 }
 
 cmd_rollback() {
+  help_requested "$@" && { cmd_help rollback; return; }
   need_root "$@"
   flake_exists
   local host
@@ -227,6 +325,7 @@ cmd_generations() {
 }
 
 cmd_gc() {
+  help_requested "$@" && { cmd_help gc; return; }
   need_root "$@"
   local days="${1:-7}"
   case "$days" in
@@ -243,12 +342,18 @@ cmd_gc() {
 
 cmd_info() {
   flake_exists
-  local host ver kernel uptime gpu mem disk gen
+  local host ver kernel uptime gpu mem disk gen bref
   host=$(detect_host)
   if git -C "$FLAKE_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     ver="$(git -C "$FLAKE_DIR" log -1 --format='%h' 2>/dev/null || echo '?') (branch $(git -C "$FLAKE_DIR" branch --show-current 2>/dev/null || echo '?'))"
   else
-    ver="1.0.0 (config từ github:quocnho/bamos)"
+    # Máy đích: hiển thị đúng phiên bản cấu hình đang dùng từ GitHub
+    bref=$(lock_rev bamos)
+    if [ -n "$bref" ]; then
+      ver="bamos @ ${bref} (github:quocnho/bamos/main)"
+    else
+      ver="1.0.0 (config từ github:quocnho/bamos)"
+    fi
   fi
   kernel=$(uname -r)
   uptime=$(system_uptime)
@@ -388,7 +493,8 @@ cmd_help() {
       say "  boot [-u]      Như switch nhưng giữ hệ thống đang chạy (áp dụng khi khởi động lại)"
       say "  build          Build thử cấu hình mới, không áp dụng"
       say "  dry            Xem trước những gì sẽ thay đổi (dry-build)"
-      say "  update         Chỉ cập nhật flake.lock"
+      say "  update [--boot] Tải cấu hình mới nhất từ GitHub + cập nhật hệ thống ngay"
+      say "  lock           Chỉ cập nhật flake.lock (không rebuild)"
       say "  iso            Build file ISO cài đặt cho người dùng khác"
       say "  rollback       Quay về generation trước"
       say "  generations    Danh sách generation + khác biệt 2 bản gần nhất"
@@ -403,14 +509,15 @@ cmd_help() {
       say ""
       say "Ví dụ: bam switch -u   •   bam gc 7   •   bam iso   •   bam doctor"
       ;;
-    switch | boot | build | dry | update | iso | rollback | generations | gc | info | doctor | publish)
+    switch | boot | build | dry | update | lock | iso | rollback | generations | gc | info | doctor | publish)
       say "${C_BOLD}Lệnh: bam $topic${C_RESET}"
       case "$topic" in
         switch) say "Rebuild + áp dụng ngay cấu hình mới. -u/--update: chạy nix flake update trước." ;;
         boot) say "Rebuild nhưng chỉ áp dụng khi khởi động lại. -u/--update: cập nhật trước." ;;
         build) say "Build thử cấu hình mới (không ảnh hưởng hệ thống)." ;;
         dry) say "Dry-build: xem trước thay đổi của generation mới." ;;
-        update) say "Chỉ cập nhật flake.lock (input nixpkgs, bamos...)." ;;
+        update) say "Lệnh cập nhật chính thức: tải cấu hình mới nhất từ GitHub (nix flake update) rồi rebuild switch. --boot: chỉ rebuild boot, áp dụng khi khởi động lại (an toàn hơn)." ;;
+        lock) say "Chỉ cập nhật flake.lock (input nixpkgs, bamos...) — không rebuild. Dùng khi bạn tự rebuild thủ công." ;;
         iso) say "Build ISO cài đặt (nix build .#iso), in đường dẫn + cách ghi USB." ;;
         rollback) say "Quay về generation trước đó." ;;
         generations) say "Liệt kê generation + diff 2 bản gần nhất (giống glf-history)." ;;
@@ -439,6 +546,7 @@ main() {
     build) cmd_build "$@" ;;
     dry | dry-build) cmd_dry "$@" ;;
     update) cmd_update "$@" ;;
+    lock) cmd_lock "$@" ;;
     iso) cmd_iso "$@" ;;
     rollback) cmd_rollback "$@" ;;
     gen | generations | history) cmd_generations "$@" ;;

@@ -1,7 +1,8 @@
 # ============================================================================
 #  TÍNH NĂNG HỆ ĐIỀU HÀNH — BỎ COMMENT (#) đầu dòng để BẬT, THÊM # để TẮT
 # ============================================================================
-#  Sau khi sửa:  sudo nixos-rebuild switch --flake /etc/nixos#bamos
+#  Sau khi sửa:  bam switch  (hoặc sudo nixos-rebuild switch --flake /etc/nixos#bamos)
+#  Tải bản mới từ GitHub:  bam update
 #
 #  Những dòng KHÔNG có # là MẶC ĐỊNH BamOS bật (muốn tắt thì thêm #).
 #  Phù hợp website bamos.info — "Hệ điều hành cho người Việt Nam",
