@@ -42,4 +42,21 @@
             "args": ["-y", "@modelcontextprotocol/server-fetch"],
         },
     },
+
+    "lsp": {
+        "nil": {
+            "binary": {
+                // nil cài qua systemPackages (modules/packages.nix) — dùng path tuyệt đối
+                // để chắc chắn Zed tìm thấy kể cả khi PATH của process bị tối giản.
+                "path": "/run/current-system/sw/bin/nil",
+            },
+        },
+    },
+
+    "languages": {
+        "Nix": {
+            // Chỉ dùng nil (không bật nixd) — nil đủ dùng, nhẹ và nhanh hơn.
+            "language_servers": ["nil", "!nixd"],
+        },
+    },
 }

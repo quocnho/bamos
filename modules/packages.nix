@@ -5,6 +5,7 @@
   environment.systemPackages = with pkgs; [
     # Core Tools
     zed-editor
+    nil            # Nix language server (extension "Nix" của Zed + nix-ide trong Antigravity)
     git
     vim
     wget

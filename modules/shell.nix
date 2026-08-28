@@ -42,8 +42,10 @@
       antigravity = "antigravity-ide";
       agy = "agy";
       # ==== NixOS rebuild & flake shortcuts ====
-      sw   = "sudo nixos-rebuild switch --flake /etc/nixos#lg";
-      bt   = "sudo nixos-rebuild boot --flake /etc/nixos#lg";
+      # sw/bt tự gắn tag "NixOS-YY.MM.DD-HH:MM" (system.nixos.tags) khi switch:
+      #   NIXOS_TAG do `date` sinh ra, inject qua env + nixos-rebuild --impure.
+      sw   = ''sudo env NIXOS_TAG="NixOS-$(date +%y.%m.%d-%H:%M)" nixos-rebuild switch --flake /etc/nixos#lg --impure'';
+      bt   = ''sudo env NIXOS_TAG="NixOS-$(date +%y.%m.%d-%H:%M)" nixos-rebuild boot --flake /etc/nixos#lg --impure'';
       bu   = "sudo nixos-rebuild build --flake /etc/nixos#lg";
       dry  = "sudo nixos-rebuild dry-build --flake /etc/nixos#lg";
       fu   = "nix flake update /etc/nixos";
