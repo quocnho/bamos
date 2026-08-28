@@ -12,12 +12,16 @@
       lib = nixpkgs.lib;
     in
     {
+      # Module dùng chung (aggregator modules/default.nix) — khớp mẫu website
+      # bamos.info: `bamos.nixosModules.default` trong flake của máy đích.
+      nixosModules.default = ./modules/default.nix;
+
       # Profiles dùng chung — máy đích (cài từ ISO) import qua `bamos.profiles.*`
-      # trong flake của họ (xem installer/flake.nix).
+      # trong flake của họ (xem iso-cfg/flake.nix).
       profiles = {
         common = ./profiles/common.nix; # nền tảng: module chung + audio
         desktop = ./profiles/desktop.nix; # GNOME + macOS look + boot + fonts
-        installer = ./profiles/installer.nix; # LiveCD (isoImage + dialog installer)
+        installer = ./profiles/installer.nix; # LiveCD (isoImage + Calamares override)
       };
 
       nixosConfigurations = {
