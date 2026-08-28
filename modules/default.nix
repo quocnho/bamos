@@ -20,3 +20,5 @@
     ./nix.nix
   ];
 }
+
+# bamos installer

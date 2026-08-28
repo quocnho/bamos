@@ -3,8 +3,8 @@
 # = Desktop profile (common + gnome + macos + boot + assets)
 # = Phần riêng máy này: GPU (my.gpu + bus IDs), nguồn điện (my.power), user.
 #
-# Lưu ý: modules/users.nix tạo user "quocnho" — chỉ import ở host này,
-# KHÔNG nằm trong modules/default.nix (để máy khác cài qua ISO tự tạo user).
+# Lưu ý: user "quocnho" khai báo TRỰC TIẾP ở đây (không hardcode trong
+# modules/) — máy khác cài qua ISO tự tạo user riêng ở bước Users của Calamares.
 {
   config,
   lib,
@@ -15,11 +15,27 @@
 {
   imports = [
     ../profiles/desktop.nix
-    ../modules/users.nix
     ../hardware-configuration.nix
   ];
 
   networking.hostName = "lg";
+
+  # ==== Người dùng (riêng host này) ====
+  # initialPassword chỉ dùng lần đăng nhập đầu — đổi ngay sau khi vào máy:
+  #   passwd
+  users.users.quocnho = {
+    isNormalUser = true;
+    description = "quocnho";
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+      "video"
+      "podman"
+      "input"
+    ];
+    initialPassword = "j";
+    shell = pkgs.zsh;
+  };
 
   # ==== Phần riêng của máy LG ====
   my.gpu.enable = true;
@@ -42,3 +58,5 @@
 
   system.stateVersion = "25.11";
 }
+
+# bamos installer
