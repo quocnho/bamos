@@ -28,11 +28,11 @@
         };
 
         # ISO installer — build bằng: nix build .#iso
-        # (chồng module LiveCD console của nixpkgs + profile installer)
+        # (LiveCD GNOME + Calamares của nixpkgs + profile installer override)
         installer = lib.nixosSystem {
           inherit system;
           modules = [
-            "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+            "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-graphical-calamares-gnome.nix"
             ./hosts/installer.nix
           ];
         };
