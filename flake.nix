@@ -1,26 +1,48 @@
 {
-  description = "Cấu hình NixOS với Flakes (LG laptop)";
+  description = "Bamos — cấu hình NixOS declarative (hosts + profiles + ISO installer)";
 
   inputs = {
-    # Nguồn gói phần mềm, hiện đang trỏ tới nhánh unstable
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   };
 
-  outputs = { self, nixpkgs, ... }@inputs: {
-    # Các module NixOS dùng chung — cấu trúc tương tự flake-parts:
-    # mỗi module nằm trong ./modules, được gom qua ./modules/default.nix.
-    nixosModules = {
-      default = ./modules/default.nix;
-    };
+  outputs =
+    { self, nixpkgs, ... }@inputs:
+    let
+      system = "x86_64-linux";
+      lib = nixpkgs.lib;
+    in
+    {
+      # Profiles dùng chung — máy đích (cài từ ISO) import qua `bamos.profiles.*`
+      # trong flake của họ (xem installer/flake.nix).
+      profiles = {
+        common = ./profiles/common.nix; # nền tảng: module chung + audio
+        desktop = ./profiles/desktop.nix; # GNOME + macOS look + boot + fonts
+        installer = ./profiles/installer.nix; # LiveCD (isoImage + dialog installer)
+      };
 
-    nixosConfigurations = {
-      # Host "lg" — laptop LG (Intel UHD CometLake + NVIDIA GTX 1650)
-      lg = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = [
-          ./configuration.nix
-        ];
+      nixosConfigurations = {
+        # LG laptop — máy chính (host).
+        lg = lib.nixosSystem {
+          inherit system;
+          modules = [ ./configuration.nix ];
+        };
+
+        # ISO installer — build bằng: nix build .#iso
+        # (chồng module LiveCD console của nixpkgs + profile installer)
+        installer = lib.nixosSystem {
+          inherit system;
+          modules = [
+            "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+            ./hosts/installer.nix
+          ];
+        };
+      };
+
+      packages.${system} = {
+        # ISO cài đặt cho người dùng khác
+        iso = self.nixosConfigurations.installer.config.system.build.isoImage;
+        # toplevel máy chính (nix build .)
+        default = self.nixosConfigurations.lg.config.system.build.toplevel;
       };
     };
-  };
 }
