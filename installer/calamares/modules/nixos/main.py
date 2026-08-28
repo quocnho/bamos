@@ -22,11 +22,13 @@ import libcalamares
 CFG_TEMPLATE = """\
 # Bamos — cấu hình sinh bởi Calamares (bamos-install).
 # Cấu hình thật được kéo từ github.com/quocnho/bamos qua input "bamos" trong flake.nix.
-{{ config, pkgs, ... }}:
+{{ config, lib, pkgs, ... }}:
 {{
   imports = [ ./hardware-configuration.nix ];
 
-  networking.hostName = "{hostname}";
+  # Tên máy MẶC ĐỊNH "bamos" — đổi được trong /etc/nixos/customConfig/features.nix
+  # (networking.hostName = "...";  sẽ ghi đè mkDefault này).
+  networking.hostName = lib.mkDefault "{hostname}";
 
   users.users."{username}" = {{
     isNormalUser = true;

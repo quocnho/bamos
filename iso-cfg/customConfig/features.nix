@@ -121,5 +121,7 @@
   # my.power.enable = true; # TLP + suspend sâu (s2idle) + thermald
 
   # ---------------- Thông tin hệ thống ----------------
-  # networking.hostName = "bamos"; # tên máy (mặc định do Calamares đặt)
+  # Tên máy MẶC ĐỊNH: bamos (đặt ở đây — ghi đè mkDefault của Calamares).
+  # Đổi tên máy của bạn bằng cách sửa giá trị dưới, KHÔNG cần đụng nơi khác.
+  networking.hostName = "bamos";
 }
