@@ -39,6 +39,9 @@
           - id: gpu
             module: packagechooser
             config: gpu.conf
+          - id: device
+            module: packagechooser
+            config: device.conf
 
           sequence:
           - show:
@@ -47,6 +50,7 @@
             - keyboard
             - users
             - packagechooser@gpu
+            - packagechooser@device
             - partition
             - summary
           - exec:

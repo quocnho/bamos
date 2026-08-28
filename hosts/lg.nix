@@ -26,12 +26,22 @@
   users.users.quocnho = {
     isNormalUser = true;
     description = "quocnho";
+    # extraGroups đầy đủ: wifi (networkmanager), bluetooth, input, video/audio,
+    # in ấn (lp/scanner), mount ổ đĩa (disk/storage), sudo (wheel), podman...
     extraGroups = [
       "networkmanager"
       "wheel"
-      "video"
-      "podman"
+      "bluetooth"
       "input"
+      "video"
+      "audio"
+      "render"
+      "disk"
+      "storage"
+      "lp"
+      "scanner"
+      "power"
+      "podman"
     ];
     initialPassword = "j";
     shell = pkgs.zsh;

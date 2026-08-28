@@ -22,4 +22,7 @@
 
   # Fonts (Inter + Nerd Fonts) + wallpapers cục bộ (offline)
   my.assets.enable = true;
+
+  # ==== Mạng — bắt buộc cho desktop (wifi/ethernet qua GNOME Settings) ====
+  networking.networkmanager.enable = true;
 }

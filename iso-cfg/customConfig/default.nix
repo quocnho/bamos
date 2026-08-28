@@ -1,17 +1,29 @@
-# Cấu hình RIÊNG của máy này (được iso-cfg/flake.nix import).
+# ============================================================================
+#  CẤU HÌNH RIÊNG CỦA MÁY BẠN — Bamos
+# ============================================================================
+#  Đây là nơi bạn thêm/bớt mọi thứ cho hệ điều hành của mình mà KHÔNG cần
+#  đụng tới repo (mọi commit mới của bamos vẫn tự cập nhật về máy).
 #
-# Nơi để các thứ riêng: hostname khác, GPU (nếu Calamares không dò được),
-# packages riêng, ... — KHÔNG cần sửa flake.nix.
+#  Cách dùng — MỞ file rồi BỎ COMMENT (#) để bật, THÊM # để tắt:
+#    apps.nix       → ứng dụng cài thêm (trình duyệt, văn phòng, media...)
+#    features.nix   → tính năng hệ điều hành (in ấn, ssh, firewall, tên máy...)
 #
-# VÍ DỤ:
-#   { config, lib, pkgs, ... }:
-#   {
-#     networking.hostName = "may-cua-toi";
-#     environment.systemPackages = with pkgs; [ vim git ];
-#   }
-{ config, lib, ... }:
+#  Muốn thêm file riêng (vd hardware.nix): tạo file rồi import vào bên dưới.
+#
+#  Sau khi sửa, cập nhật máy:
+#    sudo nixos-rebuild switch --flake /etc/nixos#bamos
+# ============================================================================
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
+  imports = [
+    ./apps.nix # ứng dụng
+    ./features.nix # tính năng hệ điều hành
+    # ./hardware.nix # (tùy chọn) thông tin phần cứng riêng
+  ];
 }
-
-# (bamos)

@@ -31,11 +31,13 @@ CFG_TEMPLATE = """\
   users.users."{username}" = {{
     isNormalUser = true;
     description = "{fullname}";
-    extraGroups = [ "networkmanager" "wheel" ];
+    # extraGroups đầy đủ — đảm bảo wifi (networkmanager), bluetooth, input,
+    # video/audio, in ấn (lp/scanner), mount ổ đĩa (disk/storage), sudo (wheel)...
+    extraGroups = [ "networkmanager" "wheel" "bluetooth" "input" "video" "audio" "render" "disk" "storage" "lp" "scanner" "power" ];
     initialPassword = "{password}";
     shell = pkgs.zsh;
   }};
-{gpu_cfg}
+{gpu_cfg}{device_cfg}
   system.stateVersion = "25.11";
 }}
 """
@@ -115,6 +117,22 @@ def _gpu_config(choice, gpus):
     return ""
 
 
+def _device_config(choice):
+    """
+    Sinh khối cấu hình theo LOẠI MÁY (màn "Loại máy" của Calamares).
+    - laptop:  bật quản lý năng lượng (my.power: TLP + s2idle + thermald + lid).
+    - desktop: không cần quản lý pin — dùng mặc định (power-profiles-daemon của GNOME).
+    """
+    if choice == "laptop":
+        return """
+  # ==== Máy xách tay: quản lý năng lượng (TLP + s2idle + thermald) ====
+  my.power.enable = true;
+"""
+    return """
+  # ==== Máy bàn (desktop): không cần quản lý pin ====
+"""
+
+
 def run():
     gs = libcalamares.globalstorage
     root = gs.value("rootMountPoint")
@@ -126,6 +144,7 @@ def run():
     password = gs.value("userPassword") or ""
     hostname = gs.value("hostname") or HOSTNAME_DEFAULT
     gpu_choice = gs.value("packagechooser_gpu") or "auto"
+    device_choice = gs.value("packagechooser_device") or "desktop"
 
     if not password:
         return ("Thiếu mật khẩu", "Vui lòng nhập mật khẩu ở bước Users.")
@@ -151,6 +170,7 @@ def run():
         fullname=fullname,
         password=password,
         gpu_cfg=_gpu_config(gpu_choice, gpus),
+        device_cfg=_device_config(device_choice),
     )
     try:
         _write_root(os.path.join(nixos_dir, "configuration.nix"), cfg)
@@ -208,5 +228,3 @@ def run():
 
     libcalamares.job.setprogress(1.0)
     return None
-
-# bamos installer
