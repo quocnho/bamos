@@ -15,6 +15,8 @@
     ./i18n.nix
     ./shell.nix
     ./packages.nix
+    ./dev.nix
+    ./update.nix
     ./bluetooth.nix
     ./virtualisation.nix
     ./nix.nix

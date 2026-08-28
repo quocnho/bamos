@@ -48,6 +48,7 @@
   };
 
   # ==== Phần riêng của máy LG ====
+  my.dev.enable = true; # công cụ dev: Zed, Antigravity, Python, Node, devenv...
   my.gpu.enable = true;
   my.gpu.intelBusId = "PCI:0:2:0";
   my.gpu.nvidiaBusId = "PCI:2:0:0";

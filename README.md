@@ -11,17 +11,18 @@ tham khảo sâu dự án [GLF-OS](https://framagit.org/gaming-linux-fr/glf-os/g
 
 ## Tính năng mặc định (khớp bamos.info — "Cài xong là dùng")
 
-| Website bamos.info                     | Trạng thái trong BamOS                                                             |
-| -------------------------------------- | ---------------------------------------------------------------------------------- |
-| Bộ gõ tiếng Việt (Unikey)              | ✅ fcitx5 + **fcitx5-unikey** mặc định                                             |
-| Văn phòng (tương thích MS Office)      | ✅ **LibreOffice** mặc định + **Google Docs/Sheets/Slides** web apps; WPS tùy chọn |
-| Chrome                                 | ✅ **google-chrome** cài sẵn                                                       |
-| Zoom                                   | ✅ **zoom-us** cài sẵn                                                             |
-| Zalo                                   | ⏳ chưa có package nixpkgs (hướng dẫn trong `customConfig/features.nix`)           |
-| Chỉnh sửa ảnh & video (GIMP, Kdenlive) | ✅ tùy chọn (bỏ comment trong `features.nix`)                                      |
-| Driver NVIDIA                          | ✅ màn chọn GPU trong Calamares (auto/nvidia/intel)                                |
-| Múi giờ Việt Nam                       | ✅ `Asia/Ho_Chi_Minh` mặc định                                                     |
-| Không lo virus / Rollback              | ✅ bản chất immutable của NixOS                                                    |
+| Website bamos.info                     | Trạng thái trong BamOS                                                                       |
+| -------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Bộ gõ tiếng Việt (Unikey)              | ✅ fcitx5 + **fcitx5-unikey** mặc định                                                       |
+| Văn phòng (tương thích MS Office)      | ✅ **LibreOffice** mặc định + **Google Docs/Sheets/Slides** web apps; WPS tùy chọn           |
+| Chrome                                 | ✅ **google-chrome** cài sẵn                                                                 |
+| Zoom                                   | ✅ **zoom-us** cài sẵn                                                                       |
+| Zalo                                   | ⏳ chưa có package nixpkgs (hướng dẫn trong `customConfig/features.nix`)                     |
+| Chỉnh sửa ảnh & video (GIMP, Kdenlive) | ✅ tùy chọn (bỏ comment trong `features.nix`)                                                |
+| Driver NVIDIA                          | ✅ màn chọn GPU trong Calamares (auto/nvidia/intel)                                          |
+| Múi giờ Việt Nam                       | ✅ `Asia/Ho_Chi_Minh` mặc định                                                               |
+| Tự động cập nhật                       | ✅ systemd timer 12h (tham khảo GLF-OS): tải config mới từ GitHub → rebuild boot → thông báo |
+| Không lo virus / Rollback              | ✅ bản chất immutable của NixOS                                                              |
 
 > **Vì sao WPS → LibreOffice + Google?** WPS Office trên Linux hay lỗi font tiếng Việt
 > và symbol (ô vuông ☺☻) do thiếu font fallback. BamOS đã cài sẵn font MS (`corefonts`)
@@ -56,7 +57,10 @@ tham khảo sâu dự án [GLF-OS](https://framagit.org/gaming-linux-fr/glf-os/g
 │   ├── bam.sh                 #   nguồn script (sửa ở đây, chạy `bash -n` để kiểm tra)
 │   └── default.nix            #   gói: writeShellScriptBin "bam"
 ├── modules/                   # module dùng chung (my.*, bật qua my.X.enable)
-│   ├── default.nix            #   aggregator — xuất qua bamos.nixosModules.default
+│   ├── default.nix              #   aggregator — xuất qua bamos.nixosModules.default
+│   ├── packages.nix             #   công cụ cơ bản MỌI máy (git, bam, fzf, htop...)
+│   ├── dev.nix                  #   ★ công cụ dev (Zed, Antigravity, Python, Node...) — my.dev.enable
+│   ├── update.nix               #   ★ auto-update kiểu GLF-OS (timer 12h + notify) — my.update.enable
 │   └── (boot, gpu, power, audio, gnome, macos, assets, i18n, shell, ...)
 ├── hardware-configuration.nix # cấu hình phần cứng máy LG (nixos-generate-config)
 └── assets/                    # tài nguyên cục bộ (offline): fonts, ảnh, IDE config
@@ -164,20 +168,17 @@ bam switch            # áp dụng thay đổi (không cần mạng)
 # (tương đương: sudo nixos-rebuild switch --flake /etc/nixos#bamos)
 ```
 
-### Cập nhật máy từ GitHub — `bam update`
+### Cập nhật máy từ GitHub — `bam update` + TỰ ĐỘNG
 
 Mọi cải tiến commit lên repo (`bamos` = `github:quocnho/bamos/main`) sẽ lan tới máy
-người dùng bằng **1 lệnh** (tự kiểm tra mạng/đĩa, tải config + nixpkgs mới nhất,
-rebuild và áp dụng ngay, tự gắn tag):
+người dùng theo 2 cách:
 
-```bash
-bam update            # tải cấu hình + ứng dụng/công cụ/thư viện mới nhất → áp dụng ngay
-bam update --boot     # an toàn hơn: chỉ rebuild boot, áp dụng khi khởi động lại
-```
-
-Lệnh này cập nhật cả **cấu hình BamOS** (input `bamos` từ GitHub) lẫn **nixpkgs**
-(nền tảng gói) — ứng dụng, công cụ, thư viện mới sẽ về máy sau khi rebuild.
-Muốn chỉ cập nhật lockfile (không rebuild): `bam lock`.
+1. **Tự động (mặc định)**: systemd timer `bamos-update` (12h) — tải config + nixpkgs
+   mới nhất → `nixos-rebuild boot` → dọn rác 7 ngày → thông báo desktop (tham khảo
+   sâu `glfos-update` của GLF-OS). Bật/tắt: `my.update.enable` trong
+   `customConfig/features.nix`. Log: `/var/log/bamos-update.log`.
+2. **Chạy tay**: `bam update` — kiểm tra mạng/đĩa, tải config mới nhất, rebuild và
+   áp dụng NGAY (tự gắn tag). `bam update --boot` = áp dụng khi khởi động lại.
 
 ## Máy chính (LG)
 
@@ -195,15 +196,15 @@ bam build         # build thử không áp dụng
 
 ## Tham khảo GLF-OS → BamOS
 
-| Tính năng               | GLF-OS                                                          | BamOS                                                                          |
-| ----------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Flake hosts             | 1 `nixosConfiguration` / máy (`glf-installer`, `user-test`)     | `hosts/*.nix` + `nixosConfigurations.*`                                        |
-| Profiles                | `glf.environment.edition` + `glf.features.*` (catalog)          | `profiles/*.nix` (import thuần, dễ ghép)                                       |
-| ISO                     | `installation-cd-graphical-calamares-gnome.nix`                 | `installation-cd-graphical-calamares-gnome.nix` (giống GLF-OS)                 |
-| Installer               | Calamares + module Python (sinh config, dò GPU, copy flake)     | Calamares + module Python (`installer/calamares/`) + **GPU + Laptop/Desktop**  |
-| Post-install /etc/nixos | copy `iso-cfg/` (flake input `glf`)                             | copy `iso-cfg/` (flake input `bamos` = github) + `customConfig/`               |
-| CLI                     | alias `glf-update/switch/build/clean/history/systeminfo` + `nh` | **`bam`** (1 lệnh, tiếng Việt, tự dò host, tự tag — `pkgs/bam/`)               |
-| Update máy đích         | `glf-update` = `nix flake update` + `nixos-rebuild boot`        | `bam update` = flake update (kéo `github:quocnho/bamos/main`) + rebuild switch |
+| Tính năng               | GLF-OS                                                                       | BamOS                                                                                       |
+| ----------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Flake hosts             | 1 `nixosConfiguration` / máy (`glf-installer`, `user-test`)                  | `hosts/*.nix` + `nixosConfigurations.*`                                                     |
+| Profiles                | `glf.environment.edition` + `glf.features.*` (catalog)                       | `profiles/*.nix` (import thuần, dễ ghép)                                                    |
+| ISO                     | `installation-cd-graphical-calamares-gnome.nix`                              | `installation-cd-graphical-calamares-gnome.nix` (giống GLF-OS)                              |
+| Installer               | Calamares + module Python (sinh config, dò GPU, copy flake)                  | Calamares + module Python (`installer/calamares/`) + **GPU + Laptop/Desktop**               |
+| Post-install /etc/nixos | copy `iso-cfg/` (flake input `glf`)                                          | copy `iso-cfg/` (flake input `bamos` = github) + `customConfig/`                            |
+| CLI                     | alias `glf-update/switch/build/clean/history/systeminfo` + `nh`              | **`bam`** (1 lệnh, tiếng Việt, tự dò host, tự tag — `pkgs/bam/`)                            |
+| Update máy đích         | `glf-update` + auto-update (`glfos-update.service`, timer 12h, notify FR/EN) | `bam update` (tay) + **`bamos-update` timer 12h, notify tiếng Việt** (`modules/update.nix`) |
 
 ## Lộ trình nâng cấp (tùy chọn)
 

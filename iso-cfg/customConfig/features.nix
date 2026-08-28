@@ -26,6 +26,11 @@
   services.printing.enable = true; # in ấn (CUPS)
   # services.openssh.enable = true; # SSH server (cho phép đăng nhập từ xa)
 
+  # TỰ ĐỘNG cập nhật từ GitHub (systemd timer 12h — tham khảo GLF-OS):
+  #   tải config mới nhất + nixpkgs → rebuild boot → thông báo; áp dụng khi
+  #   khởi động lại. Muốn tắt hẳn: thêm # đầu dòng. (Vẫn có thể chạy tay: bam update)
+  my.update.enable = true;
+
   # ---------------- Ngôn ngữ & bộ gõ tiếng Việt (mặc định BamOS) ----------------
   time.timeZone = "Asia/Ho_Chi_Minh"; # múi giờ Việt Nam (mặc định)
 
