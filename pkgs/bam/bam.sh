@@ -132,11 +132,11 @@ rebuild() {
   local action="$1" host tag
   host=$(detect_host)
   if [ "$action" = "switch" ] || [ "$action" = "boot" ]; then
-    # Tự gắn tag "NixOS-YY.MM.DD-HH:MM" (nixpkgs chỉ cho ký tự [a-zA-Z0-9:_.-]
-    # nên "/" → "." — hosts/lg.nix đọc NIXOS_TAG qua system.nixos.tags).
-    tag="NixOS-$(date +%y.%m.%d-%H:%M)"
+    # Tự gắn tag "BamOS-YY.MM.DD-HH:MM" (nixpkgs chỉ cho ký tự [a-zA-Z0-9:_.-]
+    # nên "/" → "." — profiles/common.nix đọc BAMOS_TAG qua system.nixos.tags).
+    tag="BamOS-$(date +%y.%m.%d-%H:%M)"
     info "Rebuild ($action) host '$host' — tag $tag"
-    $SUDO env NIXOS_TAG="$tag" nixos-rebuild "$action" --flake "$FLAKE_DIR#$host" --impure
+    $SUDO env BAMOS_TAG="$tag" nixos-rebuild "$action" --flake "$FLAKE_DIR#$host" --impure
   else
     info "Rebuild ($action) host '$host'..."
     $SUDO nixos-rebuild "$action" --flake "$FLAKE_DIR#$host"
@@ -511,7 +511,7 @@ cmd_help() {
       say "Cách dùng: bam <lệnh> [tùy chọn]"
       say ""
       say "${C_BOLD}Lệnh chính:${C_RESET}"
-      say "  switch [-u]    Cập nhật hệ thống (rebuild switch, tự gắn tag NixOS-YY.MM.DD-HH:MM)"
+      say "  switch [-u]    Cập nhật hệ thống (rebuild switch, tự gắn tag BamOS-YY.MM.DD-HH:MM)"
       say "  boot [-u]      Như switch nhưng giữ hệ thống đang chạy (áp dụng khi khởi động lại)"
       say "  build          Build thử cấu hình mới, không áp dụng"
       say "  dry            Xem trước những gì sẽ thay đổi (dry-build)"

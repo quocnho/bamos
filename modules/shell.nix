@@ -50,8 +50,8 @@
       antigravity = "antigravity-ide";
       agy = "agy";
       # ==== NixOS rebuild & flake shortcuts (Bam CLI — `bam help`) ====
-      # bam tự dò host (lg/bamos) + tự gắn tag "NixOS-YY.MM.DD-HH:MM" khi
-      # switch/boot (system.nixos.tags đọc NIXOS_TAG qua --impure — hosts/lg.nix).
+      # bam tự dò host (lg/bamos) + tự gắn tag "BamOS-YY.MM.DD-HH:MM" khi
+      # switch/boot (system.nixos.tags đọc BAMOS_TAG qua --impure — profiles/common.nix).
       sw = "bam switch";
       swu = "bam switch -u"; # kèm nix flake update trước
       bt = "bam boot";

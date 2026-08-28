@@ -89,12 +89,12 @@ trong `flake.nix` (hoặc để ISO cài sẵn — máy đích chạy profile de
 
 Mọi thao tác hệ thống gói gọn trong **1 lệnh `bam`** — tiếng Việt, tự dò host
 (`lg` trên máy dev / `bamos` trên máy cài từ ISO), tự gắn tag
-`NixOS-YY.MM.DD-HH:MM` khi switch/boot. Cài sẵn trên mọi máy dùng BamOS
+`BamOS-YY.MM.DD-HH:MM` khi switch/boot. Cài sẵn trên mọi máy dùng BamOS
 (qua `modules/packages.nix`) — code tại `pkgs/bam/`.
 
 ```bash
 bam update [--boot]   # ★ Cập nhật: tải cấu hình mới nhất từ GitHub + rebuild áp dụng ngay
-bam switch [-u]       # rebuild + áp dụng ngay (tự gắn tag NixOS-YY.MM.DD-HH:MM)
+bam switch [-u]       # rebuild + áp dụng ngay (tự gắn tag BamOS-YY.MM.DD-HH:MM)
 bam boot [-u]         # rebuild, áp dụng khi khởi động lại (giữ hệ thống đang chạy)
 bam build             # build thử, không áp dụng
 bam lock              # chỉ cập nhật flake.lock (không rebuild)
@@ -183,7 +183,7 @@ người dùng theo 2 cách:
 ## Máy chính (LG)
 
 ```bash
-bam switch        # rebuild + áp dụng ngay (tự gắn tag NixOS-YY.MM.DD-HH:MM)
+bam switch        # rebuild + áp dụng ngay (tự gắn tag BamOS-YY.MM.DD-HH:MM)
 bam switch -u     # kèm nix flake update
 bam boot          # boot thay vì switch (giữ generation cũ)
 bam build         # build thử không áp dụng
@@ -191,7 +191,7 @@ bam build         # build thử không áp dụng
 
 - Alias cũ vẫn còn: `sw` = `bam switch`, `swu` = `bam switch -u`, `bt` = `bam boot`,
   `bu` = `bam build`, `dry` = `bam dry`, `fu` = `bam lock`, `ngc` = `bam gc` (xem `modules/shell.nix`).
-- Tag `NixOS-YY.MM.DD-HH:MM` tự gắn mỗi lần switch trên MỌI máy (xem `profiles/common.nix`).
+- Tag `BamOS-YY.MM.DD-HH:MM` tự gắn mỗi lần switch trên MỌI máy (xem `profiles/common.nix`).
 - User `quocnho` khai báo trực tiếp trong `hosts/lg.nix` (không hardcode trong modules/).
 
 ## Tham khảo GLF-OS → BamOS

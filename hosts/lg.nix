@@ -55,7 +55,7 @@
 
   my.power.enable = true; # s2idle + TLP + Battery Care 80%
 
-  # (Tag generation "NixOS-YY.MM.DD-HH:MM" giờ nằm ở profiles/common.nix — mọi máy)
+  # (Tag generation "BamOS-YY.MM.DD-HH:MM" giờ nằm ở profiles/common.nix — mọi máy)
   system.stateVersion = "25.11";
 }
 

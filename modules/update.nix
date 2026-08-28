@@ -124,7 +124,7 @@
           # lại để xác nhận, tránh báo nhầm "đã cập nhật" khi vẫn chạy bản cũ hỏng.
           if [ -f "$STATE_FILE" ] && ${pkgs.gnugrep}/bin/grep -q '^failed' "$STATE_FILE"; then
             echo "[INFO] Lần trước ghi nhận lỗi — rebuild thử lại để xác nhận..."
-            if ${pkgs.nixos-rebuild}/bin/nixos-rebuild boot --flake "$FLAKE_DIR#$HOST"; then
+            if BAMOS_TAG="BamOS-$(date +%y.%m.%d-%H:%M)" ${pkgs.nixos-rebuild}/bin/nixos-rebuild boot --flake "$FLAKE_DIR#$HOST" --impure; then
               echo ok > "$STATE_FILE"
               _notify "Bamos" "Hệ thống đang chạy cấu hình mới nhất."
             else
@@ -139,8 +139,10 @@
         echo "[INFO] Có bản cập nhật mới — bắt đầu rebuild..."
         _check_disk || _fail "disk-space"
 
-        # 4) Rebuild boot — áp dụng khi khởi động lại (an toàn, không gián đoạn)
-        ${pkgs.nixos-rebuild}/bin/nixos-rebuild boot --flake "$FLAKE_DIR#$HOST" || _fail "rebuild"
+        # 4) Rebuild boot — áp dụng khi khởi động lại (an toàn, không gián đoạn),
+        #    kèm tag "BamOS-YY.MM.DD-HH:MM" để dễ nhận biết generation.
+        BAMOS_TAG="BamOS-$(date +%y.%m.%d-%H:%M)" \
+          ${pkgs.nixos-rebuild}/bin/nixos-rebuild boot --flake "$FLAKE_DIR#$HOST" --impure || _fail "rebuild"
 
         # 5) Dọn rác: giữ 7 ngày (khớp nix.gc.automatic trong modules/nix.nix)
         ${pkgs.nix}/bin/nix-collect-garbage --delete-older-than 7d || \
