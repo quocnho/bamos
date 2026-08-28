@@ -207,7 +207,13 @@ update_lockfile() {
 
 # Chỉ cập nhật flake.lock, không rebuild (dành cho người muốn kiểm soát thủ công)
 cmd_lock() {
+  help_requested "$@" && { cmd_help lock; return; }
   flake_exists
+  # Máy đích: /etc/nixos do installer tạo với quyền ROOT → cần sudo để ghi
+  # flake.lock. Máy dev: flake.lock thuộc user → chạy trực tiếp (không hỏi sudo).
+  if [ ! -w "$FLAKE_DIR/flake.lock" ]; then
+    need_root lock "$@"
+  fi
   update_lockfile
 }
 
@@ -283,6 +289,10 @@ cmd_dry() {
 
 cmd_iso() {
   flake_exists
+  # Chỉ repo dev (flake có gói .#iso) mới build ISO được — máy đích cài từ ISO không có.
+  if ! grep -qE '^[[:space:]]*iso[[:space:]]*=' "$FLAKE_DIR/flake.nix"; then
+    die "'bam iso' chỉ dùng trên máy dev (repo bamos) — flake này không có gói .#iso."
+  fi
   local out iso
   info "Build ISO cài đặt (nix build .#iso)..."
   out=$(cd "$FLAKE_DIR" && nix --extra-experimental-features "$NIX_FLAGS" build .#iso --no-link --print-out-paths 2>&1 | tail -n 1)
