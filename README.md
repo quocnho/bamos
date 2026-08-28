@@ -80,7 +80,7 @@ Luồng cài (Calamares — tham khảo GLF-OS):
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    bamos.url = "github:quocnho/bamos";          # ★ kéo config từ repo này
+    bamos.url = "github:quocnho/bamos/main";     # ★ ref main (default branch trên GitHub vẫn là master)
     bamos.inputs.nixpkgs.follows = "nixpkgs";
   };
   outputs = { self, nixpkgs, bamos, ... }: {

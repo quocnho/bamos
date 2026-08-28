@@ -13,7 +13,11 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    bamos.url = "github:quocnho/bamos";
+    # ★ ref MAIN — không bỏ phần /main: default branch trên GitHub vẫn là
+    #   master (cũ) nên `github:quocnho/bamos` (không ref) sẽ trỏ nhầm.
+    #   (GitHub shorthand: github:owner/repo/branch — tương đương ?ref=main;
+    #    flake.lock sẽ pin chính xác commit, không fetch cả branch mỗi lần.)
+    bamos.url = "github:quocnho/bamos/main";
     # Dùng chung 1 nixpkgs với bamos → tránh closure chồng chéo
     bamos.inputs.nixpkgs.follows = "nixpkgs";
   };
