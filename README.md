@@ -18,8 +18,10 @@ dự án [GLF-OS](https://framagit.org/gaming-linux-fr/glf-os/glf-os).
 │   ├── desktop.nix            #   GNOME + macOS look + boot + fonts
 │   └── installer.nix          #   LiveCD: isoImage + dialog installer + autologin
 ├── installer/                 # ★ nhúng vào ISO (isoImage.contents → /installer)
-│   ├── install.sh             #   script cài đặt (dialog TUI)
-│   └── flake.nix              #   flake MẪU copy vào /etc/nixos máy đích
+│   ├── flake.nix              #   flake MẪU copy vào /etc/nixos máy đích
+│   └── calamares/             #   cấu hình Calamares của bamos
+│       ├── modules/nixos/     #     module Python: sinh config + nixos-install
+│       └── config/modules/    #     partition.conf, users.conf, welcome.conf
 ├── modules/                   # module dùng chung (my.*, bật qua my.X.enable)
 │   ├── default.nix            #   aggregator (không gồm users.nix — chỉ máy LG)
 │   ├── users.nix              #   user "quocnho" — import riêng ở hosts/lg.nix
@@ -55,11 +57,15 @@ nix build .#iso
 # ISO nằm ở result/iso/*.iso — ghi ra USB: dd if=result/iso/*.iso of=/dev/sdX bs=4M status=progress
 ```
 
-Luồng cài (tương tự GLF-OS, bản gọn bằng script dialog):
-1. Boot USB → tự đăng nhập root → chạy `bamos-install`.
-2. Chọn ổ đĩa → phân vùng GPT (ESP 512M + root ext4) → mount.
-3. Nhập tên user / mật khẩu → `nixos-generate-config` tự dò phần cứng.
-4. Ghi `/etc/nixos` (flake mẫu + configuration.nix) → `nixos-install --flake /mnt/etc/nixos#bamos`.
+Luồng cài (Calamares — tham khảo GLF-OS):
+
+1. Boot USB → đăng nhập GNOME với user `nixos` (mật khẩu trống) → **Calamares** tự chạy.
+2. Welcome (kiểm tra mạng/ổ cứng) → locale → bàn phím → **Users** (tên/mật khẩu)
+   → **Phân vùng** (EFI + root ext4, kèm swap tùy chọn) → Summary.
+3. Installer (module `nixos` trong `installer/calamares/`): sinh `hardware-configuration.nix`
+   bằng `nixos-generate-config`, ghi `configuration.nix` + copy `flake.nix` mẫu
+   (input `bamos` = github:quocnho/bamos) vào `/etc/nixos`, pre-lock `flake.lock`,
+   rồi `nixos-install --flake <root>/etc/nixos#bamos --no-root-passwd`.
 
 ## Sau khi cài xong — máy người dùng
 
@@ -106,21 +112,19 @@ bu   # build thử không áp dụng
 
 ## Tham khảo GLF-OS → bamos
 
-| Tính năng | GLF-OS | Bamos |
-| --- | --- | --- |
-| Flake hosts | 1 `nixosConfiguration` / máy (`glf-installer`, `user-test`) | `hosts/*.nix` + `nixosConfigurations.*` |
-| Profiles | `glf.environment.edition` + `glf.features.*` (catalog) | `profiles/*.nix` (import thuần, dễ ghép) |
-| ISO | `installation-cd-graphical-calamares-gnome.nix` | `installation-cd-minimal.nix` (console, nhẹ) |
-| Installer | Calamares + module Python (sinh config, dò GPU, copy flake) | `installer/install.sh` (dialog: partition → config → nixos-install) |
-| Post-install /etc/nixos | copy `iso-cfg/` (flake input `glf`) | copy `installer/flake.nix` (flake input `bamos` = github) |
-| Update máy đích | `glf-update` = `nix flake update` + `nixos-rebuild boot` | `nix flake update` + `nixos-rebuild switch` |
+| Tính năng               | GLF-OS                                                      | Bamos                                                           |
+| ----------------------- | ----------------------------------------------------------- | --------------------------------------------------------------- |
+| Flake hosts             | 1 `nixosConfiguration` / máy (`glf-installer`, `user-test`) | `hosts/*.nix` + `nixosConfigurations.*`                         |
+| Profiles                | `glf.environment.edition` + `glf.features.*` (catalog)      | `profiles/*.nix` (import thuần, dễ ghép)                        |
+| ISO                     | `installation-cd-graphical-calamares-gnome.nix`             | `installation-cd-graphical-calamares-gnome.nix` (giống GLF-OS)  |
+| Installer               | Calamares + module Python (sinh config, dò GPU, copy flake) | Calamares + module Python đơn giản hơn (`installer/calamares/`) |
+| Post-install /etc/nixos | copy `iso-cfg/` (flake input `glf`)                         | copy `installer/flake.nix` (flake input `bamos` = github)       |
+| Update máy đích         | `glf-update` = `nix flake update` + `nixos-rebuild boot`    | `nix flake update` + `nixos-rebuild switch`                     |
 
 ### Lộ trình nâng cấp (tùy chọn)
 
-- **Calamares GUI**: đổi module cd-dvd trong `flake.nix` (host installer) sang
-  `installation-cd-graphical-calamares-gnome.nix` + viết module Calamares theo
-  `patches/calamares-nixos-extensions` của GLF-OS.
-- **Dò GPU lúc cài**: thêm bước `lspci` trong `install.sh` để tự bật
-  `my.gpu` / driver AMD/Intel cho máy đích (GLF-OS làm vậy).
-- **Binary cache (Attic)**: đẩy closure lên cache riêng để `nixos-install`
-  tải nhanh hơn (GLF-OS dùng Attic + CI).
+- **Dò GPU lúc cài**: thêm bước `lspci` trong `installer/calamares/modules/nixos/main.py`
+  để tự bật `my.gpu` / driver AMD/Intel cho máy đích (GLF-OS làm vậy).
+- **Branding riêng**: hiện dùng branding `nixos` của package — có thể thêm
+  `installer/calamares/branding/bamos/` và đổi `branding:` trong settings.conf.
+- **Binary cache (Attic)**: đẩy closure lên cache riêng để `nixos-install` tải nhanh hơn (GLF-OS dùng Attic + CI).
