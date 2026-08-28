@@ -47,11 +47,23 @@ if [ "$(id -u)" -ne 0 ]; then
   SUDO="sudo"
 fi
 
-# Chạy lại qua sudo nếu chưa phải root (giữ nguyên toàn bộ tham số).
+# Chạy lại qua sudo nếu chưa phải root.
+# $1 = subcommand đang chạy (vd: switch) — cần truyền lại để không bị mất
+# khi re-exec (sudo chạy lại toàn bộ lệnh).
+# Dùng đường dẫn TUYỆT ĐỐI: khi gọi `bash pkgs/bam/bam.sh` thì $0 là đường
+# dẫn tương đối — sudo (secure_path) không tìm thấy.
 need_root() {
   if [ "$(id -u)" -ne 0 ]; then
+    local sub="$1"
+    shift
     warn "Lệnh cần quyền root — chạy lại qua sudo..."
-    exec sudo "$0" "$@"
+    local abs
+    abs=$(readlink -f "$0" 2>/dev/null || true)
+    if [ -n "$abs" ] && [ "${abs#/}" != "$abs" ]; then
+      exec sudo bash "$abs" "$sub" "$@"
+    else
+      exec sudo "$0" "$sub" "$@"
+    fi
   fi
 }
 
@@ -202,7 +214,7 @@ cmd_lock() {
 # ---------- Cập nhật hệ thống: tải config mới nhất từ GitHub + rebuild ----------
 cmd_update() {
   help_requested "$@" && { cmd_help update; return; }
-  need_root "$@"
+  need_root update "$@"
   local boot_only=0
   while [ $# -gt 0 ]; do
     case "$1" in
@@ -227,7 +239,7 @@ cmd_update() {
 # ---------- Lệnh chính ----------
 cmd_switch() {
   help_requested "$@" && { cmd_help switch; return; }
-  need_root "$@"
+  need_root switch "$@"
   local update=0
   while [ $# -gt 0 ]; do
     case "$1" in
@@ -245,7 +257,7 @@ cmd_switch() {
 
 cmd_boot() {
   help_requested "$@" && { cmd_help boot; return; }
-  need_root "$@"
+  need_root boot "$@"
   local update=0
   while [ $# -gt 0 ]; do
     case "$1" in
@@ -289,7 +301,7 @@ cmd_iso() {
 
 cmd_rollback() {
   help_requested "$@" && { cmd_help rollback; return; }
-  need_root "$@"
+  need_root rollback "$@"
   flake_exists
   local host
   host=$(detect_host)
@@ -326,7 +338,7 @@ cmd_generations() {
 
 cmd_gc() {
   help_requested "$@" && { cmd_help gc; return; }
-  need_root "$@"
+  need_root gc "$@"
   local days="${1:-7}"
   case "$days" in
     '' | *[!0-9]*) die "Số ngày không hợp lệ: $days (vd: bam gc 7)" ;;
