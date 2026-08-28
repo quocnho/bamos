@@ -1,18 +1,26 @@
 # Git, shell (zsh + starship + fzf + zoxide) và direnv — tối ưu cho developer.
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   programs.git = {
     enable = true;
-    config = { user.name = "quocnho"; user.email = "quocnho@gmail.com"; };
+    config = {
+      user.name = "quocnho";
+      user.email = "quocnho@gmail.com";
+    };
   };
 
   # ==== ZSH chuyên nghiệp ====
   programs.zsh = {
     enable = true;
-    autosuggestions.enable = true;    # gợi ý lệnh khi gõ
+    autosuggestions.enable = true; # gợi ý lệnh khi gõ
     syntaxHighlighting.enable = true; # tô màu cú pháp
-    enableCompletion = true;          # hoàn thành lệnh (compinit)
+    enableCompletion = true; # hoàn thành lệnh (compinit)
 
     shellAliases = {
       # Hiển thị đẹp với eza (cài trong modules/packages.nix)
@@ -36,21 +44,22 @@
 
       # Khác
       grep = "grep --color=auto";
-      zi = "zoxide query -i";   # chọn thư mục bằng fzf
+      zi = "zoxide query -i"; # chọn thư mục bằng fzf
 
       # Antigravity IDE (binary là antigravity-ide) + CLI (agy)
       antigravity = "antigravity-ide";
       agy = "agy";
-      # ==== NixOS rebuild & flake shortcuts ====
-      # sw/bt tự gắn tag "NixOS-YY.MM.DD-HH:MM" (system.nixos.tags) khi switch:
-      #   NIXOS_TAG do `date` sinh ra, inject qua env + nixos-rebuild --impure.
-      sw   = ''sudo env NIXOS_TAG="NixOS-$(date +%y.%m.%d-%H:%M)" nixos-rebuild switch --flake /etc/nixos#lg --impure'';
-      bt   = ''sudo env NIXOS_TAG="NixOS-$(date +%y.%m.%d-%H:%M)" nixos-rebuild boot --flake /etc/nixos#lg --impure'';
-      bu   = "sudo nixos-rebuild build --flake /etc/nixos#lg";
-      dry  = "sudo nixos-rebuild dry-build --flake /etc/nixos#lg";
-      fu   = "nix flake update /etc/nixos";
-      chk  = "nix flake check /etc/nixos";
-      ngc  = "sudo nix-collect-garbage -d";
+      # ==== NixOS rebuild & flake shortcuts (Bam CLI — `bam help`) ====
+      # bam tự dò host (lg/bamos) + tự gắn tag "NixOS-YY.MM.DD-HH:MM" khi
+      # switch/boot (system.nixos.tags đọc NIXOS_TAG qua --impure — hosts/lg.nix).
+      sw = "bam switch";
+      swu = "bam switch -u"; # kèm nix flake update trước
+      bt = "bam boot";
+      bu = "bam build";
+      dry = "bam dry";
+      fu = "bam update";
+      chk = "nix flake check /etc/nixos";
+      ngc = "bam gc";
     };
 
     promptInit = ''
@@ -89,26 +98,40 @@
       format = "$directory$git_branch$git_status$python$container$cmd_duration$jobs\n$character";
 
       directory = {
-        truncation_length = 3;        # giữ 3 cấp thư mục cuối
+        truncation_length = 3; # giữ 3 cấp thư mục cuối
         truncation_symbol = "…/";
         style = "bold cyan";
       };
 
-      git_branch = { style = "bold purple"; };
-      git_status = { style = "bold red"; };
+      git_branch = {
+        style = "bold purple";
+      };
+      git_status = {
+        style = "bold red";
+      };
 
       cmd_duration = {
-        min_time = 1000;              # chỉ hiện khi lệnh chạy > 1s
+        min_time = 1000; # chỉ hiện khi lệnh chạy > 1s
         show_milliseconds = true;
         format = "took [$duration]($style) ";
         style = "yellow";
       };
 
-      jobs = { threshold = 1; style = "blue"; };
+      jobs = {
+        threshold = 1;
+        style = "blue";
+      };
 
-      container = { symbol = ""; format = "[$symbol]($style) "; style = "bright-magenta"; };
+      container = {
+        symbol = "";
+        format = "[$symbol]($style) ";
+        style = "bright-magenta";
+      };
 
-      python = { format = "[$symbol$version]($style) "; style = "green"; };
+      python = {
+        format = "[$symbol$version]($style) ";
+        style = "green";
+      };
 
       character = {
         success_symbol = "[❯](bold green)";
@@ -131,5 +154,8 @@
     FZF_ALT_C_COMMAND = "fd --type d --hidden --follow --exclude .git";
   };
 
-  programs.direnv = { enable = true; nix-direnv.enable = true; };
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+  };
 }

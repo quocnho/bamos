@@ -104,6 +104,11 @@
   ];
 
   # ==== ISO ====
+  # Tên file ISO: bamos-gnome-26.11-x86_64-linux.iso
+  # (nixpkgs mặc định: image.baseName = "nixos-<edition>-<label>-<system>" —
+  #  isoName = baseName + ".iso", nên phải mkForce lên baseName)
+  image.baseName = lib.mkForce "bamos-gnome-26.11-x86_64-linux";
+
   isoImage = {
     appendToMenuLabel = " Bamos Installer";
     volumeID = "BAMOS-INSTALL";
