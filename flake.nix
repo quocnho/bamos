@@ -3,10 +3,22 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+
+    # Home-manager — quản lý cấu hình NGƯỜI DÙNG ($HOME): gói riêng của user,
+    # git config, dotfiles... (dùng chung nixpkgs với hệ thống → useGlobalPkgs).
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    { self, nixpkgs, ... }@inputs:
+    {
+      self,
+      nixpkgs,
+      home-manager,
+      ...
+    }@inputs:
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
@@ -15,6 +27,10 @@
       # Module dùng chung (aggregator modules/default.nix) — khớp mẫu website
       # bamos.info: `bamos.nixosModules.default` trong flake của máy đích.
       nixosModules.default = ./modules/default.nix;
+
+      # Home-manager dùng chung — máy đích (cài từ ISO) dùng qua
+      # `bamos.homeModules.default` trong iso-cfg/flake.nix.
+      homeModules.default = ./home/default.nix;
 
       # Profiles dùng chung — máy đích (cài từ ISO) import qua `bamos.profiles.*`
       # trong flake của họ (xem iso-cfg/flake.nix).
@@ -28,7 +44,19 @@
         # LG laptop — máy chính (host).
         lg = lib.nixosSystem {
           inherit system;
-          modules = [ ./configuration.nix ];
+          modules = [
+            ./configuration.nix
+            # Home-manager: cấu hình user quocnho (home/lg.nix → kế thừa home/default.nix)
+            home-manager.nixosModules.home-manager
+            {
+              home-manager = {
+                useGlobalPkgs = true; # dùng chung nixpkgs với hệ thống
+                useUserPackages = true; # gói user vào ~/.nix-profile (qua users.users.*.packages)
+                backupFileExtension = "hm-bak"; # file $HOME trùng tên → backup thay vì lỗi
+                users.quocnho = import ./home/lg.nix;
+              };
+            }
+          ];
         };
 
         # ISO installer — build bằng: nix build .#iso

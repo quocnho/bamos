@@ -43,12 +43,16 @@ tham khảo sâu dự án [GLF-OS](https://framagit.org/gaming-linux-fr/glf-os/g
 │   ├── common.nix             #   nền tảng: module chung + audio (mọi máy)
 │   ├── desktop.nix            #   GNOME + macOS look + boot + fonts + networkmanager
 │   └── installer.nix          #   LiveCD: isoImage + Calamares override (DPI, GPU, Loại máy)
+├── home/                      # ★ Home-manager — cấu hình NGƯỜI DÙNG ($HOME)
+│   ├── default.nix            #   dùng chung mọi máy: gói riêng user + git aliases (xuất qua bamos.homeModules.default)
+│   └── lg.nix                 #   riêng host lg: git identity quocnho
 ├── iso-cfg/                   # ★ flake cho /etc/nixos MÁY ĐÍCH (nhúng vào ISO → /iso-cfg)
-│   ├── flake.nix              #   input bamos = github:quocnho/bamos/main (kéo config từ repo)
+│   ├── flake.nix              #   input bamos = github:quocnho/bamos/main (kéo config từ repo) + home-manager
 │   └── customConfig/          #   ★ nơi người dùng bật/tắt bằng cách comment
 │       ├── default.nix        #     import apps.nix + features.nix
 │       ├── apps.nix           #     ứng dụng thêm (comment để bật/tắt)
-│       └── features.nix       #     tính năng: timezone VN, fcitx5-unikey, LibreOffice + Google Docs...
+│       ├── features.nix       #     tính năng: timezone VN, fcitx5-unikey, LibreOffice + Google Docs...
+│       └── home.nix           #     home-manager riêng của máy (gói user, git config...)
 ├── installer/                 # cấu hình Calamares (nạp vào package qua override)
 │   └── calamares/
 │       ├── modules/nixos/     #   module Python: sinh config + dò GPU + nixos-install
@@ -84,6 +88,25 @@ tham khảo sâu dự án [GLF-OS](https://framagit.org/gaming-linux-fr/glf-os/g
 
 Muốn thêm máy mới: tạo `hosts/<máy>.nix` + thêm 1 entry `nixosConfigurations.<máy>`
 trong `flake.nix` (hoặc để ISO cài sẵn — máy đích chạy profile desktop từ repo).
+
+## Home-manager (cấu hình người dùng)
+
+BamOS dùng [home-manager](https://github.com/nix-community/home-manager) để quản lý
+cấu hình **người dùng** trong `$HOME` (gói cài riêng, git config, dotfiles...) — bổ
+sung cho `modules/` (cấp hệ thống). Home-manager được cài như **NixOS module** nên
+`bam switch` / `nixos-rebuild` tự kích hoạt, không cần lệnh riêng.
+
+- **Máy dev (lg)**: bật qua `home-manager.users.quocnho` trong `flake.nix` — cấu hình
+  ở `home/lg.nix` (git identity `quocnho`) kế thừa `home/default.nix` (dùng chung).
+- **Máy đích (cài từ ISO)**: `iso-cfg/flake.nix` tự áp home-manager cho **mọi user
+  thường** (user do Calamares tạo — `home.username`/`homeDirectory` tự suy từ
+  `users.users`) qua `bamos.homeModules.default`; thêm riêng cho máy trong
+  `/etc/nixos/customConfig/home.nix`.
+- `home-manager.useGlobalPkgs` (dùng chung nixpkgs hệ thống) + `useUserPackages`
+  (gói user vào `~/.nix-profile`) + `backupFileExtension = "hm-bak"` (file `$HOME`
+  trùng tên → backup thay vì lỗi).
+
+> Đăng xuất/đăng nhập lại (hoặc khởi động lại) để áp dụng thay đổi shell sau switch.
 
 ## Bam CLI (`bam`)
 
@@ -192,7 +215,8 @@ bam build         # build thử không áp dụng
 - Alias cũ vẫn còn: `sw` = `bam switch`, `swu` = `bam switch -u`, `bt` = `bam boot`,
   `bu` = `bam build`, `dry` = `bam dry`, `fu` = `bam lock`, `ngc` = `bam gc` (xem `modules/shell.nix`).
 - Tag `BamOS-YY.MM.DD-HH:MM` tự gắn mỗi lần switch trên MỌI máy (xem `profiles/common.nix`).
-- User `quocnho` khai báo trực tiếp trong `hosts/lg.nix` (không hardcode trong modules/).
+- User `quocnho` khai báo trực tiếp trong `hosts/lg.nix` (không hardcode trong modules/),
+  cấu hình người dùng (home-manager) trong `home/lg.nix`.
 
 ## Tham khảo GLF-OS → BamOS
 

@@ -7,6 +7,8 @@
 #  Cách dùng — MỞ file rồi BỎ COMMENT (#) để bật, THÊM # để tắt:
 #    apps.nix       → ứng dụng cài thêm (trình duyệt, văn phòng, media...)
 #    features.nix   → tính năng hệ điều hành (in ấn, ssh, firewall, tên máy...)
+#    home.nix       → cấu hình NGƯỜI DÙNG qua home-manager (gói riêng, git config...)
+#                    (file này được flake.nix import riêng — KHÔNG đặt ở đây)
 #
 #  Muốn thêm file riêng (vd hardware.nix): tạo file rồi import vào bên dưới.
 #
