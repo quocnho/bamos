@@ -50,7 +50,12 @@
 
       # ---- Cú pháp & text objects ----
       nvim-treesitter.withAllGrammars # grammar cài qua Nix (không tải lúc chạy)
-      nvim-treesitter-textobjects
+      # Bỏ dep nvim-treesitter bản thường (tránh "two different versions")
+      (nvim-treesitter-textobjects.overrideAttrs (o: {
+        passthru = (o.passthru or { }) // {
+          dependencies = [ ];
+        };
+      }))
       targets-vim # text objects nâng cao (a/ i/ kèm nhiều dấu)
 
       # ---- Tìm kiếm & điều hướng ----
