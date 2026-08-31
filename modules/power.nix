@@ -35,7 +35,7 @@ in
       # LG Control Center (Windows): chỉ sạc tới 80% để kéo dài tuổi thọ pin.
       # LG CHỈ hỗ trợ giá trị 80 hoặc 100, và KHÔNG có start threshold riêng.
       # TLP nhận diện tự động qua plugin `35-lg` + module kernel lg_laptop.
-      STOP_CHARGE_THRESH_BAT0 = "80";
+      STOP_CHARGE_THRESH_BAT0 = "100";
 
       # Ưu tiên PIN: EPP "power" khi chạy bằng pin (i5-10210U vẫn đủ mạnh
       # cho Firefox + devenv). Nếu thấy máy ì, đổi lại "balance_power".
