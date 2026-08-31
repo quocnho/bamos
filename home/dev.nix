@@ -70,7 +70,6 @@
       vim-sandwich # bọc/xoá cặp: cs/ds/ys
       vim-commentary # comment: gc
       vim-repeat
-      iswap-nvim # đổi chỗ tham số
       yanky-nvim # lịch sử yank
       vim-eunuch # :Rename, :Delete, :SudoWrite...
       vim-matchup # match ngoặc thông minh (thay matchparen)

@@ -24,13 +24,8 @@ map("x", "gc", "<Plug>Commentary", { desc = "comment selection" })
 -- ===== Better-escape: gõ "jk" thoát insert (thay better-escape.vim) =====
 map("i", "jk", "<Esc>", { desc = "thoát insert (jk)" })
 
--- ===== IsWap: đổi chỗ 2 tham số/điều kiện (gS) =====
-require("iswap").setup {
-  keys = { "f", "d", "s", "a", "w", "e", "r" },
-}
-map("n", "gS", "<cmd>ISwap<CR>", { desc = "iswap" })
-map("x", "gS", "<cmd>ISwapWith<CR>", { desc = "iswap with" })
-
+-- ===== IsWap: đổi chỗ 2 tham số — đã dùng treesitter-textobjects swap
+-- (plugins/treesitter.lua: <leader>a / <leader>A đổi tham số) =====
 -- ===== Yanky: lịch sử yank (p/P sau dán chuyển qua lại) =====
 require("yanky").setup {
   highlight = { on_put = true, on_yank = true, timer = 200 },
