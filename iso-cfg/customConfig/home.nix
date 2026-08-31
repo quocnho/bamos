@@ -17,6 +17,13 @@
 }:
 
 {
+  # ----------------------------------------------------------------------------
+  # ★ BỘ CÔNG CỤ DEVELOPER (Neovim + tmux + gh + direnv...) — bỏ comment dòng dưới
+  #   để bật. Cấu hình chi tiết nằm trong repo bamos (home/dev.nix) — mọi cập nhật
+  #   từ GitHub sẽ tự về máy qua bam update.
+  # ----------------------------------------------------------------------------
+  # imports = [ bamos.homeModules.dev ];
+
   # ---------------- Gói cài riêng cho user (vào ~/.nix-profile) ----------------
   # home.packages = with pkgs; [
   #   vlc
@@ -26,7 +33,14 @@
   # ---------------- Định danh git cho lệnh commit (user.name/user.email) ----------------
   # programs.git = {
   #   enable = true;
-  #   userName = "Tên của bạn";
-  #   userEmail = "email@vi-du.vn";
+  #   settings.user = {
+  #     name = "Tên của bạn";
+  #     email = "email@vi-du.vn";
+  #   };
   # };
+
+  # ---------------- Thêm file cấu hình riêng (dotfile) ----------------
+  # home.file.".config/myapp/config.toml".text = ''
+  #   # nội dung file — ghi đè/backup file cũ (đuôi .hm-bak)
+  # '';
 }

@@ -29,8 +29,11 @@
       nixosModules.default = ./modules/default.nix;
 
       # Home-manager dùng chung — máy đích (cài từ ISO) dùng qua
-      # `bamos.homeModules.default` trong iso-cfg/flake.nix.
-      homeModules.default = ./home/default.nix;
+      # `bamos.homeModules.*` trong iso-cfg/flake.nix.
+      homeModules = {
+        default = ./home/default.nix; # nền tảng: shell, git, ssh (mọi máy)
+        dev = ./home/dev.nix; # developer: nvim, tmux, gh, direnv (bật riêng)
+      };
 
       # Profiles dùng chung — máy đích (cài từ ISO) import qua `bamos.profiles.*`
       # trong flake của họ (xem iso-cfg/flake.nix).

@@ -8,10 +8,13 @@
 }:
 
 {
-  imports = [ ./default.nix ];
+  imports = [
+    ./default.nix # dùng chung: shell/starship/fzf/zoxide/git/ssh (mọi máy)
+    ./dev.nix # developer: nvim + tmux + gh + direnv (máy dev)
+  ];
 
   # ==== Định danh git cá nhân ====
-  # User-level (~/.gitconfig) — thắng /etc/gitconfig của modules/shell.nix.
+  # User-level (~/.gitconfig) — thắng /etc/gitconfig cấp hệ thống.
   programs.git = {
     settings.user = {
       name = "quocnho";

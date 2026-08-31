@@ -44,11 +44,9 @@
       mesa-demos # glxinfo... (kiểm tra GPU)
     ];
 
-    # direnv: nạp env theo thư mục (dev chạy devenv/nix-direnv)
-    programs.direnv = {
-      enable = true;
-      nix-direnv.enable = true;
-    };
+    # direnv: nạp env theo thư mục (dev chạy devenv/nix-direnv).
+    # LƯU Ý: từ giờ direnv do HOME-MANAGER quản lý (home/dev.nix —
+    # programs.direnv) để cấu hình nằm đúng tầng user, tránh trùng lặp.
 
     # ==== Zed editor: font lớn + cấu hình chuyên nghiệp (declarative) ====
     # File settings nằm ở assets/zed/settings.json — sửa ở đó rồi rebuild.

@@ -44,8 +44,10 @@ tham khảo sâu dự án [GLF-OS](https://framagit.org/gaming-linux-fr/glf-os/g
 │   ├── desktop.nix            #   GNOME + macOS look + boot + fonts + networkmanager
 │   └── installer.nix          #   LiveCD: isoImage + Calamares override (DPI, GPU, Loại máy)
 ├── home/                      # ★ Home-manager — cấu hình NGƯỜI DÙNG ($HOME)
-│   ├── default.nix            #   dùng chung mọi máy: gói riêng user + git aliases (xuất qua bamos.homeModules.default)
-│   └── lg.nix                 #   riêng host lg: git identity quocnho
+│   ├── default.nix            #   dùng chung mọi máy: zsh/starship/fzf/zoxide/git/ssh (bamos.homeModules.default)
+│   ├── dev.nix                #   ★ developer: Neovim + tmux + gh + direnv (bamos.homeModules.dev)
+│   ├── lg.nix                 #   riêng host lg: git identity quocnho + import dev.nix
+│   └── nvim/user/             #   Lua config của Neovim (lsp, cmp, telescope, ui, editor, format)
 ├── iso-cfg/                   # ★ flake cho /etc/nixos MÁY ĐÍCH (nhúng vào ISO → /iso-cfg)
 │   ├── flake.nix              #   input bamos = github:quocnho/bamos/main (kéo config từ repo) + home-manager
 │   └── customConfig/          #   ★ nơi người dùng bật/tắt bằng cách comment
@@ -97,11 +99,13 @@ sung cho `modules/` (cấp hệ thống). Home-manager được cài như **NixO
 `bam switch` / `nixos-rebuild` tự kích hoạt, không cần lệnh riêng.
 
 - **Máy dev (lg)**: bật qua `home-manager.users.quocnho` trong `flake.nix` — cấu hình
-  ở `home/lg.nix` (git identity `quocnho`) kế thừa `home/default.nix` (dùng chung).
+  ở `home/lg.nix` (git identity `quocnho` + bộ developer) kế thừa `home/default.nix`
+  (dùng chung) + `home/dev.nix` (Neovim/tmux/gh — tham khảo craftzdog + jdhao).
 - **Máy đích (cài từ ISO)**: `iso-cfg/flake.nix` tự áp home-manager cho **mọi user
   thường** (user do Calamares tạo — `home.username`/`homeDirectory` tự suy từ
   `users.users`) qua `bamos.homeModules.default`; thêm riêng cho máy trong
-  `/etc/nixos/customConfig/home.nix`.
+  `/etc/nixos/customConfig/home.nix` (bộ developer: bỏ comment
+  `imports = [ bamos.homeModules.dev ]`).
 - `home-manager.useGlobalPkgs` (dùng chung nixpkgs hệ thống) + `useUserPackages`
   (gói user vào `~/.nix-profile`) + `backupFileExtension = "hm-bak"` (file `$HOME`
   trùng tên → backup thay vì lỗi).
@@ -213,10 +217,13 @@ bam build         # build thử không áp dụng
 ```
 
 - Alias cũ vẫn còn: `sw` = `bam switch`, `swu` = `bam switch -u`, `bt` = `bam boot`,
-  `bu` = `bam build`, `dry` = `bam dry`, `fu` = `bam lock`, `ngc` = `bam gc` (xem `modules/shell.nix`).
+  `bu` = `bam build`, `dry` = `bam dry`, `fu` = `bam lock`, `ngc` = `bam gc` (xem `home/default.nix`).
 - Tag `BamOS-YY.MM.DD-HH:MM` tự gắn mỗi lần switch trên MỌI máy (xem `profiles/common.nix`).
 - User `quocnho` khai báo trực tiếp trong `hosts/lg.nix` (không hardcode trong modules/),
-  cấu hình người dùng (home-manager) trong `home/lg.nix`.
+  cấu hình người dùng (home-manager) trong `home/lg.nix` (shell/git) + `home/dev.nix` (nvim/tmux).
+
+> **Sau khi switch**: đăng xuất/đăng nhập lại để nạp `.zshrc` mới (lần đầu cũng nên
+> chạy `tmux` nếu dùng — tmux-resurrect sẽ tự khôi phục session đã lưu).
 
 ## Tham khảo GLF-OS → BamOS
 
