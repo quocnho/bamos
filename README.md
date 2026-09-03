@@ -69,6 +69,7 @@ tham khảo sâu dự án [GLF-OS](https://framagit.org/gaming-linux-fr/glf-os/g
 │   ├── default.nix              #   aggregator — xuất qua bamos.nixosModules.default
 │   ├── packages.nix             #   công cụ cơ bản MỌI máy (git, bam, fzf, htop...)
 │   ├── dev.nix                  #   ★ công cụ dev (Zed, Antigravity, Python, Node...) — my.dev.enable
+│   ├── studio.nix               #   ★ studio-pro theo GLF-OS: OBS + NVENC/VAAPI, GIMP, Audacity... — my.studio.enable
 │   ├── update.nix               #   ★ auto-update kiểu GLF-OS (timer 12h + notify) — my.update.enable
 │   └── (boot, gpu, power, audio, gnome, macos, assets, i18n, shell, ...)
 ├── hardware-configuration.nix # cấu hình phần cứng máy LG (nixos-generate-config)
@@ -227,6 +228,20 @@ bam build         # build thử không áp dụng
 - Tag `BamOS-YY.MM.DD-HH:MM` tự gắn mỗi lần switch trên MỌI máy (xem `profiles/common.nix`).
 - User `quocnho` khai báo trực tiếp trong `hosts/lg.nix` (không hardcode trong modules/),
   cấu hình người dùng (home-manager) trong `home/lg.nix` (shell/git) + `home/dev.nix` (nvim/tmux).
+
+### Studio (my.studio — ghi hình/livestream OBS, edition studio-pro của GLF-OS)
+
+Bật sẵn trên máy LG (`my.studio.enable` trong `hosts/lg.nix`), tham khảo module
+`creation.nix` + catalog `studio-pro` của [GLF-OS](https://framagit.org/gaming-linux-fr/glf-os):
+
+- **OBS Studio** + virtual camera + plugin: pipewire-audio-capture, obs-vkcapture,
+  composite-blur, move-transition, obs-vaapi (encode iGPU Intel).
+- **Encode tối ưu theo GPU**: máy có NVIDIA → OBS build CUDA (NVENC). Trên laptop
+  Optimus chạy bằng **`obs-nvenc`** (bọc `nvidia-offload obs`) để dùng NVENC;
+  không thì x264 (CPU) hoặc VAAPI iGPU (`vainfo` để kiểm tra).
+- Công cụ: GIMP + Audacity (mặc định), DaVinci Resolve (bản Studio khi
+  `my.studio.davinciResolve.studio = true` — như studio-pro), Kdenlive, REAPER.
+- Fonts sáng tạo (overlay/thumb), vainfo/intel_gpu_top/pavucontrol.
 
 > **Sau khi switch**: đăng xuất/đăng nhập lại để nạp `.zshrc` mới (lần đầu cũng nên
 > chạy `tmux` nếu dùng — tmux-resurrect sẽ tự khôi phục session đã lưu).

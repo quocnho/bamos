@@ -55,6 +55,12 @@
 
   my.power.enable = true; # s2idle + TLP + Battery Care 80%
 
+  # ==== Studio (edition studio-pro theo GLF-OS) — ghi hình + livestream OBS ====
+  # OBS + NVENC (chạy bằng `obs-nvenc`) / VAAPI iGPU / x264 + GIMP, Audacity,
+  # fonts sáng tạo, công cụ đa phương tiện. Tùy chọn nặng (DaVinci Resolve,
+  # Kdenlive, REAPER) mặc định TẮT — xem modules/studio.nix để bật.
+  my.studio.enable = true;
+
   # (Tag generation "BamOS-YY.MM.DD-HH:MM" giờ nằm ở profiles/common.nix — mọi máy)
   system.stateVersion = "25.11";
 }
