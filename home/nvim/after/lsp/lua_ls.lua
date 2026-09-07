@@ -1,5 +1,5 @@
--- Lua LSP (port after/lsp/lua_ls.lua của jdhao)
-vim.lsp.config("lua_ls", {
+-- Lua LSP (lua-language-server)
+return {
   settings = {
     Lua = {
       runtime = { version = "LuaJIT" },
@@ -11,4 +11,4 @@ vim.lsp.config("lua_ls", {
       telemetry = { enable = false },
     },
   },
-})
+}

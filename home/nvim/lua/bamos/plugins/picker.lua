@@ -1,5 +1,5 @@
--- Fzf-lua — fuzzy finder chính (jdhao dùng fzf-lua thay telescope).
--- Backend: fzf + fd + ripgrep (có sẵn trên BamOS qua home.packages/extraPackages).
+-- Fzf-lua — fuzzy finder chính (nhẹ hơn telescope; ray-x cũng dùng fzf-lua).
+-- Backend: fzf + fd + ripgrep (cài qua programs.neovim.extraPackages).
 local fzf = require("fzf-lua")
 
 fzf.setup {

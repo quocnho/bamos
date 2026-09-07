@@ -55,11 +55,28 @@
 
   my.power.enable = true; # s2idle + TLP + Battery Care 80%
 
+  # Kernel ZEN (7.1) — ưu tiên phản hồi nhanh/mượt khi đa nhiệm + OBS/stream
+  # (so sánh zen vs default vs latest: modules/boot.nix). Đổi về "default"
+  # nếu muốn ưu tiên pin/ổn định. Muốn thử bản khác: `bam boot` → chọn ở boot menu.
+  my.boot.kernel = "zen";
+
   # ==== Studio (edition studio-pro theo GLF-OS) — ghi hình + livestream OBS ====
   # OBS + NVENC (chạy bằng `obs-nvenc`) / VAAPI iGPU / x264 + GIMP, Audacity,
   # fonts sáng tạo, công cụ đa phương tiện. Tùy chọn nặng (DaVinci Resolve,
   # Kdenlive, REAPER) mặc định TẮT — xem modules/studio.nix để bật.
   my.studio.enable = true;
+
+  # ==== Máy DEVELOPER — gọn, nhẹ, không app chạy ngầm thừa ====
+  # GNOME Software + Flatpak backend: cài app bằng Nix là đủ → bỏ ~160MB
+  # gnome-software + flatpak helpers chạy ngầm + refresh kho Flathub định kỳ.
+  # (Máy cài từ ISO vẫn có store — mặc định my.gnome.store = true.)
+  my.gnome.store = false;
+
+  # (acpid giữ NGUYÊN: module nvidia.nix của nixpkgs tự bật cho quản lý nguồn
+  #  NVIDIA — daemon rất nhỏ, không đáng tắt bằng mkForce.)
+
+  # Journald: giới hạn log ổn định (không phình vô hạn trên SSD 512GB)
+  services.journald.extraConfig = "SystemMaxUse=400M\nSystemMaxFileSize=50M";
 
   # (Tag generation "BamOS-YY.MM.DD-HH:MM" giờ nằm ở profiles/common.nix — mọi máy)
   system.stateVersion = "25.11";

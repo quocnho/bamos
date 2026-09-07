@@ -1,5 +1,5 @@
--- Ruff (lint + format cho Python) — port after/lsp/ruff.lua của jdhao
-vim.lsp.config("ruff", {
+-- Ruff (lint + format cho Python)
+return {
   settings = {
     ruff = {
       lineLength = 100,
@@ -7,4 +7,4 @@ vim.lsp.config("ruff", {
       format = { enable = true },
     },
   },
-})
+}

@@ -1,11 +1,10 @@
--- Editor options (port từ lua/options.lua của jdhao — chuẩn 2-space, nhiều
--- tinh chỉnh cho editor hiện đại).
-local utils = require("user.utils")
+-- Editor options (chuẩn 2-space, tinh chỉnh cho editor hiện đại trên nvim 0.12).
+local utils = require("bamos.utils")
 local fn = vim.fn
 local opt = vim.opt
 local o = vim.o
 
--- Fillchars: folding, split, eob...
+-- Fillchars: folding, split, eob…
 opt.fillchars = {
   fold = " ",
   foldsep = " ",
@@ -46,14 +45,16 @@ opt.backupdir = vim.g.backupdir
 opt.backup = true
 opt.backupcopy = "yes"
 
--- Tab: 2 spaces (theo chuẩn jdhao)
+-- Tab: 2 spaces
 opt.tabstop = 2
 opt.softtabstop = 2
 opt.shiftwidth = 2
 opt.expandtab = true
 opt.shiftround = true
 
-opt.matchpairs:append { "<:>", "「:」", "『:』", "【:】", '"', "'", "《:》" }
+-- matchpairs: KHÔNG thêm `"<:>"` (đã có sẵn mặc định — nvim ≥0.12 báo E474 nếu
+-- thêm trùng) và không thêm nháy đơn/kép (vim cấm). Chỉ thêm cặp CJK:
+opt.matchpairs:append("「:」,『:』,【:】,《:》")
 
 opt.number = true
 opt.relativenumber = true
@@ -68,6 +69,8 @@ opt.linebreak = true
 opt.showbreak = "↪"
 opt.wildmode = "list:longest"
 opt.scrolloff = 5
+opt.sidescroll = 1
+opt.sidescrolloff = 8
 
 opt.mouse = "n"
 opt.mousemodel = "popup"
@@ -89,7 +92,7 @@ opt.autoread = true
 
 -- Tiêu đề cửa sổ: hostname + path + thời gian sửa
 opt.title = true
-o.titlestring = "%{v:lua.require('user.utils').get_titlestr()}"
+o.titlestring = "%{v:lua.require('bamos.utils').get_titlestr()}"
 
 opt.undofile = true -- undo bền vững qua các lần mở
 

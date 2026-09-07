@@ -1,5 +1,5 @@
--- Pyright (port after/lsp/pyright.lua của jdhao — rút gọn)
-vim.lsp.config("pyright", {
+-- Pyright (Python type checker)
+return {
   settings = {
     python = {
       analysis = {
@@ -10,4 +10,4 @@ vim.lsp.config("pyright", {
       },
     },
   },
-})
+}

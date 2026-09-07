@@ -10,7 +10,8 @@
 # cho nhu cầu của LG (ghi hình + livestream OBS trên laptop Optimus Intel+NVIDIA):
 #
 #   1. OBS Studio + virtual camera + plugin bắt âm thanh PipeWire, game capture
-#      (obs-vkcapture), hiệu ứng (composite-blur, move-transition).
+#      (obs-vkcapture), hiệu ứng (composite-blur).
+#      (obs-move-transition tạm BỎ: bản nixpkgs 3.2.1 không build được với OBS 32.)
 #   2. Encode TỐI ƯU theo GPU của LG (GTX 1650 = Turing):
 #        • NVENC (dGPU):   chạy OBS qua lệnh `obs-nvenc` (gói cài sẵn) → driver
 #          NVIDIA + CUDA, encoder chuyên dụng, chất lượng cao, CPU rảnh.
@@ -143,7 +144,9 @@ in
               obs-pipewire-audio-capture # bắt âm thanh ứng dụng qua PipeWire
               obs-vkcapture # game capture (Vulkan) — chạy game qua wrapper vkcapture
               obs-composite-blur # làm mờ nền (kiểu blur webcam/nền)
-              obs-move-transition # transition chuyển cảnh mượt
+              # LƯU Ý: không cài obs-move-transition — bản nixpkgs (3.2.1) dùng API
+              # deprecated nên KHÔNG build được với OBS 32 (-Werror). Khi nixpkgs
+              # nâng plugin lên bản tương thích thì thêm lại.
             ])
             ++ lib.optionals cfg.obs.vaapi [ pkgs.obs-studio-plugins.obs-vaapi ];
         };

@@ -1,4 +1,4 @@
--- Diagnostics (port từ lua/diagnostic-conf.lua của jdhao — gọn, không virtual text).
+-- Diagnostics: gọn, không virtual text (sign + float + statusline là đủ).
 local diagnostic = vim.diagnostic
 local api = vim.api
 
@@ -27,7 +27,7 @@ diagnostic.config {
 }
 
 -- Đưa diagnostic của buffer vào quickfix
-local set_qflist = function(buf_num, severity)
+local function set_qflist(buf_num, severity)
   local items = diagnostic.toqflist(diagnostic.get(buf_num, { severity = severity }))
   vim.fn.setqflist({}, " ", { title = "Diagnostics", items = items })
   vim.cmd("copen")

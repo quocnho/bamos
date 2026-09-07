@@ -1,4 +1,4 @@
--- LSP configuration (port từ lua/lsp_conf.lua của jdhao).
+-- LSP configuration.
 --
 -- ĐIỀU CHỈNH CHO NIXOS + DEVENV:
 --   • Server cài qua Nix (programs.neovim.extraPackages) → luôn có trong PATH.
@@ -6,7 +6,7 @@
 --   → Dùng `vim.lsp.enable()` + kiểm tra executable: server nào có trong PATH
 --     thì tự bật, không cần khai báo danh sách cứng. Config riêng từng server
 --     nằm ở after/lsp/<tên>.lua (cơ chế mặc định của Neovim ≥ 0.11).
-local utils = require("user.utils")
+local utils = require("bamos.utils")
 
 local api = vim.api
 

@@ -47,10 +47,10 @@ tham khảo sâu dự án [GLF-OS](https://framagit.org/gaming-linux-fr/glf-os/g
 │   ├── default.nix            #   dùng chung mọi máy: zsh/starship/fzf/zoxide/git/ssh (bamos.homeModules.default)
 │   ├── dev.nix                #   ★ developer: Neovim + tmux + gh + direnv (bamos.homeModules.dev)
 │   ├── lg.nix                 #   riêng host lg: git identity quocnho + import dev.nix
-│   └── nvim/                  #   Neovim theo CHUẨN jdhao/nvim-config
-│       ├── lua/user/          #     core (globals, options, mappings, lsp...) + plugins/ (mỗi nhóm 1 file)
-│       ├── after/lsp/         #     cấu hình riêng từng LSP server (lua_ls, pyright, nil_ls...)
-│       └── after/ftplugin/    #     cấu hình theo filetype (python, markdown, go...)
+│   └── nvim/                  #   Neovim — kiến trúc hiện đại (ray-x/LazyVim-style)
+│       ├── lua/bamos/          #     core (options, keymaps, lsp, theme...) + plugins/ (1 file 1 plugin)
+│       ├── after/lsp/          #     cấu hình riêng từng LSP server (lua_ls, pyright, nil_ls...)
+│       └── after/ftplugin/     #     cấu hình theo filetype (python, markdown, go...)
 ├── iso-cfg/                   # ★ flake cho /etc/nixos MÁY ĐÍCH (nhúng vào ISO → /iso-cfg)
 │   ├── flake.nix              #   input bamos = github:quocnho/bamos/main (kéo config từ repo) + home-manager
 │   └── customConfig/          #   ★ nơi người dùng bật/tắt bằng cách comment
@@ -104,10 +104,14 @@ sung cho `modules/` (cấp hệ thống). Home-manager được cài như **NixO
 
 - **Máy dev (lg)**: bật qua `home-manager.users.quocnho` trong `flake.nix` — cấu hình
   ở `home/lg.nix` (git identity `quocnho` + bộ developer) kế thừa `home/default.nix`
-  (dùng chung) + `home/dev.nix`. **Neovim theo chuẩn [jdhao/nvim-config](https://github.com/jdhao/nvim-config)**
-  (blink.cmp, fzf-lua, treesitter-textobjects, hop, yanky, nvim-ufo...), điều chỉnh
-  cho NixOS + devenv: plugins qua Nix (không lazy.nvim), LSP server tự bật theo PATH
-  (`vim.lsp.enable`) — server của dự án (devenv.nix) tự hoạt động sau `direnv allow`.
+  (dùng chung) + `home/dev.nix`. **Neovim cấu hình hiện đại theo phong cách
+  [ray-x/nvim](https://github.com/ray-x/nvim) (nhẹ, domain modules) + [LazyVim](https://www.lazyvim.org/)
+  look (dashboard + which-key + bufferline — tham khảo
+  [jellydn/lazy-nvim-ide](https://github.com/jellydn/lazy-nvim-ide), [appelgriebsch/Nv](https://github.com/appelgriebsch/Nv))**:
+  `lua/bamos/` (core) + `lua/bamos/plugins/` (một file một plugin) + `after/` (LSP/ftplugin).
+  Điều chỉnh cho NixOS + devenv: plugins qua Nix (pack native — không lazy.nvim),
+  grammar treesitter qua Nix, LSP server tự bật theo PATH (`vim.lsp.enable`) — server
+  của dự án (devenv.nix) tự hoạt động sau `direnv allow`.
 - **Máy đích (cài từ ISO)**: `iso-cfg/flake.nix` tự áp home-manager cho **mọi user
   thường** (user do Calamares tạo — `home.username`/`homeDirectory` tự suy từ
   `users.users`) qua `bamos.homeModules.default`; thêm riêng cho máy trong

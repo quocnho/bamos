@@ -1,5 +1,5 @@
 -- Nil — Nix language server (đặc trưng NixOS; dùng chung với Zed/Antigravity)
-vim.lsp.config("nil_ls", {
+return {
   settings = {
     ["nil"] = {
       formatting = {
@@ -11,4 +11,4 @@ vim.lsp.config("nil_ls", {
       },
     },
   },
-})
+}

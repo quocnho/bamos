@@ -1,5 +1,5 @@
 -- Python (port after/ftplugin/python.lua của jdhao)
-local utils = require("user.utils")
+local utils = require("bamos.utils")
 local opt = vim.opt
 
 opt.wrap = false

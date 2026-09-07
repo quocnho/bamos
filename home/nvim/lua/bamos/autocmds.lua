@@ -1,4 +1,4 @@
--- Autocommands (theo tinh thần lua/custom-autocmd.lua của jdhao — rút gọn).
+-- Autocommands toàn cục.
 local api = vim.api
 local augroup = api.nvim_create_augroup("bamos", { clear = true })
 

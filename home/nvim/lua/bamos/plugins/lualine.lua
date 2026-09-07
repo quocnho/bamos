@@ -1,5 +1,5 @@
--- Lualine — statusline (port lua/config/lualine.lua của jdhao, rút gọn).
-local utils = require("user.utils")
+-- Lualine — statusline (theme "auto" theo colorscheme đang chạy).
+local utils = require("bamos.utils")
 
 local function lsp_name()
   local clients = vim.lsp.get_clients({ bufnr = 0 })
@@ -13,14 +13,22 @@ local function lsp_name()
   return table.concat(names, ",")
 end
 
+local function py_env()
+  local env = utils.get_virtual_env()
+  if env == "" then
+    return ""
+  end
+  return " " .. env
+end
+
 require("lualine").setup {
   options = {
-    theme = "auto", -- theo colorscheme đang chạy (jdhao style)
+    theme = "auto", -- theo colorscheme đang chạy
     globalstatus = true,
     icons_enabled = true,
     component_separators = { left = "", right = "" },
     section_separators = { left = "", right = "" },
-    disabled_filetypes = { statusline = { "dashboard", "alpha" } },
+    disabled_filetypes = { statusline = { "snacks_dashboard", "alpha", "dashboard" } },
   },
   sections = {
     lualine_a = { "mode" },
@@ -29,6 +37,7 @@ require("lualine").setup {
       { "filename", path = 1, symbols = { modified = "●", readonly = "" } },
     },
     lualine_x = {
+      { py_env, icon = "" },
       { lsp_name, icon = "" },
       { "filetype", icon = "" },
       { "encoding" },
@@ -46,6 +55,3 @@ require("lualine").setup {
     lualine_z = {},
   },
 }
-
--- Có dùng được cho LSP name nếu cần
-vim.g.lualine_lsp_name = lsp_name

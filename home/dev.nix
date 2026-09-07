@@ -5,16 +5,19 @@
 #   - Máy đích (ISO): bỏ comment `imports = [ bamos.homeModules.dev ]` trong
 #                     /etc/nixos/customConfig/home.nix
 #
-# NEOVIM theo CHUẨN jdhao/nvim-config (https://github.com/jdhao/nvim-config):
-#   • Cùng kiến trúc: lua/user/{globals,options,autocmd,mappings,utils,lsp,diagnostic,ui}
-#     + lua/user/plugins/* (như lua/config/*) + after/lsp/* + after/ftplugin/*.
-#   • Cùng bộ plugin: blink.cmp, fzf-lua, treesitter-textobjects, hop, hlslens,
-#     glance, yanky, iswap, statuscol, nvim-ufo, aerial, nvim-tree, diffview,
-#     gitlinker, snacks, mini.icons, colorful-menu...
-#   • Cùng cách LSP: server cài NGOÀI (Nix/devenv) + `vim.lsp.enable()` tự dò PATH.
+# NEOVIM — kiến trúc hiện đại, tham khảo ray-x/nvim + LazyVim (look
+# jellydn/lazy-nvim-ide, appelgriebsch/Nv):
+#   • Cấu trúc domain rõ ràng: lua/bamos/ = core (options, keymaps, autocmds,
+#     lsp, theme) + lua/bamos/plugins/* = MỘT FILE MỘT PLUGIN (như LazyVim).
+#   • after/lsp/* = cấu hình riêng từng LSP server; after/ftplugin/* = theo filetype.
+#   • Nhẹ (tinh thần ray-x): plugin tinh gọn, tận dụng native Neovim 0.12 —
+#     vim.lsp.enable(), treesitter, pack native, snacks (1 plugin thay nhiều).
+#   • Look LazyVim: snacks.dashboard (home screen khi `nvim` không file) +
+#     bufferline (tab) + which-key v3 (menu phím) + theme TokyoNight mặc định.
 #
 # ĐIỀU CHỈNH CHO NIXOS + DEVENV:
-#   • Plugins cài qua Nix (vimPlugins) → không cần lazy.nvim, offline, reproducible.
+#   • Plugins cài qua Nix (vimPlugins — pack native của home-manager) → KHÔNG
+#     cần lazy.nvim: offline, reproducible, "cài mới là chạy".
 #   • LSP server mặc định cài qua extraPackages; server của dự án (devenv.nix)
 #     tự xuất hiện trong PATH khi `direnv allow` → nvim tự bật, không sửa config.
 #   • Grammar treesitter cài qua nixpkgs (withAllGrammars) → không cần compiler.
@@ -29,7 +32,7 @@
 
 {
   # ==========================================================================
-  #  NEOVIM — theo chuẩn jdhao/nvim-config
+  #  NEOVIM — kiến trúc lua/bamos (xem comment đầu file)
   # ==========================================================================
   programs.neovim = {
     enable = true;
@@ -40,13 +43,12 @@
     withRuby = false;
 
     plugins = with pkgs.vimPlugins; [
-      # ---- LSP & completion (blink.cmp — mặc định của jdhao) ----
-      nvim-lspconfig
-      blink-cmp
-      blink-compat
+      # ---- LSP & completion ----
+      nvim-lspconfig # registry config cho vim.lsp.enable (Neovim ≥ 0.11)
+      blink-cmp # completion engine (nhanh, gọn — thay nvim-cmp)
       friendly-snippets # bộ snippets sẵn (vscode format)
       luasnip # snippet engine cho blink.cmp
-      plenary-nvim
+      plenary-nvim # thư viện dùng chung
 
       # ---- Cú pháp & text objects ----
       nvim-treesitter.withAllGrammars # grammar cài qua Nix (không tải lúc chạy)
@@ -56,78 +58,71 @@
           dependencies = [ ];
         };
       }))
-      targets-vim # text objects nâng cao (a/ i/ kèm nhiều dấu)
+      targets-vim # text objects nâng cao (a/ i/ theo dấu câu & ngoặc)
 
       # ---- Tìm kiếm & điều hướng ----
-      fzf-lua # fuzzy finder chính (thay telescope — như jdhao)
+      fzf-lua # fuzzy finder chính (nhẹ — ray-x cũng dùng)
       hop-nvim # nhảy nhanh (EasyMotion-style)
       nvim-hlslens # hiện số match khi tìm kiếm
-      glance-nvim # peek definition/references
-      aerial-nvim # outline symbol
+      aerial-nvim # outline symbol (sidebar phải)
 
       # ---- Editor helpers ----
-      nvim-autopairs
+      nvim-autopairs # tự đóng ngoặc
       vim-sandwich # bọc/xoá cặp: cs/ds/ys
       vim-commentary # comment: gc
-      vim-repeat
+      vim-repeat # lặp plugin map bằng "."
       yanky-nvim # lịch sử yank
-      vim-eunuch # :Rename, :Delete, :SudoWrite...
+      vim-eunuch # :Rename, :Delete, :SudoWrite…
       vim-matchup # match ngoặc thông minh (thay matchparen)
-      unicode-vim # ga: thông tin ký tự unicode
-      asyncrun-vim # :AsyncRun chạy lệnh bất đồng bộ
-      vim-scriptease # công cụ cho người viết vim plugin
-      vim-toml # syntax toml
       vim-oscyank # copy ra ngoài qua OSC52 (tmux/ssh)
 
       # ---- Git ----
       vim-fugitive
       gitsigns-nvim
-      diffview-nvim # UI diff/log đẹp
-      gitlinker-nvim # copy link github/gitlab
 
-      # ---- UI ----
-      lualine-nvim
-      bufferline-nvim
-      which-key-nvim
-      nvim-notify
-      snacks-nvim # bộ tiện ích (indent, bigfile, notifier...)
+      # ---- UI (look LazyVim) ----
+      lualine-nvim # statusline
+      bufferline-nvim # thanh tab kiểu IDE
+      which-key-nvim # menu phím tắt (v3)
+      snacks-nvim # dashboard + notifier + indent + bigfile + lazygit…
       nvim-colorizer-lua # hiện màu hex/css
       render-markdown-nvim # render markdown trong buffer
-      colorful-menu-nvim # menu completion màu theo kind
-      dropbar-nvim # breadcrumb theo cú pháp
-      statuscol-nvim # cột số/sign gọn
+      statuscol-nvim # cột số/sign gọn (click được)
       nvim-ufo # fold thông minh (LSP/treesitter)
       promise-async # dependency của nvim-ufo
-      nvim-tree-lua # file explorer
-      mini-icons # icon file (mock nvim-web-devicons)
-      mini-indentscope # vạch indent theo scope
+      nvim-tree-lua # file explorer (sidebar)
+      mini-icons # icon file (mock nvim-web-devicons — nhẹ hơn)
       fidget-nvim # tiến trình LSP
       nvim-lightbulb # gợi ý code action
-      quicker-nvim # quickfix đẹp
-      nvim-bqf # quickfix buffer
+      nvim-bqf # quickfix đẹp
       vim-illuminate # highlight từ cùng tên
-      whitespace-nvim # hiện khoảng trắng thừa
 
-      # ---- Colorschemes (chuẩn jdhao: chọn ngẫu nhiên mỗi lần mở) ----
+      # ---- Colorschemes (mặc định tokyonight — đổi bằng `,ut` / :BamosTheme) ----
       tokyonight-nvim
       catppuccin-nvim
       gruvbox-material
-      everforest
       nightfox-nvim
       kanagawa-nvim
-      onedark-nvim
-      # thêm theme: vd oxocarbon-nvim + thêm entry trong lua/user/ui.lua
+      # thêm theme: thêm plugin ở đây + thêm entry trong lua/bamos/theme.lua
+
+      # ---- BỘ MỞ RỘNG — bỏ comment khi cần (thêm file setup trong
+      # ---- lua/bamos/plugins/ nếu plugin cần cấu hình) ----
+      # diffview-nvim          # UI diff/log (thay bằng lazygit <space>gg)
+      # glance-nvim            # peek definition/references
+      # gitlinker-nvim         # copy link github
+      # dropbar-nvim           # breadcrumb winbar
+      # oil-nvim               # explorer kiểu oil (nhẹ hơn nvim-tree)
     ];
 
-    # Entry: nạp lua/user/* (cấu trúc theo jdhao — xem bên dưới)
+    # Entry: nạp lua/bamos/* (cấu trúc mới — xem lua/bamos/init.lua)
     initLua = ''
-      require("user")
+      require("bamos")
     '';
 
     # Công cụ cho nvim (LSP server + formatter + tìm kiếm) — có trong PATH của nvim.
     # Server nào DEVENV cung cấp thì tự động có (không cần khai báo ở đây).
     extraPackages = with pkgs; [
-      # ---- LSP servers (bộ mặc định BamOS — khớp lua/user/lsp.lua) ----
+      # ---- LSP servers (bộ mặc định BamOS — khớp lua/bamos/lsp.lua) ----
       nil # Nix
       lua-language-server # Lua
       pyright # Python
@@ -138,7 +133,7 @@
       vscode-langservers-extracted # HTML/CSS/JSON
       taplo # TOML
 
-      # ---- Lint/format Python (chuẩn jdhao: black + ruff) ----
+      # ---- Lint/format Python ----
       black
       ruff
 
@@ -165,9 +160,9 @@
     ];
   };
 
-  # Lua/Vim config của nvim → ~/.config/nvim/ (cấu trúc theo chuẩn jdhao:
-  # lua/user/ = core + plugins, after/lsp/ = cấu hình từng LSP server,
-  # after/ftplugin/ = cấu hình theo filetype). init.lua do home-manager sinh.
+  # Lua/Vim config của nvim → ~/.config/nvim/ (lua/bamos/ = core + plugins theo
+  # plugin, after/lsp/ = cấu hình từng LSP server, after/ftplugin/ = theo
+  # filetype). init.lua do home-manager sinh (initLua ở trên).
   home.file = builtins.listToAttrs (
     map
       (f: {
@@ -177,28 +172,33 @@
         };
       })
       [
-        # ---- Core (lua/user) ----
-        "lua/user/init.lua"
-        "lua/user/utils.lua"
-        "lua/user/globals.lua"
-        "lua/user/options.lua"
-        "lua/user/autocmd.lua"
-        "lua/user/mappings.lua"
-        "lua/user/lsp.lua"
-        "lua/user/diagnostic.lua"
-        "lua/user/ui.lua"
-        # ---- Plugins (lua/user/plugins) ----
-        "lua/user/plugins/fzf-lua.lua"
-        "lua/user/plugins/blink-cmp.lua"
-        "lua/user/plugins/treesitter.lua"
-        "lua/user/plugins/lualine.lua"
-        "lua/user/plugins/bufferline.lua"
-        "lua/user/plugins/which-key.lua"
-        "lua/user/plugins/git.lua"
-        "lua/user/plugins/navigation.lua"
-        "lua/user/plugins/explorer.lua"
-        "lua/user/plugins/editor.lua"
-        "lua/user/plugins/ui.lua"
+        # ---- Core (lua/bamos) ----
+        "lua/bamos/init.lua"
+        "lua/bamos/utils.lua"
+        "lua/bamos/globals.lua"
+        "lua/bamos/options.lua"
+        "lua/bamos/autocmds.lua"
+        "lua/bamos/keymaps.lua"
+        "lua/bamos/diagnostic.lua"
+        "lua/bamos/lsp.lua"
+        "lua/bamos/theme.lua"
+        # ---- Plugins (lua/bamos/plugins) — một file một plugin ----
+        "lua/bamos/plugins/icons.lua"
+        "lua/bamos/plugins/which-key.lua"
+        "lua/bamos/plugins/bufferline.lua"
+        "lua/bamos/plugins/lualine.lua"
+        "lua/bamos/plugins/snacks.lua"
+        "lua/bamos/plugins/cmp.lua"
+        "lua/bamos/plugins/treesitter.lua"
+        "lua/bamos/plugins/picker.lua"
+        "lua/bamos/plugins/explorer.lua"
+        "lua/bamos/plugins/git.lua"
+        "lua/bamos/plugins/editor.lua"
+        "lua/bamos/plugins/folding.lua"
+        "lua/bamos/plugins/statuscol.lua"
+        "lua/bamos/plugins/navigation.lua"
+        "lua/bamos/plugins/markdown.lua"
+        "lua/bamos/plugins/extras.lua"
         # ---- LSP per-server (after/lsp) ----
         "after/lsp/lua_ls.lua"
         "after/lsp/pyright.lua"

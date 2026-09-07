@@ -1,4 +1,4 @@
--- Tiện ích dùng chung (port từ lua/utils.lua của jdhao/nvim-config).
+-- Tiện ích dùng chung (không phụ thuộc plugin — native Lua/API).
 local fn = vim.fn
 
 local M = {}
@@ -10,7 +10,7 @@ function M.executable(name)
   return fn.executable(name) > 0
 end
 
---- Kiểm tra feature của Nvim, vd "nvim-0.11", "unix"
+--- Kiểm tra feature của Nvim, vd "nvim-0.12", "unix"
 function M.has(feat)
   return fn.has(feat) == 1
 end

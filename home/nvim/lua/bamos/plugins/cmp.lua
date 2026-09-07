@@ -1,4 +1,4 @@
--- Completion: blink.cmp (mặc định của jdhao — thay nvim-cmp).
+-- Completion: blink.cmp (nhanh, gọn — thay toàn bộ stack nvim-cmp).
 -- Sources: LSP + snippets (friendly-snippets qua luasnip) + path + buffer.
 local blink = require("blink.cmp")
 

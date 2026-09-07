@@ -1,5 +1,8 @@
--- Treesitter + textobjects (port lua/config/treesitter*.lua của jdhao).
--- Grammar cài qua Nix (nvim-treesitter.withAllGrammars) → không tải lúc chạy.
+-- Treesitter: grammar cài qua Nix (nvim-treesitter.withAllGrammars) → không tải
+-- lúc chạy, không cần compiler. Text objects theo cú pháp (af/if, ac/ic, aa/ia…).
+--
+-- LƯU Ý nvim-treesitter bản mới: dùng module `nvim-treesitter` nếu có (main
+-- branch mới), fallback `configs.setup` cho bản cũ — tương thích cả hai.
 local ok, ts = pcall(require, "nvim-treesitter")
 if ok and ts.setup then
   ts.setup({
@@ -14,8 +17,8 @@ else
   })
 end
 
--- Text objects theo cú pháp: af/if (function), ac/ic (class), al/il (loop),
--- ab/ib (block), aa/ia (argument), at/it (conditional)...
+-- Text objects theo cú pháp: af/if (function), ac/ic (class), aa/ia (argument),
+-- ab/ib (block), al/il (loop), at/it (conditional)…
 require("nvim-treesitter-textobjects").setup({
   select = {
     enable = true,

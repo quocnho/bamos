@@ -1,4 +1,5 @@
--- Git: gitsigns + fugitive + diffview + gitlinker (port lua/config/* của jdhao).
+-- Git: gitsigns (dấu thay đổi) + fugitive (:Git) + lazygit qua snacks (<space>gg).
+-- UI diff/log nâng cao cứ dùng lazygit — gọn hơn diffview.
 
 -- ===== Gitsigns: dấu thay đổi bên lề + keymaps =====
 require("gitsigns").setup {
@@ -24,24 +25,11 @@ require("gitsigns").setup {
   end,
 }
 
--- ===== Fugitive: git trong nvim =====
+-- ===== Fugitive: git nhanh trong nvim (:Git) =====
 local map = vim.keymap.set
 map("n", "<space>gv", "<cmd>Git<CR>", { desc = "git status (fugitive)" })
 map("n", "<space>gd", "<cmd>Gvdiffsplit<CR>", { desc = "git diff split" })
 map("n", "<space>gl", "<cmd>Gclog<CR>", { desc = "git log" })
 map("n", "<space>gb", "<cmd>Git blame<CR>", { desc = "git blame" })
-
--- ===== Diffview: UI diff/log đẹp =====
-require("diffview").setup {}
-map("n", "<space>gD", "<cmd>DiffviewOpen<CR>", { desc = "diffview open" })
-map("n", "<space>gL", "<cmd>DiffviewFileHistory<CR>", { desc = "diffview file history" })
-map("n", "<space>gX", "<cmd>DiffviewClose<CR>", { desc = "diffview close" })
-
--- ===== Gitlinker: copy link file/dòng (github/gitlab) =====
-require("gitlinker").setup {
-  callbacks = {
-    ["github.com"] = require("gitlinker.actions").get_github_type_url,
-  },
-}
-map("n", "<space>gy", "<cmd>GitLink<CR>", { desc = "copy github link" })
-map("x", "<space>gy", "<cmd>GitLink<CR>", { desc = "copy github link" })
+map("n", "<space>gy", "<cmd>GBrowse<CR>", { desc = "mở file/dòng trên GitHub" })
+map("x", "<space>gy", "<cmd>GBrowse<CR>", { desc = "mở selection trên GitHub" })

@@ -1,7 +1,6 @@
--- Keymaps (port từ lua/mappings.lua của jdhao — các phím autoload được viết
--- lại inline bằng Lua để không phụ thuộc file autoload/*.vim).
-local keymap = vim.keymap.set
-local uv = vim.uv
+-- Keymaps toàn cục (core). Keymaps theo plugin nằm ở lua/bamos/plugins/*.
+-- Mọi map có `desc` → which-key tự nhận diện (which-key v3).
+local keymap = vim.keymap
 
 -- ====================== Cơ bản ======================
 -- Gõ ";" thay ":" để vào command mode (tiết kiệm phím shift)
@@ -62,6 +61,13 @@ keymap.set("n", "<leader>cd", "<cmd>lcd %:p:h<cr><cmd>pwd<cr>", { desc = "change
 -- Esc thoát terminal
 keymap.set("t", "<Esc>", [[<c-\><c-n>]])
 
+-- Esc ở normal: đóng cửa sổ nổi nếu đang mở (an toàn hơn `fclose!` cũ)
+keymap.set("n", "<Esc>", function()
+  if vim.api.nvim_win_get_config(0).relative ~= "" then
+    vim.cmd("close!")
+  end
+end, { desc = "close floating window" })
+
 -- Toggle spell check
 keymap.set("n", "<F11>", "<cmd>set spell!<cr>", { desc = "toggle spell" })
 keymap.set("i", "<F11>", "<c-o><cmd>set spell!<cr>", { desc = "toggle spell" })
@@ -100,13 +106,9 @@ keymap.set("x", "<A-j>", ":m '>+1<CR>gv=gv", { desc = "move selection down" })
 -- Dán từ register không làm bẩn register
 keymap.set("x", "p", '"_c<Esc>p')
 
--- Chuyển buffer: gb/gB (đếm số)
-keymap.set("n", "gb", function()
-  vim.cmd("bnext")
-end, { desc = "next buffer" })
-keymap.set("n", "gB", function()
-  vim.cmd("bprevious")
-end, { desc = "previous buffer" })
+-- Chuyển buffer: gb/gB
+keymap.set("n", "gb", "<cmd>bnext<CR>", { desc = "next buffer" })
+keymap.set("n", "gB", "<cmd>bprevious<CR>", { desc = "previous buffer" })
 
 -- Điều hướng cửa sổ bằng phím mũi tên
 keymap.set("n", "<left>", "<c-w>h")
@@ -134,29 +136,8 @@ keymap.set("i", "<C-E>", "<END>")
 keymap.set("c", "<C-A>", "<HOME>")
 keymap.set("i", "<C-D>", "<DEL>")
 
--- Nhấn nháy vị trí con trỏ (tìm nhanh)
-keymap.set("n", "<leader>cb", function()
-  local cnt, blink_times = 0, 7
-  local timer = uv.new_timer()
-  if timer == nil then
-    return
-  end
-  timer:start(0, 100, vim.schedule_wrap(function()
-    vim.cmd("set cursorcolumn! | set cursorline!")
-    cnt = cnt + 1
-    if cnt == blink_times then
-      timer:close()
-    end
-  end))
-end, { desc = "blink cursor" })
-
--- Ghi macro bằng Q (q hiển thị thông báo)
+-- Ghi macro bằng Q (q remap để nhắc — tránh gõ nhầm mất thao tác)
 keymap.set("n", "q", function()
   vim.print("q đã remap sang Q — dùng Q để ghi macro!")
 end)
 keymap.set("n", "Q", "q", { desc = "record macro" })
-
--- Esc đóng cửa sổ nổi
-keymap.set("n", "<Esc>", function()
-  vim.cmd("fclose!")
-end, { desc = "close floating window" })

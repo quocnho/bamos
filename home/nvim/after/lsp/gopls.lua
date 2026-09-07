@@ -1,5 +1,5 @@
--- Gopls (Go) — port after/lsp/gopls.lua của jdhao
-vim.lsp.config("gopls", {
+-- Gopls (Go)
+return {
   settings = {
     gopls = {
       usePlaceholders = true,
@@ -9,4 +9,4 @@ vim.lsp.config("gopls", {
       },
     },
   },
-})
+}

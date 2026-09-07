@@ -1,4 +1,4 @@
--- Clangd (C/C++) — port after/lsp/clangd.lua của jdhao
-vim.lsp.config("clangd", {
+-- Clangd (C/C++): background index + clang-tidy + header insertion.
+return {
   cmd = { "clangd", "--background-index", "--clang-tidy", "--header-insertion=iwyu" },
-})
+}

@@ -1,7 +1,10 @@
--- Bufferline — thanh tab kiểu IDE (port lua/config/bufferline.lua của jdhao).
+-- Bufferline — thanh tab kiểu IDE (giống look LazyVim: icon file, vạch active,
+-- đóng bằng icon, hiện số diagnostic).
 require("bufferline").setup {
   options = {
     mode = "buffers",
+    -- Số thứ tự buffer trên tab (như IDE) — muốn bỏ: "none"
+    numbers = "ordinal",
     diagnostics = "nvim_lsp",
     diagnostics_indicator = function(_, _, diagnostics_dict, _)
       local result = ""
@@ -14,7 +17,15 @@ require("bufferline").setup {
     show_buffer_close_icons = true,
     show_close_icon = false,
     separator_style = "thin",
-    always_show_bufferline = false,
+    always_show_bufferline = true,
+    -- Không hiện buffer đặc biệt (dashboard, help…) trên tab bar
+    custom_filter = function(buf, buf_nums)
+      local ft = vim.bo[buf].filetype
+      if ft == "snacks_dashboard" or ft == "help" or vim.bo[buf].buftype ~= "" then
+        return false
+      end
+      return true
+    end,
   },
 }
 

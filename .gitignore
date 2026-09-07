@@ -3,3 +3,4 @@
 
 # Python bytecode
 __pycache__/
+/result*
