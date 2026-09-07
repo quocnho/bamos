@@ -6,9 +6,11 @@ local keymap = vim.keymap
 -- Gõ ";" thay ":" để vào command mode (tiết kiệm phím shift)
 keymap.set({ "n", "x" }, ";", ":")
 
--- LƯU Ý: giữ NGUYÊN các phím insert-mode chuẩn của vim (hữu ích cho dev):
---   <C-u> xoá về đầu dòng • <C-t>/<C-d> thụt lề • <C-a> lặp chèn • <C-e> chèn
---   ký tự dòng trên — không remap sang chức năng khác như cấu hình cũ.
+-- LƯU Ý phím insert-mode:
+--   • <C-u> xoá về đầu dòng · <C-t> thụt lề · <C-h>/<C-w> xoá lùi — giữ VIM
+--     CHUẨN (tốt cho code).
+--   • <C-a>/<C-e>/<C-b>/<C-f>/<C-d>/<C-k>/<C-y> + <M-b/f/d>… do module
+--     "insert kiểu Emacs" đảm nhiệm — xem lua/bamos/emacs.lua (tắt được).
 
 -- Paste không linewise lên/xuống dòng hiện tại
 keymap.set("n", "<leader>p", "m`o<ESC>p``", { desc = "paste below" })

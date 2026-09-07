@@ -213,7 +213,27 @@ register, `c`/`C`/`cc` xoá KHÔNG bẩn register (đã remap).
 - **Help**: `q` đóng cửa sổ help.
 - Go/JSON/YAML/Vim/Tex…: xem file tương ứng trong `after/ftplugin/`.
 
-### 4.5 Command hữu ích
+### 4.5 Chế độ insert kiểu Emacs (mặc định BẬT)
+
+Map các phím soạn thảo quen thuộc của Emacs ngay trong insert mode (file
+`lua/bamos/emacs.lua`):
+
+| Phím                                  | Hành động                      | Ghi chú so với vim mặc định                |
+| ------------------------------------- | ------------------------------ | ------------------------------------------ |
+| `<C-b>` / `<C-f>`                     | sang trái / phải 1 ký tự       | (vim: cuộn doc completion)                 |
+| `<C-a>` / `<C-e>`                     | đầu / cuối dòng                | (vim: lặp chèn / chèn ký tự dòng trên)     |
+| `<C-d>`                               | xoá ký tự phía trước           | (vim: thụt lề trái — dùng Backspace thay)  |
+| `<C-k>`                               | xoá (kill) tới cuối dòng       | (vim: digraph — gõ unicode bằng `<C-v>u…`) |
+| `<C-y>`                               | dán (yank) lại vừa kill        | (vim: chèn ký tự dòng trên)                |
+| `<M-b>` / `<M-f>` (+`<M-Left/Right>`) | lùi / tới theo từ              |                                            |
+| `<M-d>`                               | xoá hết từ phía trước          |                                            |
+| `<C-h>` / `<C-w>` / `<C-u>` / `<C-t>` | giữ NGUYÊN vim (vốn đã hợp lý) |                                            |
+
+C-p/C-n trong insert dành cho **completion** (blink) — khi menu mở mới có tác dụng.
+Muốn tắt hẳn emacs-mode: thêm `vim.g.bamos_emacs_insert = false` trong
+`lua/bamos/globals.lua`.
+
+### 4.6 Command hữu ích
 
 | Lệnh                                      | Công dụng                    |
 | ----------------------------------------- | ---------------------------- |

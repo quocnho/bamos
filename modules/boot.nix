@@ -19,7 +19,7 @@ in
         "zen"
         "latest"
       ];
-      default = "default";
+      default = "latest";
       description = ''
         Kernel cho máy. So sánh chi tiết ở phần config bên dưới.
         - "default": kernel mặc định nixpkgs (6.18) — ổn định, tiết kiệm pin.

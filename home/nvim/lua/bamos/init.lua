@@ -17,6 +17,8 @@ vim.loader.enable()
 require("bamos.globals")
 require("bamos.options")
 require("bamos.keymaps")
+-- Chế độ gõ insert kiểu Emacs (tắt bằng vim.g.bamos_emacs_insert = false)
+require("bamos.emacs")
 require("bamos.autocmds")
 -- Fcitx5/Unikey: tự tắt bộ gõ khi ra khỏi insert / vào command-line
 -- (chỉ chạy khi có fcitx5-remote — xem đầu file ime.lua)
@@ -27,26 +29,26 @@ require("bamos.ime")
 require("bamos.plugins.icons")
 
 for _, mod in ipairs({
-  "which-key",
-  "bufferline",
-  "lualine",
-  "snacks",
-  "cmp",
-  "treesitter",
-  "picker",
-  "explorer",
-  "git",
-  "editor",
-  "folding",
-  "statuscol",
-  "navigation",
-  "markdown",
-  "terminal",
-  "notes",
-  "todo",
-  "extras",
+    "which-key",
+    "bufferline",
+    "lualine",
+    "snacks",
+    "cmp",
+    "treesitter",
+    "picker",
+    "explorer",
+    "git",
+    "editor",
+    "folding",
+    "statuscol",
+    "navigation",
+    "markdown",
+    "terminal",
+    "notes",
+    "todo",
+    "extras",
 }) do
-  require("bamos.plugins." .. mod)
+    require("bamos.plugins." .. mod)
 end
 
 require("bamos.diagnostic")

@@ -55,6 +55,11 @@
 
   my.power.enable = true; # s2idle + TLP + Battery Care 80%
 
+  # Bootloader: bỏ đếm ngược 5s mặc định của systemd-boot (~4.5s/lần boot chỉ để
+  # chờ menu — đo bằng systemd-analyze, không liên quan kernel). Muốn hiện menu
+  # chọn generation/kernel cũ: giữ phím SPACE ngay khi logo boot xuất hiện.
+  boot.loader.timeout = 0;
+
   # Kernel ZEN (7.1) — ưu tiên phản hồi nhanh/mượt khi đa nhiệm + OBS/stream
   # (so sánh zen vs default vs latest: modules/boot.nix). Đổi về "default"
   # nếu muốn ưu tiên pin/ổn định. Muốn thử bản khác: `bam boot` → chọn ở boot menu.

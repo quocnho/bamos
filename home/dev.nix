@@ -213,6 +213,7 @@ in
         "lua/bamos/autocmds.lua"
         "lua/bamos/ime.lua"
         "lua/bamos/keymaps.lua"
+        "lua/bamos/emacs.lua"
         "lua/bamos/diagnostic.lua"
         "lua/bamos/lsp.lua"
         "lua/bamos/theme.lua"
