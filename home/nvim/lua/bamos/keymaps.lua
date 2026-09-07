@@ -25,13 +25,13 @@ keymap.set("n", [[\x]], "<cmd>windo lclose <bar> cclose <cr>", { silent = true, 
 -- Xoá buffer (giữ cửa sổ); xoá các buffer khác
 keymap.set("n", [[\db]], "<cmd>bprevious <bar> bdelete #<cr>", { silent = true, desc = "delete buffer" })
 keymap.set("n", [[\dB]], function()
-  local buf_ids = vim.api.nvim_list_bufs()
-  local cur_buf = vim.api.nvim_win_get_buf(0)
-  for _, buf_id in ipairs(buf_ids) do
-    if vim.api.nvim_get_option_value("buflisted", { buf = buf_id }) and buf_id ~= cur_buf then
-      vim.api.nvim_buf_delete(buf_id, { force = true })
+    local buf_ids = vim.api.nvim_list_bufs()
+    local cur_buf = vim.api.nvim_win_get_buf(0)
+    for _, buf_id in ipairs(buf_ids) do
+        if vim.api.nvim_get_option_value("buflisted", { buf = buf_id }) and buf_id ~= cur_buf then
+            vim.api.nvim_buf_delete(buf_id, { force = true })
+        end
     end
-  end
 end, { desc = "delete other buffers" })
 
 keymap.set("n", [[\dt]], "<cmd>tabclose<CR>", { silent = true, desc = "delete tab" })
@@ -63,9 +63,9 @@ keymap.set("n", "<leader>cd", "<cmd>lcd %:p:h<cr><cmd>pwd<cr>", { desc = "change
 
 -- Esc ở normal: đóng cửa sổ nổi nếu đang mở (an toàn hơn `fclose!` cũ)
 keymap.set("n", "<Esc>", function()
-  if vim.api.nvim_win_get_config(0).relative ~= "" then
-    vim.cmd("close!")
-  end
+    if vim.api.nvim_win_get_config(0).relative ~= "" then
+        vim.cmd("close!")
+    end
 end, { desc = "close floating window" })
 
 -- Toggle spell check
@@ -84,21 +84,21 @@ keymap.set("n", "<leader><space>", "<cmd>StripTrailingWhitespace<cr>", { desc = 
 
 -- Toggle cursor column highlight
 keymap.set("n", "<leader>cl", function()
-  vim.opt.cursorcolumn = not vim.opt.cursorcolumn:get()
+    vim.opt.cursorcolumn = not vim.opt.cursorcolumn:get()
 end, { desc = "toggle cursor column" })
 
 -- Di chuyển dòng/khối lên xuống
 keymap.set("n", "<A-k>", function()
-  if vim.fn.line(".") == 1 then
-    return
-  end
-  vim.cmd("normal! ddP")
+    if vim.fn.line(".") == 1 then
+        return
+    end
+    vim.cmd("normal! ddP")
 end, { desc = "move line up" })
 keymap.set("n", "<A-j>", function()
-  if vim.fn.line(".") == vim.fn.line("$") then
-    return
-  end
-  vim.cmd("normal! ddp")
+    if vim.fn.line(".") == vim.fn.line("$") then
+        return
+    end
+    vim.cmd("normal! ddp")
 end, { desc = "move line down" })
 keymap.set("x", "<A-k>", ":m '<-2<CR>gv=gv", { desc = "move selection up" })
 keymap.set("x", "<A-j>", ":m '>+1<CR>gv=gv", { desc = "move selection down" })
@@ -118,13 +118,13 @@ keymap.set("n", "<Down>", "<C-W>j")
 
 -- J không nhảy con trỏ
 keymap.set("n", "J", function()
-  vim.cmd("normal! mzJ`z")
-  vim.cmd("delmarks z")
+    vim.cmd("normal! mzJ`z")
+    vim.cmd("delmarks z")
 end, { desc = "join lines (keep cursor)" })
 
 -- Tách undo unit theo dấu câu
 for _, ch in ipairs({ ",", ".", "!", "?", ";", ":" }) do
-  keymap.set("i", ch, ch .. "<c-g>u")
+    keymap.set("i", ch, ch .. "<c-g>u")
 end
 
 -- Chèn dấu ";" cuối dòng
@@ -133,6 +133,13 @@ keymap.set("i", "<A-;>", "<Esc>miA;<Esc>`ii")
 -- Điều hướng trong insert giữ mặc định; command-line map Home/End:
 keymap.set("c", "<C-A>", "<HOME>")
 keymap.set("c", "<C-E>", "<END>")
+
+-- Scroll wheel (tham khảo Nv/appelgriebsch): tắt cuộn NGANG; Shift+cuộn dọc
+-- chuyển thành cuộn ngang — tránh vô tình cuộn ngang khi gõ phím cuộn.
+keymap.set("n", "<ScrollWheelRight>", "<Nop>")
+keymap.set("n", "<ScrollWheelLeft>", "<Nop>")
+keymap.set("n", "<S-ScrollWheelUp>", "<ScrollWheelRight>")
+keymap.set("n", "<S-ScrollWheelDown>", "<ScrollWheelLeft>")
 
 -- Ghi macro: q mặc định (vim chuẩn); Q lặp lại macro vừa ghi ở thanh ghi q
 -- (không chặn q như cấu hình cũ — q còn dùng đóng cửa sổ quickfix/help)
