@@ -30,6 +30,31 @@
   ...
 }:
 
+let
+  # Plugin jellydn chưa có trong nixpkgs → pin trực tiếp GitHub (reproducible:
+  # cố định rev + sha256, không phụ thuộc trạng thái remote lúc rebuild).
+  # Muốn nâng cấp: đổi rev + chạy `nix-prefetch-url --unpack <archive-url>` lấy hash mới.
+  jellydnPlugins = {
+    my-note-nvim = pkgs.vimUtils.buildVimPlugin {
+      name = "my-note-nvim";
+      src = pkgs.fetchFromGitHub {
+        owner = "jellydn";
+        repo = "my-note.nvim";
+        rev = "bce15c38514df229eb446a6b6bef2fcbb1993e80";
+        sha256 = "1dl57hq833aaaxgc4iyn0b77zgrxmhidzj9xdgylnrhah3k7qdx5";
+      };
+    };
+    tiny-term-nvim = pkgs.vimUtils.buildVimPlugin {
+      name = "tiny-term-nvim";
+      src = pkgs.fetchFromGitHub {
+        owner = "jellydn";
+        repo = "tiny-term.nvim";
+        rev = "51224ee32fe0e88be1d5dd21afa8874ee7568180";
+        sha256 = "0j0qn9q9dzzjihk4fg9wkzbrxrjjwx3925h0rxldd1j5f7q95py0";
+      };
+    };
+  };
+in
 {
   # ==========================================================================
   #  NEOVIM — kiến trúc lua/bamos (xem comment đầu file)
@@ -90,12 +115,19 @@
       statuscol-nvim # cột số/sign gọn (click được)
       nvim-ufo # fold thông minh (LSP/treesitter)
       promise-async # dependency của nvim-ufo
-      nvim-tree-lua # file explorer (sidebar)
+      oil-nvim # file explorer (sửa filesystem như buffer — LazyVim/tiny-nvim style)
+      # nvim-tree-lua # nếu thích sidebar kiểu cũ (xem lua/bamos/plugins/explorer.lua)
       mini-icons # icon file (mock nvim-web-devicons — nhẹ hơn)
       fidget-nvim # tiến trình LSP
       nvim-lightbulb # gợi ý code action
       nvim-bqf # quickfix đẹp
       vim-illuminate # highlight từ cùng tên
+      todo-comments-nvim # highlight + tìm TODO/FIXME (hỗ trợ developer)
+
+      # ---- Plugin jellydn (chưa có trong nixpkgs — pin rev/hash ở đầu file) ----
+      nui-nvim # UI component library (dependency của my-note)
+      jellydnPlugins.my-note-nvim # ghi chú nhanh trong cửa sổ nổi (`,n`)
+      jellydnPlugins.tiny-term-nvim # terminal toggle float/split — 0 dependency
 
       # ---- Colorschemes (mặc định tokyonight — đổi bằng `,ut` / :BamosTheme) ----
       tokyonight-nvim
@@ -111,7 +143,8 @@
       # glance-nvim            # peek definition/references
       # gitlinker-nvim         # copy link github
       # dropbar-nvim           # breadcrumb winbar
-      # oil-nvim               # explorer kiểu oil (nhẹ hơn nvim-tree)
+      # nvim-tree-lua          # sidebar explorer (thay oil — xem explorer.lua)
+      # flash-nvim             # nhảy/tìm nhanh (thay hop — cần đổi keymap do xung đột s)
     ];
 
     # Entry: nạp lua/bamos/* (cấu trúc mới — xem lua/bamos/init.lua)
@@ -178,6 +211,7 @@
         "lua/bamos/globals.lua"
         "lua/bamos/options.lua"
         "lua/bamos/autocmds.lua"
+        "lua/bamos/ime.lua"
         "lua/bamos/keymaps.lua"
         "lua/bamos/diagnostic.lua"
         "lua/bamos/lsp.lua"
@@ -198,6 +232,9 @@
         "lua/bamos/plugins/statuscol.lua"
         "lua/bamos/plugins/navigation.lua"
         "lua/bamos/plugins/markdown.lua"
+        "lua/bamos/plugins/terminal.lua"
+        "lua/bamos/plugins/notes.lua"
+        "lua/bamos/plugins/todo.lua"
         "lua/bamos/plugins/extras.lua"
         # ---- LSP per-server (after/lsp) ----
         "after/lsp/lua_ls.lua"

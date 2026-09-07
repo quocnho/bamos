@@ -6,9 +6,9 @@ local keymap = vim.keymap
 -- Gõ ";" thay ":" để vào command mode (tiết kiệm phím shift)
 keymap.set({ "n", "x" }, ";", ":")
 
--- Chuyển chữ dưới con trỏ: UPPER / Title
-keymap.set("i", "<c-u>", "<Esc>viwUea")
-keymap.set("i", "<c-t>", "<Esc>b~lea")
+-- LƯU Ý: giữ NGUYÊN các phím insert-mode chuẩn của vim (hữu ích cho dev):
+--   <C-u> xoá về đầu dòng • <C-t>/<C-d> thụt lề • <C-a> lặp chèn • <C-e> chèn
+--   ký tự dòng trên — không remap sang chức năng khác như cấu hình cũ.
 
 -- Paste không linewise lên/xuống dòng hiện tại
 keymap.set("n", "<leader>p", "m`o<ESC>p``", { desc = "paste below" })
@@ -58,8 +58,8 @@ keymap.set("n", "<leader>v", "`[V`]", { desc = "reselect pasted" })
 -- Đổi cwd theo file hiện tại
 keymap.set("n", "<leader>cd", "<cmd>lcd %:p:h<cr><cmd>pwd<cr>", { desc = "change cwd to file dir" })
 
--- Esc thoát terminal
-keymap.set("t", "<Esc>", [[<c-\><c-n>]])
+-- ESC trong terminal: để tiny-term lo (double-Esc mới thoát, single Esc truyền
+-- qua — xem plugins/terminal.lua).
 
 -- Esc ở normal: đóng cửa sổ nổi nếu đang mở (an toàn hơn `fclose!` cũ)
 keymap.set("n", "<Esc>", function()
@@ -103,8 +103,8 @@ end, { desc = "move line down" })
 keymap.set("x", "<A-k>", ":m '<-2<CR>gv=gv", { desc = "move selection up" })
 keymap.set("x", "<A-j>", ":m '>+1<CR>gv=gv", { desc = "move selection down" })
 
--- Dán từ register không làm bẩn register
-keymap.set("x", "p", '"_c<Esc>p')
+-- Dán từ register không làm bẩn register — KHÔNG map x-p ở đây nữa:
+-- visual p/P do yanky đảm nhiệm (plugins/editor.lua, xử lý ring tốt hơn).
 
 -- Chuyển buffer: gb/gB
 keymap.set("n", "gb", "<cmd>bnext<CR>", { desc = "next buffer" })
@@ -130,14 +130,10 @@ end
 -- Chèn dấu ";" cuối dòng
 keymap.set("i", "<A-;>", "<Esc>miA;<Esc>`ii")
 
--- Điều hướng trong insert/command
-keymap.set("i", "<C-A>", "<HOME>")
-keymap.set("i", "<C-E>", "<END>")
+-- Điều hướng trong insert giữ mặc định; command-line map Home/End:
 keymap.set("c", "<C-A>", "<HOME>")
-keymap.set("i", "<C-D>", "<DEL>")
+keymap.set("c", "<C-E>", "<END>")
 
--- Ghi macro bằng Q (q remap để nhắc — tránh gõ nhầm mất thao tác)
-keymap.set("n", "q", function()
-  vim.print("q đã remap sang Q — dùng Q để ghi macro!")
-end)
-keymap.set("n", "Q", "q", { desc = "record macro" })
+-- Ghi macro: q mặc định (vim chuẩn); Q lặp lại macro vừa ghi ở thanh ghi q
+-- (không chặn q như cấu hình cũ — q còn dùng đóng cửa sổ quickfix/help)
+keymap.set("n", "Q", "@q", { desc = "lặp macro q" })

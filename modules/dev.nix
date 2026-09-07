@@ -42,6 +42,26 @@
       distrobox
       podman-compose
       mesa-demos # glxinfo... (kiểm tra GPU)
+
+      # ---- Toolchain build (C/C++/CMake/node-gyp...) ----
+      # NixOS reproducible: hệ thống KHÔNG phơi bày compiler sẵn — máy dev cần
+      # build native (node-gyp, pip wheel, cmake project, cấu trúc C…) nên cài
+      # sẵn bộ toolchain. LƯU Ý glibc (runtime + headers) ĐÃ có qua /nix/store,
+      # gcc wrapper tự trỏ tới — không cần thêm glibc.dev vào systemPackages.
+      gcc # C/C++ (gcc + g++), kèm header libc chuẩn
+      binutils # ld, as, strip, ar...
+      gnumake # make
+      pkg-config # tìm thư viện/header khi build (CFLAGS/LDFLAGS)
+      cmake # build system phổ biến
+      ninja # build nhanh (cmake -G Ninja)
+      autoconf # build từ source (./configure) — autotools
+      automake
+      libtool
+      m4
+      patch
+      file # nhiều script ./configure cần xác định loại file
+      # clang # bỏ comment nếu build project cần clang (vd Rust bindgen, Zig...)
+      # openssl # bỏ comment nếu build native cần thư viện openssl (headers đi kèm dev)
     ];
 
     # direnv: nạp env theo thư mục (dev chạy devenv/nix-direnv).

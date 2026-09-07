@@ -1,7 +1,12 @@
-import json, os, pathlib, shutil, sys
+import json
+import os
+import pathlib
+import shutil
+import sys
 
 assets = pathlib.Path(sys.argv[1])
 home = pathlib.Path.home()
+
 
 def jsonc_loads(text):
     # Parse JSONC: bỏ comment // bên ngoài chuỗi + dấu phẩy thừa
@@ -10,26 +15,31 @@ def jsonc_loads(text):
         c = text[i]
         if in_str:
             out.append(c)
-            if c == '\\':
-                out.append(text[i + 1]); i += 2; continue
+            if c == "\\":
+                out.append(text[i + 1])
+                i += 2
+                continue
             if c == '"':
                 in_str = False
         else:
             if c == '"':
                 if pending_comma:
-                    out.append(','); pending_comma = False
-                in_str = True; out.append(c)
-            elif c == '/' and i + 1 < len(text) and text[i + 1] == '/':
+                    out.append(",")
+                    pending_comma = False
+                in_str = True
+                out.append(c)
+            elif c == "/" and i + 1 < len(text) and text[i + 1] == "/":
                 if pending_comma:
-                    out.append(','); pending_comma = False
-                while i < len(text) and text[i] != '\n':
+                    out.append(",")
+                    pending_comma = False
+                while i < len(text) and text[i] != "\n":
                     i += 1
                 continue
-            elif c == ',':
+            elif c == ",":
                 pending_comma = True
-            elif c in ' \t\r\n':
+            elif c in " \t\r\n":
                 out.append(c)
-            elif c in '}]':
+            elif c in "}]":
                 if not pending_comma:
                     out.append(c)
                 else:
@@ -37,12 +47,15 @@ def jsonc_loads(text):
                     out.append(c)
             else:
                 if pending_comma:
-                    out.append(','); pending_comma = False
+                    out.append(",")
+                    pending_comma = False
                 out.append(c)
         i += 1
     return json.loads("".join(out))
 
+
 settings_path = home / ".config/zed/settings.json"
+(home / ".config/zed").mkdir(parents=True, exist_ok=True)
 with (assets / "settings.json").open() as f:
     defaults = jsonc_loads(f.read().replace("__HOME__", str(home)))
 
@@ -57,6 +70,17 @@ if settings_path.exists():
 merged.update({k: v for k, v in defaults.items() if k != "agent"})
 settings_path.write_text(json.dumps(merged, indent=2) + "\n")
 
+# Đồng bộ keymap.json (assets là nguồn chuẩn — ghi đè declarative để keymap
+# luôn khớp repo; muốn thêm phím riêng thì sửa assets/zed/keymap.json).
+# Zed đọc keymap.json dạng JSONC — giữ nguyên text (comment), không nén.
+keymap_src = assets / "keymap.json"
+keymap_path = home / ".config/zed/keymap.json"
+if keymap_src.exists():
+    content = keymap_src.read_text().replace("__HOME__", str(home))
+    if not keymap_path.exists() or keymap_path.read_text() != content:
+        keymap_path.write_text(content)
+
+
 # Đồng bộ skills (assets là nguồn chuẩn)
 def make_writable(path):
     for root, dirs, files in os.walk(path, topdown=False):
@@ -64,6 +88,7 @@ def make_writable(path):
             os.chmod(os.path.join(root, f), 0o644)
         os.chmod(root, 0o755)
     os.chmod(path, 0o755)
+
 
 skills_dst = home / ".config/zed/skills"
 skills_dst.mkdir(parents=True, exist_ok=True)

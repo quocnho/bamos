@@ -111,7 +111,11 @@ sung cho `modules/` (cấp hệ thống). Home-manager được cài như **NixO
   `lua/bamos/` (core) + `lua/bamos/plugins/` (một file một plugin) + `after/` (LSP/ftplugin).
   Điều chỉnh cho NixOS + devenv: plugins qua Nix (pack native — không lazy.nvim),
   grammar treesitter qua Nix, LSP server tự bật theo PATH (`vim.lsp.enable`) — server
-  của dự án (devenv.nix) tự hoạt động sau `direnv allow`.
+  của dự án (devenv.nix) tự hoạt động sau `direnv allow`. Dev-support thêm từ
+  [jellydn/tiny-nvim](https://github.com/jellydn/tiny-nvim): `tiny-term.nvim`
+  (terminal toggle `<space>tt`/`<C-/>`), `my-note.nvim` (ghi chú nhanh `,n`),
+  `oil.nvim` (explorer `<space>s`/`<space>e`), `todo-comments.nvim` (`<space>T`);
+  plugin jellydn chưa có trong nixpkgs được pin rev + hash ở đầu `home/dev.nix`.
 - **Máy đích (cài từ ISO)**: `iso-cfg/flake.nix` tự áp home-manager cho **mọi user
   thường** (user do Calamares tạo — `home.username`/`homeDirectory` tự suy từ
   `users.users`) qua `bamos.homeModules.default`; thêm riêng cho máy trong

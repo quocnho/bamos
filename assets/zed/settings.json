@@ -1,62 +1,125 @@
 {
+// ==== Giao diện (BamOS: Inter UI + JetBrainsMono Nerd Font Mono buffer) ====
     "theme": "One Dark",
     "ui_font_size": 17,
     "buffer_font_size": 18,
     "ui_font_family": "Inter",
     "buffer_font_family": "JetBrainsMono Nerd Font Mono",
     "buffer_line_height": "comfortable",
-    "tab_size": 4,
-    "indent_guides": {
-        "enabled": true,
-    },
-    "format_on_save": "on",
-    "autosave": "on_focus_change",
-    "telemetry": {
-        "diagnostics": false,
-        "metrics": false,
-    },
     "agent_ui_font_size": 17,
     "agent_ui_font_family": "Inter",
     "agent_buffer_font_size": 17,
     "agent_buffer_font_family": "JetBrainsMono Nerd Font Mono",
 
+// ==== Soạn thảo ====
+    "tab_size": 4,
+    "indent_guides": {
+        "enabled": true,
+// Rainbow indent (giống mini.indentscope + snacks.indent trong nvim)
+        "coloring": "indent_aware"
+    },
+    "colorize_brackets": true,// tô cặp ngoặc (giống vim-matchup)
+    "format_on_save": "on",
+    "autosave": "on_focus_change",
+    "telemetry": {
+        "diagnostics": false,
+        "metrics": false
+    },
+
+// ==== Vim mode + which-key (đồng bộ với nvim BamOS) ====
+// Keymap chi tiết ở keymap.json (cùng prefix <space> với nvim).
+    "base_keymap": "VSCode",
+    "vim_mode": true,
+    "vim": {},
+    "which_key": {
+        "enabled": true,
+// Hơi ngắn hơn zed-101 (500ms) để phản hồi nhanh như nvim timeoutlen
+        "delay_ms": 400
+    },
+// Số dòng tương đối (giống nvim relativenumber)
+    "relative_line_numbers": "enabled",
+// Lề cuộn (giống nvim scrolloff=5 / sidescrolloff=8)
+    "vertical_scroll_margin": 5,
+    "horizontal_scroll_margin": 8,
+// Xác nhận khi thoát còn thay đổi chưa lưu (giống nvim confirm=true)
+    "confirm_quit": true,
+
+// ==== Tab bar / scrollbar (giống bufferline + không scrollbar rác) ====
+    "tab_bar": {
+        "show": true
+    },
+    "tabs": {
+        "file_icons": true,
+        "git_status": true,
+        "show_diagnostics": "errors"
+    },
+    "scrollbar": {
+        "show": "never"
+    },
+
+// ==== Git ====
+// Inline blame TẮT mặc định (như gitsigns current_line_blame=false),
+// bật/tắt bằng phím space g b.
+    "git": {
+        "inline_blame": {
+            "enabled": false
+        }
+    },
+
+// ==== Exclusions (khớp fd_opts/wildignore của nvim: bỏ node_modules...) ====
+    "file_scan_exclusions": [
+        "**/.git",
+        "**/.svn",
+        "**/.hg",
+        "**/.DS_Store",
+        "**/Thumbs.db",
+        "**/node_modules",
+        "**/__pycache__",
+        "**/dist",
+        "**/build",
+        "**/result"
+    ],
+
+// ==== MCP context servers (chạy qua npx — Node đã cài trên máy dev) ====
     "context_servers": {
         "fs": {
             "command": "npx",
             "args": [
                 "-y",
                 "@modelcontextprotocol/server-filesystem",
-                "__HOME__",
-            ],
+                "__HOME__"
+            ]
         },
         "context7": {
             "command": "npx",
-            "args": ["-y", "@upstash/context7-mcp"],
+            "args": ["-y", "@upstash/context7-mcp"]
         },
         "memory": {
             "command": "npx",
-            "args": ["-y", "@modelcontextprotocol/server-memory"],
+            "args": ["-y", "@modelcontextprotocol/server-memory"]
         },
         "fetch": {
             "command": "npx",
-            "args": ["-y", "@modelcontextprotocol/server-fetch"],
-        },
+            "args": ["-y", "@modelcontextprotocol/server-fetch"]
+        }
     },
 
+// ==== LSP ====
     "lsp": {
         "nil": {
             "binary": {
-                // nil cài qua systemPackages (modules/packages.nix) — dùng path tuyệt đối
-                // để chắc chắn Zed tìm thấy kể cả khi PATH của process bị tối giản.
-                "path": "/run/current-system/sw/bin/nil",
-            },
-        },
+// nil cài qua systemPackages (modules/dev.nix) — path tuyệt đối
+// để chắc chắn Zed tìm thấy kể cả khi PATH bị tối giản.
+                "path": "/run/current-system/sw/bin/nil"
+            }
+        }
     },
 
     "languages": {
         "Nix": {
-            // Chỉ dùng nil (không bật nixd) — nil đủ dùng, nhẹ và nhanh hơn.
-            "language_servers": ["nil", "!nixd"],
-        },
-    },
+// Chỉ dùng nil (không bật nixd) — nil đủ dùng, nhẹ và nhanh hơn.
+            "language_servers": ["nil", "!nixd"]
+        }
+    }
 }
+

@@ -8,8 +8,12 @@ require("nvim-autopairs").setup {
   map_c_h = true, -- <C-h> xoá cặp
 }
 
--- ===== Vim-sandwich: bọc/xoá cặp (cs/ds/ys) — giữ phím `s` =====
-map({ "n", "o" }, "s", "<Nop>", { desc = "s dành cho vim-sandwich" })
+-- ===== Vim-sandwich: bọc/xoá/thay cặp (sa/sd/sr) =====
+-- Plugin KHÔNG tự map phím — phải map tay. Giữ `s` đơn = substitute mặc định
+-- của vim (không cần Nop nữa — sa/sd/sr là map dài hơn, không xung đột).
+map({ "n", "x" }, "sa", "<Plug>(operator-sandwich-add)", { desc = "sandwich: thêm (wrap)" })
+map({ "n", "x" }, "sd", "<Plug>(operator-sandwich-delete)", { desc = "sandwich: xoá" })
+map({ "n", "x" }, "sr", "<Plug>(operator-sandwich-replace)", { desc = "sandwich: thay" })
 
 -- ===== Commentary: comment code (gc/gcc) =====
 map("n", "gcc", "<Plug>CommentaryLine", { desc = "comment line" })

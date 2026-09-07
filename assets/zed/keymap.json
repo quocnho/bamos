@@ -1,0 +1,266 @@
+[
+// ==========================================================================
+//  Zed Vim keymap — đồng bộ với cấu hình NVIM BamOS (lua/bamos/)
+//  Tham khảo: https://github.com/jellydn/zed-101-setup
+//
+//  Nguyên tắc:
+//   • Prefix <space> + NHÓM giống hệt nvim: f=tìm, g=git, c=LSP/code,
+//     t=terminal/ui, w=window, q=quit, a=AI agent, m=markdown...
+//   • Which-key (bật trong settings.json) tự hiện các phím tiếp theo.
+//   • Chỗ nào Zed chưa có tương đương (buffers picker, hop…) thì bỏ qua
+//     hoặc map sang hành động gần nhất — ghi chú rõ dưới từng nhóm.
+//   • KHÔNG dùng trailing comma (Zed + validator đều nuốt được chính xác).
+// ==========================================================================
+
+// ======================= 1) NORMAL + VISUAL (chung) =======================
+    {
+        "context": "Editor && (vim_mode == normal || vim_mode == visual) && !VimWaiting && !menu",
+        "bindings": {
+// ---- space f = tìm kiếm (nvim: fzf-lua <space>ff/fg/fr) ----
+            "space f f": "file_finder::Toggle",// nvim <space>ff: tìm file
+            "space f g": "pane::DeploySearch",// nvim <space>fg: live grep dự án
+            "space f r": "projects::OpenRecent",// nvim <space>fr: file gần đây
+            "space f n": "workspace::NewFile",// file mới
+            "space f p": "projects::OpenRecent",// alias: mở project gần đây
+
+// ---- space g = git (nvim: <space>g*) ----
+            "space g s": "git_panel::ToggleFocus",// nvim <space>gv: git status
+            "space g d": "git::Diff",// nvim <space>gd: git diff
+            "space g b": "editor::ToggleGitBlameInline",// nvim <space>gb: blame
+            "space g h d": "editor::ToggleSelectedDiffHunks",// nvim gitsigns hunk
+
+// ---- space a = AI agent (nvim dùng Zed/Antigravity cho AI) ----
+            "space a i": "assistant::InlineAssist",// hỏi AI ngay trong buffer
+            "space a c": "agent::ToggleFocus",// mở/đóng agent panel
+            "space a n": "agent::NewThread",// thread agent mới
+            "space a m": "agent::ToggleModelSelector"// chọn model
+
+// ---- space t = tiện ích ----
+// "space t t": "terminal_panel::ToggleFocus",  // nvim <space>tt
+// "space t i": "editor::ToggleInlayHints"       // nvim LspInlayHints
+        }
+    },
+
+// ======================= 2) NORMAL (chỉ normal mode) =======================
+    {
+        "context": "Editor && vim_mode == normal && !VimWaiting && !menu",
+        "bindings": {
+// ---- Điều hướng pane: Ctrl+hjkl (như nvim <c-w> + mũi tên) ----
+            "ctrl-h": "workspace::ActivatePaneLeft",
+            "ctrl-j": "workspace::ActivatePaneDown",
+            "ctrl-k": "workspace::ActivatePaneUp",
+            "ctrl-l": "workspace::ActivatePaneRight",
+            "ctrl-shift-h": "vim::ResizePaneLeft",
+            "ctrl-shift-j": "vim::ResizePaneDown",
+            "ctrl-shift-k": "vim::ResizePaneUp",
+            "ctrl-shift-l": "vim::ResizePaneRight",
+
+// ---- LSP (nvim: lsp.lua — gd / space rn / space ca) ----
+            "g d": "editor::GoToDefinition",// nvim gd
+            "g D": "editor::GoToDefinitionSplit",
+            "g i": "editor::GoToImplementation",
+            "g I": "editor::GoToImplementationSplit",
+            "g t": "editor::GoToTypeDefinition",
+            "g T": "editor::GoToTypeDefinitionSplit",
+            "g r": "editor::FindAllReferences",
+            "space c a": "editor::ToggleCodeActions",// nvim <space>ca
+            "space .": "editor::ToggleCodeActions",// nhanh: space .
+            "space c r": "editor::Rename",// nvim <space>rn
+            "space c f": "editor::Format",// format cả file (LSP)
+
+// ---- Terminal & inlay hints (nvim <space>t*) ----
+            "space t t": "terminal_panel::ToggleFocus",
+            "space t i": "editor::ToggleInlayHints",
+
+// ---- UI ----
+            "space u w": "editor::ToggleSoftWrap",// xuống dòng mềm
+            "space c z": "workspace::ToggleCenteredLayout",// zen layout
+
+// ---- Markdown preview (nvim render-markdown) ----
+            "space m p": "markdown::OpenPreview",
+            "space m P": "markdown::OpenPreviewToTheSide",
+
+// ---- Explorer & outline (nvim oil <space>s/<space>e • aerial <space>o) ----
+            "space s": "pane::RevealInProjectPanel",
+            "space e": "pane::RevealInProjectPanel",
+            "space o": "outline::Toggle",
+
+// ---- Diagnostics panel ----
+            "space x x": "diagnostics::Deploy",
+
+// ---- Diagnostic jumps (nvim ]d/[d; ]e/]w theo severity) ----
+            "] d": "editor::GoToDiagnostic",
+            "[ d": "editor::GoToPreviousDiagnostic",
+            "] e": ["editor::GoToDiagnostic", { "severity": "error" }],
+            "[ e": ["editor::GoToPreviousDiagnostic", { "severity": "error" }],
+            "] w": ["editor::GoToDiagnostic", { "severity": "warning" }],
+            "[ w": [
+                "editor::GoToPreviousDiagnostic",
+                { "severity": "warning" }
+            ],
+
+// ---- Git hunk (nvim: ]h/[h gitsigns) ----
+            "] h": "editor::GoToHunk",
+            "[ h": "editor::GoToPreviousHunk",
+
+// ---- Buffer/tab (nvim: bufferline, Tab/S-Tab, gb/gB) ----
+            "shift-h": "pane::ActivatePreviousItem",
+            "shift-l": "pane::ActivateNextItem",
+            "] b": "pane::ActivateNextItem",
+            "[ b": "pane::ActivatePreviousItem",
+            "space b b": "pane::ActivatePreviousItem",
+            "space b d": "pane::CloseActiveItem",// nvim \db
+            "space b o": "pane::CloseOtherItems",// nvim \dB
+
+// ---- Lưu / thoát (nvim: ,w update • ,q x • ,Q qa!) ----
+            "ctrl-s": "workspace::Save",
+            "ctrl-q": "pane::CloseActiveItem",
+            "space q q": "workspace::CloseWindow",
+
+// ---- Tìm kiếm nhanh ----
+// LƯU Ý: không map "space s b" — `space s` đã là explorer leaf,
+// thêm con gây delay như nvim. Tìm trong buffer dùng "/" gốc.
+            "space space": "file_finder::Toggle",
+            "space /": "pane::DeploySearch",
+
+// ---- Di chuyển dòng (nvim: <A-j>/<A-k>) ----
+            "alt-j": "editor::MoveLineDown",
+            "alt-k": "editor::MoveLineUp",
+
+// ---- Window management (nvim: <space> w* ) ----
+            "space w w": "workspace::ActivatePreviousPane",
+            "space w -": "pane::SplitDown",
+            "space w |": "pane::SplitRight",
+            "space w d": "pane::CloseActiveItem"
+        }
+    },
+
+// ======================= 3) EMPTY PANE (chưa mở editor) =======================
+    {
+        "context": "EmptyPane || SharedScreen",
+        "bindings": {
+            "space space": "file_finder::Toggle",
+            "space f p": "projects::OpenRecent",
+            "space a c": "agent::ToggleFocus",
+            "space g s": "git_panel::ToggleFocus"
+        }
+    },
+
+// ======================= 4) VISUAL: comment + AI =======================
+    {
+        "context": "Editor && vim_mode == visual && !VimWaiting && !menu",
+        "bindings": {
+            "g c": "editor::ToggleComments",// nvim gc/gcc (vim-commentary)
+            "space a e": [
+                "assistant::InlineAssist",
+                {
+                    "prompt": "Explain the selected code. Cover purpose, control flow, and non-obvious behavior."
+                }
+            ],
+            "space a f": [
+                "assistant::InlineAssist",
+                {
+                    "prompt": "Fix bugs and issues in the selected code. Identify root causes, not just symptoms."
+                }
+            ],
+            "space a t": [
+                "assistant::InlineAssist",
+                {
+                    "prompt": "Generate focused unit tests for the selected code. Use the project's test framework and conventions."
+                }
+            ],
+            "space a r": [
+                "assistant::InlineAssist",
+                {
+                    "prompt": "Refactor the selected code for clarity and maintainability without changing external behavior."
+                }
+            ]
+        }
+    },
+
+// ======================= 5) INSERT: thoát nhanh jk (như nvim) =======================
+    {
+        "context": "Editor && vim_mode == insert && !menu",
+        "bindings": {
+            "j k": "vim::NormalBefore"// nvim: "jk" thoát insert
+        }
+    },
+
+// ======================= 6) OPERATOR c: gõ nhanh (theo zed-101) =======================
+    {
+        "context": "Editor && vim_operator == c",
+        "bindings": {
+            "c": "vim::CurrentLine",// cc = đổi cả dòng
+            "r": "editor::Rename",// cr = rename
+            "a": "editor::ToggleCodeActions"// ca = code action (kiểu VSCode)
+        }
+    },
+
+// ======================= 7) TERMINAL =======================
+    {
+        "context": "Workspace",
+        "bindings": {
+            "ctrl-\\": "terminal_panel::ToggleFocus"// nvim <space>tt / <C-/>
+        }
+    },
+    {
+        "context": "Terminal",
+        "bindings": {
+            "ctrl-h": "workspace::ActivatePaneLeft",
+            "ctrl-j": "workspace::ActivatePaneDown",
+            "ctrl-k": "workspace::ActivatePaneUp",
+            "ctrl-l": "workspace::ActivatePaneRight"
+        }
+    },
+
+// ======================= 8) PROJECT PANEL (như nvim-tree/oil) =======================
+    {
+        "context": "ProjectPanel && not_editing",
+        "bindings": {
+            "a": "project_panel::NewFile",
+            "A": "project_panel::NewDirectory",
+            "r": "project_panel::Rename",
+            "d": "project_panel::Delete",
+            "x": "project_panel::Cut",
+            "c": "project_panel::Copy",
+            "p": "project_panel::Paste",
+            "q": "workspace::ToggleRightDock",
+            "space e": "workspace::ToggleRightDock",
+            "ctrl-h": "workspace::ActivatePaneLeft",
+            "ctrl-j": "workspace::ActivatePaneDown",
+            "ctrl-k": "workspace::ActivatePaneUp",
+            "ctrl-l": "workspace::ActivatePaneRight"
+        }
+    },
+
+// ======================= 9) DOCK (panel phải) =======================
+    {
+        "context": "Dock",
+        "bindings": {
+            "ctrl-w h": "workspace::ActivatePaneLeft",
+            "ctrl-w j": "workspace::ActivatePaneDown",
+            "ctrl-w k": "workspace::ActivatePaneUp",
+            "ctrl-w l": "workspace::ActivatePaneRight"
+        }
+    },
+
+// ======================= 10) SNEAK (như hop.nvim trong nvim) =======================
+    {
+        "context": "vim_mode == normal || vim_mode == visual",
+        "bindings": {
+            "s": ["vim::PushSneak", {}],// nhảy 2 ký tự (nvim <space>hh hop)
+            "S": ["vim::PushSneakBackward", {}]
+        }
+    },
+
+// ======================= 11) WHICH-KEY: giải phóng <space> =======================
+// Zed mặc định <space> = vim::WrappingRight (sang phải) — vô hiệu để dùng
+// làm leader; which-key (settings.json) hiện group sau delay 400ms.
+    {
+        "context": "(VimControl && !menu)",
+        "bindings": {
+            "space": null
+        }
+    }
+]
+

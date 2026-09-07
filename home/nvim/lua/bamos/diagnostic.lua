@@ -38,6 +38,15 @@ vim.keymap.set("n", "<space>qb", function()
   set_qflist(0)
 end, { desc = "buffer diagnostics → qf" })
 
+-- Nhảy giữa các diagnostic (chuẩn LazyVim/dev): ]d/[d
+-- (không xung đột: ]c/[c = treesitter class, ]h/[h = gitsigns hunk)
+vim.keymap.set("n", "]d", function()
+  vim.diagnostic.jump({ count = 1, float = true })
+end, { desc = "diagnostic kế tiếp" })
+vim.keymap.set("n", "[d", function()
+  vim.diagnostic.jump({ count = -1, float = true })
+end, { desc = "diagnostic trước" })
+
 -- Tự hiện float diagnostic khi đứng yên trên dòng lỗi
 api.nvim_create_autocmd("CursorHold", {
   pattern = "*",

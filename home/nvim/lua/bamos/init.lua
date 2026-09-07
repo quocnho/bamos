@@ -18,6 +18,9 @@ require("bamos.globals")
 require("bamos.options")
 require("bamos.keymaps")
 require("bamos.autocmds")
+-- Fcitx5/Unikey: tự tắt bộ gõ khi ra khỏi insert / vào command-line
+-- (chỉ chạy khi có fcitx5-remote — xem đầu file ime.lua)
+require("bamos.ime")
 
 -- Icon file (mini.icons) phải nạp TRƯỚC bufferline/lualine/snacks… vì chúng
 -- require("nvim-web-devicons") lúc load (mini.icons mock sẵn module này).
@@ -38,6 +41,9 @@ for _, mod in ipairs({
   "statuscol",
   "navigation",
   "markdown",
+  "terminal",
+  "notes",
+  "todo",
   "extras",
 }) do
   require("bamos.plugins." .. mod)

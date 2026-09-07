@@ -17,8 +17,10 @@ require("gitsigns").setup {
       opts.buffer = bufnr
       vim.keymap.set(mode, l, r, opts)
     end
-    map("n", "]c", "&diff ? ']c' : '<cmd>Gitsigns next_hunk<CR>'", { expr = true })
-    map("n", "[c", "&diff ? '[c' : '<cmd>Gitsigns prev_hunk<CR>'", { expr = true })
+    -- ]h/[h = hunk (chuẩn LazyVim); ]c/[c để dành cho treesitter-textobjects
+    -- (nhảy class) — xem plugins/treesitter.lua. Trong diff vẫn dùng ]c/[c gốc.
+    map("n", "]h", "&diff ? ']c' : '<cmd>Gitsigns next_hunk<CR>'", { expr = true })
+    map("n", "[h", "&diff ? '[c' : '<cmd>Gitsigns prev_hunk<CR>'", { expr = true })
     map("n", "<leader>gp", "<cmd>Gitsigns preview_hunk<CR>", { desc = "preview hunk" })
     map("n", "<leader>gr", "<cmd>Gitsigns reset_hunk<CR>", { desc = "reset hunk" })
     map("n", "<leader>gs", "<cmd>Gitsigns stage_hunk<CR>", { desc = "stage hunk" })
