@@ -68,20 +68,9 @@
     # LƯU Ý: từ giờ direnv do HOME-MANAGER quản lý (home/dev.nix —
     # programs.direnv) để cấu hình nằm đúng tầng user, tránh trùng lặp.
 
-    # ==== Zed editor: font lớn + cấu hình chuyên nghiệp (declarative) ====
-    # File settings nằm ở assets/zed/settings.json — sửa ở đó rồi rebuild.
-    # User service chạy mỗi lần đăng nhập:
-    #   1. MERGE settings.json vào ~/.config/zed/settings.json (KHÔNG đè "agent")
-    #   2. Đồng bộ skills/ vào ~/.config/zed/skills/ (assets là nguồn chuẩn)
-    # Thay __HOME__ trong settings (dùng cho context server fs).
-    systemd.user.services.zed-settings = {
-      wantedBy = [ "default.target" ];
-      path = [ pkgs.python3 ];
-      script = ''
-        mkdir -p "$HOME/.config/zed"
-        python3 ${./../assets/zed/sync.py} ${./../assets/zed}
-      '';
-    };
+    # ==== Zed editor: cấu hình (settings/keymap/skills) do HOME-MANAGER quản lý ====
+    # User service `zed-settings` giờ định nghĩa trong home/dev.nix (home-manager)
+    # — gói zed-editor vẫn cài ở đây (environment.systemPackages).
 
     # ==== Antigravity IDE + CLI: cấu hình chuyên nghiệp (declarative) ====
     # Asset nằm ở assets/antigravity/ (settings.json, mcp_config.jsonc, skills/).

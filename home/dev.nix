@@ -264,6 +264,28 @@ in
   );
 
   # ==========================================================================
+  #  ZED — cấu hình (settings/keymap/skills) qua home-manager
+  # ==========================================================================
+  # User service chạy mỗi lần đăng nhập (đồng bộ từ assets/zed sang ~/.config/zed):
+  #   1. MERGE settings.json → ~/.config/zed/settings.json (KHÔNG đè block "agent"
+  #      — quyền tool đã duyệt vẫn giữ) + thay __HOME__ (context server fs)
+  #   2. Ghi đè keymap.json (cùng prefix <space> với nvim — xem assets/zed/README.md)
+  #   3. Copy đè skills/ (assets là nguồn chuẩn)
+  # Sửa config ở assets/zed/ (không sửa tay trong ~/.config/zed).
+  systemd.user.services.zed-settings = {
+    Unit = {
+      Description = "Zed: đồng bộ settings/keymap/skills từ assets/zed";
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.python3}/bin/python3 ${../assets/zed/sync.py} ${../assets/zed}";
+    };
+    Install = {
+      WantedBy = [ "default.target" ];
+    };
+  };
+
+  # ==========================================================================
   #  TMUX — session/tab/panel (craftzdog workflow: tmux + editor)
   # ==========================================================================
   programs.tmux = {
