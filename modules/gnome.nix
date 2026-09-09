@@ -111,6 +111,7 @@ in
                 favorite-apps = [
                   "firefox.desktop"
                   "org.gnome.Nautilus.desktop"
+                  "org.bamos.assistant.desktop"
                 ]
                 ++ lib.optionals cfg.store [ "org.gnome.Software.desktop" ];
               };

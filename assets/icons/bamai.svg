@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background linear gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141726" />
+      <stop offset="50%" stop-color="#1e2238" />
+      <stop offset="100%" stop-color="#0f111c" />
+    </linearGradient>
+
+    <!-- NixOS Blue Lambdas -->
+    <linearGradient id="nixBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7ebae4" />
+      <stop offset="100%" stop-color="#5277c3" />
+    </linearGradient>
+
+    <!-- NixOS Cyan Lambdas -->
+    <linearGradient id="nixCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#93d7f7" />
+      <stop offset="100%" stop-color="#6ab4e4" />
+    </linearGradient>
+
+    <!-- Brain Neon Glowing Gradient -->
+    <linearGradient id="brainNeon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe" />
+      <stop offset="40%" stop-color="#4facfe" />
+      <stop offset="100%" stop-color="#7f53ac" />
+    </linearGradient>
+
+    <!-- Glow Filter -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <!-- Subtle Shadow -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+  </defs>
+
+  <!-- Squircle App Icon Container (macOS / Deepin style) -->
+  <rect x="24" y="24" width="464" height="464" rx="108" fill="url(#bgGrad)" stroke="rgba(255,255,255,0.15)" stroke-width="2" filter="url(#shadow)" />
+
+  <!-- Outer Ring Glow -->
+  <circle cx="256" cy="256" r="195" fill="none" stroke="rgba(82, 119, 195, 0.25)" stroke-width="1.5" stroke-dasharray="6 6" />
+
+  <!-- NixOS Snowflake Outer Flakes (6 arms rotated at 60 degree intervals) -->
+  <!-- Arm definition template: Lambda shape -->
+  <g id="nixSnowflake" filter="url(#shadow)">
+    <!-- 0 deg -->
+    <path d="M256,60 L280,102 L245,162 L210,162 L232,124 L190,124 L175,98 L256,98 Z" fill="url(#nixBlue)" />
+    <path d="M256,60 L240,88 L275,148 L250,148 L235,122 L210,122 Z" fill="url(#nixCyan)" opacity="0.85" />
+
+    <!-- 60 deg -->
+    <g transform="rotate(60 256 256)">
+      <path d="M256,60 L280,102 L245,162 L210,162 L232,124 L190,124 L175,98 L256,98 Z" fill="url(#nixCyan)" />
+    </g>
+
+    <!-- 120 deg -->
+    <g transform="rotate(120 256 256)">
+      <path d="M256,60 L280,102 L245,162 L210,162 L232,124 L190,124 L175,98 L256,98 Z" fill="url(#nixBlue)" />
+    </g>
+
+    <!-- 180 deg -->
+    <g transform="rotate(180 256 256)">
+      <path d="M256,60 L280,102 L245,162 L210,162 L232,124 L190,124 L175,98 L256,98 Z" fill="url(#nixCyan)" />
+    </g>
+
+    <!-- 240 deg -->
+    <g transform="rotate(240 256 256)">
+      <path d="M256,60 L280,102 L245,162 L210,162 L232,124 L190,124 L175,98 L256,98 Z" fill="url(#nixBlue)" />
+    </g>
+
+    <!-- 300 deg -->
+    <g transform="rotate(300 256 256)">
+      <path d="M256,60 L280,102 L245,162 L210,162 L232,124 L190,124 L175,98 L256,98 Z" fill="url(#nixCyan)" />
+    </g>
+  </g>
+
+  <!-- Central Core Orb (Vòng tròn công nghệ bảo vệ AI Brain) -->
+  <circle cx="256" cy="256" r="106" fill="#151829" stroke="url(#nixCyan)" stroke-width="3" filter="url(#glow)" />
+  <circle cx="256" cy="256" r="98" fill="#121424" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" />
+
+  <!-- Synapse Orbit Rings -->
+  <ellipse cx="256" cy="256" rx="90" ry="40" fill="none" stroke="rgba(0, 242, 254, 0.3)" stroke-width="1" transform="rotate(-25 256 256)" />
+  <ellipse cx="256" cy="256" rx="90" ry="40" fill="none" stroke="rgba(127, 83, 172, 0.3)" stroke-width="1" transform="rotate(35 256 256)" />
+
+  <!-- AI BRAIN (Bộ não công nghệ ở tâm) -->
+  <g transform="translate(256, 256) scale(0.92) translate(-256, -256)" filter="url(#glow)">
+    <!-- Trục phân cách 2 bán cầu não -->
+    <line x1="256" y1="192" x2="256" y2="318" stroke="#4facfe" stroke-width="3" stroke-dasharray="3 3" opacity="0.6" />
+
+    <!-- Bán cầu não TRÁI (Left Hemisphere) -->
+    <!-- Đường viền ngoài -->
+    <path d="M250,195 
+             C232,192 216,200 208,212 
+             C196,214 186,224 186,238 
+             C182,244 182,256 186,264 
+             C184,274 190,288 200,295 
+             C206,306 222,316 238,318 
+             C246,319 250,317 250,315" 
+          fill="none" stroke="url(#brainNeon)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Nếp nhăn & Rãnh nơ-ron bán cầu trái -->
+    <path d="M208,225 C222,230 236,220 248,226" fill="none" stroke="url(#brainNeon)" stroke-width="3.5" stroke-linecap="round" />
+    <path d="M188,248 C202,252 212,246 226,254 C236,258 244,250 250,256" fill="none" stroke="url(#brainNeon)" stroke-width="3" stroke-linecap="round" />
+    <path d="M192,274 C204,272 216,282 232,276 C240,274 246,280 250,284" fill="none" stroke="url(#brainNeon)" stroke-width="3" stroke-linecap="round" />
+    <path d="M214,302 C226,298 238,304 248,302" fill="none" stroke="url(#brainNeon)" stroke-width="3" stroke-linecap="round" />
+
+    <!-- Bán cầu não PHẢI (Right Hemisphere) -->
+    <!-- Đường viền ngoài -->
+    <path d="M262,195 
+             C280,192 296,200 304,212 
+             C316,214 326,224 326,238 
+             C330,244 330,256 326,264 
+             C328,274 322,288 312,295 
+             C306,306 290,316 274,318 
+             C266,319 262,317 262,315" 
+          fill="none" stroke="url(#brainNeon)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Nếp nhăn & Rãnh nơ-ron bán cầu phải -->
+    <path d="M304,225 C290,230 276,220 264,226" fill="none" stroke="url(#brainNeon)" stroke-width="3.5" stroke-linecap="round" />
+    <path d="M324,248 C310,252 300,246 286,254 C276,258 268,250 262,256" fill="none" stroke="url(#brainNeon)" stroke-width="3" stroke-linecap="round" />
+    <path d="M320,274 C308,272 296,282 280,276 C272,274 266,280 262,284" fill="none" stroke="url(#brainNeon)" stroke-width="3" stroke-linecap="round" />
+    <path d="M298,302 C286,298 274,304 264,302" fill="none" stroke="url(#brainNeon)" stroke-width="3" stroke-linecap="round" />
+
+    <!-- Các điểm nơ-ron phát sáng (Synapse Nodes) -->
+    <circle cx="218" cy="228" r="3" fill="#00f2fe" />
+    <circle cx="294" cy="228" r="3" fill="#00f2fe" />
+    <circle cx="232" cy="254" r="3" fill="#4facfe" />
+    <circle cx="280" cy="254" r="3" fill="#4facfe" />
+    <circle cx="204" cy="276" r="3" fill="#7f53ac" />
+    <circle cx="308" cy="276" r="3" fill="#7f53ac" />
+    <circle cx="240" cy="302" r="2.5" fill="#00f2fe" />
+    <circle cx="272" cy="302" r="2.5" fill="#00f2fe" />
+  </g>
+
+  <!-- Sparkles -->
+  <circle cx="330" cy="170" r="2" fill="#ffffff" opacity="0.8" />
+  <circle cx="180" cy="340" r="2" fill="#ffffff" opacity="0.6" />
+</svg>

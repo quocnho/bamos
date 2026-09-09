@@ -20,6 +20,15 @@
 
   networking.hostName = "lg";
 
+  # ==== Hostname ảo cho dev (domain local .test) ====
+  # quocnho.test → 127.0.0.1 (dùng cho dev web/local HTTPS cert…)
+  networking.hosts."127.0.0.1" = [ "quocnho.test" ];
+
+  # Cho phép process không-root bind cổng thấp (<1024) — tiện cho dev
+  # (server test port 80/443, podman rootless…). Lưu ý: giảm an toàn mạng
+  # cục bộ một chút — nếu không cần nữa hãy xoá/xét lại giá trị này.
+  boot.kernel.sysctl."net.ipv4.ip_unprivileged_port_start" = 0;
+
   # ==== Người dùng (riêng host này) ====
   # initialPassword chỉ dùng lần đăng nhập đầu — đổi ngay sau khi vào máy:
   #   passwd
@@ -49,6 +58,8 @@
 
   # ==== Phần riêng của máy LG ====
   my.dev.enable = true; # công cụ dev: Zed, Antigravity, Python, Node, devenv...
+  my.ai.enable = true;  # Local AI (llama-server, Qwen2.5-1.5B) - on-demand
+  my.rag.enable = true; # RAG service (chromem-go) - on-demand
   my.gpu.enable = true;
   my.gpu.intelBusId = "PCI:0:2:0";
   my.gpu.nvidiaBusId = "PCI:2:0:0";
@@ -60,10 +71,10 @@
   # chọn generation/kernel cũ: giữ phím SPACE ngay khi logo boot xuất hiện.
   boot.loader.timeout = 0;
 
-  # Kernel ZEN (7.1) — ưu tiên phản hồi nhanh/mượt khi đa nhiệm + OBS/stream
-  # (so sánh zen vs default vs latest: modules/boot.nix). Đổi về "default"
-  # nếu muốn ưu tiên pin/ổn định. Muốn thử bản khác: `bam boot` → chọn ở boot menu.
-  my.boot.kernel = "zen";
+  # Kernel LATEST (mainline mới nhất) — theo yêu cầu. Lưu ý: nixpkgs update liên
+  # tục sẽ rebuild kernel + driver NVIDIA mỗi tuần; muốn ổn định/pin hơn đổi về
+  # "default"/"zen". So sánh đầy đủ ở modules/boot.nix.
+  my.boot.kernel = "latest";
 
   # ==== Studio (edition studio-pro theo GLF-OS) — ghi hình + livestream OBS ====
   # OBS + NVENC (chạy bằng `obs-nvenc`) / VAAPI iGPU / x264 + GIMP, Audacity,
@@ -81,7 +92,11 @@
   #  NVIDIA — daemon rất nhỏ, không đáng tắt bằng mkForce.)
 
   # Journald: giới hạn log ổn định (không phình vô hạn trên SSD 512GB)
-  services.journald.extraConfig = "SystemMaxUse=400M\nSystemMaxFileSize=50M";
+  # Cú pháp mới của nixpkgs (extraConfig đã bị loại bỏ → assertion lỗi)
+  services.journald.settings.Journal = {
+    SystemMaxUse = "400M";
+    SystemMaxFileSize = "50M";
+  };
 
   # (Tag generation "BamOS-YY.MM.DD-HH:MM" giờ nằm ở profiles/common.nix — mọi máy)
   system.stateVersion = "25.11";

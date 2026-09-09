@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=BamAI
+Comment=Trợ lý ảo thông minh BamOS (Deepin style)
+GenericName=AI Assistant
+Exec=bamos-assistant
+Icon=bamos-assistant
+Terminal=false
+Type=Application
+Categories=Utility;Office;ArtificialIntelligence;
+StartupWMClass=bamos-assistant
+StartupNotify=true
+Keywords=ai;chat;qwen;rag;assistant;

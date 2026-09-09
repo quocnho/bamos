@@ -23,6 +23,7 @@ tham khảo sâu dự án [GLF-OS](https://framagit.org/gaming-linux-fr/glf-os/g
 | Múi giờ Việt Nam                       | ✅ `Asia/Ho_Chi_Minh` mặc định                                                               |
 | Tự động cập nhật                       | ✅ systemd timer 12h (tham khảo GLF-OS): tải config mới từ GitHub → rebuild boot → thông báo |
 | Không lo virus / Rollback              | ✅ bản chất immutable của NixOS                                                              |
+| Local AI & RAG Engine                  | ✅ **llama-server** + **Qwen2.5-1.5B** + **Golang chromem-go** (on-demand qua `bam ai`/`rag`)  |
 
 > **Vì sao WPS → LibreOffice + Google?** WPS Office trên Linux hay lỗi font tiếng Việt
 > và symbol (ô vuông ☺☻) do thiếu font fallback. BamOS đã cài sẵn font MS (`corefonts`)
