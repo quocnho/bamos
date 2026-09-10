@@ -1,600 +1,651 @@
 * {
-  box-sizing: border-box;
-  user-select: none;
-  margin: 0;
-  padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+    margin: 0;
+    padding: 0;
 }
 
-html, body {
-  width: 100vw;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  background: transparent !important;
-  overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
+html,
+body {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    background: transparent !important;
+    overflow: hidden;
+    font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+        Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
 #app-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: flex-end;
-  padding-right: 14px;
-  padding-bottom: 12px;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding-right: 14px;
+    padding-bottom: 12px;
 }
 
 /* ===================================================
    BONG BÓNG THOẠI CHUNG (GLASSMORPHISM)
    =================================================== */
 .bubble {
-  position: absolute;
-  right: 14px;
-  bottom: 185px;
-  width: 350px;
-  max-width: 92vw;
-  max-height: calc(100vh - 210px);
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  border-radius: 22px;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22), 0 2px 6px rgba(0, 0, 0, 0.08);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-  transform-origin: bottom right;
-  z-index: 100;
-  color: #2D3748;
+    position: absolute;
+    right: 14px;
+    bottom: 185px;
+    width: 350px;
+    max-width: 92vw;
+    max-height: calc(100vh - 210px);
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 22px;
+    box-shadow:
+        0 16px 36px rgba(0, 0, 0, 0.22),
+        0 2px 6px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-origin: bottom right;
+    z-index: 100;
+    color: #2d3748;
 }
 
 .bubble.hidden {
-  opacity: 0;
-  transform: scale(0.65) translateY(24px);
-  pointer-events: none;
+    opacity: 0;
+    transform: scale(0.65) translateY(24px);
+    pointer-events: none;
 }
 
 .bubble-header {
-  flex-shrink: 0;
-  padding: 10px 14px 8px 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  cursor: grab;
-  background: rgba(255, 255, 255, 0.5);
+    flex-shrink: 0;
+    padding: 10px 14px 8px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    cursor: grab;
+    background: rgba(255, 255, 255, 0.5);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.bubble-header:active {
+    cursor: grabbing;
 }
 
 /* Thanh bối cảnh Cục Xương */
 .bone-context-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: linear-gradient(135deg, rgba(244, 162, 97, 0.22), rgba(231, 111, 81, 0.15));
-  border-bottom: 1px dashed rgba(231, 111, 81, 0.35);
-  padding: 5px 12px;
-  font-size: 11.5px;
-  color: #C0392B;
-  transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(
+        135deg,
+        rgba(244, 162, 97, 0.22),
+        rgba(231, 111, 81, 0.15)
+    );
+    border-bottom: 1px dashed rgba(231, 111, 81, 0.35);
+    padding: 5px 12px;
+    font-size: 11.5px;
+    color: #c0392b;
+    transition: all 0.25s ease;
 }
 
 .bone-context-bar.hidden {
-  display: none !important;
+    display: none !important;
 }
 
 .bone-context-info {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .bone-icon {
-  font-size: 14px;
-  animation: boneWiggle 2s infinite ease-in-out;
+    font-size: 14px;
+    animation: boneWiggle 2s infinite ease-in-out;
 }
 
 @keyframes boneWiggle {
-  0%, 100% { transform: rotate(-5deg); }
-  50% { transform: rotate(10deg); }
+    0%,
+    100% {
+        transform: rotate(-5deg);
+    }
+    50% {
+        transform: rotate(10deg);
+    }
 }
 
 .bone-text {
-  font-weight: 700;
-  color: #B23B18;
-  font-family: monospace;
+    font-weight: 700;
+    color: #b23b18;
+    font-family: monospace;
 }
 
 .bone-clear-btn {
-  background: none;
-  border: none;
-  color: #C0392B;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-  padding: 0 4px;
-  border-radius: 4px;
-  transition: background 0.15s;
+    background: none;
+    border: none;
+    color: #c0392b;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0 4px;
+    border-radius: 4px;
+    transition: background 0.15s;
 }
 
 .bone-clear-btn:hover {
-  background: rgba(192, 57, 43, 0.2);
+    background: rgba(192, 57, 43, 0.2);
 }
 
 .mouth-bone {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+    transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
 }
 
 .mouth-bone.hidden {
-  display: none !important;
+    display: none !important;
 }
 
 .assistant-tag {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .rag-indicator {
-  font-size: 11px;
-  font-weight: 700;
-  background: #2A9D8F;
-  color: #FFFFFF;
-  padding: 2px 8px;
-  border-radius: 10px;
-  letter-spacing: 0.5px;
-  transition: background 0.2s;
+    font-size: 11px;
+    font-weight: 700;
+    background: #2a9d8f;
+    color: #ffffff;
+    padding: 2px 8px;
+    border-radius: 10px;
+    letter-spacing: 0.5px;
+    transition: background 0.2s;
 }
 
 .rag-indicator.off {
-  background: #A0AEC0;
+    background: #a0aec0;
 }
 
 .status-text {
-  font-size: 12px;
-  font-weight: 600;
-  color: #4A5568;
+    font-size: 12px;
+    font-weight: 600;
+    color: #4a5568;
 }
 
 .window-controls {
-  display: flex;
-  gap: 4px;
+    display: flex;
+    gap: 4px;
 }
 
 .icon-btn {
-  background: none;
-  border: none;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  color: #718096;
-  transition: background 0.2s, color 0.2s;
+    background: none;
+    border: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: #718096;
+    transition:
+        background 0.2s,
+        color 0.2s;
 }
 
 .icon-btn.active {
-  color: #E76F51;
+    color: #e76f51;
 }
 
 .icon-btn:hover {
-  background: rgba(0, 0, 0, 0.08);
-  color: #1A202C;
+    background: rgba(0, 0, 0, 0.08);
+    color: #1a202c;
 }
 
 .close-btn:hover {
-  background: #E53E3E;
-  color: #FFFFFF;
+    background: #e53e3e;
+    color: #ffffff;
 }
 
 .stop-btn {
-  color: #E63946 !important;
-  font-size: 13px !important;
-  background: rgba(230, 57, 70, 0.12) !important;
+    color: #e63946 !important;
+    font-size: 13px !important;
+    background: rgba(230, 57, 70, 0.12) !important;
 }
 
 .stop-btn:hover {
-  background: rgba(230, 57, 70, 0.25) !important;
-  color: #D62828 !important;
+    background: rgba(230, 57, 70, 0.25) !important;
+    color: #d62828 !important;
 }
 
 .stop-btn.hidden {
-  display: none !important;
+    display: none !important;
 }
 
 /* Thanh đính kèm tệp / hình ảnh (+) */
 .attached-preview-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 4px 10px;
-  background: #FFF3E0;
-  border-bottom: 1px solid rgba(244, 162, 97, 0.3);
-  font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 10px;
+    background: #fff3e0;
+    border-bottom: 1px solid rgba(244, 162, 97, 0.3);
+    font-size: 11px;
 }
 
 .attached-preview-bar.hidden {
-  display: none !important;
+    display: none !important;
 }
 
 .attached-tag {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  max-width: 85%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: #D94E34;
-  font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 85%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #d94e34;
+    font-weight: 600;
 }
 
 .remove-attachment-btn {
-  background: none;
-  border: none;
-  color: #E76F51;
-  font-size: 14px;
-  cursor: pointer;
-  font-weight: bold;
+    background: none;
+    border: none;
+    color: #e76f51;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: bold;
 }
 
 .bubble-body {
-  flex: 1 1 auto;
-  padding: 12px 16px;
-  overflow-y: auto;
-  font-size: 13.5px;
-  line-height: 1.6;
-  color: #2D3748;
-  word-break: break-word;
-  user-select: text;
-  min-height: 60px;
+    flex: 1 1 auto;
+    padding: 12px 16px;
+    overflow-y: auto;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #2d3748;
+    word-break: break-word;
+    user-select: text;
+    min-height: 60px;
 }
 
 /* ===================================================
    VISUAL HTML RICH TYPOGRAPHY (MÀU SẮC, ĐẬM NHẠT, THỤT DÒNG)
    =================================================== */
 .ai-reply {
-  color: #1E293B;
+    color: #1e293b;
 }
 
-.ai-reply h1, .ai-reply h2, .ai-reply h3 {
-  color: #0F172A;
-  margin: 10px 0 6px 0;
-  font-weight: 700;
+.ai-reply h1,
+.ai-reply h2,
+.ai-reply h3 {
+    color: #0f172a;
+    margin: 10px 0 6px 0;
+    font-weight: 700;
 }
 
-.ai-reply h1 { font-size: 15px; border-bottom: 1px solid #E2E8F0; padding-bottom: 4px; }
-.ai-reply h2 { font-size: 14px; }
-.ai-reply h3 { font-size: 13px; color: #2A9D8F; }
+.ai-reply h1 {
+    font-size: 15px;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 4px;
+}
+.ai-reply h2 {
+    font-size: 14px;
+}
+.ai-reply h3 {
+    font-size: 13px;
+    color: #2a9d8f;
+}
 
 .ai-reply p {
-  margin-bottom: 8px;
+    margin-bottom: 8px;
 }
 
-.ai-reply strong, .ai-reply b {
-  color: #0F172A;
-  font-weight: 700;
+.ai-reply strong,
+.ai-reply b {
+    color: #0f172a;
+    font-weight: 700;
 }
 
-.ai-reply em, .ai-reply i {
-  color: #64748B;
+.ai-reply em,
+.ai-reply i {
+    color: #64748b;
 }
 
 .ai-reply blockquote {
-  border-left: 3.5px solid #2A9D8F;
-  background: rgba(42, 157, 143, 0.08);
-  margin: 8px 0;
-  padding: 6px 12px;
-  border-radius: 0 8px 8px 0;
-  color: #334155;
-  font-style: italic;
+    border-left: 3.5px solid #2a9d8f;
+    background: rgba(42, 157, 143, 0.08);
+    margin: 8px 0;
+    padding: 6px 12px;
+    border-radius: 0 8px 8px 0;
+    color: #334155;
+    font-style: italic;
 }
 
-.ai-reply ul, .ai-reply ol {
-  margin: 6px 0 8px 18px;
-  padding: 0;
+.ai-reply ul,
+.ai-reply ol {
+    margin: 6px 0 8px 18px;
+    padding: 0;
 }
 
 .ai-reply li {
-  margin-bottom: 4px;
-  line-height: 1.5;
+    margin-bottom: 4px;
+    line-height: 1.5;
 }
 
 .ai-reply code {
-  background: rgba(15, 23, 42, 0.07);
-  color: #E76F51;
-  font-family: "JetBrains Mono", Consolas, monospace;
-  font-size: 12px;
-  padding: 2px 5px;
-  border-radius: 4px;
-  font-weight: 600;
+    background: rgba(15, 23, 42, 0.07);
+    color: #e76f51;
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 12px;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-weight: 600;
 }
 
 .ai-reply pre {
-  background: #1E293B;
-  color: #F8FAFC;
-  padding: 10px 12px;
-  border-radius: 10px;
-  overflow-x: auto;
-  margin: 8px 0;
-  font-family: "JetBrains Mono", Consolas, monospace;
-  font-size: 12px;
-  line-height: 1.45;
-  border: 1px solid #334155;
+    background: #1e293b;
+    color: #f8fafc;
+    padding: 10px 12px;
+    border-radius: 10px;
+    overflow-x: auto;
+    margin: 8px 0;
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.45;
+    border: 1px solid #334155;
 }
 
 .ai-reply pre code {
-  background: transparent;
-  color: inherit;
-  padding: 0;
+    background: transparent;
+    color: inherit;
+    padding: 0;
 }
 
 .ai-reply a {
-  color: #0284C7;
-  text-decoration: none;
-  border-bottom: 1px dashed #0284C7;
-  transition: color 0.15s;
+    color: #0284c7;
+    text-decoration: none;
+    border-bottom: 1px dashed #0284c7;
+    transition: color 0.15s;
 }
 
 .ai-reply a:hover {
-  color: #0369A1;
+    color: #0369a1;
 }
 
 /* Embedded Visual Terminal Window */
 .terminal-window {
-  background: #0F172A;
-  color: #38BDF8;
-  border-radius: 12px;
-  border: 1px solid #334155;
-  margin: 8px 0 12px 0;
-  overflow: hidden;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
-  font-family: "JetBrains Mono", Consolas, monospace;
-  font-size: 11.5px;
+    background: #0f172a;
+    color: #38bdf8;
+    border-radius: 12px;
+    border: 1px solid #334155;
+    margin: 8px 0 12px 0;
+    overflow: hidden;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 11.5px;
 }
 
 .terminal-header {
-  background: #1E293B;
-  padding: 5px 10px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid #334155;
+    background: #1e293b;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #334155;
 }
 
 .terminal-dots {
-  display: flex;
-  gap: 5px;
+    display: flex;
+    gap: 5px;
 }
 
 .terminal-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
 }
 
-.dot-red { background: #EF4444; }
-.dot-yellow { background: #F59E0B; }
-.dot-green { background: #10B981; }
+.dot-red {
+    background: #ef4444;
+}
+.dot-yellow {
+    background: #f59e0b;
+}
+.dot-green {
+    background: #10b981;
+}
 
 .terminal-title {
-  color: #94A3B8;
-  font-size: 10.5px;
-  font-weight: 600;
+    color: #94a3b8;
+    font-size: 10.5px;
+    font-weight: 600;
 }
 
 .terminal-body {
-  padding: 8px 10px;
-  max-height: 180px;
-  overflow-y: auto;
-  white-space: pre-wrap;
-  word-break: break-all;
-  line-height: 1.45;
-  color: #E2E8F0;
+    padding: 8px 10px;
+    max-height: 180px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    line-height: 1.45;
+    color: #e2e8f0;
 }
 
 .terminal-body::-webkit-scrollbar {
-  width: 4px;
+    width: 4px;
 }
 
 .terminal-body::-webkit-scrollbar-thumb {
-  background: #475569;
-  border-radius: 4px;
+    background: #475569;
+    border-radius: 4px;
 }
 
 /* Ẩn triệt để input file upload của trình duyệt để không bao giờ chiếm diện tích hay đẩy input */
-.hidden-file-input, input[type="file"].hidden {
-  display: none !important;
-  visibility: hidden !important;
-  position: absolute !important;
-  width: 0 !important;
-  height: 0 !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: none !important;
+.hidden-file-input,
+input[type="file"].hidden {
+    display: none !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
 }
 
 .attach-btn {
-  background: rgba(244, 162, 97, 0.15);
-  border: 1px solid rgba(244, 162, 97, 0.3);
-  color: #E76F51;
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 4px;
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    background: rgba(244, 162, 97, 0.15);
+    border: 1px solid rgba(244, 162, 97, 0.3);
+    color: #e76f51;
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 4px;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .attach-btn:hover {
-  background: #F4A261;
-  color: #FFFFFF;
-  border-color: #F4A261;
-  transform: scale(1.1);
+    background: #f4a261;
+    color: #ffffff;
+    border-color: #f4a261;
+    transform: scale(1.1);
 }
 
 .bubble-body::-webkit-scrollbar {
-  width: 5px;
+    width: 5px;
 }
 
 .bubble-body::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 10px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
 }
 
 .bubble-footer {
-  flex-shrink: 0;
-  padding: 6px 12px 12px 12px;
+    flex-shrink: 0;
+    padding: 6px 12px 12px 12px;
 }
 
 .smart-suggestions {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding: 0 2px 8px 2px;
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 0 2px 8px 2px;
 }
 
 .smart-suggestions::-webkit-scrollbar {
-  display: none;
+    display: none;
 }
 
 .chip {
-  background: rgba(244, 162, 97, 0.14);
-  color: #D94E34;
-  border: 1px solid rgba(244, 162, 97, 0.35);
-  border-radius: 12px;
-  padding: 3px 9px;
-  font-size: 11px;
-  font-weight: 600;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: all 0.2s;
+    background: rgba(244, 162, 97, 0.14);
+    color: #d94e34;
+    border: 1px solid rgba(244, 162, 97, 0.35);
+    border-radius: 12px;
+    padding: 3px 9px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
 .chip:hover {
-  background: #F4A261;
-  color: #FFFFFF;
-  transform: translateY(-1px);
+    background: #f4a261;
+    color: #ffffff;
+    transform: translateY(-1px);
 }
 
 .input-wrapper {
-  display: flex;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1.5px solid #E2E8F0;
-  border-radius: 24px;
-  padding: 4px 8px;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: border-color 0.2s, box-shadow 0.2s;
-  width: 100%;
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1.5px solid #e2e8f0;
+    border-radius: 24px;
+    padding: 4px 8px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+    width: 100%;
 }
 
 .input-wrapper:focus-within {
-  border-color: #F4A261;
-  box-shadow: 0 0 0 3px rgba(244, 162, 97, 0.25);
+    border-color: #f4a261;
+    box-shadow: 0 0 0 3px rgba(244, 162, 97, 0.25);
 }
 
 #chat-input {
-  flex: 1 1 auto;
-  min-width: 0;
-  border: none;
-  outline: none;
-  background: transparent;
-  padding: 6px 8px;
-  font-size: 13px;
-  color: #2D3748;
-  user-select: text;
+    flex: 1 1 auto;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 6px 8px;
+    font-size: 13px;
+    color: #2d3748;
+    user-select: text;
 }
 
 .toggle-btn {
-  background: none;
-  border: none;
-  font-size: 15px;
-  cursor: pointer;
-  padding: 4px;
-  opacity: 0.5;
-  transition: opacity 0.2s, transform 0.2s;
-  flex-shrink: 0;
+    background: none;
+    border: none;
+    font-size: 15px;
+    cursor: pointer;
+    padding: 4px;
+    opacity: 0.5;
+    transition:
+        opacity 0.2s,
+        transform 0.2s;
+    flex-shrink: 0;
 }
 
 .toggle-btn.active {
-  opacity: 1;
-  transform: scale(1.1);
+    opacity: 1;
+    transform: scale(1.1);
 }
 
 .send-btn {
-  background: #F4A261;
-  color: white;
-  border: none;
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  margin-left: 4px;
-  transition: background 0.2s, transform 0.1s;
+    background: #f4a261;
+    color: white;
+    border: none;
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    margin-left: 4px;
+    transition:
+        background 0.2s,
+        transform 0.1s;
 }
 
 .send-btn:hover {
-  background: #E76F51;
-  transform: scale(1.05);
+    background: #e76f51;
+    transform: scale(1.05);
 }
 
 .bubble-tail {
-  position: absolute;
-  bottom: -10px;
-  right: 70px;
-  width: 0;
-  height: 0;
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  border-top: 10px solid rgba(255, 255, 255, 0.92);
+    position: absolute;
+    bottom: -10px;
+    right: 70px;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid rgba(255, 255, 255, 0.92);
 }
 
 /* ===================================================
    BONG BÓNG EYELEO SỨC KHỎE
    =================================================== */
 .eyeleo-bubble {
-  border: 2px solid #48CAE4;
-  box-shadow: 0 16px 36px rgba(0, 119, 182, 0.25);
-  z-index: 150;
+    border: 2px solid #48cae4;
+    box-shadow: 0 16px 36px rgba(0, 119, 182, 0.25);
+    z-index: 150;
 }
 
 .eyeleo-badge {
-  font-size: 11px;
-  font-weight: bold;
-  background: #0077B6;
-  color: #FFFFFF;
-  padding: 2px 8px;
-  border-radius: 10px;
+    font-size: 11px;
+    font-weight: bold;
+    background: #0077b6;
+    color: #ffffff;
+    padding: 2px 8px;
+    border-radius: 10px;
 }
 
 .eyeleo-body {
-  display: flex;
-  flex-direction: column;
-  padding: 16px;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
 }
 /* ===================================================
    HỆ THỐNG EYELEO TOÀN DIỆN (ERGONOMICS & HEALTH)
@@ -602,627 +653,696 @@ html, body {
 
 /* 1. Pre-break Notification Toast */
 .eyeleo-prebreak-toast {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 320px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(244, 162, 97, 0.5);
-  border-left: 5px solid #F4A261;
-  border-radius: 14px;
-  padding: 12px 14px;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  z-index: 1200;
-  animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  transition: all 0.3s ease;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 320px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(244, 162, 97, 0.5);
+    border-left: 5px solid #f4a261;
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    z-index: 1200;
+    animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.3s ease;
 }
 
 @keyframes slideInRight {
-  from { transform: translateX(50px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+    from {
+        transform: translateX(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
 
 .eyeleo-prebreak-toast.hidden {
-  opacity: 0;
-  transform: translateY(-20px);
-  pointer-events: none;
+    opacity: 0;
+    transform: translateY(-20px);
+    pointer-events: none;
 }
 
 .prebreak-icon {
-  font-size: 24px;
-  line-height: 1;
+    font-size: 24px;
+    line-height: 1;
 }
 
 .prebreak-content {
-  flex: 1;
+    flex: 1;
 }
 
 .prebreak-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: #E76F51;
-  margin-bottom: 2px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #e76f51;
+    margin-bottom: 2px;
 }
 
 .prebreak-text {
-  font-size: 11.5px;
-  color: #4A5568;
-  line-height: 1.4;
+    font-size: 11.5px;
+    color: #4a5568;
+    line-height: 1.4;
 }
 
 .prebreak-close {
-  background: none;
-  border: none;
-  font-size: 16px;
-  font-weight: bold;
-  color: #A0AEC0;
-  cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 16px;
+    font-weight: bold;
+    color: #a0aec0;
+    cursor: pointer;
 }
 
 .prebreak-close:hover {
-  color: #2D3748;
+    color: #2d3748;
 }
 
 /* 2. Short Break Widget */
 .eyeleo-shortbreak {
-  bottom: 200px;
-  border: 1px solid rgba(42, 157, 143, 0.4);
-  box-shadow: 0 16px 36px rgba(42, 157, 143, 0.2);
+    bottom: 200px;
+    border: 1px solid rgba(42, 157, 143, 0.4);
+    box-shadow: 0 16px 36px rgba(42, 157, 143, 0.2);
 }
 
 .eyeleo-badge.short {
-  background: linear-gradient(135deg, #2A9D8F, #264653);
-  color: white;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 11px;
-  font-weight: 700;
+    background: linear-gradient(135deg, #2a9d8f, #264653);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
 }
 
 .exercise-guide-box {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
 }
 
 .exercise-icon {
-  font-size: 32px;
-  line-height: 1;
+    font-size: 32px;
+    line-height: 1;
 }
 
 .exercise-text {
-  font-size: 13px;
-  line-height: 1.45;
-  color: #1D3557;
-  font-weight: 600;
+    font-size: 13px;
+    line-height: 1.45;
+    color: #1d3557;
+    font-weight: 600;
 }
 
 .eyeleo-timer-bar-wrapper {
-  width: 100%;
-  background: #E2E8F0;
-  height: 10px;
-  border-radius: 6px;
-  overflow: hidden;
-  position: relative;
-  display: flex;
-  align-items: center;
+    width: 100%;
+    background: #e2e8f0;
+    height: 10px;
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
 .eyeleo-timer-bar {
-  height: 100%;
-  width: 100%;
-  background: linear-gradient(90deg, #2A9D8F, #48CAE4);
-  border-radius: 6px;
-  transition: width 0.9s linear;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #2a9d8f, #48cae4);
+    border-radius: 6px;
+    transition: width 0.9s linear;
 }
 
 .eyeleo-seconds-num {
-  position: absolute;
-  right: 8px;
-  font-size: 10px;
-  font-weight: 800;
-  color: #1D3557;
-  font-variant-numeric: tabular-nums;
+    position: absolute;
+    right: 8px;
+    font-size: 10px;
+    font-weight: 800;
+    color: #1d3557;
+    font-variant-numeric: tabular-nums;
 }
 
 /* 3. Long Break Full Glassmorphism Overlay */
 .eyeleo-longbreak-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(15, 23, 42, 0.82);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  z-index: 2000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: opacity 0.4s ease;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.82);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.4s ease;
 }
 
 .eyeleo-longbreak-overlay.hidden {
-  opacity: 0;
-  pointer-events: none;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .longbreak-card {
-  width: 90%;
-  max-width: 390px;
-  background: rgba(255, 255, 255, 0.94);
-  border-radius: 28px;
-  padding: 24px 20px;
-  text-align: center;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  animation: zoomIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    width: 90%;
+    max-width: 390px;
+    background: rgba(255, 255, 255, 0.94);
+    border-radius: 28px;
+    padding: 24px 20px;
+    text-align: center;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    animation: zoomIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes zoomIn {
-  from { transform: scale(0.85); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+    from {
+        transform: scale(0.85);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 .longbreak-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
 }
 
 .longbreak-badge {
-  background: #0077B6;
-  color: white;
-  font-size: 11px;
-  font-weight: 800;
-  padding: 4px 10px;
-  border-radius: 12px;
-  letter-spacing: 0.5px;
+    background: #0077b6;
+    color: white;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 12px;
+    letter-spacing: 0.5px;
 }
 
 .strict-badge {
-  background: #E63946;
-  color: white;
-  font-size: 11px;
-  font-weight: 800;
-  padding: 4px 8px;
-  border-radius: 12px;
+    background: #e63946;
+    color: white;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 8px;
+    border-radius: 12px;
 }
 
 .strict-badge.hidden {
-  display: none;
+    display: none;
 }
 
 .longbreak-clock {
-  font-size: 54px;
-  font-weight: 900;
-  color: #023E8A;
-  letter-spacing: -1px;
-  font-variant-numeric: tabular-nums;
-  margin: 6px 0 10px 0;
-  text-shadow: 0 2px 10px rgba(0, 119, 182, 0.2);
+    font-size: 54px;
+    font-weight: 900;
+    color: #023e8a;
+    letter-spacing: -1px;
+    font-variant-numeric: tabular-nums;
+    margin: 6px 0 10px 0;
+    text-shadow: 0 2px 10px rgba(0, 119, 182, 0.2);
 }
 
 .longbreak-title {
-  font-size: 17px;
-  font-weight: 700;
-  color: #1E293B;
-  margin-bottom: 8px;
+    font-size: 17px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
 }
 
 .longbreak-desc {
-  font-size: 13.5px;
-  line-height: 1.55;
-  color: #475569;
-  margin-bottom: 20px;
-  font-weight: 500;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: #475569;
+    margin-bottom: 20px;
+    font-weight: 500;
 }
 
 .longbreak-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
 }
 
 .longbreak-btn {
-  flex: 1;
-  padding: 10px 14px;
-  border-radius: 14px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-  border: none;
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
 }
 
 .longbreak-btn.secondary {
-  background: #E2E8F0;
-  color: #334155;
+    background: #e2e8f0;
+    color: #334155;
 }
 
 .longbreak-btn.secondary:hover {
-  background: #CBD5E1;
+    background: #cbd5e1;
 }
 
 .longbreak-btn.outline {
-  background: transparent;
-  border: 1px solid #CBD5E1;
-  color: #64748B;
+    background: transparent;
+    border: 1px solid #cbd5e1;
+    color: #64748b;
 }
 
 .longbreak-btn.outline:hover {
-  background: rgba(226, 232, 240, 0.4);
-  color: #1E293B;
+    background: rgba(226, 232, 240, 0.4);
+    color: #1e293b;
 }
 
 /* 4. Modal Backdrop & Settings Form */
+/* Neo ở góc DƯỚI-PHẢI (cùng hệ với chú cún và khung chat) để kích thước thẻ
+   KHÔNG phụ thuộc kích thước cửa sổ — nhờ vậy window-fit đo được ổn định và
+   cửa sổ co giãn vừa khít bảng mà không nhảy vị trí. */
 .modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  z-index: 1500;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    padding: var(--fit-pad, 20px);
+    box-sizing: border-box;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 1500;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    overflow: hidden;
 }
 
 .modal-backdrop.hidden {
-  display: none !important;
+    display: none !important;
 }
 
 .modal-card {
-  width: 92%;
-  max-width: 380px;
-  background: #FFFFFF;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  animation: zoomIn 0.25s ease-out;
+    width: 380px;
+    max-width: calc(var(--screen-width, 1920px) - 16px);
+    flex-shrink: 0;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: zoomIn 0.25s ease-out;
 }
 
 .modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 18px;
-  border-bottom: 1px solid #EDF2F7;
-  background: #F8FAFC;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    border-bottom: 1px solid #edf2f7;
+    background: #f8fafc;
 }
 
 .modal-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: #1E293B;
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
 }
 
 .modal-body.settings-form {
-  padding: 16px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  max-height: 440px;
-  overflow-y: auto;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-height: var(--modal-max-height, 520px);
+    overflow-y: auto;
 }
 
 .setting-item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .setting-item.switch-item {
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
 }
 
 .setting-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: #1E293B;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
 }
 
 .setting-desc {
-  font-size: 11px;
-  color: #64748B;
-  line-height: 1.35;
+    font-size: 11px;
+    color: #64748b;
+    line-height: 1.35;
 }
 
 .setting-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .setting-row select {
-  padding: 6px 8px;
-  border-radius: 8px;
-  border: 1px solid #CBD5E1;
-  font-size: 12px;
-  color: #1E293B;
-  background: #FFFFFF;
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 12px;
+    color: #1e293b;
+    background: #ffffff;
 }
 
 .unit-label {
-  font-size: 11.5px;
-  color: #64748B;
-  font-weight: 500;
+    font-size: 11.5px;
+    color: #64748b;
+    font-weight: 500;
 }
 
 /* Toggle Switch */
 .toggle-switch {
-  position: relative;
-  display: inline-block;
-  width: 44px;
-  height: 24px;
-  flex-shrink: 0;
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
 }
 
 .toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
+    opacity: 0;
+    width: 0;
+    height: 0;
 }
 
 .slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #CBD5E1;
-  transition: .3s;
-  border-radius: 24px;
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    transition: 0.3s;
+    border-radius: 24px;
 }
 
 .slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: .3s;
-  border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 input:checked + .slider {
-  background-color: #2A9D8F;
+    background-color: #2a9d8f;
 }
 
 input:checked + .slider:before {
-  transform: translateX(20px);
+    transform: translateX(20px);
 }
 
 .modal-footer {
-  padding: 12px 18px;
-  background: #F8FAFC;
-  border-top: 1px solid #EDF2F7;
-  display: flex;
-  justify-content: flex-end;
+    padding: 12px 18px;
+    background: #f8fafc;
+    border-top: 1px solid #edf2f7;
+    display: flex;
+    justify-content: flex-end;
 }
 
 .modal-btn.primary {
-  background: #2A9D8F;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  padding: 8px 18px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
+    background: #2a9d8f;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
 }
 
 .modal-btn.primary:hover {
-  background: #21867a;
+    background: #21867a;
 }
 
 /* ===================================================
    CHÚ CÚN 3D CHIBI (ORIGINAL MASCOT ANIMATIONS)
    =================================================== */
 .pet-draggable {
-  position: relative;
-  cursor: grab;
-  transform-origin: center bottom;
-  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    cursor: grab;
+    transform-origin: center bottom;
+    transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .pet-draggable:active {
-  cursor: grabbing;
+    cursor: grabbing;
 }
 
 /* Mặc định: Mắt mở, mí mắt nhắm ẩn */
 .eye-open {
-  display: block;
+    display: block;
 }
 .eye-closed {
-  display: none;
+    display: none;
 }
 
 /* Hiệu ứng tim bay khi click vuốt ve */
 .heart-effect {
-  position: absolute;
-  top: -20px;
-  left: 50%;
-  transform: translateX(-50%) scale(0);
-  font-size: 26px;
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%) scale(0);
+    font-size: 26px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .heart-effect.animate {
-  transform: translateX(-50%) translateY(-35px) scale(1.3);
-  opacity: 1;
+    transform: translateX(-50%) translateY(-35px) scale(1.3);
+    opacity: 1;
 }
 
 /* Hiệu ứng ngủ z Z Z */
 .zzz-effect {
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  font-size: 18px;
-  font-weight: 800;
-  color: #4A5568;
-  opacity: 0;
-  pointer-events: none;
-  text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 18px;
+    font-weight: 800;
+    color: #4a5568;
+    opacity: 0;
+    pointer-events: none;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 /* Nhịp thở nhẹ nhàng của cún (breathing) */
 @keyframes breathing {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02) translateY(-2px); }
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02) translateY(-2px);
+    }
 }
 
 .body-group {
-  animation: breathing 3.5s ease-in-out infinite;
-  transform-origin: 110px 198px;
+    animation: breathing 3.5s ease-in-out infinite;
+    transform-origin: 110px 198px;
 }
 
 /* Hoạt họa vẫy đuôi mặc định */
 @keyframes wagTail {
-  0%, 100% { transform: rotate(-5deg); }
-  50% { transform: rotate(18deg); }
+    0%,
+    100% {
+        transform: rotate(-5deg);
+    }
+    50% {
+        transform: rotate(18deg);
+    }
 }
 
 .tail-group {
-  animation: wagTail 1.2s ease-in-out infinite;
-  transform-origin: 152px 165px;
+    animation: wagTail 1.2s ease-in-out infinite;
+    transform-origin: 152px 165px;
 }
 
 /* Hoạt họa vẫy đuôi cực vui khi đón chào Chủ nhân */
 @keyframes fastWagTail {
-  0%, 100% { transform: rotate(-18deg); }
-  50% { transform: rotate(32deg); }
+    0%,
+    100% {
+        transform: rotate(-18deg);
+    }
+    50% {
+        transform: rotate(32deg);
+    }
 }
 
 /* Hoạt họa chớp mắt khi thức */
 @keyframes blink {
-  0%, 94%, 98%, 100% { transform: scaleY(1); }
-  96% { transform: scaleY(0.1); }
+    0%,
+    94%,
+    98%,
+    100% {
+        transform: scaleY(1);
+    }
+    96% {
+        transform: scaleY(0.1);
+    }
 }
 
 .eye-open {
-  animation: blink 4.2s infinite;
-  transform-origin: center;
+    animation: blink 4.2s infinite;
+    transform-origin: center;
 }
 
 /* ===================================================
    TRẠNG THÁI KHỞI ĐỘNG (WELCOMING - NHẢY NHÓT MỪNG RỠ)
    =================================================== */
 @keyframes welcomeBounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-14px) scale(1.03); }
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-14px) scale(1.03);
+    }
 }
 
 .state-welcoming .pet-draggable {
-  animation: welcomeBounce 0.6s ease-in-out infinite;
+    animation: welcomeBounce 0.6s ease-in-out infinite;
 }
 
 .state-welcoming .tail-group {
-  animation: fastWagTail 0.25s ease-in-out infinite;
+    animation: fastWagTail 0.25s ease-in-out infinite;
 }
 
 /* ===================================================
    TRẠNG THÁI NGỦ CANH NHÀ (GUARD-SLEEPING)
    =================================================== */
 .state-sleeping .eye-open {
-  display: none;
+    display: none;
 }
 
 .state-sleeping .eye-closed {
-  display: block;
+    display: block;
 }
 
 /* Hàng lông mi cong vút rung rinh nhẹ khi thở */
 @keyframes lashBreathe {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.03) translateY(-0.8px); }
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.03) translateY(-0.8px);
+    }
 }
 
 .state-sleeping .eyelash {
-  animation: lashBreathe 4s ease-in-out infinite;
+    animation: lashBreathe 4s ease-in-out infinite;
 }
 
 /* Tư thế nằm ngủ canh nhà: đầu gối lên chân trước */
 .state-sleeping .head-group {
-  transform: translateY(12px) scale(0.97);
-  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    transform: translateY(12px) scale(0.97);
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .state-sleeping .body-group {
-  animation: sleepBreathing 4.5s ease-in-out infinite;
+    animation: sleepBreathing 4.5s ease-in-out infinite;
 }
 
 @keyframes sleepBreathing {
-  0%, 100% { transform: scale(0.98) translateY(6px); }
-  50% { transform: scale(1.01) translateY(3px); }
+    0%,
+    100% {
+        transform: scale(0.98) translateY(6px);
+    }
+    50% {
+        transform: scale(1.01) translateY(3px);
+    }
 }
 
 .state-sleeping .tail-group {
-  animation: wagTail 4s ease-in-out infinite; /* vẫy cực chậm */
+    animation: wagTail 4s ease-in-out infinite; /* vẫy cực chậm */
 }
 
 .state-sleeping .zzz-effect {
-  opacity: 0.95;
-  animation: zzzFloat 2.8s infinite;
+    opacity: 0.95;
+    animation: zzzFloat 2.8s infinite;
 }
 
 @keyframes zzzFloat {
-  0% { transform: translate(0, 0) scale(0.7); opacity: 0; }
-  40% { opacity: 0.95; }
-  100% { transform: translate(20px, -30px) scale(1.3); opacity: 0; }
+    0% {
+        transform: translate(0, 0) scale(0.7);
+        opacity: 0;
+    }
+    40% {
+        opacity: 0.95;
+    }
+    100% {
+        transform: translate(20px, -30px) scale(1.3);
+        opacity: 0;
+    }
 }
 
 /* ===================================================
    TRẠNG THÁI SUY NGHĨ / NÓI / VUI VẺ
    =================================================== */
 .state-thinking .head-group {
-  transform: rotate(10deg);
-  transition: transform 0.4s ease;
-  transform-origin: 110px 100px;
+    transform: rotate(10deg);
+    transition: transform 0.4s ease;
+    transform-origin: 110px 100px;
 }
 
 @keyframes talkingMouth {
-  0%, 100% { transform: translateY(0) scaleY(1); }
-  50% { transform: translateY(3px) scaleY(1.4); }
+    0%,
+    100% {
+        transform: translateY(0) scaleY(1);
+    }
+    50% {
+        transform: translateY(3px) scaleY(1.4);
+    }
 }
 
 .state-talking .mouth-group {
-  animation: talkingMouth 0.25s infinite;
-  transform-origin: 110px 90px;
+    animation: talkingMouth 0.25s infinite;
+    transform-origin: 110px 90px;
 }
 
 .state-talking .tail-group {
-  animation: fastWagTail 0.35s ease-in-out infinite;
+    animation: fastWagTail 0.35s ease-in-out infinite;
 }
 
 .state-happy .pet-draggable {
-  animation: welcomeBounce 0.4s ease;
+    animation: welcomeBounce 0.4s ease;
 }
 
 .state-happy .tail-group {
-  animation: fastWagTail 0.2s ease-in-out infinite;
+    animation: fastWagTail 0.2s ease-in-out infinite;
 }
 
 /* ===================================================
@@ -1231,125 +1351,182 @@ input:checked + .slider:before {
 
 /* 1. Bài tập chớp mắt liên tục (Rapid Blinking) */
 @keyframes rapidBlink {
-  0%, 15%, 30%, 45%, 60%, 75%, 90%, 100% {
-    transform: scaleY(1);
-  }
-  7.5%, 22.5%, 37.5%, 52.5%, 67.5%, 82.5% {
-    transform: scaleY(0.08);
-  }
+    0%,
+    15%,
+    30%,
+    45%,
+    60%,
+    75%,
+    90%,
+    100% {
+        transform: scaleY(1);
+    }
+    7.5%,
+    22.5%,
+    37.5%,
+    52.5%,
+    67.5%,
+    82.5% {
+        transform: scaleY(0.08);
+    }
 }
 
 .exercise-blink .eye-open {
-  animation: rapidBlink 3.2s ease-in-out infinite !important;
-  transform-origin: 110px 68px;
+    animation: rapidBlink 3.2s ease-in-out infinite !important;
+    transform-origin: 110px 68px;
 }
 
 /* 2. Bài tập đảo mắt sang trái - phải (Look Left & Right) */
 @keyframes lookLeftRight {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-6px); }
-  50% { transform: translateX(0); }
-  75% { transform: translateX(6px); }
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-6px);
+    }
+    50% {
+        transform: translateX(0);
+    }
+    75% {
+        transform: translateX(6px);
+    }
 }
 
 .exercise-left-right .eye-pupil-group {
-  animation: lookLeftRight 2.8s ease-in-out infinite !important;
+    animation: lookLeftRight 2.8s ease-in-out infinite !important;
 }
 
 .exercise-left-right .head-group {
-  animation: slightHeadTilt 2.8s ease-in-out infinite;
+    animation: slightHeadTilt 2.8s ease-in-out infinite;
 }
 
 @keyframes slightHeadTilt {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-4deg); }
-  75% { transform: rotate(4deg); }
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(-4deg);
+    }
+    75% {
+        transform: rotate(4deg);
+    }
 }
 
 /* 3. Bài tập xoay tròn mắt 360 độ (Eye Rolling) */
 @keyframes eyeRollCircular {
-  0% { transform: translate(0, 0); }
-  25% { transform: translate(4px, -3px); }
-  50% { transform: translate(0, -5px); }
-  75% { transform: translate(-4px, -3px); }
-  100% { transform: translate(0, 0); }
+    0% {
+        transform: translate(0, 0);
+    }
+    25% {
+        transform: translate(4px, -3px);
+    }
+    50% {
+        transform: translate(0, -5px);
+    }
+    75% {
+        transform: translate(-4px, -3px);
+    }
+    100% {
+        transform: translate(0, 0);
+    }
 }
 
 .exercise-roll .eye-pupil-group {
-  animation: eyeRollCircular 2.4s linear infinite !important;
+    animation: eyeRollCircular 2.4s linear infinite !important;
 }
 
 /* 4. Bài tập nhìn ra xa (Look Far Away > 6m) */
 @keyframes lookFar {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-5px) scale(0.92); }
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(-5px) scale(0.92);
+    }
 }
 
 .exercise-look-far .eye-pupil-group {
-  animation: lookFar 3s ease-in-out infinite !important;
+    animation: lookFar 3s ease-in-out infinite !important;
 }
 
 .exercise-look-far .head-group {
-  transform: translateY(-4px) scale(1.02);
-  transition: transform 0.5s ease;
+    transform: translateY(-4px) scale(1.02);
+    transition: transform 0.5s ease;
 }
 
 /* 5. Cún vươn vai thư giãn & Uống nước (Long Break Stretch) */
 @keyframes puppyStretchMotion {
-  0%, 100% {
-    transform: translateY(0) scale(1);
-  }
-  50% {
-    transform: translateY(6px) scaleX(1.04) scaleY(0.96);
-  }
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(6px) scaleX(1.04) scaleY(0.96);
+    }
 }
 
 .exercise-stretch .head-group {
-  transform: translateY(-8px) rotate(-3deg);
-  transition: transform 0.6s ease;
+    transform: translateY(-8px) rotate(-3deg);
+    transition: transform 0.6s ease;
 }
 
 .exercise-stretch .body-group {
-  animation: puppyStretchMotion 3.5s ease-in-out infinite;
+    animation: puppyStretchMotion 3.5s ease-in-out infinite;
 }
 
 .exercise-stretch .cup-drink {
-  display: block !important;
-  animation: floatCup 2s ease-in-out infinite;
+    display: block !important;
+    animation: floatCup 2s ease-in-out infinite;
 }
 
 @keyframes floatCup {
-  0%, 100% { transform: translate(136px, 118px); }
-  50% { transform: translate(136px, 112px); }
+    0%,
+    100% {
+        transform: translate(136px, 118px);
+    }
+    50% {
+        transform: translate(136px, 112px);
+    }
 }
 
 /* Hiệu ứng cử động tai vểnh tinh anh */
 @keyframes perkyEarLeft {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(-4deg); }
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+    50% {
+        transform: rotate(-4deg);
+    }
 }
 
 @keyframes perkyEarRight {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(4deg); }
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+    50% {
+        transform: rotate(4deg);
+    }
 }
 
 .ear-left-perky {
-  transform-origin: 84px 50px;
-  animation: perkyEarLeft 4s ease-in-out infinite;
+    transform-origin: 84px 50px;
+    animation: perkyEarLeft 4s ease-in-out infinite;
 }
 
 .ear-right-perky {
-  transform-origin: 136px 50px;
-  animation: perkyEarRight 4s ease-in-out infinite;
+    transform-origin: 136px 50px;
+    animation: perkyEarRight 4s ease-in-out infinite;
 }
 
 .state-happy .ear-left-perky {
-  animation: perkyEarLeft 0.3s ease-in-out infinite;
+    animation: perkyEarLeft 0.3s ease-in-out infinite;
 }
 
 .state-happy .ear-right-perky {
-  animation: perkyEarRight 0.3s ease-in-out infinite;
+    animation: perkyEarRight 0.3s ease-in-out infinite;
 }
-
-

@@ -77,8 +77,6 @@
         # BamOS CLI — cài qua environment.systemPackages (modules/packages.nix),
         # hoặc build độc lập: nix build .#bam
         bam = nixpkgs.legacyPackages.${system}.callPackage ./pkgs/bam { };
-        # BamOS RAG Service
-        rag = nixpkgs.legacyPackages.${system}.callPackage ./pkgs/rag { };
         # ISO cài đặt cho người dùng khác
         iso = self.nixosConfigurations.installer.config.system.build.isoImage;
         # toplevel máy chính (nix build .)

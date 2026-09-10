@@ -130,6 +130,9 @@ in
     systemd.tmpfiles.rules = [
       "d ${cfg.modelDir} 0777 root root -"
       "d /var/lib/bamos 0777 root root -"
+      # Thư mục tri thức RAG — dùng bởi RAG chromem-go NHÚNG trong BamAI
+      # (pkgs/assistant/rag.go, mặc định /var/lib/bamos/rag/knowledge.db).
+      "d /var/lib/bamos/rag 0777 root root -"
     ];
 
     # Tự động tạo Shortcut trên màn hình Desktop của người dùng

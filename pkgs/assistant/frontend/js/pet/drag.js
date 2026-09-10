@@ -59,10 +59,12 @@ function onPetMouseDown(e) {
     window.addEventListener("mouseup", onMouseUp);
 }
 
+// Kéo cửa sổ từ thanh tiêu đề khung chat (bỏ qua khi bấm vào nút bên trong).
 function onHeaderMouseDown(e) {
-    if (e.target.tagName !== "BUTTON") {
-        native.dragWindow();
-    }
+    if (e.target.closest && e.target.closest("button")) return;
+    // Chặn bôi đen văn bản để trình duyệt nhường thao tác cho việc kéo cửa sổ.
+    e.preventDefault();
+    native.dragWindow();
 }
 
 export function initDrag() {

@@ -1,7 +1,7 @@
 {
-  "uuid": "bamai@bamos",
-  "name": "BamAI Indicator",
-  "description": "Hiện BamAI trên thanh trên cùng của GNOME Shell, kèm menu Hiện / Ẩn / Tắt.",
-  "shell-version": ["45", "46", "47", "48", "49", "50"],
-  "version": 1
+    "uuid": "bamai@bamos",
+    "name": "BamAI Indicator",
+    "description": "Icon Thiết lập BamAI trên thanh trên cùng GNOME Shell: RAG — Tri thức, LLM/SLM, Quản lý nghỉ ngơi, Giới thiệu; kèm Hiện / Ẩn / Tắt BamAI.",
+    "shell-version": ["45", "46", "47", "48", "49", "50"],
+    "version": 3
 }

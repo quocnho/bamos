@@ -47,6 +47,47 @@ static gint g_fit_x = 0, g_fit_y = 0, g_fit_w = 0, g_fit_h = 0;
 // Kích thước nội dung do giao diện yêu cầu.
 static gint g_pending_w = 0, g_pending_h = 0;
 
+// Cờ "đang tự điều khiển hình học": mọi configure-event sinh ra trong lúc này
+// là hệ quả của lệnh resize/move của CHÍNH TA (X11 áp dụng bất đồng bộ), nên
+// KHÔNG được dùng để cập nhật mốc neo — nếu không sẽ đọc phải hình học nửa vời
+// (đã resize nhưng chưa move) và làm cửa sổ nhảy về vị trí cũ.
+static gboolean g_geom_busy = FALSE;
+static guint g_geom_busy_timeout = 0;
+
+static gboolean clear_geom_busy(gpointer user_data) {
+    g_geom_busy_timeout = 0;
+    g_geom_busy = FALSE;
+    return G_SOURCE_REMOVE;
+}
+
+static void mark_geom_busy(void) {
+    g_geom_busy = TRUE;
+    if (g_geom_busy_timeout != 0) g_source_remove(g_geom_busy_timeout);
+    g_geom_busy_timeout = g_timeout_add(250, clear_geom_busy, NULL);
+}
+
+// Ghi nhận mốc neo (góc dưới-phải cửa sổ khít) từ hình học THỰC TẾ.
+static void capture_anchor(int x, int y, int w, int h) {
+    if (x < 0 || y < 0 || w <= 0 || h <= 0) return;
+    g_saved_right = x + w;
+    g_saved_bottom = y + h;
+    g_has_saved_position = TRUE;
+}
+
+// Mốc neo hiện hành: dùng giá trị đã biết; nếu chưa có thì suy ra từ hình học.
+static void current_anchor(int *right, int *bottom) {
+    if (!g_has_saved_position) {
+        gint x = 0, y = 0, w = 0, h = 0;
+        if (g_app.window != NULL) {
+            gtk_window_get_position(GTK_WINDOW(g_app.window), &x, &y);
+            gtk_window_get_size(GTK_WINDOW(g_app.window), &w, &h);
+        }
+        capture_anchor(x, y, w, h);
+    }
+    *right = g_saved_right;
+    *bottom = g_saved_bottom;
+}
+
 // Vùng làm việc của màn hình chính (đã trừ panel).
 static void get_workarea(GdkRectangle *area) {
     area->x = 0; area->y = 0; area->width = 1024; area->height = 768;
@@ -80,24 +121,24 @@ static void set_default_keep_above(gboolean keep_above) {
     g_keep_above = keep_above;
 }
 
-// Ghi khung hiện tại xuống file (chỉ khi đang ở chế độ khít).
+// Ghi mốc neo hiện tại xuống file (chỉ khi đang ở chế độ khít).
 static gboolean do_save_window_state(gpointer user_data) {
     g_save_timeout = 0;
     if (g_app.window == NULL || g_state_path[0] == '\0' || g_in_full) return G_SOURCE_REMOVE;
 
-    gint x = 0, y = 0, w = 0, h = 0;
-    gtk_window_get_position(GTK_WINDOW(g_app.window), &x, &y);
-    gtk_window_get_size(GTK_WINDOW(g_app.window), &w, &h);
-
-    g_saved_right = x + w;
-    g_saved_bottom = y + h;
-    g_has_saved_position = TRUE;
+    if (!g_has_saved_position) {
+        gint x = 0, y = 0, w = 0, h = 0;
+        gtk_window_get_position(GTK_WINDOW(g_app.window), &x, &y);
+        gtk_window_get_size(GTK_WINDOW(g_app.window), &w, &h);
+        capture_anchor(x, y, w, h);
+        if (!g_has_saved_position) return G_SOURCE_REMOVE;
+    }
 
     FILE *fp = fopen(g_state_path, "w");
     if (fp != NULL) {
         // CHỈ lưu góc dưới-phải. Trạng thái ghim thuộc assistant_config.json để
         // tránh hai nguồn sự thật gây kẹt trạng thái.
-        fprintf(fp, "{\"right\":%d,\"bottom\":%d}\n", x + w, y + h);
+        fprintf(fp, "{\"right\":%d,\"bottom\":%d}\n", g_saved_right, g_saved_bottom);
         fclose(fp);
     }
     return G_SOURCE_REMOVE;
@@ -112,11 +153,21 @@ static void schedule_save_window_state(void) {
 
 static gboolean on_window_configure(GtkWidget *widget, GdkEventConfigure *event, gpointer data) {
     // Bỏ qua toạ độ tổng hợp (-1) mà một số compositor gửi.
-    if (event->x >= 0 && event->y >= 0) schedule_save_window_state();
+    if (event->x < 0 || event->y < 0) return FALSE;
+    // Bỏ qua thay đổi do chính ta gây ra (resize/move khít hoặc mở rộng).
+    if (g_in_full || g_geom_busy) return FALSE;
+    // Bỏ qua khung đúng bằng vùng làm việc (tàn dư của chế độ mở rộng).
+    GdkRectangle area;
+    get_workarea(&area);
+    if (event->width >= area.width - 2 && event->height >= area.height - 2) return FALSE;
+
+    // Chỉ tới đây mới là thao tác NGƯỜI DÙNG kéo cửa sổ → cập nhật mốc neo.
+    capture_anchor(event->x, event->y, event->width, event->height);
+    schedule_save_window_state();
     return FALSE;
 }
 
-// Áp dụng kích thước nội dung, GIỮ CỐ ĐỊNH góc dưới-phải để nội dung không nhảy.
+// Áp dụng kích thước nội dung, neo CỐ ĐỊNH góc dưới-phải để nội dung không nhảy.
 static gboolean do_window_fit(gpointer user_data) {
     if (g_app.window == NULL) return G_SOURCE_REMOVE;
 
@@ -132,30 +183,24 @@ static gboolean do_window_fit(gpointer user_data) {
     if (h > area.height - 8) h = area.height - 8;
     if (w > area.width - 8) w = area.width - 8;
 
+    // Mốc neo là nguồn sự thật duy nhất — KHÔNG suy ra từ hình học hiện tại vì
+    // resize/move của X11 bất đồng bộ, đọc giữa chừng sẽ ra toạ độ sai.
+    gint right = 0, bottom = 0;
+    current_anchor(&right, &bottom);
+
+    g_fit_w = w;
+    g_fit_h = h;
+    g_fit_x = right - w;
+    g_fit_y = bottom - h;
+
     if (g_in_full) {
-        // Đang mở rộng: chỉ cập nhật khung khít đã nhớ (giữ nguyên góc dưới-phải).
-        gint right = g_fit_x + g_fit_w;
-        gint bottom = g_fit_y + g_fit_h;
-        g_fit_w = w;
-        g_fit_h = h;
-        g_fit_x = right - w;
-        g_fit_y = bottom - h;
+        // Đang mở rộng: chỉ cập nhật khung khít đã nhớ, không đụng cửa sổ thật.
         return G_SOURCE_REMOVE;
     }
 
-    gint x = 0, y = 0, curW = 0, curH = 0;
-    gtk_window_get_position(GTK_WINDOW(g_app.window), &x, &y);
-    gtk_window_get_size(GTK_WINDOW(g_app.window), &curW, &curH);
-    gint right = x + curW;
-    gint bottom = y + curH;
-
+    mark_geom_busy();
     gtk_window_resize(GTK_WINDOW(g_app.window), w, h);
-    gtk_window_move(GTK_WINDOW(g_app.window), right - w, bottom - h);
-
-    g_fit_x = right - w;
-    g_fit_y = bottom - h;
-    g_fit_w = w;
-    g_fit_h = h;
+    gtk_window_move(GTK_WINDOW(g_app.window), g_fit_x, g_fit_y);
     return G_SOURCE_REMOVE;
 }
 
@@ -172,25 +217,35 @@ static gboolean do_window_set_full(gpointer user_data) {
     if (g_app.window == NULL) return G_SOURCE_REMOVE;
 
     if (enable && !g_in_full) {
-        gint x = 0, y = 0, w = 0, h = 0;
-        gtk_window_get_position(GTK_WINDOW(g_app.window), &x, &y);
-        gtk_window_get_size(GTK_WINDOW(g_app.window), &w, &h);
-        g_fit_x = x;
-        g_fit_y = y;
-        g_fit_w = w;
-        g_fit_h = h;
+        // Ghi nhớ kích thước khung khít đang dùng (do lần fit gần nhất quyết định).
+        if (g_fit_w <= 0 || g_fit_h <= 0) {
+            gint w = 0, h = 0;
+            gtk_window_get_size(GTK_WINDOW(g_app.window), &w, &h);
+            g_fit_w = w;
+            g_fit_h = h;
+        }
+        gint right = 0, bottom = 0;
+        current_anchor(&right, &bottom);
+        g_fit_x = right - g_fit_w;
+        g_fit_y = bottom - g_fit_h;
 
         GdkRectangle area;
         get_workarea(&area);
+        mark_geom_busy();
         gtk_window_resize(GTK_WINDOW(g_app.window), area.width, area.height);
         gtk_window_move(GTK_WINDOW(g_app.window), area.x, area.y);
         g_in_full = TRUE;
     } else if (!enable && g_in_full) {
+        g_in_full = FALSE;
         if (g_fit_w > 0 && g_fit_h > 0) {
+            gint right = 0, bottom = 0;
+            current_anchor(&right, &bottom);
+            g_fit_x = right - g_fit_w;
+            g_fit_y = bottom - g_fit_h;
+            mark_geom_busy();
             gtk_window_resize(GTK_WINDOW(g_app.window), g_fit_w, g_fit_h);
             gtk_window_move(GTK_WINDOW(g_app.window), g_fit_x, g_fit_y);
         }
-        g_in_full = FALSE;
     }
     return G_SOURCE_REMOVE;
 }
@@ -251,6 +306,30 @@ static gboolean do_hide(gpointer user_data) {
 
 static void trigger_window_hide() {
     g_idle_add(do_hide, NULL);
+}
+
+// Mở URL bằng ứng dụng mặc định của hệ thống (thường là trình duyệt). Phải chạy
+// trên luồng chính GTK vì gtk_show_uri_on_window cần cửa sổ.
+static gboolean do_open_url(gpointer user_data) {
+    char *url = (char*)user_data;
+    if (url != NULL) {
+        GError *err = NULL;
+        if (g_app.window != NULL) {
+            gtk_show_uri_on_window(GTK_WINDOW(g_app.window), url, GDK_CURRENT_TIME, &err);
+        } else {
+            g_app_info_launch_default_for_uri(url, NULL, &err);
+        }
+        if (err != NULL) {
+            g_printerr("[BamAI GUI] Không mở được liên kết %s: %s\n", url, err->message);
+            g_error_free(err);
+        }
+    }
+    g_free(url);
+    return G_SOURCE_REMOVE;
+}
+
+static void trigger_open_url(const char *url) {
+    if (url != NULL) g_idle_add(do_open_url, g_strdup(url));
 }
 
 static gboolean do_quit(gpointer user_data) {
@@ -467,6 +546,7 @@ static void setup_window_and_webview(const char *app_url) {
         "    closeApp: function() { post({action: 'close'}); },"
         "    setAlwaysOnTop: function(enable) { post({action: 'set_always_on_top', always_on_top: !!enable}); },"
         "    wakeAI: function() { post({action: 'wake_ai'}); },"
+        "    ensureServices: function() { post({action: 'ensure_services'}); },"
         "    evaluateSleepOrStop: function() { post({action: 'evaluate_sleep_or_stop'}); },"
         "    setContextDir: function(dir) { post({action: 'set_directory', directory: dir}); },"
         "    clearContextDir: function() { post({action: 'clear_directory'}); },"
@@ -476,6 +556,7 @@ static void setup_window_and_webview(const char *app_url) {
         "    setContentSize: function(w, h) { post({action: 'window_fit', width: w, height: h}); },"
         "    setWindowFull: function(full) { post({action: 'window_full', full: !!full}); },"
         "    log: function(message) { post({action: 'log', debug: String(message)}); },"
+        "    openUrl: function(url) { post({action: 'open_url', payload: {url: String(url)}}); },"
         "    stopGeneration: function() { post({action: 'stop'}); },"
         "    ask: function(q, rag, history) { post({action: 'ask', question: q, use_rag: rag, history: history || []}); },"
         // ---- Bảng thiết lập ----
@@ -541,6 +622,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"os/exec"
 	"strings"
@@ -594,6 +676,10 @@ func handleScriptMessage(cMessage *C.char) {
 		return
 	}
 
+	if debugEnabled() {
+		fmt.Printf("[BamAI GUI] action=%s\n", msg.Action)
+	}
+
 	switch msg.Action {
 	case "drag":
 		C.trigger_window_drag()
@@ -638,6 +724,8 @@ func handleScriptMessage(cMessage *C.char) {
 		if debugEnabled() {
 			fmt.Printf("[BamAI UI] %s\n", msg.Debug)
 		}
+	case "open_url":
+		handleOpenURL(msg.Payload)
 	case "get_idle_time":
 		go func() {
 			idleMs := getMutterIdleTimeMs()
@@ -654,14 +742,14 @@ func handleScriptMessage(cMessage *C.char) {
 		if globalAI != nil && globalAI.mem != nil {
 			globalAI.mem.SetActiveDirectory("")
 		}
-	case "wake_ai":
+	case "wake_ai", "ensure_services":
 		if globalAI != nil {
-			go globalAI.StartAIServicesOnDemand(
+			go globalAI.EnsureServices(
 				func(progressMsg string) {
 					pushJSON("onAIWaking", progressMsg)
 				},
-				func() {
-					evalJS("window.onAIReady && window.onAIReady();")
+				func(started bool) {
+					evalJS(fmt.Sprintf("window.onAIReady && window.onAIReady(%t);", started))
 				},
 			)
 		}
@@ -727,6 +815,32 @@ func handleScriptMessage(cMessage *C.char) {
 	}
 }
 
+// handleOpenURL mở liên kết bằng trình duyệt/ứng dụng mặc định của hệ thống.
+// Chỉ chấp nhận http/https để tránh kích hoạt scheme nguy hiểm (file:, smb:…).
+func handleOpenURL(payload json.RawMessage) {
+	var req struct {
+		URL string `json:"url"`
+	}
+	if err := json.Unmarshal(payload, &req); err != nil {
+		return
+	}
+
+	raw := strings.TrimSpace(req.URL)
+	parsed, err := url.Parse(raw)
+	if err != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") {
+		fmt.Printf("[BamAI GUI] Bỏ qua liên kết không hợp lệ: %q\n", raw)
+		return
+	}
+
+	target := parsed.String()
+	if debugEnabled() {
+		fmt.Printf("[BamAI GUI] Mở liên kết: %s\n", target)
+	}
+	cURL := C.CString(target)
+	C.trigger_open_url(cURL)
+	C.free(unsafe.Pointer(cURL))
+}
+
 func escapeJSString(s string) string {
 	s = strings.ReplaceAll(s, "\\", "\\\\")
 	s = strings.ReplaceAll(s, "'", "\\'")
@@ -753,7 +867,7 @@ func getMutterIdleTimeMs() int64 {
 	return val
 }
 
-func StartUI(ai *AIService) {
+func StartUI(ai *AIService, startupPanel string) {
 	globalAI = ai
 
 	subFS, err := fs.Sub(frontendFS, "frontend")
@@ -783,9 +897,25 @@ func StartUI(ai *AIService) {
 		fmt.Fprintf(w, `{"status":"ok","dir":"%s"}`, dir)
 	})
 
+	// API mở bảng thiết lập trong giao diện (menu GNOME Shell gọi vào).
+	mux.HandleFunc("/api/open-settings", func(w http.ResponseWriter, r *http.Request) {
+		panel := r.URL.Query().Get("panel")
+		C.trigger_window_show()
+		if globalAI != nil {
+			go globalAI.EnsureServices(nil, nil)
+		}
+		evalJS(fmt.Sprintf("window.openSettingsPanel && window.openSettingsPanel('%s');", escapeJSString(panel)))
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"status":"ok","panel":"%s"}`, panel)
+	})
+
 	// API hiển thị cún
 	mux.HandleFunc("/api/show", func(w http.ResponseWriter, r *http.Request) {
 		C.trigger_window_show()
+		// Hiện cửa sổ chat ⇒ kiểm tra & khởi động lại dịch vụ AI nếu đã tắt.
+		if globalAI != nil {
+			go globalAI.EnsureServices(nil, nil)
+		}
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintln(w, `{"status":"ok"}`)
 	})
@@ -824,7 +954,14 @@ func StartUI(ai *AIService) {
 		serverURL = fallbackServer.URL
 	}
 
-	cURL := C.CString(serverURL)
+	// URL giao diện: kèm `#panel=<tên>` khi được mở từ menu GNOME Shell để giao
+	// diện tự mở đúng bảng thiết lập sau khi nạp xong (BamAI khởi động lần đầu).
+	uiURL := serverURL
+	if startupPanel != "" {
+		uiURL = serverURL + "#panel=" + url.QueryEscape(startupPanel)
+	}
+
+	cURL := C.CString(uiURL)
 	defer C.free(unsafe.Pointer(cURL))
 
 	C.setup_window_and_webview(cURL)

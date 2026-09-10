@@ -1,44 +1,63 @@
 // ============================================================================
 // BamAI Indicator — GNOME Shell extension (ESM, GNOME 45+)
 // ----------------------------------------------------------------------------
-// Hiện một mục "🐶 BamAI" trên thanh trên cùng của GNOME Shell kèm menu:
-//   • Hiện BamAI        → chạy bamos-assistant (đánh thức/đưa cửa sổ lên trên)
-//   • Ẩn cửa sổ         → bamos-assistant --hide
-//   • Tắt BamAI         → bamos-assistant --quit (dừng AI/RAG rồi thoát)
+// Trên thanh trên cùng hiện icon bánh răng (settings). Bấm vào mở menu sổ xuống:
+//   • RAG — Tri thức       → mở bảng thiết lập tri thức trong BamAI
+//   • LLM / SLM            → mở bảng thiết lập model
+//   • Quản lý nghỉ ngơi    → mở bảng nhắc nghỉ mắt
+//   • Giới thiệu           → mở trang giới thiệu
+//   ───────────────────────
+//   • Hiện BamAI  • Ẩn cửa sổ  •  Tắt BamAI (dừng AI/RAG)
 //
-// Extension KHÔNG phụ thuộc API nội bộ của Shell (chỉ St/panel/menu chuẩn) nên
-// ổn định qua các phiên bản. Mọi lỗi được bắt để không ảnh hưởng tới Shell.
+// Mọi thao tác đều đi qua CLI `bamos-assistant`: nếu ứng dụng đang chạy thì lệnh
+// được chuyển tiếp qua API nội bộ của nó, nên extension không cần biết cổng HTTP.
 // ============================================================================
 
-import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
-import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
-import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
-import St from 'gi://St';
-import Gio from 'gi://Gio';
+import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
+import * as Main from "resource:///org/gnome/shell/ui/main.js";
+import * as PanelMenu from "resource:///org/gnome/shell/ui/panelMenu.js";
+import * as PopupMenu from "resource:///org/gnome/shell/ui/popupMenu.js";
+import St from "gi://St";
+import Gio from "gi://Gio";
 
-const APP_BIN = 'bamos-assistant';
+const APP_BIN = "bamos-assistant";
+
+// [tên icon symbolic, nhãn, tên bảng thiết lập trong BamAI]
+const SETTINGS_ITEMS = [
+    ["folder-documents-symbolic", "RAG — Tri thức", "rag"],
+    ["application-x-executable-symbolic", "LLM / SLM", "llm"],
+    ["view-reveal-symbolic", "Quản lý nghỉ ngơi", "eyeleo"],
+    ["help-about-symbolic", "Giới thiệu", "about"],
+];
 
 export default class BamaiIndicator extends Extension {
     enable() {
-        this._indicator = new PanelMenu.Button(0.0, 'BamAI', false);
+        this._indicator = new PanelMenu.Button(0.0, "Thiết lập BamAI", false);
 
-        // y_align = 2 (Clutter.ActorAlign.CENTER) để nhãn nằm giữa chiều cao panel.
-        const label = new St.Label({
-            text: '🐶 BamAI',
-            y_align: 2,
-            style_class: 'bamai-panel-label',
+        // Icon bánh răng làm điểm nhấn "settings" trên thanh trên cùng.
+        const icon = new St.Icon({
+            icon_name: "emblem-system-symbolic",
+            style_class: "system-status-icon bamai-panel-icon",
+            y_align: 2, // Clutter.ActorAlign.CENTER
         });
-        this._indicator.add_child(label);
+        this._indicator.add_child(icon);
 
-        this._indicator.menu.addAction('Hiện BamAI', () => this._run([]));
-        this._indicator.menu.addAction('Ẩn cửa sổ', () => this._run(['--hide']));
-        this._indicator.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-        this._indicator.menu.addAction('Tắt BamAI (dừng AI/RAG)', () =>
-            this._run(['--quit']),
-        );
+        const menu = this._indicator.menu;
 
-        Main.panel.addToStatusArea('bamai-indicator', this._indicator);
+        for (const [iconName, label, panel] of SETTINGS_ITEMS) {
+            const item = new PopupMenu.PopupImageMenuItem(label, iconName);
+            item.connect("activate", () => this._run(["--settings", panel]));
+            menu.addMenuItem(item);
+        }
+
+        menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        menu.addAction("Hiện BamAI", () => this._run([]));
+        menu.addAction("Ẩn cửa sổ", () => this._run(["--hide"]));
+
+        menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        menu.addAction("Tắt BamAI (dừng AI/RAG)", () => this._run(["--quit"]));
+
+        Main.panel.addToStatusArea("bamai-indicator", this._indicator);
     }
 
     disable() {

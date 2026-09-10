@@ -58,8 +58,9 @@
 
   # ==== Phần riêng của máy LG ====
   my.dev.enable = true; # công cụ dev: Zed, Antigravity, Python, Node, devenv...
-  my.ai.enable = true;  # Local AI (llama-server, Qwen2.5-1.5B) - on-demand
-  my.rag.enable = true; # RAG service (chromem-go) - on-demand
+  my.ai.enable = true; # Local AI (llama-server, Qwen2.5-1.5B) - on-demand
+  # RAG (chromem-go) nằm NGAY TRONG tiến trình BamAI (pkgs/assistant/rag.go) —
+  # không còn dịch vụ bamos-rag riêng, nên không có my.rag nữa.
   my.gpu.enable = true;
   my.gpu.intelBusId = "PCI:0:2:0";
   my.gpu.nvidiaBusId = "PCI:2:0:0";

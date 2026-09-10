@@ -65,6 +65,27 @@ func main() {
 
 	preferX11Backend()
 
+	// --settings <panel>: mở bảng thiết lập (rag|llm|eyeleo|about) — dùng bởi menu
+	// sổ xuống trên thanh trên cùng của GNOME Shell.
+	//  • BamAI đang chạy  -> nhờ instance hiện tại mở bảng.
+	//  • BamAI chưa chạy  -> khởi động kèm `#panel=<tên>` để giao diện tự mở bảng.
+	startupPanel := ""
+	for i := 1; i < len(os.Args); i++ {
+		if os.Args[i] != "--settings" || i+1 >= len(os.Args) {
+			continue
+		}
+		panel := os.Args[i+1]
+		if isAssistantAlreadyRunning() {
+			endpoint := assistantURL("/api/open-settings?panel=" + url.QueryEscape(panel))
+			if _, err := http.Get(endpoint); err != nil {
+				fmt.Printf("[BamAI] Không mở được bảng thiết lập %q: %v\n", panel, err)
+			}
+			return
+		}
+		startupPanel = panel
+		break
+	}
+
 	// Lệnh điều khiển nhanh từ bên ngoài (GNOME Shell indicator, script...).
 	// --hide: ẩn cửa sổ nhưng vẫn chạy nền; --quit: dừng AI/RAG và thoát.
 	for _, arg := range os.Args[1:] {
@@ -133,7 +154,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	StartUI(aiService)
+	StartUI(aiService, startupPanel)
 }
 
 func isAssistantAlreadyRunning() bool {

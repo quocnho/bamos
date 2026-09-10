@@ -240,18 +240,16 @@ function saveSettings() {
     native.saveSettings(payload);
 }
 
+/** Mở bảng thiết lập LLM từ bên ngoài (menu GNOME Shell, IPC...). */
+export function openLlmSettings() {
+    openModal();
+}
+
 // ---------------------------------------------------------------------------
 // Khởi tạo
 // ---------------------------------------------------------------------------
 
 export function initLlmSettings() {
-    if (!els.btnLlmSettings) return;
-
-    els.btnLlmSettings.addEventListener("click", (e) => {
-        e.stopPropagation();
-        openModal();
-    });
-
     els.btnCloseLlmSettings.addEventListener("click", () => {
         hide(els.llmSettingsModal);
     });

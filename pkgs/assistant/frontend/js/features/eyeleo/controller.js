@@ -44,11 +44,6 @@ export class EyeLeoController {
     // Khởi tạo sự kiện
     // -------------------------------------------------------------------------
     initEvents() {
-        els.btnEyeleoToggle.addEventListener("click", (e) => {
-            e.stopPropagation();
-            this.openSettingsModal();
-        });
-
         els.btnCloseEyeleoSettings.addEventListener("click", () =>
             this.closeSettingsModal(),
         );
@@ -310,17 +305,20 @@ export class EyeLeoController {
 
         saveConfig(config);
 
-        els.btnEyeleoToggle.classList.toggle("active", config.enabled);
-        els.btnEyeleoToggle.title = config.enabled
-            ? "Cài đặt EyeLeo (Đang BẬT)"
-            : "Cài đặt EyeLeo (Đang TẮT)";
         happy();
     }
 }
 
+let controller = null;
+
 /** Khởi tạo và chạy bộ đếm EyeLeo. */
 export function initEyeLeo() {
-    const controller = new EyeLeoController();
+    controller = new EyeLeoController();
     controller.start();
     return controller;
+}
+
+/** Mở bảng thiết lập EyeLeo từ bên ngoài (menu GNOME Shell, IPC...). */
+export function openEyeleoSettings() {
+    if (controller) controller.openSettingsModal();
 }

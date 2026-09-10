@@ -536,35 +536,21 @@ cmd_ai() {
         if ! curl -s http://127.0.0.1:9090/health >/dev/null 2>&1; then
           nohup bamos-ai-server >/dev/null 2>&1 &
         fi
-        if ! curl -s http://127.0.0.1:8090/health >/dev/null 2>&1; then
-          PORT=8090 STORAGE_PATH=/var/lib/bamos/rag/knowledge.db LLAMA_HOST=http://127.0.0.1:9090 nohup bamos-rag >/dev/null 2>&1 &
-        fi
       else
         $SUDO systemctl start bamos-ai.service
-        if systemctl list-unit-files bamos-rag.service >/dev/null 2>&1; then
-          info "Khởi động bamos-rag..."
-          $SUDO systemctl start bamos-rag.service
-        fi
       fi
+      # RAG (chromem-go) chạy NGAY TRONG tiến trình BamAI — không có dịch vụ riêng.
       sleep 2
       cmd_ai status
       ;;
     stop)
       info "Dừng bamos-ai service..."
       $SUDO systemctl stop bamos-ai.service
-      if systemctl list-unit-files bamos-rag.service >/dev/null 2>&1; then
-        info "Dừng bamos-rag service..."
-        $SUDO systemctl stop bamos-rag.service
-      fi
-      ok "Đã dừng các dịch vụ BamAI & RAG."
+      ok "Đã dừng dịch vụ BamAI (llama-server)."
       ;;
     restart)
       info "Khởi động lại bamos-ai..."
       $SUDO systemctl restart bamos-ai.service
-      if systemctl list-unit-files bamos-rag.service >/dev/null 2>&1; then
-        info "Khởi động lại bamos-rag..."
-        $SUDO systemctl restart bamos-rag.service
-      fi
       sleep 2
       cmd_ai status
       ;;
@@ -573,13 +559,6 @@ cmd_ai() {
         ok "BamAI (llama-server) đang ${C_GREEN}CHẠY${C_RESET} (http://127.0.0.1:9090)"
       else
         say "${C_YELLOW}[!]${C_RESET} BamAI (llama-server) đang ${C_RED}DỪNG${C_RESET}."
-      fi
-      if systemctl list-unit-files bamos-rag.service >/dev/null 2>&1; then
-        if systemctl is-active --quiet bamos-rag.service 2>/dev/null; then
-          ok "RAG Service (chromem-go) đang ${C_GREEN}CHẠY${C_RESET} (http://127.0.0.1:8090)"
-        else
-          say "${C_YELLOW}[!]${C_RESET} RAG Service đang ${C_RED}DỪNG${C_RESET}."
-        fi
       fi
       ;;
     run)
@@ -654,105 +633,6 @@ cmd_ai() {
   esac
 }
 
-# ---------- RAG Service (chromem-go) ----------
-cmd_rag() {
-  local sub="${1:-status}"
-  if [ $# -gt 0 ]; then shift; fi
-
-  case "$sub" in
-    start)
-      info "Khởi động bamos-rag..."
-      $SUDO systemctl start bamos-rag.service
-      sleep 1
-      cmd_rag status
-      ;;
-    stop)
-      info "Dừng bamos-rag service..."
-      $SUDO systemctl stop bamos-rag.service
-      ok "Đã dừng bamos-rag."
-      ;;
-    restart)
-      info "Khởi động lại bamos-rag..."
-      $SUDO systemctl restart bamos-rag.service
-      sleep 1
-      cmd_rag status
-      ;;
-    status)
-      if systemctl is-active --quiet bamos-rag.service 2>/dev/null; then
-        ok "RAG Service (chromem-go) đang ${C_GREEN}CHẠY${C_RESET} (API: http://127.0.0.1:8090)"
-        say "  🎋 Web Studio (Tiếng Việt): ${C_BOLD}${C_CYAN}http://127.0.0.1:8090${C_RESET}"
-        curl -s http://127.0.0.1:8090/health | jq . 2>/dev/null || true
-      else
-        say "${C_YELLOW}[!]${C_RESET} RAG Service đang ${C_RED}DỪNG${C_RESET}."
-      fi
-      ;;
-    ui)
-      if ! systemctl is-active --quiet bamos-rag.service 2>/dev/null; then
-        warn "RAG Service chưa chạy! Đang khởi động..."
-        cmd_rag start
-      fi
-      info "Mở Web Studio tại http://127.0.0.1:8090..."
-      if command -v xdg-open >/dev/null 2>&1; then
-        xdg-open "http://127.0.0.1:8090" >/dev/null 2>&1 &
-      else
-        say "Hãy mở trình duyệt và truy cập: http://127.0.0.1:8090"
-      fi
-      ;;
-    index)
-      local content="${1:-}"
-      if [ -z "$content" ]; then die "Cách dùng: bam rag index \"Nội dung tài liệu cần lưu trữ\""; fi
-      info "Nạp dữ liệu vào Vector Store..."
-      local payload
-      payload=$(jq -nc --arg c "$content" '{content: $c}')
-      curl -s -X POST http://127.0.0.1:8090/index \
-        -H "Content-Type: application/json" \
-        -d "$payload" | jq .
-      ;;
-    index-file)
-      local file="${1:-}"
-      if [ ! -f "$file" ]; then die "File không tồn tại: $file"; fi
-      info "Nạp nội dung file $file vào Vector Store..."
-      local content
-      content=$(cat "$file")
-      local payload
-      payload=$(jq -nc --arg c "$content" --arg f "$file" '{content: $c, metadata: {source: $f}}')
-      curl -s -X POST http://127.0.0.1:8090/index \
-        -H "Content-Type: application/json" \
-        -d "$payload" | jq .
-      ;;
-    query)
-      local query="${1:-}"
-      if [ -z "$query" ]; then die "Cách dùng: bam rag query \"Câu hỏi cần tìm văn bản liên quan\""; fi
-      info "Truy vấn tương đồng ngữ nghĩa..."
-      local payload
-      payload=$(jq -nc --arg q "$query" '{query: $q, topK: 3}')
-      curl -s -X POST http://127.0.0.1:8090/query \
-        -H "Content-Type: application/json" \
-        -d "$payload" | jq .
-      ;;
-    ask)
-      local question="${1:-}"
-      if [ -z "$question" ]; then die "Cách dùng: bam rag ask \"Câu hỏi cần RAG trả lời\""; fi
-      info "Đang truy vấn RAG và tổng hợp câu trả lời qua Qwen2.5..."
-      local payload
-      payload=$(jq -nc --arg q "$question" '{question: $q, topK: 3}')
-      local resp
-      resp=$(curl -s -X POST http://127.0.0.1:8090/ask \
-        -H "Content-Type: application/json" \
-        -d "$payload")
-      
-      say "${C_BOLD}--- Câu trả lời RAG ---${C_RESET}"
-      printf '%s' "$resp" | jq -r '.answer // empty'
-      say ""
-      say "${C_BOLD}--- Ngữ cảnh tham chiếu ---${C_RESET}"
-      printf '%s' "$resp" | jq -r '.contexts[]?.content'
-      ;;
-    *)
-      say "Cách dùng: bam rag <start|stop|restart|status|index|index-file|query|ask>"
-      ;;
-  esac
-}
-
 # ---------- Trợ giúp ----------
 cmd_help() {
   local topic="${1:-}"
@@ -776,16 +656,15 @@ cmd_help() {
       say "  info           Thông tin hệ thống (host, kernel, phần cứng...)"
       say "  doctor         Kiểm tra sức khỏe hệ thống"
       say "  publish \"msg\"   (máy dev) commit → merge develop→main → push GitHub"
-      say "  ai [subcmd]    Quản lý Local AI (pull, start, stop, status, chat)"
-      say "  rag [subcmd]   Quản lý RAG Engine (start, stop, status, index, query, ask)"
+      say "  ai [subcmd]    Quản lý Local AI (pull, start, stop, status, chat; RAG đã nhúng sẵn trong BamAI)"
       say "  version        Phiên bản bam CLI"
       say "  help [lệnh]    Hướng dẫn chi tiết từng lệnh"
       say ""
       say "${C_BOLD}Môi trường:${C_RESET} BAM_FLAKE_DIR (thư mục flake) • BAM_HOST (tên host) • NO_COLOR (tắt màu)"
       say ""
-      say "Ví dụ: bam switch -u   •   bam ai chat   •   bam rag ask \"tài liệu là gì\""
+      say "Ví dụ: bam switch -u   •   bam ai chat   •   bam info"
       ;;
-    switch | boot | build | dry | update | lock | iso | rollback | generations | gc | info | doctor | publish | ai | rag)
+    switch | boot | build | dry | update | lock | iso | rollback | generations | gc | info | doctor | publish | ai)
       say "${C_BOLD}Lệnh: bam $topic${C_RESET}"
       case "$topic" in
         switch) say "Rebuild + áp dụng ngay cấu hình mới. -u/--update: chạy nix flake update trước." ;;
@@ -802,7 +681,6 @@ cmd_help() {
         doctor) say "Kiểm tra: flake, dung lượng /nix/store, generation, flake.lock, git." ;;
         publish) say "Máy dev: git add → commit → checkout main → merge develop → push cả 2 branch (yêu cầu đang ở develop)." ;;
         ai) say "Quản lý Local AI SLM (llama-server + Qwen2.5-1.5B): pull, start, stop, status, chat." ;;
-        rag) say "Quản lý Embedded RAG Service (Golang + chromem-go): start, stop, status, index, query, ask." ;;
       esac
       ;;
     *)
@@ -833,7 +711,6 @@ main() {
     doctor | health | check) cmd_doctor "$@" ;;
     publish) cmd_publish "$@" ;;
     ai) cmd_ai "$@" ;;
-    rag) cmd_rag "$@" ;;
     host) detect_host ;;
     version | -V | --version) say "bam $VERSION — BamOS CLI" ;;
     *)

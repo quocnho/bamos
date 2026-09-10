@@ -3,6 +3,7 @@
 // ----------------------------------------------------------------------------
 // Quản lý trạng thái hiển thị (state-*), hiệu ứng vui vẻ, đánh thức / cho ngủ
 // và hai bộ đếm thời gian: chào mừng lúc khởi động và tự nghỉ khi không dùng.
+// Mỗi lần MỞ KHUNG CHAT (cún đang thức) đều kiểm tra & khởi động lại dịch vụ AI.
 //
 // Đây là module DUY NHẤT import chat.js (để hiển thị lời nhắn). Chiều phụ
 // thuộc một hướng nên không có import vòng:
@@ -117,10 +118,12 @@ export function wake() {
 
     if (!isAiWoken()) {
         startAiSession();
-    } else if (isHidden(els.speechBubble)) {
-        openBubbleForChat();
     } else {
-        chat.focusInput();
+        if (isHidden(els.speechBubble)) openBubbleForChat();
+        else chat.focusInput();
+        // Hiện khung chat ⇒ kiểm tra & khởi động lại toàn bộ dịch vụ AI nếu đã tắt
+        // (an toàn khi gọi lặp: services.js/Go tự bỏ qua nếu AI đang chạy).
+        native.ensureServices();
     }
 
     resetInactivityTimer();

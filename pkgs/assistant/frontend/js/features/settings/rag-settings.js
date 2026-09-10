@@ -16,7 +16,6 @@ import {
     setAddressing,
     getAddressing,
 } from "../../core/state.js";
-import { refreshRagIndicator } from "../../chat/chat.js";
 
 const ADDRESSING_PRESETS = ["Chủ nhân", "Anh", "Chị", "Bạn", "Em"];
 
@@ -139,7 +138,6 @@ export function handleSettingsLoaded(result) {
     if (els.setRagTopkValue) els.setRagTopkValue.textContent = String(topK);
 
     fillAddressing(settings.addressing);
-    refreshRagIndicator();
 }
 
 export function handleSettingsSaved(result) {
@@ -218,7 +216,6 @@ function saveSettings() {
 
     setRagEnabled(enabled);
     setAddressing(addressing);
-    refreshRagIndicator();
     setStatus("Đang lưu thiết lập…");
 
     native.saveSettings({
@@ -260,18 +257,16 @@ function resetClearButton() {
     if (els.btnRagClear) els.btnRagClear.textContent = "🗑️ Xoá toàn bộ";
 }
 
+/** Mở bảng thiết lập RAG từ bên ngoài (menu GNOME Shell, IPC...). */
+export function openRagSettings() {
+    openModal();
+}
+
 // ---------------------------------------------------------------------------
 // Khởi tạo
 // ---------------------------------------------------------------------------
 
 export function initRagSettings() {
-    if (!els.btnRagSettings) return;
-
-    els.btnRagSettings.addEventListener("click", (e) => {
-        e.stopPropagation();
-        openModal();
-    });
-
     els.btnCloseRagSettings.addEventListener("click", () =>
         hide(els.ragSettingsModal),
     );
@@ -287,7 +282,6 @@ export function initRagSettings() {
 
     els.setRagEnabled.addEventListener("change", () => {
         setRagEnabled(els.setRagEnabled.checked);
-        refreshRagIndicator();
     });
 
     els.setAddressing.addEventListener("change", () => {

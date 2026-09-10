@@ -122,7 +122,7 @@
                 <div class="modal-card">
                     <div class="modal-header">
                         <div class="modal-title">
-                            ⚙️ Cài Đặt Bảo Vệ Mắt EyeLeo
+                            ⏰ Quản lý nghỉ ngơi (EyeLeo)
                         </div>
                         <button
                             id="btn-close-eyeleo-settings"
@@ -132,6 +132,15 @@
                         </button>
                     </div>
                     <div class="modal-body settings-form">
+                        <div class="panel-note">
+                            <span class="note-icon">💡</span>
+                            <div>
+                                Nhắc bạn nghỉ mắt theo
+                                <b>quy tắc 20-20-20</b> và nghỉ dài để vận động
+                                — giảm mỏi mắt, khô mắt và đau lưng.
+                            </div>
+                        </div>
+
                         <div class="setting-item switch-item">
                             <div>
                                 <div class="setting-name">
@@ -273,6 +282,43 @@
                                 <span class="slider"></span>
                             </label>
                         </div>
+
+                        <div class="tips-block">
+                            <div class="tips-title">✨ Gợi ý thiết lập</div>
+                            <ul class="tips-list">
+                                <li>
+                                    <b>Nghỉ ngắn:</b> 20 phút một lần, 20 giây —
+                                    nhìn ra xa khoảng 6m để mắt điều tiết lại.
+                                </li>
+                                <li>
+                                    <b>Nghỉ dài:</b> 50 phút một lần, 5 phút —
+                                    đứng dậy, uống nước, vươn vai.
+                                </li>
+                                <li>
+                                    Bật <b>“Thông báo trước 30 giây”</b> để kịp
+                                    lưu công việc và dòng code.
+                                </li>
+                                <li>
+                                    Bật <b>“Chế độ nghiêm ngặt”</b> nếu hay bỏ
+                                    qua — khi đó không thể tắt nghỉ dài.
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="links-row">
+                            <button
+                                class="link-btn"
+                                data-url="https://en.wikipedia.org/wiki/Computer_vision_syndrome"
+                            >
+                                👁️ Hội chứng thị giác máy tính
+                            </button>
+                            <button
+                                class="link-btn"
+                                data-url="https://nixos.org/manual/nixos/stable/"
+                            >
+                                📘 NixOS Manual
+                            </button>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button
@@ -288,7 +334,7 @@
             <!-- Bong bóng hội thoại AI Chat & RAG -->
             <div id="speech-bubble" class="bubble">
                 <div class="bubble-header" data-drag="true">
-                    <!-- Nhóm trái: ghim (ngoài cùng) → RAG → LLM → tiêu đề -->
+                    <!-- Nhóm trái: ghim trên cùng → tiêu đề. Kéo vùng này để di chuyển cửa sổ. -->
                     <div class="header-left">
                         <button
                             id="btn-always-on-top"
@@ -296,20 +342,6 @@
                             title="Ghim trên cùng màn hình (Always on Top)"
                         >
                             📌
-                        </button>
-                        <button
-                            id="btn-rag-settings"
-                            class="icon-btn active"
-                            title="Thiết lập tri thức RAG"
-                        >
-                            📚
-                        </button>
-                        <button
-                            id="btn-llm-settings"
-                            class="icon-btn"
-                            title="Thiết lập LLM (model, API key)"
-                        >
-                            📓
                         </button>
                         <div class="header-title-block">
                             <div class="app-title">
@@ -323,18 +355,32 @@
                     </div>
                     <div class="window-controls">
                         <button
+                            id="btn-new-chat"
+                            class="icon-btn"
+                            title="Tạo phiên hỏi đáp mới"
+                        >
+                            ＋
+                        </button>
+                        <button
+                            id="btn-recent-chat"
+                            class="icon-btn"
+                            title="Mở lại hội thoại gần đây"
+                        >
+                            🕘
+                        </button>
+                        <button
+                            id="btn-settings"
+                            class="icon-btn"
+                            title="Thiết lập BamAI"
+                        >
+                            ⚙️
+                        </button>
+                        <button
                             id="btn-stop-stream"
                             class="icon-btn stop-btn hidden"
                             title="Dừng câu trả lời"
                         >
                             ⏹
-                        </button>
-                        <button
-                            id="btn-eyeleo-toggle"
-                            class="icon-btn active"
-                            title="Bật/Tắt nhắc EyeLeo (mắt/nước)"
-                        >
-                            ⏰
                         </button>
                         <button
                             id="btn-minimize"
@@ -459,6 +505,15 @@
                         </button>
                     </div>
                     <div class="modal-body settings-form">
+                        <div class="panel-note">
+                            <span class="note-icon">💡</span>
+                            <div>
+                                BamAI trả lời dựa trên
+                                <b>tài liệu bạn nạp</b>. Toàn bộ tri thức chỉ
+                                lưu trên máy này, không gửi đi đâu.
+                            </div>
+                        </div>
+
                         <div class="setting-item switch-item">
                             <div>
                                 <div class="setting-name">
@@ -556,6 +611,47 @@
                             <div id="rag-status" class="settings-status"></div>
                         </div>
 
+                        <div class="tips-block">
+                            <div class="tips-title">✨ Gợi ý thiết lập</div>
+                            <ul class="tips-list">
+                                <li>
+                                    Bật tri thức khi cần BamAI nhớ tài liệu
+                                    riêng; tắt đi khi hỏi kiến thức chung để trả
+                                    lời nhanh hơn.
+                                </li>
+                                <li>
+                                    <b>3–5 đoạn</b> tri thức là đủ cho hầu hết
+                                    câu hỏi; tăng lên <b>6–8</b> nếu tài liệu
+                                    dài, nhiều chương.
+                                </li>
+                                <li>
+                                    Chia tài liệu theo chủ đề, đặt tên rõ ràng
+                                    (ví dụ <code>hopdong-2024.md</code>) để dễ
+                                    tra cứu.
+                                </li>
+                                <li>
+                                    Ưu tiên văn bản thuần: <code>.md</code>,
+                                    <code>.txt</code>, <code>.nix</code>,
+                                    <code>.json</code>, <code>.csv</code>…
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="links-row">
+                            <button
+                                class="link-btn"
+                                data-url="https://www.markdownguide.org/basic-syntax/"
+                            >
+                                📝 Cú pháp Markdown
+                            </button>
+                            <button
+                                class="link-btn"
+                                data-url="https://github.com/quocnho/bamos"
+                            >
+                                🐶 Mã nguồn BamOS
+                            </button>
+                        </div>
+
                         <div class="modal-actions-row">
                             <button
                                 id="btn-save-rag-settings"
@@ -581,6 +677,15 @@
                         </button>
                     </div>
                     <div class="modal-body settings-form">
+                        <div class="panel-note">
+                            <span class="note-icon">💡</span>
+                            <div>
+                                Chọn nơi xử lý câu trả lời: <b>cục bộ</b> (riêng
+                                tư, không cần Internet) hoặc <b>đám mây</b>
+                                (nhanh, cần API key).
+                            </div>
+                        </div>
+
                         <div class="setting-item">
                             <label for="set-llm-provider">Nhà cung cấp:</label>
                             <select id="set-llm-provider">
@@ -717,6 +822,73 @@
                             />
                         </div>
 
+                        <div class="tips-block">
+                            <div class="tips-title">✨ Gợi ý thiết lập</div>
+                            <ul class="tips-list">
+                                <li>
+                                    Máy <b>8GB RAM</b>: dùng Qwen2.5-1.5B (Q4) —
+                                    nhẹ và tiếng Việt tốt.
+                                </li>
+                                <li>
+                                    Có GPU NVIDIA: đặt <b>-ngl = 99</b> để đẩy
+                                    toàn bộ layer lên GPU; không có GPU thì để
+                                    <b>0</b>.
+                                </li>
+                                <li>
+                                    <b>Temperature 0.7</b> cân bằng; giảm về
+                                    0.3–0.5 khi cần câu trả lời chính xác, ít
+                                    sáng tạo.
+                                </li>
+                                <li>
+                                    <b>Context 4096</b> đủ cho hội thoại thường;
+                                    tăng lên nếu bạn dán tài liệu dài.
+                                </li>
+                                <li>
+                                    Đám mây (DeepSeek / OpenAI / Gemini) không
+                                    cần tải model nhưng cần API key và Internet.
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="links-row">
+                            <button
+                                class="link-btn"
+                                data-url="https://huggingface.co/models?search=gguf"
+                            >
+                                📥 Tải model GGUF
+                            </button>
+                            <button
+                                class="link-btn"
+                                data-url="https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF"
+                            >
+                                🤖 Qwen2.5-1.5B-Instruct
+                            </button>
+                            <button
+                                class="link-btn"
+                                data-url="https://github.com/ggml-org/llama.cpp"
+                            >
+                                🦙 llama.cpp
+                            </button>
+                            <button
+                                class="link-btn"
+                                data-url="https://platform.deepseek.com/"
+                            >
+                                🔑 API key DeepSeek
+                            </button>
+                            <button
+                                class="link-btn"
+                                data-url="https://platform.openai.com/api-keys"
+                            >
+                                🔑 API key OpenAI
+                            </button>
+                            <button
+                                class="link-btn"
+                                data-url="https://aistudio.google.com/app/apikey"
+                            >
+                                🔑 API key Gemini
+                            </button>
+                        </div>
+
                         <div id="llm-status" class="settings-status"></div>
 
                         <div class="modal-actions-row">
@@ -742,8 +914,168 @@
                 </div>
             </div>
 
+            <!-- ===== Modal Mở Lại Hội Thoại Gần Đây ===== -->
+            <div id="recent-sessions-modal" class="modal-backdrop hidden">
+                <div class="modal-card settings-modal">
+                    <div class="modal-header">
+                        <div class="modal-title">🕘 Hội Thoại Gần Đây</div>
+                        <button
+                            id="btn-close-recent"
+                            class="icon-btn close-btn"
+                        >
+                            ×
+                        </button>
+                    </div>
+                    <div class="modal-body settings-form">
+                        <div
+                            id="recent-sessions-list"
+                            class="session-list"
+                        ></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Modal Giới Thiệu BamAI ===== -->
+            <div id="about-modal" class="modal-backdrop hidden">
+                <div class="modal-card settings-modal about-card">
+                    <div class="modal-header">
+                        <div class="modal-title">ℹ️ Giới thiệu BamAI</div>
+                        <button id="btn-close-about" class="icon-btn close-btn">
+                            ×
+                        </button>
+                    </div>
+                    <div class="modal-body settings-form about-body">
+                        <div class="about-hero">
+                            <div class="about-logo">🐶</div>
+                            <div class="about-name">BamAI</div>
+                            <div class="about-tagline">
+                                Trợ lý AI ngoại tuyến · BamOS
+                            </div>
+                        </div>
+
+                        <p class="about-text">
+                            <b>BamAI</b> là một package thuộc hệ thống
+                            <b>BamOS</b>, được thiết kế, xây dựng và phát triển
+                            bởi <b>Nguyễn Quốc Nho</b>.
+                        </p>
+
+                        <ul class="about-list">
+                            <li>
+                                🧠 Chạy mô hình ngôn ngữ cục bộ (llama.cpp) —
+                                không cần Internet.
+                            </li>
+                            <li>
+                                📚 Tri thức RAG nhúng (chromem-go) từ tài liệu
+                                của bạn.
+                            </li>
+                            <li>
+                                🐶 Thú cưng ảo tương tác ngay trên màn hình (GTK
+                                + WebKit).
+                            </li>
+                            <li>
+                                👀 Nhắc nhở bảo vệ mắt EyeLeo theo phương pháp
+                                20-20-20.
+                            </li>
+                            <li>
+                                🔒 Hội thoại và tri thức chỉ lưu trên máy, không
+                                gửi đi đâu.
+                            </li>
+                        </ul>
+
+                        <div class="tips-block">
+                            <div class="tips-title">🚀 Bắt đầu nhanh</div>
+                            <ul class="tips-list">
+                                <li>
+                                    Bấm vào chú cún để đánh thức AI và mở khung
+                                    chat.
+                                </li>
+                                <li>
+                                    Nạp tài liệu ở <b>RAG — Tri thức</b> rồi hỏi
+                                    như trò chuyện bình thường.
+                                </li>
+                                <li>
+                                    Dùng <b>＋</b> để mở phiên mới, <b>🕘</b> để
+                                    xem lại hội thoại cũ.
+                                </li>
+                                <li>
+                                    Bật <b>Quản lý nghỉ ngơi</b> để được nhắc
+                                    bảo vệ mắt.
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="links-row">
+                            <button
+                                class="link-btn"
+                                data-url="https://github.com/quocnho/bamos"
+                            >
+                                🐶 Mã nguồn BamOS
+                            </button>
+                            <button
+                                class="link-btn"
+                                data-url="https://nixos.org/manual/nixos/stable/"
+                            >
+                                📘 NixOS Manual
+                            </button>
+                            <button
+                                class="link-btn"
+                                data-url="https://github.com/ggml-org/llama.cpp"
+                            >
+                                🦙 llama.cpp
+                            </button>
+                        </div>
+
+                        <div class="about-meta">
+                            <span>Phiên bản 0.2.0</span>
+                            <span>BamOS · NixOS</span>
+                        </div>
+
+                        <div class="modal-actions-row">
+                            <button
+                                id="btn-about-close"
+                                class="modal-btn primary"
+                            >
+                                Đóng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Tooltip cho chip từ khóa: đặt ngoài .bubble để không bị overflow:hidden cắt -->
             <div id="chip-tooltip" class="chip-tooltip hidden"></div>
+
+            <!-- Menu sổ xuống của nút Thiết lập ⚙ (đặt ngoài .bubble để không bị cắt) -->
+            <div id="settings-menu" class="settings-menu hidden">
+                <button class="settings-menu-item" data-panel="rag">
+                    <span class="smi-icon">📚</span>
+                    <span class="smi-text">
+                        <b>RAG — Tri thức</b>
+                        <small>Nạp tài liệu, xưng hô, số đoạn tri thức</small>
+                    </span>
+                </button>
+                <button class="settings-menu-item" data-panel="llm">
+                    <span class="smi-icon">🧠</span>
+                    <span class="smi-text">
+                        <b>LLM / SLM</b>
+                        <small>Chọn model cục bộ hoặc API đám mây</small>
+                    </span>
+                </button>
+                <button class="settings-menu-item" data-panel="eyeleo">
+                    <span class="smi-icon">⏰</span>
+                    <span class="smi-text">
+                        <b>Quản lý nghỉ ngơi</b>
+                        <small>Nhắc nghỉ mắt 20-20-20 và nghỉ dài</small>
+                    </span>
+                </button>
+                <button class="settings-menu-item" data-panel="about">
+                    <span class="smi-icon">ℹ️</span>
+                    <span class="smi-text">
+                        <b>Giới thiệu</b>
+                        <small>BamAI — package của BamOS</small>
+                    </span>
+                </button>
+            </div>
 
             <!-- Chú cún con Mascot 3D Chibi (Original BamOS Mascot) -->
             <div

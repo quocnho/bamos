@@ -12,7 +12,7 @@
 
 {
   options.my.dev.enable = lib.mkOption {
-    description = "Cài công cụ phát triển (Zed, Antigravity, Python, Node, devenv...)";
+    description = "Cài công cụ phát triển (Zed, Antigravity, Python, Node, Go, devenv...)";
     type = lib.types.bool;
     default = false;
   };
@@ -33,6 +33,27 @@
       # ---- Node.js (JavaScript/TypeScript) ----
       nodejs # Node LTS + npm đi kèm
       pnpm # quản lý package nhanh, tiết kiệm dung lượng
+
+      # ---- Go (Golang) ----
+      go # toolchain: go build/test/run, go mod, gofmt, go vet
+      gopls # language server cho Zed/Antigravity (gợi ý code, go to def, refactor)
+      gotools # goimports, godoc, guru... (golang.org/x/tools)
+      #     ^ lưu ý: KHÁC "go-tools" bên dưới (gotools = x/tools, go-tools = staticcheck)
+      delve # gỡ lỗi `dlv` (giao thức DAP — debug trực tiếp trong Zed/Antigravity)
+      golangci-lint # lint tổng hợp: govet, errcheck, ineffassign, revive...
+      go-tools # staticcheck + các phân tích tĩnh nâng cao
+      gotestsum # xuất kết quả `go test` dễ đọc hơn (tuỳ chọn, thay cho `go test`)
+      gofumpt # formatter chặt hơn gofmt (tuỳ chọn)
+      # air # live-reload khi phát triển server/binary Go (tuỳ chọn)
+      # goreleaser # đóng gói & phát hành binary đa nền tảng (tuỳ chọn)
+
+      # Go + cgo: BamAI (pkgs/assistant) build bằng cgo + GTK/WebKit
+      #   (#cgo pkg-config: gtk+-3.0 webkit2gtk-4.1)
+      # Muốn `go build` TRỰC TIẾP ngoài Nix (không qua `nix build`) thì bỏ comment
+      # 2 dòng dưới để có header + file .pc, rồi trỏ pkg-config tới profile:
+      #   export PKG_CONFIG_PATH=/run/current-system/sw/lib/pkgconfig
+      # gtk3.dev # header + gtk+-3.0.pc
+      # webkitgtk_4_1.dev # header + webkit2gtk-4.1.pc
 
       # ---- Antigravity (Google — AI IDE + CLI, unfree) ----
       antigravity-ide

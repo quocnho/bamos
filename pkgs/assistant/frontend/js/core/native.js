@@ -38,8 +38,12 @@ export const native = {
     // Nhật ký chẩn đoán (hiện ra stdout của tiến trình Go)
     log: (message) => call("log", message),
 
+    // Mở liên kết bằng trình duyệt/ứng dụng mặc định của hệ thống.
+    openUrl: (url) => call("openUrl", url),
+
     // AI
     wakeAI: () => call("wakeAI"),
+    ensureServices: () => call("ensureServices"),
     evaluateSleepOrStop: () => call("evaluateSleepOrStop"),
     stopGeneration: () => call("stopGeneration"),
     getIdleTime: () => call("getIdleTime"),

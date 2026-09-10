@@ -23,7 +23,9 @@ export const els = {
     // Chú cún + bong bóng chat
     petWrapper: $("pet-wrapper"),
     speechBubble: $("speech-bubble"),
-    bubbleHeader: document.querySelector(".bubble-header"),
+    // PHẢI chỉ định trong #speech-bubble: trang có nhiều .bubble-header (bong bóng
+    // nghỉ ngắn EyeLeo đứng trước trong DOM) nên querySelector đơn thuần sẽ bắt nhầm.
+    bubbleHeader: document.querySelector("#speech-bubble .bubble-header"),
     chatStream: $("chat-stream"),
     chatInput: $("chat-input"),
     btnSend: $("btn-send"),
@@ -34,10 +36,23 @@ export const els = {
     btnMinimize: $("btn-minimize"),
     btnClose: $("btn-close"),
     btnAlwaysOnTop: $("btn-always-on-top"),
-    btnRagSettings: $("btn-rag-settings"),
-    btnLlmSettings: $("btn-llm-settings"),
-    btnEyeleoToggle: $("btn-eyeleo-toggle"),
     btnStopStream: $("btn-stop-stream"),
+
+    // Phiên hội thoại
+    btnNewChat: $("btn-new-chat"),
+    btnRecentChat: $("btn-recent-chat"),
+    recentSessionsModal: $("recent-sessions-modal"),
+    recentList: $("recent-sessions-list"),
+    btnCloseRecent: $("btn-close-recent"),
+
+    // Menu Thiết lập (nút ⚙ ở header)
+    btnSettings: $("btn-settings"),
+    settingsMenu: $("settings-menu"),
+
+    // Giới thiệu BamAI
+    aboutModal: $("about-modal"),
+    btnCloseAbout: $("btn-close-about"),
+    btnAboutClose: $("btn-about-close"),
 
     // Chip gợi ý + tooltip
     smartChips: $("smart-chips"),

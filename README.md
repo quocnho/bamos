@@ -11,19 +11,19 @@ tham khảo sâu dự án [GLF-OS](https://framagit.org/gaming-linux-fr/glf-os/g
 
 ## Tính năng mặc định (khớp bamos.info — "Cài xong là dùng")
 
-| Website bamos.info                     | Trạng thái trong BamOS                                                                       |
-| -------------------------------------- | -------------------------------------------------------------------------------------------- |
-| Bộ gõ tiếng Việt (Unikey)              | ✅ fcitx5 + **fcitx5-unikey** mặc định                                                       |
-| Văn phòng (tương thích MS Office)      | ✅ **LibreOffice** mặc định + **Google Docs/Sheets/Slides** web apps; WPS tùy chọn           |
-| Chrome                                 | ✅ **google-chrome** cài sẵn                                                                 |
-| Zoom                                   | ✅ **zoom-us** cài sẵn                                                                       |
-| Zalo                                   | ⏳ chưa có package nixpkgs (hướng dẫn trong `customConfig/features.nix`)                     |
-| Chỉnh sửa ảnh & video (GIMP, Kdenlive) | ✅ tùy chọn (bỏ comment trong `features.nix`)                                                |
-| Driver NVIDIA                          | ✅ màn chọn GPU trong Calamares (auto/nvidia/intel)                                          |
-| Múi giờ Việt Nam                       | ✅ `Asia/Ho_Chi_Minh` mặc định                                                               |
-| Tự động cập nhật                       | ✅ systemd timer 12h (tham khảo GLF-OS): tải config mới từ GitHub → rebuild boot → thông báo |
-| Không lo virus / Rollback              | ✅ bản chất immutable của NixOS                                                              |
-| Local AI & RAG Engine                  | ✅ **llama-server** + **Qwen2.5-1.5B** + **Golang chromem-go** (on-demand qua `bam ai`/`rag`)  |
+| Website bamos.info                     | Trạng thái trong BamOS                                                                                 |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Bộ gõ tiếng Việt (Unikey)              | ✅ fcitx5 + **fcitx5-unikey** mặc định                                                                 |
+| Văn phòng (tương thích MS Office)      | ✅ **LibreOffice** mặc định + **Google Docs/Sheets/Slides** web apps; WPS tùy chọn                     |
+| Chrome                                 | ✅ **google-chrome** cài sẵn                                                                           |
+| Zoom                                   | ✅ **zoom-us** cài sẵn                                                                                 |
+| Zalo                                   | ⏳ chưa có package nixpkgs (hướng dẫn trong `customConfig/features.nix`)                               |
+| Chỉnh sửa ảnh & video (GIMP, Kdenlive) | ✅ tùy chọn (bỏ comment trong `features.nix`)                                                          |
+| Driver NVIDIA                          | ✅ màn chọn GPU trong Calamares (auto/nvidia/intel)                                                    |
+| Múi giờ Việt Nam                       | ✅ `Asia/Ho_Chi_Minh` mặc định                                                                         |
+| Tự động cập nhật                       | ✅ systemd timer 12h (tham khảo GLF-OS): tải config mới từ GitHub → rebuild boot → thông báo           |
+| Không lo virus / Rollback              | ✅ bản chất immutable của NixOS                                                                        |
+| Local AI & RAG Engine                  | ✅ **llama-server** + **Qwen2.5-1.5B** + **RAG chromem-go nhúng trong BamAI** (on-demand qua `bam ai`) |
 
 > **Vì sao WPS → LibreOffice + Google?** WPS Office trên Linux hay lỗi font tiếng Việt
 > và symbol (ô vuông ☺☻) do thiếu font fallback. BamOS đã cài sẵn font MS (`corefonts`)

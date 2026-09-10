@@ -8,11 +8,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 	"unicode/utf8"
 )
@@ -23,6 +25,10 @@ type AIService struct {
 	fs  *FSTool
 	mem *UserMemory
 	cli *CLIEngine
+
+	// Chống khởi động trùng llama-server khi nhiều yêu cầu dồn tới.
+	startMu  sync.Mutex
+	starting bool
 }
 
 func NewAIService(cfg Config, rag *RAGManager, fsTool *FSTool, mem *UserMemory) *AIService {
@@ -473,9 +479,16 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 	onDone()
 }
 
+// IsAIOffline kiểm tra llama-server (dịch vụ suy luận THỰC TẾ) có sống không.
+// RAG của BamAI là chromem-go NHÚNG trong tiến trình này (rag.go) nên chỉ cần
+// kiểm tra llama-server — không có dịch vụ RAG riêng nào để kiểm tra.
 func (s *AIService) IsAIOffline() bool {
+	host := s.cfg.LlamaHost
+	if host == "" {
+		host = defaultLlamaHost
+	}
 	client := &http.Client{Timeout: 600 * time.Millisecond}
-	resp, err := client.Get("http://127.0.0.1:8090/health")
+	resp, err := client.Get(strings.TrimRight(host, "/") + "/health")
 	if err != nil {
 		return true
 	}
@@ -483,45 +496,109 @@ func (s *AIService) IsAIOffline() bool {
 	return resp.StatusCode != http.StatusOK
 }
 
-// StartAIServicesOnDemand bật llama-server khi cần.
+// startAIServer chạy llama-server qua script bamos-ai-server.
+// Cố ý KHÔNG gọi `bam ai start` để tránh hỏi sudo (sẽ treo GUI). RAG là
+// chromem-go nhúng trong tiến trình này (rag.go) nên không cần dịch vụ ngoài.
+func (s *AIService) startAIServer() error {
+	server := exec.Command("bamos-ai-server")
+	server.Env = s.aiServerEnv(s.cfg.ModelPath)
+	return server.Start()
+}
+
+// aiServerEnv dựng môi trường cho `bamos-ai-server`.
 //
-// RAG của BamAI dùng chromem-go nhúng sẵn trong tiến trình này (xem rag.go),
-// nên KHÔNG khởi động thêm dịch vụ `bamos-rag` — tránh hai tiến trình cùng
-// mở một file database và ghi đè lẫn nhau.
-func (s *AIService) StartAIServicesOnDemand(onProgress func(string), onReady func()) {
+// Quan trọng: gỡ BAMAI_PORT thừa hưởng từ tiến trình cha. Biến này vừa là cổng
+// HTTP nội bộ của BamAI vừa là cổng bind của llama-server trong script; nếu để
+// lọt sang, llama-server sẽ bind trùng cổng và thoát ngay. Ta đặt lại đúng cổng
+// suy ra từ LlamaHost (mặc định 9090).
+func (s *AIService) aiServerEnv(modelPath string) []string {
+	env := make([]string, 0, len(os.Environ())+2)
+	for _, kv := range os.Environ() {
+		if strings.HasPrefix(kv, "BAMAI_PORT=") {
+			continue
+		}
+		env = append(env, kv)
+	}
+	env = append(env, "BAMAI_MODEL_PATH="+modelPath)
+	if port := urlPort(s.cfg.LlamaHost); port != "" {
+		env = append(env, "BAMAI_PORT="+port)
+	}
+	return env
+}
+
+// urlPort lấy cổng từ một URL (ví dụ http://127.0.0.1:9090 -> "9090").
+func urlPort(raw string) string {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return ""
+	}
+	return u.Port()
+}
+
+// waitAIReady chờ llama-server trả /health OK trong tối đa timeout.
+func (s *AIService) waitAIReady(timeout time.Duration) bool {
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		if !s.IsAIOffline() {
+			return true
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+	return !s.IsAIOffline()
+}
+
+// beginStart trả false nếu đang có một lần khởi động dở dang.
+func (s *AIService) beginStart() bool {
+	s.startMu.Lock()
+	defer s.startMu.Unlock()
+	if s.starting {
+		return false
+	}
+	s.starting = true
+	return true
+}
+
+func (s *AIService) endStart() {
+	s.startMu.Lock()
+	s.starting = false
+	s.startMu.Unlock()
+}
+
+// EnsureServices đảm bảo toàn bộ dịch vụ AI đang chạy (llama-server).
+//
+// An toàn khi gọi lặp từ giao diện (mỗi lần mở khung chat):
+//   - Dịch vụ đã sống  -> gọi onReady(false) ngay, KHÔNG hiện thông báo rườm rà.
+//   - Đang khởi động dở -> bỏ qua yêu cầu mới (không tạo tiến trình trùng).
+//   - Đang tắt         -> khởi động rồi gọi onReady(true) khi xong.
+func (s *AIService) EnsureServices(onProgress func(string), onReady func(started bool)) {
 	if !s.IsAIOffline() {
-		onReady()
+		if onReady != nil {
+			onReady(false)
+		}
 		return
 	}
-
-	onProgress("Đang đánh thức AI (bam ai start)...")
-
+	if !s.beginStart() {
+		return
+	}
+	if onProgress != nil {
+		onProgress("Đang khởi động dịch vụ AI (llama-server)…")
+	}
 	go func() {
-		cmd := exec.Command("bam", "ai", "start")
-		_ = cmd.Start()
-
-		if s.IsAIOffline() {
-			server := exec.Command("bamos-ai-server")
-			server.Env = append(os.Environ(), "BAMAI_MODEL_PATH="+s.cfg.ModelPath)
-			_ = server.Start()
+		defer s.endStart()
+		if err := s.startAIServer(); err != nil {
+			fmt.Printf("[BamAI Power] Không khởi động được llama-server: %v\n", err)
 		}
-
-		for i := 0; i < 30; i++ {
-			time.Sleep(500 * time.Millisecond)
-			if !s.IsAIOffline() {
-				break
-			}
+		s.waitAIReady(30 * time.Second)
+		if onReady != nil {
+			onReady(true)
 		}
-
-		onReady()
 	}()
 }
 
 func (s *AIService) StopAllServices() {
-	fmt.Println("[BamAI Power] Đóng toàn bộ dịch vụ AI & RAG theo lệnh người dùng...")
+	fmt.Println("[BamAI Power] Đóng dịch vụ AI (llama-server) theo lệnh người dùng...")
 	_ = exec.Command("pkill", "-9", "-f", "bamos-ai-server").Run()
 	_ = exec.Command("pkill", "-9", "-f", "llama-server").Run()
-	_ = exec.Command("pkill", "-9", "-f", "bamos-rag").Run()
 }
 
 func (s *AIService) EvaluateAndSleepOrStopAI() string {
@@ -547,10 +624,9 @@ func (s *AIService) EvaluateAndSleepOrStopAI() string {
 	}
 
 	if shouldFullStop {
-		fmt.Println("[BamAI Power] Đã tự động tắt dịch vụ AI & RAG để giải phóng 100% tài nguyên.")
+		fmt.Println("[BamAI Power] Đã tự động tắt dịch vụ AI (llama-server) để giải phóng tài nguyên.")
 		_ = exec.Command("pkill", "-f", "bamos-ai-server").Run()
 		_ = exec.Command("pkill", "-f", "llama-server").Run()
-		_ = exec.Command("pkill", "-f", "bamos-rag").Run()
 		return "stopped"
 	}
 

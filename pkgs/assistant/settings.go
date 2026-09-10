@@ -471,14 +471,18 @@ func restartAIServer(modelPath string) error {
 	time.Sleep(700 * time.Millisecond)
 
 	cmd := exec.Command("bamos-ai-server")
-	cmd.Env = append(os.Environ(), "BAMAI_MODEL_PATH="+modelPath)
+	if globalAI != nil {
+		cmd.Env = globalAI.aiServerEnv(modelPath)
+	} else {
+		cmd.Env = append(os.Environ(), "BAMAI_MODEL_PATH="+modelPath)
+	}
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("không khởi động được llama-server: %w", err)
 	}
 	return nil
 }
 
-// ensureAIReady đảm bảo llama-server đang chạy.
+// ensureAIReady đảm bảo llama-server đang chạy (dùng chung với EnsureServices).
 // Khi announce=true, tiến trình hiện tại gửi thông báo tiến độ về giao diện.
 func ensureAIReady(announce bool) bool {
 	if globalAI == nil {
@@ -488,22 +492,13 @@ func ensureAIReady(announce bool) bool {
 		return true
 	}
 
-	if err := exec.Command("bam", "ai", "start").Start(); err != nil && announce {
+	if announce {
 		pushJSON("onRagIndexProgress", map[string]any{"ok": true, "message": "Đang bật AI…"})
 	}
-	if globalAI.IsAIOffline() {
-		server := exec.Command("bamos-ai-server")
-		server.Env = append(os.Environ(), "BAMAI_MODEL_PATH="+globalAI.cfg.ModelPath)
-		_ = server.Start()
+	if err := globalAI.startAIServer(); err != nil {
+		fmt.Printf("[BamAI Settings] Không khởi động được llama-server: %v\n", err)
 	}
-
-	for i := 0; i < 60; i++ {
-		time.Sleep(500 * time.Millisecond)
-		if !globalAI.IsAIOffline() {
-			return true
-		}
-	}
-	return false
+	return globalAI.waitAIReady(30 * time.Second)
 }
 
 // ---------------------------------------------------------------------------
