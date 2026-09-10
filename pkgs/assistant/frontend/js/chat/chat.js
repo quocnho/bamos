@@ -1,22 +1,26 @@
 // ============================================================================
 // chat/chat.js — Điều khiển hội thoại với AI
 // ----------------------------------------------------------------------------
-// Chứa toàn bộ logic gửi câu hỏi, nhận phản hồi streaming và cập nhật giao
-// diện khung chat. Module này KHÔNG import pet.js; thay vào đó phát sự kiện
-// qua bus ("session:ensure-awake", "session:touch") để tránh import vòng.
+// Chứa logic gửi câu hỏi, nhận phản hồi streaming và cập nhật giao diện khung
+// chat. Module này KHÔNG import pet.js; thay vào đó phát sự kiện qua bus
+// ("session:ensure-awake", "session:touch", "chat:asked") để tránh import vòng.
+//
+// Khung hội thoại tách rõ câu hỏi và câu trả lời, mỗi khối có nút sao chép.
 // ============================================================================
 
 import { els, show, hide } from "../core/dom.js";
 import { bus } from "../core/bus.js";
-import { setPetState, isRagEnabled, setRagEnabled } from "../core/state.js";
+import { setPetState, isRagEnabled, getAddressing } from "../core/state.js";
 import { native } from "../core/native.js";
 import { escapeHtml } from "../core/utils.js";
+import { copyText } from "../core/clipboard.js";
 import { renderVisualMarkdown } from "./markdown.js";
 import { createAttachmentManager } from "./attachments.js";
 
 const attachments = createAttachmentManager();
 
 let fullAccumulatedReply = "";
+let lastUserText = "";
 
 // ---------------------------------------------------------------------------
 // Truy vấn nhanh các element động (được tạo lại mỗi lần đổi innerHTML)
@@ -55,6 +59,13 @@ export function setInputValue(text) {
     if (els.chatInput) els.chatInput.value = text;
 }
 
+/** Cập nhật trạng thái bật/tắt trên nút RAG ở header. */
+export function refreshRagIndicator() {
+    if (els.btnRagSettings) {
+        els.btnRagSettings.classList.toggle("active", isRagEnabled());
+    }
+}
+
 /** Gửi câu hỏi hiện tại trong ô nhập liệu. Trả về true nếu đã gửi. */
 export function send() {
     const attachment = attachments.peek();
@@ -83,12 +94,10 @@ export function send() {
 
     els.chatInput.value = "";
     fullAccumulatedReply = "";
+    lastUserText = displayUserMsg;
     show(els.btnStopStream);
 
-    els.chatStream.innerHTML = `
-    <div class="user-query"><b>Chủ nhân:</b> ${escapeHtml(displayUserMsg)}</div>
-    <div class="ai-reply" id="current-reply"><i>Em đang tra cứu và xử lý...</i></div>
-  `;
+    els.chatStream.innerHTML = userBlock(displayUserMsg) + answerBlock();
     scrollToBottom();
 
     els.statusLabel.textContent = isRagEnabled()
@@ -96,8 +105,37 @@ export function send() {
         : "Đang suy nghĩ...";
     setPetState("thinking");
 
+    // Thống kê tần suất từ khóa (features/suggestions.js lắng nghe).
+    bus.emit("chat:asked", displayUserMsg);
+
     native.ask(question, isRagEnabled());
     return true;
+}
+
+// ---------------------------------------------------------------------------
+// Dựng khối câu hỏi / câu trả lời
+// ---------------------------------------------------------------------------
+
+function userBlock(text) {
+    return `
+    <div class="msg msg-user">
+      <div class="msg-head">
+        <span class="msg-role">🧑 ${escapeHtml(getAddressing())}</span>
+        <button class="msg-copy" data-copy="question" title="Sao chép câu hỏi">📋</button>
+      </div>
+      <div class="msg-body">${escapeHtml(text)}</div>
+    </div>`;
+}
+
+function answerBlock() {
+    return `
+    <div class="msg msg-ai">
+      <div class="msg-head">
+        <span class="msg-role">🐶 BamAI</span>
+        <button class="msg-copy" data-copy="answer" title="Sao chép câu trả lời">📋</button>
+      </div>
+      <div class="msg-body" id="current-reply"><i>Em đang tra cứu và xử lý...</i></div>
+    </div>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -113,10 +151,12 @@ export function handleWaking(progressMsg) {
 /** AI + RAG đã sẵn sàng. */
 export function handleReady() {
     setPetState("idle");
-    els.statusLabel.textContent = "Sẵn sàng phục vụ Chủ nhân!";
+    els.statusLabel.textContent = "Sẵn sàng phục vụ";
     showMessage(`
-    <div class="ai-reply">
-      ✨ <b>Gâu gâu!</b> Toàn bộ dịch vụ AI và RAG đã sẵn sàng 100%! Chủ nhân hãy hỏi em bất cứ điều gì nhé!
+    <div class="msg msg-ai">
+      <div class="msg-body">
+        ✨ <b>Gâu gâu!</b> Toàn bộ dịch vụ AI và RAG đã sẵn sàng 100%! ${escapeHtml(getAddressing())} hãy hỏi em bất cứ điều gì nhé!
+      </div>
     </div>
   `);
     focusInput();
@@ -146,7 +186,7 @@ export function handleChunk(chunkText, isFirst) {
 export function handleDone() {
     setPetState("idle");
     hide(els.btnStopStream);
-    els.statusLabel.textContent = "Sẵn sàng phục vụ Chủ nhân!";
+    els.statusLabel.textContent = "Sẵn sàng phục vụ";
 
     const target = replyElement();
     if (target && fullAccumulatedReply) {
@@ -169,25 +209,12 @@ export function handleError(errMsg) {
 }
 
 // ---------------------------------------------------------------------------
-// Hành động trên giao diện
+// Nút dừng và nút sao chép
 // ---------------------------------------------------------------------------
-
-function toggleRag() {
-    setRagEnabled(!isRagEnabled());
-    applyRagUi();
-    focusInput();
-}
-
-function applyRagUi() {
-    const enabled = isRagEnabled();
-    els.btnRagToggle.classList.toggle("active", enabled);
-    els.ragBadge.classList.toggle("off", !enabled);
-    els.ragBadge.textContent = enabled ? "📚 RAG" : "⚡ LLM";
-}
 
 function stopGeneration(e) {
     if (e) e.stopPropagation();
-    console.log("[BamAI] Chủ nhân yêu cầu dừng cưỡng chế câu trả lời...");
+    console.log("[BamAI] Yêu cầu dừng câu trả lời...");
     native.stopGeneration();
     hide(els.btnStopStream);
     setPetState("idle");
@@ -199,6 +226,28 @@ function stopGeneration(e) {
             '<div style="color: #E76F51; font-size: 11.5px; margin-top: 6px;"><i>⏹ (Đã dừng trả lời)</i></div>';
     }
     bus.emit("session:touch");
+}
+
+function flashCopy(button, ok) {
+    const original = "📋";
+    button.classList.toggle("copied", ok);
+    button.textContent = ok ? "✅" : "⚠️";
+    setTimeout(() => {
+        button.classList.remove("copied");
+        button.textContent = original;
+    }, 1200);
+}
+
+function onStreamClick(e) {
+    const button =
+        e.target && e.target.closest ? e.target.closest(".msg-copy") : null;
+    if (!button) return;
+
+    const kind = button.dataset.copy;
+    const text = kind === "answer" ? fullAccumulatedReply : lastUserText;
+    if (!text) return;
+
+    copyText(text).then((ok) => flashCopy(button, ok));
 }
 
 // ---------------------------------------------------------------------------
@@ -219,8 +268,6 @@ export function initChat() {
         bus.emit("session:touch");
     });
 
-    els.btnRagToggle.addEventListener("click", toggleRag);
     els.btnStopStream.addEventListener("click", stopGeneration);
-
-    applyRagUi();
+    els.chatStream.addEventListener("click", onStreamClick);
 }

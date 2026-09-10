@@ -27,8 +27,6 @@ export const els = {
     chatStream: $("chat-stream"),
     chatInput: $("chat-input"),
     btnSend: $("btn-send"),
-    btnRagToggle: $("btn-rag-toggle"),
-    ragBadge: $("rag-badge"),
     statusLabel: $("status-label"),
     heartBurst: $("heart-burst"),
 
@@ -36,8 +34,14 @@ export const els = {
     btnMinimize: $("btn-minimize"),
     btnClose: $("btn-close"),
     btnAlwaysOnTop: $("btn-always-on-top"),
-    btnSleep: $("btn-sleep-cún"),
+    btnRagSettings: $("btn-rag-settings"),
+    btnLlmSettings: $("btn-llm-settings"),
     btnEyeleoToggle: $("btn-eyeleo-toggle"),
+    btnStopStream: $("btn-stop-stream"),
+
+    // Chip gợi ý + tooltip
+    smartChips: $("smart-chips"),
+    chipTooltip: $("chip-tooltip"),
 
     // Cục Xương — bối cảnh thư mục
     boneContextBar: $("bone-context-bar"),
@@ -46,7 +50,6 @@ export const els = {
     mouthBone: $("mouth-bone"),
 
     // Đính kèm tệp/hình ảnh
-    btnStopStream: $("btn-stop-stream"),
     btnAttach: $("btn-attach"),
     fileUploadInput: $("file-upload-input"),
     attachedPreviewBar: $("attached-preview-bar"),
@@ -88,6 +91,49 @@ export const els = {
     setPrebreakNotify: $("set-prebreak-notify"),
     setAutoIdle: $("set-auto-idle"),
     setSoundEnabled: $("set-sound-enabled"),
+
+    // Bảng thiết lập RAG
+    ragSettingsModal: $("rag-settings-modal"),
+    btnCloseRagSettings: $("btn-close-rag-settings"),
+    setRagEnabled: $("set-rag-enabled"),
+    setAddressing: $("set-addressing"),
+    setAddressingCustom: $("set-addressing-custom"),
+    setRagTopk: $("set-rag-topk"),
+    setRagTopkValue: $("set-rag-topk-value"),
+    ragCountBadge: $("rag-count-badge"),
+    ragDropzone: $("rag-dropzone"),
+    ragFileInput: $("rag-file-input"),
+    ragPendingList: $("rag-pending-list"),
+    btnRagIndex: $("btn-rag-index"),
+    btnRagClear: $("btn-rag-clear"),
+    ragStatus: $("rag-status"),
+    btnSaveRagSettings: $("btn-save-rag-settings"),
+
+    // Bảng thiết lập LLM
+    llmSettingsModal: $("llm-settings-modal"),
+    btnCloseLlmSettings: $("btn-close-llm-settings"),
+    setLlmProvider: $("set-llm-provider"),
+    llmKeyDeepseek: $("llm-key-deepseek"),
+    llmKeyOpenai: $("llm-key-openai"),
+    llmKeyGemini: $("llm-key-gemini"),
+    setDeepseekKey: $("set-deepseek-key"),
+    setOpenaiKey: $("set-openai-key"),
+    setGeminiKey: $("set-gemini-key"),
+    llmLocalSection: $("llm-local-section"),
+    setModelDir: $("set-model-dir"),
+    btnLlmRefreshModels: $("btn-llm-refresh-models"),
+    llmModelList: $("llm-model-list"),
+    setModelUrl: $("set-model-url"),
+    btnLlmDownload: $("btn-llm-download"),
+    llmDownloadProgress: $("llm-download-progress"),
+    setTemperature: $("set-temperature"),
+    setTempValue: $("set-temp-value"),
+    setContextSize: $("set-context-size"),
+    setGpuLayers: $("set-gpu-layers"),
+    llmStatus: $("llm-status"),
+    btnLlmTest: $("btn-llm-test"),
+    btnLlmRestart: $("btn-llm-restart"),
+    btnSaveLlmSettings: $("btn-save-llm-settings"),
 };
 
 // ---------------------------------------------------------------------------
@@ -103,4 +149,9 @@ export function hide(node) {
 
 export function isHidden(node) {
     return !node || node.classList.contains("hidden");
+}
+
+/** Hiển thị/ẩn phần tử theo giá trị boolean. */
+export function toggle(node, visible) {
+    if (node) node.classList.toggle("hidden", !visible);
 }

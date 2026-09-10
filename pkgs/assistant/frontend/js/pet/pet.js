@@ -16,7 +16,9 @@ import {
     setPetState,
     isAiWoken,
     setAiWoken,
+    getAddressing,
 } from "../core/state.js";
+import { escapeHtml } from "../core/utils.js";
 import { native } from "../core/native.js";
 import * as chat from "../chat/chat.js";
 
@@ -91,8 +93,10 @@ export function wake() {
         showBubble();
         els.statusLabel.textContent = "Đang khởi động toàn bộ AI & RAG...";
         chat.showMessage(`
-      <div class="ai-reply">
-        🐶 <b>Gâu gâu!</b> Em đã thức dậy phục vụ Chủ nhân rồi đây ạ! Đang khởi động llama-server và cơ sở tri thức... Vui lòng đợi em trong giây lát nhé!
+      <div class="msg msg-ai">
+        <div class="msg-body">
+          🐶 <b>Gâu gâu!</b> Em đã thức dậy phục vụ ${escapeHtml(getAddressing())} rồi đây ạ! Đang khởi động llama-server và cơ sở tri thức... Vui lòng đợi em trong giây lát nhé!
+        </div>
       </div>
     `);
         native.wakeAI();
@@ -146,13 +150,6 @@ export function resetInactivityTimer() {
 // Sự kiện giao diện
 // ---------------------------------------------------------------------------
 
-function onSleepClick(e) {
-    e.stopPropagation();
-    native.evaluateSleepOrStop();
-    setAiWoken(false);
-    sleep();
-}
-
 function onCloseClick(e) {
     e.stopPropagation();
     els.statusLabel.textContent = "Đang đóng ứng dụng và tắt AI/RAG...";
@@ -161,14 +158,27 @@ function onCloseClick(e) {
     }
 }
 
-function onAlwaysOnTopClick(e) {
-    e.stopPropagation();
-    alwaysOnTop = !alwaysOnTop;
+function applyAlwaysOnTopUi() {
     els.btnAlwaysOnTop.classList.toggle("active", alwaysOnTop);
     els.btnAlwaysOnTop.title = alwaysOnTop
         ? "Ghim trên cùng màn hình (Always on Top: BẬT)"
         : "Ghim trên cùng màn hình (Always on Top: TẮT)";
+}
+
+// Đồng bộ trạng thái ghim từ thiết lập đã lưu (gọi khi nạp settings).
+// Không gọi lại native vì phía Go đã áp dụng trạng thái này lúc tạo cửa sổ.
+export function syncAlwaysOnTop(value) {
+    alwaysOnTop = Boolean(value);
+    applyAlwaysOnTopUi();
+}
+
+function onAlwaysOnTopClick(e) {
+    e.stopPropagation();
+    alwaysOnTop = !alwaysOnTop;
+    applyAlwaysOnTopUi();
+    // Áp dụng ngay cho cửa sổ và lưu lại cho lần chạy sau.
     native.setAlwaysOnTop(alwaysOnTop);
+    native.saveSettings({ always_on_top: alwaysOnTop });
 }
 
 // ---------------------------------------------------------------------------
@@ -179,7 +189,6 @@ export function initPet() {
     bus.on("session:ensure-awake", wake);
     bus.on("session:touch", resetInactivityTimer);
 
-    els.btnSleep.addEventListener("click", onSleepClick);
     els.btnMinimize.addEventListener("click", (e) => {
         e.stopPropagation();
         hideBubble();
@@ -188,4 +197,5 @@ export function initPet() {
     if (els.btnAlwaysOnTop) {
         els.btnAlwaysOnTop.addEventListener("click", onAlwaysOnTopClick);
     }
+    applyAlwaysOnTopUi();
 }

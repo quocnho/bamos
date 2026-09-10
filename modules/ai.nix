@@ -21,11 +21,13 @@ let
     set -euo pipefail
 
     MODEL_DIR="${cfg.modelDir}"
-    MODEL_PATH="${cfg.modelPath}"
-    PORT="${toString cfg.port}"
+    # Cho phép BamAI ghi đè khi người dùng chọn model/ tham số khác trên giao diện
+    # (BAMAI_MODEL_PATH, BAMAI_NGL, BAMAI_CTX, BAMAI_PORT).
+    MODEL_PATH="''${BAMAI_MODEL_PATH:-${cfg.modelPath}}"
+    PORT="''${BAMAI_PORT:-${toString cfg.port}}"
     HOST="${cfg.host}"
-    NGL="${toString cfg.gpuLayers}"
-    CTX="${toString cfg.contextSize}"
+    NGL="''${BAMAI_NGL:-${toString cfg.gpuLayers}}"
+    CTX="''${BAMAI_CTX:-${toString cfg.contextSize}}"
 
     # Tạo thư mục model nếu chưa có
     mkdir -p "$MODEL_DIR"
@@ -45,9 +47,13 @@ let
     echo "     GPU Offload layers (-ngl): $NGL"
     echo "     Context size: $CTX"
 
-    UI_CONFIG="${pkgs.writeText "bamai-webui.json" (builtins.toJSON {
-      system_prompt = "Bạn là BamAI - trợ lý ảo thông minh trên hệ điều hành BamOS. Hãy luôn trả lời hoàn toàn bằng Tiếng Việt một cách chuẩn xác, tự nhiên, rõ ràng và thân thiện.";
-    })}"
+    UI_CONFIG="${
+      pkgs.writeText "bamai-webui.json" (
+        builtins.toJSON {
+          system_prompt = "Bạn là BamAI - trợ lý ảo thông minh trên hệ điều hành BamOS. Hãy luôn trả lời hoàn toàn bằng Tiếng Việt một cách chuẩn xác, tự nhiên, rõ ràng và thân thiện.";
+        }
+      )
+    }"
 
     exec ${pkgs.llama-cpp}/bin/llama-server \
       --model "$MODEL_PATH" \

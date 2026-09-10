@@ -10,6 +10,28 @@ import (
 	"time"
 )
 
+// preferX11Backend chọn GDK_BACKEND=x11 khi có XWayland.
+//
+// Lý do: trên GNOME Wayland thuần, các API quản lý cửa sổ mà ứng dụng cần đều
+// là no-op (gtk_window_set_keep_above, gtk_window_move). Chạy qua XWayland
+// (X11) giúp các tính năng "ghim trên cùng", "nhớ vị trí" và "đưa cửa sổ lên
+// trên khi nhắc nghỉ" hoạt động thật.
+//
+// Có thể ghi đè bằng biến môi trường BAMAI_GDK_BACKEND (x11 | wayland).
+func preferX11Backend() {
+	if override := os.Getenv("BAMAI_GDK_BACKEND"); override != "" {
+		_ = os.Setenv("GDK_BACKEND", override)
+		return
+	}
+	if os.Getenv("GDK_BACKEND") != "" {
+		return // người dùng đã tự chọn backend
+	}
+	// DISPLAY được đặt nghĩa là X(XWayland) sẵn sàng → ưu tiên x11.
+	if os.Getenv("DISPLAY") != "" {
+		_ = os.Setenv("GDK_BACKEND", "x11")
+	}
+}
+
 func main() {
 	fmt.Println("==================================================")
 	fmt.Println("🐶 BamOS Mascot AI Assistant (Web Tech + Go Core)")
@@ -17,6 +39,8 @@ func main() {
 	fmt.Println("   - Embedded RAG (chromem-go)")
 	fmt.Println("   - Transparent Desktop Pet Interface")
 	fmt.Println("==================================================")
+
+	preferX11Backend()
 
 	cfg := loadConfig()
 	fmt.Printf("[BamAI] Khởi tạo cấu hình: Provider=%s, RAG=%t, LlamaHost=%s\n", cfg.Provider, cfg.EnableRAG, cfg.LlamaHost)

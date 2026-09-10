@@ -6,56 +6,128 @@ import (
 	"path/filepath"
 )
 
+// Config là cấu hình runtime của BamAI, được lưu tại
+// ~/.config/bamos/assistant_config.json và có thể chỉnh sửa từ bảng
+// thiết lập LLM/RAG trên giao diện.
 type Config struct {
-	Provider    string `json:"provider"`
+	// Nhà cung cấp LLM: local | deepseek | openai | gemini
+	Provider string `json:"provider"`
+
+	// Khóa API cho các nhà cung cấp đám mây
 	DeepSeekKey string `json:"deepseek_key"`
 	OpenAIKey   string `json:"openai_key"`
 	GeminiKey   string `json:"gemini_key"`
-	EnableRAG   bool   `json:"enable_rag"`
-	LlamaHost   string `json:"llama_host"`
-	RAGDBPath   string `json:"rag_db_path"`
+
+	// llama-server cục bộ
+	LlamaHost   string  `json:"llama_host"`
+	ModelDir    string  `json:"model_dir"`
+	ModelPath   string  `json:"model_path"`
+	ContextSize int     `json:"context_size"`
+	GpuLayers   int     `json:"gpu_layers"`
+	Temperature float64 `json:"temperature"`
+
+	// RAG (tri thức nội bộ)
+	EnableRAG bool   `json:"enable_rag"`
+	RAGDBPath string `json:"rag_db_path"`
+	RAGTopK   int    `json:"rag_top_k"`
+
+	// Giao diện & hành vi
+	Addressing  string `json:"addressing"`
+	AlwaysOnTop bool   `json:"always_on_top"`
 }
+
+const (
+	defaultLlamaHost = "http://127.0.0.1:9090"
+	defaultModelDir  = "/var/lib/bamos/models"
+	defaultModelPath = "/var/lib/bamos/models/qwen2.5-1.5b-instruct-q4_k_m.gguf"
+	defaultRAGDBPath = "/var/lib/bamos/rag/knowledge.db"
+)
 
 func defaultConfig() Config {
 	return Config{
-		Provider:  "local",
-		EnableRAG: true,
-		LlamaHost: "http://127.0.0.1:9090",
-		RAGDBPath: "/var/lib/bamos/rag/knowledge.db",
+		Provider:    "local",
+		EnableRAG:   true,
+		LlamaHost:   defaultLlamaHost,
+		ModelDir:    defaultModelDir,
+		ModelPath:   defaultModelPath,
+		RAGDBPath:   defaultRAGDBPath,
+		RAGTopK:     3,
+		Temperature: 0.7,
+		ContextSize: 4096,
+		GpuLayers:   99,
+		Addressing:  "Chủ nhân",
+		AlwaysOnTop: true,
 	}
 }
 
-func getConfigPath() string {
+// bamosConfigDir trả về thư mục ~/.config/bamos (tạo nếu chưa có).
+func bamosConfigDir() string {
 	configDir := os.Getenv("XDG_CONFIG_HOME")
 	if configDir == "" {
 		home, _ := os.UserHomeDir()
 		configDir = filepath.Join(home, ".config")
 	}
 	dir := filepath.Join(configDir, "bamos")
-	_ = os.MkdirAll(dir, 0755)
-	return filepath.Join(dir, "assistant_config.json")
+	_ = os.MkdirAll(dir, 0o755)
+	return dir
+}
+
+func getConfigPath() string {
+	return filepath.Join(bamosConfigDir(), "assistant_config.json")
+}
+
+func getWindowStatePath() string {
+	return filepath.Join(bamosConfigDir(), "window_state.json")
+}
+
+// normalize điền các giá trị mặc định còn thiếu sau khi đọc từ đĩa.
+func (c *Config) normalize() {
+	if c.Provider == "" {
+		c.Provider = "local"
+	}
+	if c.LlamaHost == "" {
+		c.LlamaHost = defaultLlamaHost
+	}
+	if c.ModelDir == "" {
+		c.ModelDir = defaultModelDir
+	}
+	if c.ModelPath == "" {
+		c.ModelPath = defaultModelPath
+	}
+	if c.RAGDBPath == "" {
+		c.RAGDBPath = defaultRAGDBPath
+	}
+	if c.RAGTopK <= 0 {
+		c.RAGTopK = 3
+	}
+	if c.Temperature < 0 {
+		c.Temperature = 0.7
+	}
+	if c.Addressing == "" {
+		c.Addressing = "Chủ nhân"
+	}
+	if c.ContextSize <= 0 {
+		c.ContextSize = 4096
+	}
+	if c.GpuLayers < 0 {
+		c.GpuLayers = 0
+	}
 }
 
 func loadConfig() Config {
 	cfg := defaultConfig()
-	path := getConfigPath()
-	data, err := os.ReadFile(path)
-	if err == nil {
+	if data, err := os.ReadFile(getConfigPath()); err == nil {
 		_ = json.Unmarshal(data, &cfg)
 	}
-	if cfg.LlamaHost == "" {
-		cfg.LlamaHost = "http://127.0.0.1:9090"
-	}
-	if cfg.RAGDBPath == "" {
-		cfg.RAGDBPath = "/var/lib/bamos/rag/knowledge.db"
-	}
+	cfg.normalize()
 	return cfg
 }
 
-func saveConfig(cfg Config) {
-	path := getConfigPath()
+func saveConfig(cfg Config) error {
+	cfg.normalize()
 	data, err := json.MarshalIndent(cfg, "", "  ")
-	if err == nil {
-		_ = os.WriteFile(path, data, 0644)
+	if err != nil {
+		return err
 	}
+	return os.WriteFile(getConfigPath(), data, 0o644)
 }

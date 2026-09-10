@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -151,4 +152,33 @@ func (rm *RAGManager) IndexDocument(ctx context.Context, id, content string, met
 	}
 
 	return col.AddDocument(ctx, doc)
+}
+
+// DocumentCount trả về số tài liệu hiện có trong tri thức.
+func (rm *RAGManager) DocumentCount() int {
+	rm.mu.RLock()
+	col := rm.collection
+	rm.mu.RUnlock()
+	if col == nil {
+		return 0
+	}
+	return col.Count()
+}
+
+// Reset xoá toàn bộ tri thức: xoá file database rồi khởi tạo lại.
+func (rm *RAGManager) Reset() error {
+	rm.mu.Lock()
+	path := rm.dbPath
+	rm.collection = nil
+	rm.db = nil
+	rm.mu.Unlock()
+
+	if path != "" {
+		if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+			return fmt.Errorf("không xoá được dữ liệu tri thức: %w", err)
+		}
+	}
+
+	rm.initDB()
+	return nil
 }

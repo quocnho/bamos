@@ -138,13 +138,15 @@ export class EyeLeoController {
     // -------------------------------------------------------------------------
     // 1. Cảnh báo trước giờ nghỉ dài
     // -------------------------------------------------------------------------
+    // 1. Cảnh báo trước 30 giây (Pre-break notification).
+    // Đưa cửa sổ BamAI lên trên cùng TRƯỚC, rồi mới hiện thông báo để người
+    // dùng chắc chắn nhìn thấy nhắc nhở.
     showPrebreakNotification(remainingSeconds) {
         this.prebreakFired = true;
         els.prebreakSeconds.textContent = remainingSeconds;
-        show(els.eyeleoPrebreakToast);
 
         native.activateAndRaise();
-
+        setTimeout(() => show(els.eyeleoPrebreakToast), 150);
         setTimeout(() => hide(els.eyeleoPrebreakToast), 10000);
     }
 

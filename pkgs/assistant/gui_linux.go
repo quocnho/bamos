@@ -5,6 +5,7 @@ package main
 
 #include <gtk/gtk.h>
 #include <webkit2/webkit2.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 extern void handleScriptMessage(char* message);
@@ -24,6 +25,71 @@ typedef struct {
 } AppWidgets;
 
 static AppWidgets g_app;
+
+// ---------------------------------------------------------------------------
+// Trạng thái cửa sổ (vị trí + ghim trên cùng)
+// ---------------------------------------------------------------------------
+static char g_state_path[4096] = {0};
+static gboolean g_keep_above = TRUE;
+static gboolean g_has_saved_position = FALSE;
+static gint g_saved_x = 0;
+static gint g_saved_y = 0;
+static guint g_save_timeout = 0;
+
+// Đường dẫn file lưu trạng thái cửa sổ (do Go truyền sang).
+static void set_window_state_path(const char *path) {
+    if (path != NULL) {
+        g_strlcpy(g_state_path, path, sizeof(g_state_path));
+    }
+}
+
+// Vị trí + trạng thái ghim khôi phục từ lần chạy trước.
+static void set_initial_geometry(int x, int y, gboolean keep_above) {
+    g_saved_x = x;
+    g_saved_y = y;
+    g_has_saved_position = TRUE;
+    g_keep_above = keep_above;
+}
+
+// Chỉ đặt trạng thái ghim mặc định (khi chưa có vị trí đã lưu).
+static void set_default_keep_above(gboolean keep_above) {
+    g_keep_above = keep_above;
+}
+
+// Ghi vị trí hiện tại xuống file (chỉ gọi trên luồng GTK).
+static gboolean do_save_window_state(gpointer user_data) {
+    g_save_timeout = 0;
+    if (g_app.window == NULL || g_state_path[0] == '\0') return G_SOURCE_REMOVE;
+
+    gint x = 0, y = 0;
+    gtk_window_get_position(GTK_WINDOW(g_app.window), &x, &y);
+
+    // Ghi nhớ để lần map lại cửa sổ không nhảy về vị trí khởi động.
+    g_saved_x = x;
+    g_saved_y = y;
+    g_has_saved_position = TRUE;
+
+    FILE *fp = fopen(g_state_path, "w");
+    if (fp != NULL) {
+        fprintf(fp, "{\"x\":%d,\"y\":%d,\"always_on_top\":%s}\n",
+                x, y, g_keep_above ? "true" : "false");
+        fclose(fp);
+    }
+    return G_SOURCE_REMOVE;
+}
+
+// Gộp nhiều sự kiện di chuyển liên tiếp thành một lần ghi duy nhất.
+static void schedule_save_window_state(void) {
+    if (g_state_path[0] == '\0') return;
+    if (g_save_timeout != 0) g_source_remove(g_save_timeout);
+    g_save_timeout = g_timeout_add(400, do_save_window_state, NULL);
+}
+
+static gboolean on_window_configure(GtkWidget *widget, GdkEventConfigure *event, gpointer data) {
+    // Bỏ qua toạ độ tổng hợp (-1) mà một số compositor gửi.
+    if (event->x >= 0 && event->y >= 0) schedule_save_window_state();
+    return FALSE;
+}
 
 static gboolean do_eval_js(gpointer user_data) {
     char *script = (char*)user_data;
@@ -70,9 +136,17 @@ static void trigger_window_close() {
 
 static gboolean do_set_keep_above(gpointer user_data) {
     gboolean enable = GPOINTER_TO_INT(user_data);
+    g_keep_above = enable;
     if (g_app.window != NULL) {
         gtk_window_set_keep_above(GTK_WINDOW(g_app.window), enable);
+        // Trên X11/XWayland, cần present lại để compositor áp dụng ngay
+        // trạng thái trên-cùng (nếu không, thay đổi chỉ có hiệu lực khi
+        // cửa sổ đổi trạng thái).
+        if (enable) {
+            gtk_window_present(GTK_WINDOW(g_app.window));
+        }
     }
+    schedule_save_window_state();
     return G_SOURCE_REMOVE;
 }
 
@@ -80,17 +154,29 @@ static void trigger_window_set_keep_above(gboolean enable) {
     g_idle_add(do_set_keep_above, GINT_TO_POINTER(enable));
 }
 
+static gboolean clear_urgency_hint(gpointer user_data) {
+    if (g_app.window != NULL) {
+        gtk_window_set_urgency_hint(GTK_WINDOW(g_app.window), FALSE);
+    }
+    return G_SOURCE_REMOVE;
+}
+
 static gboolean do_show(gpointer user_data) {
     if (g_app.window != NULL) {
         gtk_widget_show_all(g_app.window);
-        gtk_window_set_keep_above(GTK_WINDOW(g_app.window), TRUE);
+        gtk_window_set_keep_above(GTK_WINDOW(g_app.window), g_keep_above);
         gtk_window_deiconify(GTK_WINDOW(g_app.window));
-        gtk_window_present(GTK_WINDOW(g_app.window));
+        gtk_window_present_with_time(GTK_WINDOW(g_app.window), GDK_CURRENT_TIME);
         GdkWindow *gdk_win = gtk_widget_get_window(g_app.window);
         if (gdk_win != NULL) {
             gdk_window_raise(gdk_win);
             gdk_window_focus(gdk_win, GDK_CURRENT_TIME);
         }
+        // Nhấp nháy khung + đánh dấu khẩn cấp để compositor/người dùng
+        // nhận ra cửa sổ vừa được đưa lên (đặc biệt khi thông báo EyeLeo
+        // bật lên lúc đang làm việc ở cửa sổ khác).
+        gtk_window_set_urgency_hint(GTK_WINDOW(g_app.window), TRUE);
+        g_timeout_add(2500, clear_urgency_hint, NULL);
     }
     return G_SOURCE_REMOVE;
 }
@@ -133,8 +219,18 @@ static void reposition_to_bottom_right(GtkWindow *window) {
     }
 }
 
+// Khôi phục vị trí lần chạy trước; nếu chưa có thì về góc dưới phải.
+static void apply_initial_position(GtkWindow *window) {
+    if (window == NULL) return;
+    if (g_has_saved_position) {
+        gtk_window_move(window, g_saved_x, g_saved_y);
+    } else {
+        reposition_to_bottom_right(window);
+    }
+}
+
 static gboolean on_window_map(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-    reposition_to_bottom_right(GTK_WINDOW(widget));
+    apply_initial_position(GTK_WINDOW(widget));
     return FALSE;
 }
 
@@ -145,7 +241,7 @@ static gboolean do_fullscreen(gpointer user_data) {
             gtk_window_fullscreen(GTK_WINDOW(g_app.window));
         } else {
             gtk_window_unfullscreen(GTK_WINDOW(g_app.window));
-            reposition_to_bottom_right(GTK_WINDOW(g_app.window));
+            apply_initial_position(GTK_WINDOW(g_app.window));
         }
     }
     return G_SOURCE_REMOVE;
@@ -165,7 +261,7 @@ static void setup_window_and_webview(const char *app_url) {
     gtk_window_set_default_size(GTK_WINDOW(window), 440, 640);
     gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
     gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
-    gtk_window_set_keep_above(GTK_WINDOW(window), TRUE);
+    gtk_window_set_keep_above(GTK_WINDOW(window), g_keep_above);
     gtk_window_set_type_hint(GTK_WINDOW(window), GDK_WINDOW_TYPE_HINT_UTILITY);
     gtk_window_set_skip_taskbar_hint(GTK_WINDOW(window), TRUE);
     gtk_widget_set_app_paintable(window, TRUE);
@@ -180,6 +276,7 @@ static void setup_window_and_webview(const char *app_url) {
     // Kết nối sự kiện draw để xóa sạch nền và bóng viền
     g_signal_connect(window, "draw", G_CALLBACK(on_window_draw), NULL);
     g_signal_connect(window, "map-event", G_CALLBACK(on_window_map), NULL);
+    g_signal_connect(window, "configure-event", G_CALLBACK(on_window_configure), NULL);
 
     // CSS làm trong suốt hoàn toàn khung GtkWindow, loại bỏ mọi bóng mờ Mutter, viền GTK và vệt cuộn
     GtkCssProvider *css = gtk_css_provider_new();
@@ -214,20 +311,37 @@ static void setup_window_and_webview(const char *app_url) {
 
     // Tiêm script shim vào để JS frontend gọi window.assistantNative dễ dàng
     const char *shim =
-        "window.assistantNative = {"
-        "  dragWindow: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'drag'})); },"
-        "  closeApp: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'close'})); },"
-        "  setAlwaysOnTop: function(enable) { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'set_always_on_top', always_on_top: !!enable})); },"
-        "  wakeAI: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'wake_ai'})); },"
-        "  evaluateSleepOrStop: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'evaluate_sleep_or_stop'})); },"
-        "  setContextDir: function(dir) { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'set_directory', directory: dir})); },"
-        "  clearContextDir: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'clear_directory'})); },"
-        "  getIdleTime: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'get_idle_time'})); },"
-        "  activateAndRaise: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'activate_and_raise'})); },"
-        "  setFullscreen: function(fs) { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'set_fullscreen', fullscreen: !!fs})); },"
-        "  stopGeneration: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'stop'})); },"
-        "  ask: function(q, rag) { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'ask', question: q, use_rag: rag})); }"
-        "};";
+        "window.assistantNative = (function() {"
+        "  function post(obj) {"
+        "    window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify(obj));"
+        "  }"
+        "  return {"
+        "    dragWindow: function() { post({action: 'drag'}); },"
+        "    closeApp: function() { post({action: 'close'}); },"
+        "    setAlwaysOnTop: function(enable) { post({action: 'set_always_on_top', always_on_top: !!enable}); },"
+        "    wakeAI: function() { post({action: 'wake_ai'}); },"
+        "    evaluateSleepOrStop: function() { post({action: 'evaluate_sleep_or_stop'}); },"
+        "    setContextDir: function(dir) { post({action: 'set_directory', directory: dir}); },"
+        "    clearContextDir: function() { post({action: 'clear_directory'}); },"
+        "    getIdleTime: function() { post({action: 'get_idle_time'}); },"
+        "    activateAndRaise: function() { post({action: 'activate_and_raise'}); },"
+        "    setFullscreen: function(fs) { post({action: 'set_fullscreen', fullscreen: !!fs}); },"
+        "    stopGeneration: function() { post({action: 'stop'}); },"
+        "    ask: function(q, rag) { post({action: 'ask', question: q, use_rag: rag}); },"
+        // ---- Bảng thiết lập ----
+        "    getSettings: function() { post({action: 'get_settings'}); },"
+        "    saveSettings: function(settings) { post({action: 'save_settings', payload: settings}); },"
+        "    listModels: function() { post({action: 'list_models'}); },"
+        "    downloadModel: function(url, name) { post({action: 'download_model', payload: {url: url, name: name}}); },"
+        "    setActiveModel: function(path) { post({action: 'set_active_model', payload: {path: path}}); },"
+        "    testLLM: function() { post({action: 'test_llm'}); },"
+        "    restartAI: function() { post({action: 'restart_ai'}); },"
+        // ---- Tri thức RAG ----
+        "    ragAddDocuments: function(docs) { post({action: 'rag_add_documents', payload: {documents: docs}}); },"
+        "    ragStats: function() { post({action: 'rag_stats'}); },"
+        "    ragClear: function() { post({action: 'rag_clear'}); }"
+        "  };"
+        "})();";
 
     WebKitUserScript *userScript = webkit_user_script_new(
         shim,
@@ -251,15 +365,15 @@ static void setup_window_and_webview(const char *app_url) {
     gtk_container_add(GTK_CONTAINER(scrolled), webview);
     gtk_container_add(GTK_CONTAINER(window), scrolled);
 
-    // Định vị ban đầu ở góc dưới bên phải
-    reposition_to_bottom_right(GTK_WINDOW(window));
+    // Định vị ban đầu ở góc dưới bên phải (hoặc vị trí đã lưu)
+    apply_initial_position(GTK_WINDOW(window));
 
     // Nạp URL giao diện chú cún từ local web server
     webkit_web_view_load_uri(WEBKIT_WEB_VIEW(webview), app_url);
 
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     gtk_widget_show_all(window);
-    reposition_to_bottom_right(GTK_WINDOW(window));
+    apply_initial_position(GTK_WINDOW(window));
 }
 
 static void run_main_loop() {
@@ -277,6 +391,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"os/exec"
 	"strings"
 	"unsafe"
@@ -286,16 +401,34 @@ import (
 var frontendFS embed.FS
 
 type NativeMessage struct {
-	Action      string `json:"action"`
-	Question    string `json:"question"`
-	Directory   string `json:"directory"`
-	UseRAG      bool   `json:"use_rag"`
-	Fullscreen  bool   `json:"fullscreen"`
-	AlwaysOnTop bool   `json:"always_on_top"`
+	Action      string          `json:"action"`
+	Question    string          `json:"question"`
+	Directory   string          `json:"directory"`
+	UseRAG      bool            `json:"use_rag"`
+	Fullscreen  bool            `json:"fullscreen"`
+	AlwaysOnTop bool            `json:"always_on_top"`
+	Payload     json.RawMessage `json:"payload"`
 }
 
 var globalAI *AIService
 var currentCancel context.CancelFunc
+
+// evalJS chạy một đoạn JavaScript trên luồng chính của GTK.
+func evalJS(script string) {
+	cScript := C.CString(script)
+	C.eval_js_main_thread(cScript)
+	C.free(unsafe.Pointer(cScript))
+}
+
+// pushJSON gọi callback JS kèm dữ liệu JSON (đã escape an toàn).
+func pushJSON(callback string, payload any) {
+	data, err := json.Marshal(payload)
+	if err != nil {
+		fmt.Printf("[BamAI GUI] Lỗi marshal %s: %v\n", callback, err)
+		return
+	}
+	evalJS(fmt.Sprintf("window.%s && window.%s(%s);", callback, callback, string(data)))
+}
 
 //export handleScriptMessage
 func handleScriptMessage(cMessage *C.char) {
@@ -354,17 +487,10 @@ func handleScriptMessage(cMessage *C.char) {
 		if globalAI != nil {
 			go globalAI.StartAIServicesOnDemand(
 				func(progressMsg string) {
-					escaped := escapeJSString(progressMsg)
-					script := fmt.Sprintf("window.onAIWaking && window.onAIWaking('%s');", escaped)
-					cScript := C.CString(script)
-					C.eval_js_main_thread(cScript)
-					C.free(unsafe.Pointer(cScript))
+					pushJSON("onAIWaking", progressMsg)
 				},
 				func() {
-					script := "window.onAIReady && window.onAIReady();"
-					cScript := C.CString(script)
-					C.eval_js_main_thread(cScript)
-					C.free(unsafe.Pointer(cScript))
+					evalJS("window.onAIReady && window.onAIReady();")
 				},
 			)
 		}
@@ -390,29 +516,42 @@ func handleScriptMessage(cMessage *C.char) {
 					msg.Question,
 					msg.UseRAG,
 					func(chunk string) {
-						escaped := escapeJSString(chunk)
-						script := fmt.Sprintf("window.onAIChunk('%s', %t);", escaped, isFirst)
+						evalJS(fmt.Sprintf("window.onAIChunk && window.onAIChunk('%s', %t);", escapeJSString(chunk), isFirst))
 						isFirst = false
-						cScript := C.CString(script)
-						C.eval_js_main_thread(cScript)
-						C.free(unsafe.Pointer(cScript))
 					},
 					func() {
-						script := "window.onAIDone();"
-						cScript := C.CString(script)
-						C.eval_js_main_thread(cScript)
-						C.free(unsafe.Pointer(cScript))
+						evalJS("window.onAIDone && window.onAIDone();")
 					},
 					func(errMsg string) {
-						escaped := escapeJSString(errMsg)
-						script := fmt.Sprintf("window.onAIError('%s');", escaped)
-						cScript := C.CString(script)
-						C.eval_js_main_thread(cScript)
-						C.free(unsafe.Pointer(cScript))
+						evalJS(fmt.Sprintf("window.onAIError && window.onAIError('%s');", escapeJSString(errMsg)))
 					},
 				)
 			}()
 		}
+
+	// ---- Bảng thiết lập (Settings) ----
+	case "get_settings":
+		go handleGetSettings()
+	case "save_settings":
+		go handleSaveSettings(msg.Payload)
+	case "list_models":
+		go handleListModels()
+	case "download_model":
+		go handleDownloadModel(msg.Payload)
+	case "set_active_model":
+		go handleSetActiveModel(msg.Payload)
+	case "test_llm":
+		go handleTestLLM()
+	case "restart_ai":
+		go handleRestartAI()
+
+	// ---- Tri thức RAG ----
+	case "rag_add_documents":
+		go handleRagAddDocuments(msg.Payload)
+	case "rag_stats":
+		go handleRagStats()
+	case "rag_clear":
+		go handleRagClear()
 	}
 }
 
@@ -451,6 +590,9 @@ func StartUI(ai *AIService) {
 		return
 	}
 
+	// Nạp trạng thái cửa sổ (vị trí + ghim trên cùng) từ lần chạy trước.
+	applySavedWindowState(ai)
+
 	mux := http.NewServeMux()
 	fileServer := http.FileServer(http.FS(subFS))
 	mux.Handle("/", fileServer)
@@ -462,11 +604,7 @@ func StartUI(ai *AIService) {
 			if globalAI != nil && globalAI.mem != nil {
 				globalAI.mem.SetActiveDirectory(dir)
 			}
-			escaped := escapeJSString(dir)
-			script := fmt.Sprintf("window.setDirectoryContext && window.setDirectoryContext('%s');", escaped)
-			cScript := C.CString(script)
-			C.eval_js_main_thread(cScript)
-			C.free(unsafe.Pointer(cScript))
+			evalJS(fmt.Sprintf("window.setDirectoryContext && window.setDirectoryContext('%s');", escapeJSString(dir)))
 			C.trigger_window_show()
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -501,4 +639,47 @@ func StartUI(ai *AIService) {
 
 	C.setup_window_and_webview(cURL)
 	C.run_main_loop()
+}
+
+// windowState là trạng thái cửa sổ lưu giữa các lần chạy.
+type windowState struct {
+	X           int  `json:"x"`
+	Y           int  `json:"y"`
+	AlwaysOnTop bool `json:"always_on_top"`
+}
+
+// applySavedWindowState đọc vị trí/ghim đã lưu và chuyển sang tầng C trước
+// khi tạo cửa sổ. Nếu chưa có (hoặc không hợp lệ) thì dùng mặc định.
+func applySavedWindowState(ai *AIService) {
+	// Trạng thái ghim lấy từ thiết lập người dùng (nguồn duy nhất); chỉ có
+	// toạ độ cửa sổ mới đọc từ window_state.json.
+	keepAbove := true
+	if ai != nil {
+		keepAbove = ai.cfg.AlwaysOnTop
+	}
+
+	statePath := getWindowStatePath()
+	cPath := C.CString(statePath)
+	C.set_window_state_path(cPath)
+	C.free(unsafe.Pointer(cPath))
+
+	if data, err := os.ReadFile(statePath); err == nil {
+		var st windowState
+		if json.Unmarshal(data, &st) == nil && st.X >= 0 && st.Y >= 0 {
+			C.set_initial_geometry(C.int(st.X), C.int(st.Y), cBool(keepAbove))
+			return
+		}
+	}
+
+	// Chưa có vị trí đã lưu: giữ vị trí mặc định (góc dưới phải) nhưng vẫn
+	// áp dụng trạng thái ghim và sẽ ghi lại vị trí sau này.
+	C.set_default_keep_above(cBool(keepAbove))
+}
+
+// cBool chuyển bool của Go sang gboolean cho cgo.
+func cBool(v bool) C.gboolean {
+	if v {
+		return 1
+	}
+	return 0
 }

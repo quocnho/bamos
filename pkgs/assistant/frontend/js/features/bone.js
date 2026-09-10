@@ -9,7 +9,7 @@
 import { els, show, hide } from "../core/dom.js";
 import { native } from "../core/native.js";
 import { escapeHtml } from "../core/utils.js";
-import { isAiWoken } from "../core/state.js";
+import { isAiWoken, getAddressing } from "../core/state.js";
 import { wake, happy, showBubble } from "../pet/pet.js";
 import { showMessage, focusInput, setPlaceholder } from "../chat/chat.js";
 
@@ -31,10 +31,12 @@ export function setBoneContext(dirPath) {
 
     els.statusLabel.textContent = "Đã nhận Cục Xương bối cảnh!";
     showMessage(`
-    <div class="ai-reply">
-      🍖 <b>Gâu gâu! Em đã ngậm Cục Xương bối cảnh:</b><br>
-      <code>${escapeHtml(dirPath)}</code><br><br>
-      Chủ nhân muốn em làm gì trong thư mục này ạ? (Ví dụ: <i>"thống kê số lượng tập tin nix"</i>, <i>"tìm file cấu hình"</i>, <i>"chạy lệnh git status"</i>...)
+    <div class="msg msg-ai">
+      <div class="msg-body">
+        🍖 <b>Gâu gâu! Em đã ngậm Cục Xương bối cảnh:</b><br>
+        <code>${escapeHtml(dirPath)}</code><br><br>
+        ${escapeHtml(getAddressing())} muốn em làm gì trong thư mục này ạ? (Ví dụ: <i>"thống kê số lượng tập tin nix"</i>, <i>"tìm file cấu hình"</i>, <i>"chạy lệnh git status"</i>...)
+      </div>
     </div>
   `);
     setPlaceholder(`Hỏi về thư mục ${dirPath}...`);

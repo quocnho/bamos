@@ -337,12 +337,16 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 		question = fmt.Sprintf("Hãy tóm tắt và phân tích ngắn gọn nội dung của tệp tin `%s` trên.", filePath)
 	}
 
-	// Lấy context từ RAG nếu được bật
+	// Lấy context từ RAG nếu được bật (cả ở giao diện lẫn trong thiết lập)
 	var ragContext string
-	if useRAG && s.rag != nil {
+	if useRAG && s.cfg.EnableRAG && s.rag != nil {
+		topK := s.cfg.RAGTopK
+		if topK <= 0 {
+			topK = 3
+		}
 		ctxRag, cancel := context.WithTimeout(ctx, 4*time.Second)
 		var err error
-		ragContext, err = s.rag.RetrieveContext(ctxRag, question, 3)
+		ragContext, err = s.rag.RetrieveContext(ctxRag, question, topK)
 		cancel()
 		if err != nil {
 			fmt.Printf("[BamAI] Cảnh báo RAG: %v\n", err)
@@ -351,6 +355,7 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 
 	// Ghép System Prompt + Thói quen + Thư mục bối cảnh Cục Xương + Tài liệu đính kèm + RAG
 	systemContent := PuppySystemPrompt
+	systemContent += addressingRule(s.cfg.Addressing)
 	if activeDir != "" {
 		systemContent += fmt.Sprintf("\n\n=== BỐI CẢNH THƯ MỤC HIỆN TẠI (TỪ CỤC XƯƠNG FILE MANAGER) ===\nChủ nhân đang mở và làm việc trong thư mục: `%s`\nMọi yêu cầu thống kê, tìm kiếm, đọc tệp hoặc chạy lệnh của Chủ nhân hãy ưu tiên thực hiện trong thư mục này.\n=============================================================", activeDir)
 	}
@@ -387,12 +392,16 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 		endpoint = "https://api.openai.com/v1/chat/completions"
 		modelName = "gpt-4o-mini"
 		authHeader = "Bearer " + s.cfg.OpenAIKey
+	} else if s.cfg.Provider == "gemini" && s.cfg.GeminiKey != "" {
+		endpoint = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
+		modelName = "gemini-1.5-flash"
+		authHeader = "Bearer " + s.cfg.GeminiKey
 	}
 
 	reqBody, err := json.Marshal(ChatCompletionReq{
 		Model:       modelName,
 		Messages:    messages,
-		Temperature: 0.7,
+		Temperature: float32(s.cfg.Temperature),
 		Stream:      true,
 	})
 	if err != nil {
@@ -477,37 +486,32 @@ func (s *AIService) IsRAGOffline() bool {
 	return resp.StatusCode != http.StatusOK
 }
 
+// StartAIServicesOnDemand bật llama-server khi cần.
+//
+// RAG của BamAI dùng chromem-go nhúng sẵn trong tiến trình này (xem rag.go),
+// nên KHÔNG khởi động thêm dịch vụ `bamos-rag` — tránh hai tiến trình cùng
+// mở một file database và ghi đè lẫn nhau.
 func (s *AIService) StartAIServicesOnDemand(onProgress func(string), onReady func()) {
-	aiOff := s.IsAIOffline()
-	ragOff := s.IsRAGOffline()
-
-	if !aiOff && !ragOff {
+	if !s.IsAIOffline() {
 		onReady()
 		return
 	}
 
-	onProgress("Đang đánh thức AI & RAG (bam ai start)...")
+	onProgress("Đang đánh thức AI (bam ai start)...")
 
 	go func() {
 		cmd := exec.Command("bam", "ai", "start")
 		_ = cmd.Start()
 
 		if s.IsAIOffline() {
-			_ = exec.Command("bamos-ai-server").Start()
-		}
-		if s.IsRAGOffline() {
-			ragCmd := exec.Command("bamos-rag")
-			ragCmd.Env = append(os.Environ(),
-				"PORT=8090",
-				"STORAGE_PATH=/var/lib/bamos/rag/knowledge.db",
-				"LLAMA_HOST=http://127.0.0.1:9090",
-			)
-			_ = ragCmd.Start()
+			server := exec.Command("bamos-ai-server")
+			server.Env = append(os.Environ(), "BAMAI_MODEL_PATH="+s.cfg.ModelPath)
+			_ = server.Start()
 		}
 
-		for i := 0; i < 24; i++ {
+		for i := 0; i < 30; i++ {
 			time.Sleep(500 * time.Millisecond)
-			if !s.IsAIOffline() && !s.IsRAGOffline() {
+			if !s.IsAIOffline() {
 				break
 			}
 		}
@@ -563,6 +567,16 @@ func escapeHtmlAttr(s string) string {
 	s = strings.ReplaceAll(s, "<", "&lt;")
 	s = strings.ReplaceAll(s, ">", "&gt;")
 	return s
+}
+
+// addressingRule bổ sung quy tắc xưng hô theo thiết lập của người dùng.
+// Trả về chuỗi rỗng khi dùng mặc định "Chủ nhân" (đã có sẵn trong system prompt).
+func addressingRule(addressing string) string {
+	addressing = strings.TrimSpace(addressing)
+	if addressing == "" || addressing == "Chủ nhân" {
+		return ""
+	}
+	return fmt.Sprintf("\n- XƯNG HÔ THEO THIẾT LẬP: Gọi người dùng là \"%s\" và tự xưng là \"Em\". Quy tắc này THAY THẾ cho hướng dẫn gọi \"Chủ nhân\" ở trên.", addressing)
 }
 
 // fetchWebContent tải và trích xuất nội dung văn bản chính từ URL trang web

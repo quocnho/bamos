@@ -1,20 +1,37 @@
 // ============================================================================
-// pet/drag.js — Kéo thả cửa sổ & phân biệt click với kéo
+// pet/drag.js — Kéo thả cửa sổ & tương tác chuột với chú cún
 // ----------------------------------------------------------------------------
 // Cửa sổ trong suốt không có thanh tiêu đề, nên ta tự xử lý:
-//  - Kéo chú cún hoặc header bong bóng -> nhờ Go di chuyển cửa sổ.
-//  - Bấm (không kéo) vào chú cún -> đánh thức AI.
+//  - Kéo chú cún hoặc header bong bóng → nhờ Go di chuyển cửa sổ.
+//  - Bấm 1 lần vào chú cún            → đánh thức AI.
+//  - Bấm đúp (double-click) vào cún   → cho cún ngủ canh nhà.
 // ============================================================================
 
 import { els } from "../core/dom.js";
 import { native } from "../core/native.js";
-import { wake } from "./pet.js";
+import { wake, sleep } from "./pet.js";
 
 const DRAG_THRESHOLD_PX = 5;
+const DOUBLE_CLICK_MS = 240;
 
 let dragging = false;
 let startX = 0;
 let startY = 0;
+let clickTimer = null;
+
+// Phân biệt bấm 1 lần (đánh thức) và bấm đúp (đi ngủ).
+function handlePetClick() {
+    if (clickTimer !== null) {
+        clearTimeout(clickTimer);
+        clickTimer = null;
+        sleep();
+        return;
+    }
+    clickTimer = setTimeout(() => {
+        clickTimer = null;
+        wake();
+    }, DOUBLE_CLICK_MS);
+}
 
 function onPetMouseDown(e) {
     dragging = false;
@@ -34,8 +51,8 @@ function onPetMouseDown(e) {
     const onMouseUp = () => {
         window.removeEventListener("mousemove", onMouseMove);
         window.removeEventListener("mouseup", onMouseUp);
-        // Không di chuyển -> coi là một cú click để trò chuyện.
-        if (!dragging) wake();
+        // Không di chuyển -> coi là một cú click để trò chuyện / đi ngủ.
+        if (!dragging) handlePetClick();
     };
 
     window.addEventListener("mousemove", onMouseMove);

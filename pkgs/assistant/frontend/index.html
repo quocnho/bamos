@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>BamOS 3D Mascot AI Assistant & EyeLeo Companion</title>
         <link rel="stylesheet" href="style.css" />
+        <link rel="stylesheet" href="style-settings.css" />
     </head>
     <body class="state-welcoming">
         <div id="app-container">
@@ -287,16 +288,38 @@
             <!-- Bong bóng hội thoại AI Chat & RAG -->
             <div id="speech-bubble" class="bubble">
                 <div class="bubble-header" data-drag="true">
-                    <div class="assistant-tag">
-                        <span
-                            class="rag-indicator"
-                            id="rag-badge"
-                            title="RAG Tri thức nội bộ"
-                            >📚 RAG</span
+                    <!-- Nhóm trái: ghim (ngoài cùng) → RAG → LLM → tiêu đề -->
+                    <div class="header-left">
+                        <button
+                            id="btn-always-on-top"
+                            class="icon-btn active"
+                            title="Ghim trên cùng màn hình (Always on Top)"
                         >
-                        <span class="status-text" id="status-label"
-                            >Em chào Chủ nhân!</span
+                            📌
+                        </button>
+                        <button
+                            id="btn-rag-settings"
+                            class="icon-btn active"
+                            title="Thiết lập tri thức RAG"
                         >
+                            📚
+                        </button>
+                        <button
+                            id="btn-llm-settings"
+                            class="icon-btn"
+                            title="Thiết lập LLM (model, API key)"
+                        >
+                            📓
+                        </button>
+                        <div class="header-title-block">
+                            <div class="app-title">
+                                BamAI
+                                <span class="app-title-sub">Offline AI</span>
+                            </div>
+                            <div class="status-text" id="status-label">
+                                Sẵn sàng phục vụ
+                            </div>
+                        </div>
                     </div>
                     <div class="window-controls">
                         <button
@@ -307,25 +330,11 @@
                             ⏹
                         </button>
                         <button
-                            id="btn-always-on-top"
-                            class="icon-btn active"
-                            title="Ghim trên cùng màn hình (Always on Top)"
-                        >
-                            📌
-                        </button>
-                        <button
                             id="btn-eyeleo-toggle"
                             class="icon-btn active"
                             title="Bật/Tắt nhắc EyeLeo (mắt/nước)"
                         >
                             ⏰
-                        </button>
-                        <button
-                            id="btn-sleep-cún"
-                            class="icon-btn"
-                            title="Cho cún ngủ canh nhà"
-                        >
-                            💤
                         </button>
                         <button
                             id="btn-minimize"
@@ -389,32 +398,8 @@
                 </div>
 
                 <div class="bubble-footer">
-                    <div class="smart-suggestions" id="smart-chips">
-                        <button class="chip" data-query="bam info">
-                            ⚡ Bam Info
-                        </button>
-                        <button class="chip" data-query="bam health">
-                            🛡️ Bam Health
-                        </button>
-                        <button
-                            class="chip"
-                            data-query="Thông tin phần cứng hệ thống"
-                        >
-                            💻 Phần cứng
-                        </button>
-                        <button
-                            class="chip"
-                            data-query="Đang chạy những ứng dụng nào"
-                        >
-                            📊 Ứng dụng chạy
-                        </button>
-                        <button
-                            class="chip"
-                            data-query="Đọc file /etc/nixos/configuration.nix"
-                        >
-                            📄 Đọc config
-                        </button>
-                    </div>
+                    <!-- Chip gợi ý được JS dựng động theo tần suất từ khóa hỏi đáp -->
+                    <div class="smart-suggestions" id="smart-chips"></div>
                     <div class="input-wrapper">
                         <!-- Nút dấu + đính kèm hình ảnh, tài liệu (tách biệt hoàn toàn với input type file) -->
                         <input
@@ -450,13 +435,6 @@
                             autocomplete="off"
                         />
                         <button
-                            id="btn-rag-toggle"
-                            class="toggle-btn active"
-                            title="Bật/Tắt RAG Tri Thức"
-                        >
-                            📚
-                        </button>
-                        <button
                             id="btn-send"
                             class="send-btn"
                             title="Gửi câu hỏi"
@@ -467,6 +445,305 @@
                 </div>
                 <div class="bubble-tail"></div>
             </div>
+
+            <!-- ===== Modal Thiết Lập Tri Thức RAG ===== -->
+            <div id="rag-settings-modal" class="modal-backdrop hidden">
+                <div class="modal-card settings-modal">
+                    <div class="modal-header">
+                        <div class="modal-title">📚 Thiết Lập Tri Thức RAG</div>
+                        <button
+                            id="btn-close-rag-settings"
+                            class="icon-btn close-btn"
+                        >
+                            ×
+                        </button>
+                    </div>
+                    <div class="modal-body settings-form">
+                        <div class="setting-item switch-item">
+                            <div>
+                                <div class="setting-name">
+                                    Bật tri thức nội bộ (RAG)
+                                </div>
+                                <div class="setting-desc">
+                                    Trả lời dựa trên tài liệu Chủ nhân đã nạp
+                                </div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input
+                                    type="checkbox"
+                                    id="set-rag-enabled"
+                                    checked
+                                />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="set-addressing"
+                                >Cách xưng hô với bạn:</label
+                            >
+                            <div class="setting-row">
+                                <select id="set-addressing">
+                                    <option value="Chủ nhân">Chủ nhân</option>
+                                    <option value="Anh">Anh</option>
+                                    <option value="Chị">Chị</option>
+                                    <option value="Bạn">Bạn</option>
+                                    <option value="Em">Em</option>
+                                    <option value="__custom__">Khác…</option>
+                                </select>
+                                <input
+                                    type="text"
+                                    id="set-addressing-custom"
+                                    class="text-input hidden"
+                                    placeholder="Nhập cách gọi riêng…"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="set-rag-topk">
+                                Số đoạn tri thức dùng mỗi câu trả lời:
+                                <b id="set-rag-topk-value">3</b>
+                            </label>
+                            <input
+                                type="range"
+                                id="set-rag-topk"
+                                min="1"
+                                max="8"
+                                step="1"
+                                value="3"
+                            />
+                        </div>
+
+                        <div class="setting-section">
+                            <div class="section-title">
+                                📄 Tài liệu tri thức
+                                <span class="count-badge" id="rag-count-badge"
+                                    >0</span
+                                >
+                            </div>
+                            <div id="rag-dropzone" class="dropzone">
+                                <input
+                                    type="file"
+                                    id="rag-file-input"
+                                    class="hidden-file-input"
+                                    multiple
+                                    accept=".txt,.md,.markdown,.nix,.json,.yaml,.yml,.toml,.sh,.go,.py,.js,.ts,.csv,.log,.conf,.ini,.rst,.org"
+                                />
+                                <div class="dropzone-hint">
+                                    Kéo thả tài liệu vào đây hoặc
+                                    <b>bấm để chọn</b> (chọn được nhiều tệp)
+                                </div>
+                            </div>
+                            <div
+                                id="rag-pending-list"
+                                class="pending-list"
+                            ></div>
+                            <div class="modal-actions-row">
+                                <button
+                                    id="btn-rag-index"
+                                    class="modal-btn primary"
+                                >
+                                    ⬆️ Nạp vào tri thức
+                                </button>
+                                <button
+                                    id="btn-rag-clear"
+                                    class="modal-btn danger"
+                                >
+                                    🗑️ Xoá toàn bộ
+                                </button>
+                            </div>
+                            <div id="rag-status" class="settings-status"></div>
+                        </div>
+
+                        <div class="modal-actions-row">
+                            <button
+                                id="btn-save-rag-settings"
+                                class="modal-btn primary"
+                            >
+                                Lưu Cài Đặt
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Modal Thiết Lập LLM ===== -->
+            <div id="llm-settings-modal" class="modal-backdrop hidden">
+                <div class="modal-card settings-modal">
+                    <div class="modal-header">
+                        <div class="modal-title">📓 Thiết Lập LLM</div>
+                        <button
+                            id="btn-close-llm-settings"
+                            class="icon-btn close-btn"
+                        >
+                            ×
+                        </button>
+                    </div>
+                    <div class="modal-body settings-form">
+                        <div class="setting-item">
+                            <label for="set-llm-provider">Nhà cung cấp:</label>
+                            <select id="set-llm-provider">
+                                <option value="local">
+                                    Local — llama-server (offline)
+                                </option>
+                                <option value="deepseek">DeepSeek API</option>
+                                <option value="openai">OpenAI API</option>
+                                <option value="gemini">Google Gemini</option>
+                            </select>
+                        </div>
+
+                        <div
+                            class="setting-item cloud-key hidden"
+                            id="llm-key-deepseek"
+                        >
+                            <label for="set-deepseek-key"
+                                >DeepSeek API key:</label
+                            >
+                            <input
+                                type="password"
+                                id="set-deepseek-key"
+                                class="text-input"
+                                placeholder="sk-…"
+                                autocomplete="off"
+                            />
+                        </div>
+                        <div
+                            class="setting-item cloud-key hidden"
+                            id="llm-key-openai"
+                        >
+                            <label for="set-openai-key">OpenAI API key:</label>
+                            <input
+                                type="password"
+                                id="set-openai-key"
+                                class="text-input"
+                                placeholder="sk-…"
+                                autocomplete="off"
+                            />
+                        </div>
+                        <div
+                            class="setting-item cloud-key hidden"
+                            id="llm-key-gemini"
+                        >
+                            <label for="set-gemini-key"
+                                >Google Gemini API key:</label
+                            >
+                            <input
+                                type="password"
+                                id="set-gemini-key"
+                                class="text-input"
+                                placeholder="AIza…"
+                                autocomplete="off"
+                            />
+                        </div>
+
+                        <div class="setting-section" id="llm-local-section">
+                            <div class="section-title">
+                                🗂️ Model cục bộ (GGUF)
+                            </div>
+                            <div class="model-toolbar">
+                                <input
+                                    type="text"
+                                    id="set-model-dir"
+                                    class="text-input"
+                                    readonly
+                                />
+                                <button
+                                    id="btn-llm-refresh-models"
+                                    class="modal-btn ghost"
+                                >
+                                    🔄 Làm mới
+                                </button>
+                            </div>
+                            <div id="llm-model-list" class="model-list"></div>
+                            <div class="model-toolbar">
+                                <input
+                                    type="text"
+                                    id="set-model-url"
+                                    class="text-input"
+                                    placeholder="Dán URL file .gguf để tải về…"
+                                />
+                                <button
+                                    id="btn-llm-download"
+                                    class="modal-btn ghost"
+                                >
+                                    ⬇️ Tải
+                                </button>
+                            </div>
+                            <div
+                                id="llm-download-progress"
+                                class="settings-status"
+                            ></div>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="set-temperature">
+                                Độ sáng tạo (temperature):
+                                <b id="set-temp-value">0.7</b>
+                            </label>
+                            <input
+                                type="range"
+                                id="set-temperature"
+                                min="0"
+                                max="1.5"
+                                step="0.1"
+                                value="0.7"
+                            />
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="set-context-size">
+                                Kích thước ngữ cảnh (tokens):
+                            </label>
+                            <select id="set-context-size">
+                                <option value="2048">2048</option>
+                                <option value="4096" selected>4096</option>
+                                <option value="8192">8192</option>
+                                <option value="16384">16384</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="set-gpu-layers">
+                                Số layer offload GPU (-ngl):
+                            </label>
+                            <input
+                                type="number"
+                                id="set-gpu-layers"
+                                class="text-input"
+                                min="0"
+                                max="999"
+                                value="99"
+                            />
+                        </div>
+
+                        <div id="llm-status" class="settings-status"></div>
+
+                        <div class="modal-actions-row">
+                            <button id="btn-llm-test" class="modal-btn ghost">
+                                🔌 Kiểm tra kết nối
+                            </button>
+                            <button
+                                id="btn-llm-restart"
+                                class="modal-btn ghost"
+                            >
+                                ♻️ Khởi động lại AI
+                            </button>
+                        </div>
+                        <div class="modal-actions-row">
+                            <button
+                                id="btn-save-llm-settings"
+                                class="modal-btn primary"
+                            >
+                                Lưu Cài Đặt
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tooltip cho chip từ khóa: đặt ngoài .bubble để không bị overflow:hidden cắt -->
+            <div id="chip-tooltip" class="chip-tooltip hidden"></div>
 
             <!-- Chú cún con Mascot 3D Chibi (Original BamOS Mascot) -->
             <div

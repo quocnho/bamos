@@ -24,15 +24,35 @@ function call(method, ...args) {
 }
 
 export const native = {
+    // Cửa sổ
     dragWindow: () => call("dragWindow"),
     closeApp: () => call("closeApp"),
     setAlwaysOnTop: (enabled) => call("setAlwaysOnTop", enabled),
+    activateAndRaise: () => call("activateAndRaise"),
+    setFullscreen: (enabled) => call("setFullscreen", enabled),
+
+    // AI
     wakeAI: () => call("wakeAI"),
     evaluateSleepOrStop: () => call("evaluateSleepOrStop"),
+    stopGeneration: () => call("stopGeneration"),
+    getIdleTime: () => call("getIdleTime"),
+    ask: (question, useRag) => call("ask", question, useRag),
+
+    // Bối cảnh thư mục (Cục Xương)
     setContextDir: (dir) => call("setContextDir", dir),
     clearContextDir: () => call("clearContextDir"),
-    getIdleTime: () => call("getIdleTime"),
-    activateAndRaise: () => call("activateAndRaise"),
-    stopGeneration: () => call("stopGeneration"),
-    ask: (question, useRag) => call("ask", question, useRag),
+
+    // Bảng thiết lập
+    getSettings: () => call("getSettings"),
+    saveSettings: (settings) => call("saveSettings", settings),
+    listModels: () => call("listModels"),
+    downloadModel: (url, name) => call("downloadModel", url, name),
+    setActiveModel: (path) => call("setActiveModel", path),
+    testLLM: () => call("testLLM"),
+    restartAI: () => call("restartAI"),
+
+    // Tri thức RAG
+    ragAddDocuments: (documents) => call("ragAddDocuments", documents),
+    ragStats: () => call("ragStats"),
+    ragClear: () => call("ragClear"),
 };
