@@ -156,6 +156,15 @@ static gboolean on_window_configure(GtkWidget *widget, GdkEventConfigure *event,
     if (event->x < 0 || event->y < 0) return FALSE;
     // Bỏ qua thay đổi do chính ta gây ra (resize/move khít hoặc mở rộng).
     if (g_in_full || g_geom_busy) return FALSE;
+    // Cửa sổ đang ẩn / thu nhỏ / chưa được map: toạ độ do WM báo là KHÔNG đáng
+    // tin (thường về 0,0 hoặc vị trí tạm thời). Nếu ghi vào mốc neo thì lần hiện
+    // lại chú cún và khung chat sẽ nhảy sang chỗ khác. Chỉ ghi nhận hình học khi
+    // cửa sổ đang hiển thị bình thường.
+    if (!gtk_widget_get_mapped(widget)) return FALSE;
+    GdkWindow *gdk_win = gtk_widget_get_window(widget);
+    if (gdk_win == NULL) return FALSE;
+    GdkWindowState gstate = gdk_window_get_state(gdk_win);
+    if (gstate & (GDK_WINDOW_STATE_ICONIFIED | GDK_WINDOW_STATE_WITHDRAWN)) return FALSE;
     // Bỏ qua khung đúng bằng vùng làm việc (tàn dư của chế độ mở rộng).
     GdkRectangle area;
     get_workarea(&area);
@@ -371,8 +380,16 @@ static gboolean clear_urgency_hint(gpointer user_data) {
     return G_SOURCE_REMOVE;
 }
 
+// Đưa cửa sổ về đúng mốc neo sau khi được hiện lại. WM có thể xếp cửa sổ ở vị
+// trí tạm trong lúc map; chờ một nhịp để X11 áp dụng xong hình học rồi neo lại
+// góc dưới-phải — nhờ vậy chú cún đứng yên qua các lần ẩn/hiện/thu nhỏ.
+static gboolean reapply_anchor_position(gpointer user_data);
+
 static gboolean do_show(gpointer user_data) {
     if (g_app.window != NULL) {
+        // Mọi configure-event trong lúc hiện lại là do WM sắp xếp, không phải
+        // người dùng kéo → không được ghi vào mốc neo.
+        mark_geom_busy();
         gtk_widget_show_all(g_app.window);
         gtk_window_set_keep_above(GTK_WINDOW(g_app.window), g_keep_above);
         gtk_window_deiconify(GTK_WINDOW(g_app.window));
@@ -387,6 +404,8 @@ static gboolean do_show(gpointer user_data) {
         // bật lên lúc đang làm việc ở cửa sổ khác).
         gtk_window_set_urgency_hint(GTK_WINDOW(g_app.window), TRUE);
         g_timeout_add(2500, clear_urgency_hint, NULL);
+        // Neo lại góc dưới-phải sau khi WM đã xếp xong cửa sổ.
+        g_timeout_add(150, reapply_anchor_position, NULL);
     }
     return G_SOURCE_REMOVE;
 }
@@ -432,6 +451,22 @@ static void apply_initial_position(GtkWindow *window) {
         default_bottom_right(&right, &bottom);
     }
     move_window_by_bottom_right(window, right, bottom);
+}
+
+// (Đã khai báo trước ở do_show) Neo lại cửa sổ theo mốc đã lưu, không suy diễn
+// từ hình học hiện tại để tránh đọc phải toạ độ tạm do WM xếp lúc vừa hiện.
+static gboolean reapply_anchor_position(gpointer user_data) {
+    if (g_app.window == NULL || g_in_full) return G_SOURCE_REMOVE;
+    int right = 0, bottom = 0;
+    if (g_has_saved_position) {
+        right = g_saved_right;
+        bottom = g_saved_bottom;
+    } else {
+        default_bottom_right(&right, &bottom);
+    }
+    mark_geom_busy();
+    move_window_by_bottom_right(GTK_WINDOW(g_app.window), right, bottom);
+    return G_SOURCE_REMOVE;
 }
 
 static gboolean on_window_map(GtkWidget *widget, GdkEvent *event, gpointer user_data) {

@@ -938,9 +938,10 @@ input[type="file"].hidden {
     height: 100vh;
     padding: var(--fit-pad, 20px);
     box-sizing: border-box;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    /* TRONG SUỐT: cửa sổ GTK vốn đã trong suốt, nên khi bảng thiết lập mở rộng
+       cửa sổ ra kích thước lớn nhất, phần nền quanh thẻ phải xuyên qua nền để
+       thấy desktop thay vì một khối đen. */
+    background: transparent;
     z-index: 1500;
     display: flex;
     justify-content: flex-end;

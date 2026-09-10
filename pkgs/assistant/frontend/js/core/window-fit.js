@@ -157,6 +157,18 @@ function measure() {
     };
 }
 
+// Giới hạn kích thước phía C (do_window_fit) để việc tự kiểm tra không đòi hỏi
+// vượt mức (gây resize lặp vô hạn khi màn hình nhỏ).
+function clampWidth(w) {
+    const availW = (window.screen && window.screen.availWidth) || 1920;
+    return Math.min(w, availW - 8);
+}
+
+function clampHeight(h) {
+    const availH = (window.screen && window.screen.availHeight) || 800;
+    return Math.min(h, MAX_WINDOW_HEIGHT, availH - 8);
+}
+
 function apply() {
     scheduled = false;
 
@@ -172,7 +184,13 @@ function apply() {
     if (!size) return;
 
     const key = `${size.width}x${size.height}`;
-    if (key === lastKey) return;
+    // WM có thể đổi kích thước cửa sổ khi ẩn/hiện/thu nhỏ. Nếu kích thước HIỆN
+    // TẠI lệch khỏi nội dung (đã tính giới hạn phía C) thì áp lại — nhờ đó chú
+    // cún và khung chat luôn khít đúng chỗ sau khi hiện lại.
+    const mismatch =
+        Math.abs(window.innerWidth - clampWidth(size.width)) > 3 ||
+        Math.abs(window.innerHeight - clampHeight(size.height)) > 3;
+    if (key === lastKey && !mismatch) return;
     lastKey = key;
     native.log(`fit ${key} :: ${describeFitElements()}`);
     native.setContentSize(size.width, size.height);
