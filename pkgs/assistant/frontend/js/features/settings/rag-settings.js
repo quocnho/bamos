@@ -11,7 +11,11 @@
 
 import { els, hide, show, toggle } from "../../core/dom.js";
 import { native } from "../../core/native.js";
-import { setRagEnabled, setAddressing } from "../../core/state.js";
+import {
+    setRagEnabled,
+    setAddressing,
+    getAddressing,
+} from "../../core/state.js";
 import { refreshRagIndicator } from "../../chat/chat.js";
 
 const ADDRESSING_PRESETS = ["Chủ nhân", "Anh", "Chị", "Bạn", "Em"];
@@ -201,6 +205,8 @@ function openModal() {
     show(els.ragSettingsModal);
     setStatus("");
     renderPending();
+    // Hiển thị ngay giá trị đã biết để không lưu đè khi người dùng thao tác nhanh.
+    fillAddressing(getAddressing());
     native.getSettings();
     native.ragStats();
 }

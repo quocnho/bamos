@@ -71,8 +71,9 @@ static gboolean do_save_window_state(gpointer user_data) {
 
     FILE *fp = fopen(g_state_path, "w");
     if (fp != NULL) {
-        fprintf(fp, "{\"x\":%d,\"y\":%d,\"always_on_top\":%s}\n",
-                x, y, g_keep_above ? "true" : "false");
+        // CHỈ lưu toạ độ. Trạng thái ghim thuộc về assistant_config.json để
+        // tránh hai nguồn sự thật gây kẹt trạng thái.
+        fprintf(fp, "{\"x\":%d,\"y\":%d}\n", x, y);
         fclose(fp);
     }
     return G_SOURCE_REMOVE;
@@ -278,24 +279,26 @@ static void setup_window_and_webview(const char *app_url) {
     g_signal_connect(window, "map-event", G_CALLBACK(on_window_map), NULL);
     g_signal_connect(window, "configure-event", G_CALLBACK(on_window_configure), NULL);
 
-    // CSS làm trong suốt hoàn toàn khung GtkWindow, loại bỏ mọi bóng mờ Mutter, viền GTK và vệt cuộn
+    // CSS làm trong suốt hoàn toàn khung GtkWindow, loại bỏ mọi bóng mờ Mutter, viền GTK và vệt cuộn.
+    // Lưu ý: GTK CSS không hỗ trợ `!important` (sẽ gây cảnh báo "Junk at end of value"),
+    // nên các rule dưới đây không dùng `!important`.
     GtkCssProvider *css = gtk_css_provider_new();
     gtk_css_provider_load_from_data(css,
         "window, decoration, .background, scrolledwindow, viewport, undershoot, overshoot {"
-        "  background-color: rgba(0, 0, 0, 0) !important;"
-        "  background-image: none !important;"
-        "  box-shadow: none !important;"
-        "  border: none !important;"
-        "  border-width: 0 !important;"
-        "  outline: none !important;"
-        "  margin: 0 !important;"
-        "  padding: 0 !important;"
+        "  background-color: rgba(0, 0, 0, 0);"
+        "  background-image: none;"
+        "  box-shadow: none;"
+        "  border: none;"
+        "  border-width: 0;"
+        "  outline: none;"
+        "  margin: 0;"
+        "  padding: 0;"
         "}"
         "undershoot.top, undershoot.bottom, undershoot.left, undershoot.right,"
         "overshoot.top, overshoot.bottom, overshoot.left, overshoot.right {"
-        "  background: none !important;"
-        "  border: none !important;"
-        "  box-shadow: none !important;"
+        "  background: none;"
+        "  border: none;"
+        "  box-shadow: none;"
         "}",
         -1, NULL);
     gtk_style_context_add_provider_for_screen(
@@ -453,6 +456,7 @@ func handleScriptMessage(cMessage *C.char) {
 		if msg.AlwaysOnTop {
 			enable = 1
 		}
+		fmt.Printf("[BamAI GUI] Always-on-top -> %v\n", msg.AlwaysOnTop)
 		C.trigger_window_set_keep_above(enable)
 	case "activate_and_raise":
 		C.trigger_window_show()
@@ -641,11 +645,11 @@ func StartUI(ai *AIService) {
 	C.run_main_loop()
 }
 
-// windowState là trạng thái cửa sổ lưu giữa các lần chạy.
+// windowState là vị trí cửa sổ lưu giữa các lần chạy.
+// (Trạng thái ghim nằm trong Config — xem applySavedWindowState.)
 type windowState struct {
-	X           int  `json:"x"`
-	Y           int  `json:"y"`
-	AlwaysOnTop bool `json:"always_on_top"`
+	X int `json:"x"`
+	Y int `json:"y"`
 }
 
 // applySavedWindowState đọc vị trí/ghim đã lưu và chuyển sang tầng C trước

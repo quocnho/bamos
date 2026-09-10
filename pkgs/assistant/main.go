@@ -21,15 +21,20 @@ import (
 func preferX11Backend() {
 	if override := os.Getenv("BAMAI_GDK_BACKEND"); override != "" {
 		_ = os.Setenv("GDK_BACKEND", override)
+		fmt.Printf("[BamAI GUI] GDK_BACKEND=%s (theo BAMAI_GDK_BACKEND)\n", override)
 		return
 	}
-	if os.Getenv("GDK_BACKEND") != "" {
-		return // người dùng đã tự chọn backend
+	if current := os.Getenv("GDK_BACKEND"); current != "" {
+		fmt.Printf("[BamAI GUI] GDK_BACKEND=%s (đã đặt sẵn)\n", current)
+		return
 	}
 	// DISPLAY được đặt nghĩa là X(XWayland) sẵn sàng → ưu tiên x11.
 	if os.Getenv("DISPLAY") != "" {
 		_ = os.Setenv("GDK_BACKEND", "x11")
+		fmt.Println("[BamAI GUI] GDK_BACKEND=x11 (XWayland) — bật ghim cửa sổ & nhớ vị trí")
+		return
 	}
+	fmt.Println("[BamAI GUI] Không có DISPLAY — dùng backend mặc định của GTK (Wayland)")
 }
 
 func main() {

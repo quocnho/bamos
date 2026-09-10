@@ -81,31 +81,46 @@ export function hideBubble() {
 }
 
 /**
- * Đánh thức chú cún: nếu AI chưa chạy thì khởi động backend; nếu đang chạy
- * thì bật/tắt bong bóng chat.
+ * Bắt đầu một phiên làm việc với AI: đánh thức backend và mở bong bóng chat.
+ * Chỉ gọi khi AI chưa thức.
  */
-export function wake() {
-    clearStartupTimer();
-
-    if (!isAiWoken()) {
-        setAiWoken(true);
-        happy();
-        showBubble();
-        els.statusLabel.textContent = "Đang khởi động toàn bộ AI & RAG...";
-        chat.showMessage(`
+function startAiSession() {
+    setAiWoken(true);
+    happy();
+    showBubble();
+    els.statusLabel.textContent = "Đang khởi động toàn bộ AI & RAG...";
+    chat.showMessage(`
       <div class="msg msg-ai">
         <div class="msg-body">
           🐶 <b>Gâu gâu!</b> Em đã thức dậy phục vụ ${escapeHtml(getAddressing())} rồi đây ạ! Đang khởi động llama-server và cơ sở tri thức... Vui lòng đợi em trong giây lát nhé!
         </div>
       </div>
     `);
-        native.wakeAI();
+    native.wakeAI();
+}
+
+/** Mở bong bóng chat và đưa con trỏ vào ô nhập liệu. */
+function openBubbleForChat() {
+    showBubble();
+    chat.focusInput();
+    setPetState("idle");
+}
+
+/**
+ * Bấm 1 lần vào chú cún: LUÔN mở khung chat (không ẩn).
+ * Trước đây hàm này là toggle bật/tắt bong bóng nên bấm Enter hoặc bấm cún
+ * khi chat đang mở lại làm khung chat biến mất. Muốn ẩn chat thì dùng nút
+ * thu nhỏ (−) trên header.
+ */
+export function wake() {
+    clearStartupTimer();
+
+    if (!isAiWoken()) {
+        startAiSession();
     } else if (isHidden(els.speechBubble)) {
-        showBubble();
-        chat.focusInput();
-        setPetState("idle");
+        openBubbleForChat();
     } else {
-        hideBubble();
+        chat.focusInput();
     }
 
     resetInactivityTimer();
@@ -160,9 +175,11 @@ function onCloseClick(e) {
 
 function applyAlwaysOnTopUi() {
     els.btnAlwaysOnTop.classList.toggle("active", alwaysOnTop);
+    // Đổi biểu tượng để trạng thái ghim rõ ràng: 📌 = đang ghim, 📍 = không ghim.
+    els.btnAlwaysOnTop.textContent = alwaysOnTop ? "📌" : "📍";
     els.btnAlwaysOnTop.title = alwaysOnTop
-        ? "Ghim trên cùng màn hình (Always on Top: BẬT)"
-        : "Ghim trên cùng màn hình (Always on Top: TẮT)";
+        ? "Đang ghim trên cùng — bấm để bỏ ghim"
+        : "Không ghim — bấm để ghim trên cùng";
 }
 
 // Đồng bộ trạng thái ghim từ thiết lập đã lưu (gọi khi nạp settings).
@@ -179,6 +196,9 @@ function onAlwaysOnTopClick(e) {
     // Áp dụng ngay cho cửa sổ và lưu lại cho lần chạy sau.
     native.setAlwaysOnTop(alwaysOnTop);
     native.saveSettings({ always_on_top: alwaysOnTop });
+    els.statusLabel.textContent = alwaysOnTop
+        ? "📌 Đã ghim cửa sổ trên cùng"
+        : "Đã bỏ ghim cửa sổ (không nổi lên trên nữa)";
 }
 
 // ---------------------------------------------------------------------------
