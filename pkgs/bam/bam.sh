@@ -531,10 +531,20 @@ cmd_ai() {
         cmd_ai pull
       fi
       info "Khởi động bamos-ai (llama-server)..."
-      $SUDO systemctl start bamos-ai.service
-      if systemctl list-unit-files bamos-rag.service >/dev/null 2>&1; then
-        info "Khởi động bamos-rag..."
-        $SUDO systemctl start bamos-rag.service
+      if [ -n "$SUDO" ] && [ "$(id -u)" -ne 0 ]; then
+        # Khởi chạy user background process không cần quyền root/sudo nếu người dùng không muốn gõ pass
+        if ! curl -s http://127.0.0.1:9090/health >/dev/null 2>&1; then
+          nohup bamos-ai-server >/dev/null 2>&1 &
+        fi
+        if ! curl -s http://127.0.0.1:8090/health >/dev/null 2>&1; then
+          PORT=8090 STORAGE_PATH=/var/lib/bamos/rag/knowledge.db LLAMA_HOST=http://127.0.0.1:9090 nohup bamos-rag >/dev/null 2>&1 &
+        fi
+      else
+        $SUDO systemctl start bamos-ai.service
+        if systemctl list-unit-files bamos-rag.service >/dev/null 2>&1; then
+          info "Khởi động bamos-rag..."
+          $SUDO systemctl start bamos-rag.service
+        fi
       fi
       sleep 2
       cmd_ai status

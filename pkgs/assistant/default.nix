@@ -1,32 +1,28 @@
 {
   lib,
-  rustPlatform,
+  buildGoModule,
   pkg-config,
-  gtk4,
-  libadwaita,
-  openssl,
-  wrapGAppsHook4,
+  gtk3,
+  webkitgtk_4_1,
+  wrapGAppsHook3,
 }:
 
-rustPlatform.buildRustPackage {
+buildGoModule rec {
   pname = "bamos-assistant";
-  version = "0.1.0";
+  version = "0.2.0";
 
   src = ./.;
 
-  cargoLock = {
-    lockFile = ./Cargo.lock;
-  };
+  vendorHash = "sha256-hYe2Qa8Bxf9d6is1a+ik4qFJNEIEYMFmDnzdTsbF70s=";
 
   nativeBuildInputs = [
     pkg-config
-    wrapGAppsHook4
+    wrapGAppsHook3
   ];
 
   buildInputs = [
-    gtk4
-    libadwaita
-    openssl
+    gtk3
+    webkitgtk_4_1
   ];
 
   postInstall = ''
@@ -35,7 +31,7 @@ rustPlatform.buildRustPackage {
   '';
 
   meta = with lib; {
-    description = "BamOS Floating AI Assistant (Deepin OS style)";
+    description = "BamOS Mascot AI Assistant (Transparent Desktop Pet + RAG + SLM)";
     license = licenses.mit;
     mainProgram = "bamos-assistant";
   };

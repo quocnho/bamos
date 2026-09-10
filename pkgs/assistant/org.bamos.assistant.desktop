@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=BamAI
-Comment=Trợ lý ảo thông minh BamOS (Deepin style)
-GenericName=AI Assistant
+Comment=Trợ lý ảo cún cưng BamOS (Desktop Mascot AI Pet)
+GenericName=AI Mascot Pet
 Exec=bamos-assistant
 Icon=bamos-assistant
 Terminal=false
