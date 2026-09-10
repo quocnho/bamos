@@ -17,7 +17,9 @@ func main() {
 	fmt.Printf("[BamAI] Khởi tạo cấu hình: Provider=%s, RAG=%t, LlamaHost=%s\n", cfg.Provider, cfg.EnableRAG, cfg.LlamaHost)
 
 	ragMgr := NewRAGManager(cfg.RAGDBPath, cfg.LlamaHost)
-	aiService := NewAIService(cfg, ragMgr)
+	fsTool := NewFSTool()
+	userMem := NewUserMemory()
+	aiService := NewAIService(cfg, ragMgr, fsTool, userMem)
 
 	// Khởi động giao diện người dùng
 	if os.Getenv("DISPLAY") == "" && os.Getenv("WAYLAND_DISPLAY") == "" {

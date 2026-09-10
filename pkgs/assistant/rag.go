@@ -130,3 +130,25 @@ func (rm *RAGManager) RetrieveContext(ctx context.Context, query string, topK in
 	sb.WriteString("=========================================\n")
 	return sb.String(), nil
 }
+
+func (rm *RAGManager) IndexDocument(ctx context.Context, id, content string, metadata map[string]string) error {
+	rm.mu.RLock()
+	col := rm.collection
+	rm.mu.RUnlock()
+
+	if col == nil {
+		return fmt.Errorf("collection chưa khởi tạo")
+	}
+
+	emb, err := rm.getEmbedding(ctx, content)
+	if err != nil {
+		return fmt.Errorf("không thể lấy embedding để học: %w", err)
+	}
+
+	doc, err := chromem.NewDocument(ctx, id, metadata, emb, content, nil)
+	if err != nil {
+		return err
+	}
+
+	return col.AddDocument(ctx, doc)
+}

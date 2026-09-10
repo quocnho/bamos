@@ -146,7 +146,37 @@ html, body {
 }
 
 .bubble-footer {
-  padding: 8px 12px 12px 12px;
+  padding: 6px 12px 12px 12px;
+}
+
+.smart-suggestions {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 0 2px 8px 2px;
+}
+
+.smart-suggestions::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  background: rgba(244, 162, 97, 0.14);
+  color: #D94E34;
+  border: 1px solid rgba(244, 162, 97, 0.35);
+  border-radius: 12px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chip:hover {
+  background: #F4A261;
+  color: #FFFFFF;
+  transform: translateY(-1px);
 }
 
 .input-wrapper {

@@ -329,6 +329,43 @@
     btnEyeleoToggle.title = eyeleoEnabled ? 'EyeLeo đang BẬT' : 'EyeLeo đang TẮT';
   });
 
+  // Xử lý click các chip gợi ý nhanh (Smart Suggestions)
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const q = chip.getAttribute('data-query');
+      if (q) {
+        chatInput.value = q;
+        sendQuestion();
+      }
+    });
+  });
+
+  // Xử lý kéo thả tệp tin từ desktop/file manager vào chú cún
+  window.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    petWrapper.style.transform = 'scale(1.08)';
+  });
+
+  window.addEventListener('dragleave', (e) => {
+    e.preventDefault();
+    petWrapper.style.transform = 'none';
+  });
+
+  window.addEventListener('drop', (e) => {
+    e.preventDefault();
+    petWrapper.style.transform = 'none';
+    if (!aiWoken) wakeUpCún();
+
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      const filePath = file.name;
+      petHappy();
+      speechBubble.classList.remove('hidden');
+      chatInput.value = `Đọc file ${filePath}`;
+      chatInput.focus();
+    }
+  });
+
   // Bắt đầu bộ đếm EyeLeo
   startEyeleoScheduler();
 

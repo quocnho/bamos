@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -17,12 +18,16 @@ import (
 type AIService struct {
 	cfg Config
 	rag *RAGManager
+	fs  *FSTool
+	mem *UserMemory
 }
 
-func NewAIService(cfg Config, rag *RAGManager) *AIService {
+func NewAIService(cfg Config, rag *RAGManager, fsTool *FSTool, mem *UserMemory) *AIService {
 	return &AIService{
 		cfg: cfg,
 		rag: rag,
+		fs:  fsTool,
+		mem: mem,
 	}
 }
 
@@ -54,10 +59,110 @@ const PuppySystemPrompt = `Bạn là BamOS Puppy (Mascot Assistant) - một chú
 Phong cách của bạn:
 - Xưng hô thân mật: xưng "Em" hoặc "Cún", gọi người dùng là "Bạn" hoặc "Chủ nhân".
 - Đôi khi thêm tiếng "Gâu gâu!" vui vẻ ở đầu hoặc cuối câu một cách tự nhiên, đáng yêu.
-- Nếu có dữ liệu tri thức nội bộ (RAG), hãy ưu tiên sử dụng dữ liệu đó để trả lời thật chính xác.
+- Nếu có dữ liệu tri thức nội bộ (RAG), dữ liệu tệp tin hoặc thông tin thói quen, hãy sử dụng để trả lời thật chính xác, hữu ích và chu đáo.
 - Luôn sẵn sàng hỗ trợ, trả lời ngắn gọn, súc tích, dễ hiểu.`
 
 func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool, onChunk func(string), onDone func(), onError func(string)) {
+	trimmed := strings.TrimSpace(question)
+	lower := strings.ToLower(trimmed)
+
+	// Ghi nhận truy vấn vào bộ nhớ thói quen
+	if s.mem != nil {
+		s.mem.RecordQuery(question)
+	}
+
+	// 1. Nhận diện ý định TÌM KIẾM TỆP TIN (Filesystem Search)
+	if strings.HasPrefix(lower, "tìm file ") || strings.HasPrefix(lower, "tìm tệp ") || strings.HasPrefix(lower, "tìm kiếm file ") || strings.HasPrefix(lower, "find ") {
+		query := trimmed
+		for _, prefix := range []string{"tìm kiếm file ", "tìm file ", "tìm tệp ", "find "} {
+			if strings.HasPrefix(lower, prefix) {
+				query = trimmed[len(prefix):]
+				break
+			}
+		}
+		query = strings.TrimSpace(query)
+
+		files := s.fs.FindFiles(query, 10)
+		if len(files) == 0 {
+			onChunk(fmt.Sprintf("Gâu gâu! Em đã đánh hơi khắp các thư mục nhưng không tìm thấy tệp nào khớp với từ khóa \"%s\" ạ. 🐾", query))
+			onDone()
+			return
+		}
+
+		var sb strings.Builder
+		sb.WriteString(fmt.Sprintf("Gâu gâu! Em tìm thấy %d tệp tin liên quan đến \"%s\":\n\n", len(files), query))
+		for i, f := range files {
+			sb.WriteString(fmt.Sprintf("%d. 📄 `%s`\n", i+1, f))
+		}
+		sb.WriteString("\nChủ nhân có muốn em đọc hoặc tóm tắt nội dung file nào không ạ? (Hãy gõ: *Đọc file [đường dẫn]* nhé!)")
+		onChunk(sb.String())
+		onDone()
+		return
+	}
+
+	// 2. Nhận diện ý định TỰ HỌC TÀI LIỆU VÀO RAG
+	if strings.HasPrefix(lower, "học file ") || strings.HasPrefix(lower, "nhớ file ") || strings.HasPrefix(lower, "ghi nhớ file ") {
+		filePath := trimmed
+		for _, prefix := range []string{"ghi nhớ file ", "học file ", "nhớ file "} {
+			if strings.HasPrefix(lower, prefix) {
+				filePath = strings.TrimSpace(trimmed[len(prefix):])
+				break
+			}
+		}
+		filePath = strings.Trim(filePath, "`\"' ")
+
+		content, err := s.fs.ReadDocument(filePath)
+		if err != nil {
+			onError(fmt.Sprintf("Không thể đọc file để học: %v", err))
+			return
+		}
+
+		if s.rag != nil {
+			id := filepath.Base(filePath) + "_" + fmt.Sprintf("%d", time.Now().Unix())
+			err = s.rag.IndexDocument(ctx, id, content, map[string]string{
+				"source": filePath,
+				"title":  filepath.Base(filePath),
+			})
+			if err != nil {
+				onError(fmt.Sprintf("Lỗi nạp vào RAG: %v", err))
+				return
+			}
+			if s.mem != nil {
+				s.mem.RecordFileAccess(filePath)
+			}
+			onChunk(fmt.Sprintf("Gâu gâu! Em đã đọc và ghi nhớ toàn bộ nội dung của tệp `%s` vào cơ sở tri thức RAG rồi ạ! Lần sau chủ nhân cần hỏi gì về tài liệu này, em sẽ trả lời ngay nhé! 🧠✨", filePath))
+			onDone()
+			return
+		}
+	}
+
+	// 3. Nhận diện ý định ĐỌC & TÓM TẮT TÀI LIỆU
+	var attachedDocContext string
+	if strings.HasPrefix(lower, "đọc file ") || strings.HasPrefix(lower, "xem file ") || strings.HasPrefix(lower, "nội dung file ") || strings.HasPrefix(lower, "tóm tắt file ") {
+		filePath := trimmed
+		for _, prefix := range []string{"tóm tắt file ", "nội dung file ", "đọc file ", "xem file "} {
+			if strings.HasPrefix(lower, prefix) {
+				filePath = strings.TrimSpace(trimmed[len(prefix):])
+				break
+			}
+		}
+		filePath = strings.Trim(filePath, "`\"' ")
+
+		content, err := s.fs.ReadDocument(filePath)
+		if err != nil {
+			onError(fmt.Sprintf("Không thể đọc file: %v", err))
+			return
+		}
+
+		if s.mem != nil {
+			s.mem.RecordFileAccess(filePath)
+		}
+
+		attachedDocContext = fmt.Sprintf("=== NỘI DUNG TỆP TIN: %s ===\n%s\n=================================\n", filePath, content)
+		question = fmt.Sprintf("Hãy tóm tắt và phân tích ngắn gọn nội dung của tệp tin `%s` trên.", filePath)
+	}
+
+	// Lấy context từ RAG nếu được bật
 	var ragContext string
 	if useRAG && s.rag != nil {
 		ctxRag, cancel := context.WithTimeout(ctx, 4*time.Second)
@@ -69,7 +174,17 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 		}
 	}
 
+	// Ghép System Prompt + Thói quen + Tài liệu đính kèm + RAG
 	systemContent := PuppySystemPrompt
+	if s.mem != nil {
+		habit := s.mem.GetHabitContext()
+		if habit != "" {
+			systemContent += "\n\n" + habit
+		}
+	}
+	if attachedDocContext != "" {
+		systemContent += "\n\n" + attachedDocContext
+	}
 	if ragContext != "" {
 		systemContent += "\n\n" + ragContext
 	}
@@ -117,8 +232,7 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 	client := &http.Client{Timeout: 60 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		// Thử fallback nếu llama-server chưa chạy
-		onError(fmt.Sprintf("Không thể kết nối SLM (%s). Hãy đảm bảo llama-server hoặc bamos-ai đang chạy!", endpoint))
+		onError(fmt.Sprintf("Không thể kết nối SLM (%s). Hãy bấm vào cún để đánh thức AI hoặc chạy `bam ai start`!", endpoint))
 		return
 	}
 	defer resp.Body.Close()
@@ -194,11 +308,9 @@ func (s *AIService) StartAIServicesOnDemand(onProgress func(string), onReady fun
 	onProgress("Đang đánh thức AI & RAG (bam ai start)...")
 
 	go func() {
-		// Gọi bam ai start nếu có, hoặc spawn background process
 		cmd := exec.Command("bam", "ai", "start")
 		_ = cmd.Start()
 
-		// Dự phòng nếu lệnh bam chưa có trong PATH
 		if s.IsAIOffline() {
 			_ = exec.Command("bamos-ai-server").Start()
 		}
@@ -212,7 +324,6 @@ func (s *AIService) StartAIServicesOnDemand(onProgress func(string), onReady fun
 			_ = ragCmd.Start()
 		}
 
-		// Đợi kiểm tra tối đa 12 giây
 		for i := 0; i < 24; i++ {
 			time.Sleep(500 * time.Millisecond)
 			if !s.IsAIOffline() && !s.IsRAGOffline() {
