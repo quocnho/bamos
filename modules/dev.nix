@@ -34,6 +34,21 @@
       nodejs # Node LTS + npm đi kèm
       pnpm # quản lý package nhanh, tiết kiệm dung lượng
 
+      # ---- TypeScript / Vue (frontend) ----
+      # Nguyên tắc giữ máy NHẸ: chỉ cài toàn cục những thứ EDITOR gọi qua PATH
+      # và ít phụ thuộc phiên bản (LSP + formatter/linter CLI). Mọi thứ theo
+      # phiên bản dự án (vue, vite, vitest, tailwind, thư viện…) để DEVENV +
+      # pnpm lo trong từng repo — không cài global để tránh lệch version.
+      typescript # tsc + tsserver (CLI + API cho editor)
+      typescript-language-server # LSP TS/JS cho Zed/Antigravity
+      vue-language-server # Volar — LSP cho .vue (SFC)
+      vscode-langservers-extracted # LSP HTML/CSS/JSON (Zed cũng cần)
+      eslint # lint CLI
+      prettier # format CLI (nvim: <space>f; Zed: format on save)
+      # tailwindcss-language-server # bỏ comment nếu dự án dùng Tailwind
+      # emmet-language-server # gõ nhanh HTML/Vue (tuỳ chọn)
+      # vtsls # LSP TS thay thế typescript-language-server (nhanh hơn, tuỳ chọn)
+
       # ---- Go (Golang) ----
       go # toolchain: go build/test/run, go mod, gofmt, go vet
       gopls # language server cho Zed/Antigravity (gợi ý code, go to def, refactor)

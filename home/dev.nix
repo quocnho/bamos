@@ -160,6 +160,7 @@ in
       lua-language-server # Lua
       pyright # Python
       typescript-language-server # TS/JS
+      vue-language-server # Vue SFC (Volar) — nvim bật vue_ls
       bash-language-server # Bash
       marksman # Markdown
       yaml-language-server # YAML
@@ -170,9 +171,10 @@ in
       black
       ruff
 
-      # ---- Formatter khác (dùng trong after/ftplugin) ----
+      # ---- Formatter khác (dùng trong after/ftplugin / autocmds) ----
       stylua # Lua
       nixfmt # Nix (nil_ls cũng gọi nixfmt để format)
+      prettier # JS/TS/CSS/HTML/JSON/Vue/Markdown (autocmds.lua: <space>f)
 
       # ---- Fuzzy finder backend (fzf-lua) ----
       fzf
@@ -187,7 +189,7 @@ in
       # jdt-language-server    # Java (jdtls)
       # typos-lsp              # soát lỗi chính tả
       # shfmt                  # Shell format
-      # prettierd              # JS/TS/CSS/HTML/JSON format
+      # prettierd              # JS/TS/CSS/HTML/JSON format (daemon, nhanh hơn prettier)
       # dockerfile-language-server-nodejs # Dockerfile
       # terraform-ls           # Terraform
     ];
