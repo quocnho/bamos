@@ -213,7 +213,7 @@ static void setup_window_and_webview(const char *app_url) {
     g_signal_connect(manager, "script-message-received::assistantNative", G_CALLBACK(on_script_message), NULL);
 
     // Tiêm script shim vào để JS frontend gọi window.assistantNative dễ dàng
-    const char *shim = 
+    const char *shim =
         "window.assistantNative = {"
         "  dragWindow: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'drag'})); },"
         "  closeApp: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'close'})); },"
@@ -282,7 +282,7 @@ import (
 	"unsafe"
 )
 
-//go:embed frontend/*
+//go:embed frontend
 var frontendFS embed.FS
 
 type NativeMessage struct {

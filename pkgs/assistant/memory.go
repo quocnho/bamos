@@ -10,9 +10,9 @@ import (
 )
 
 type UserMemory struct {
-	mu           sync.RWMutex
-	filePath     string
-	Data         MemoryData
+	mu       sync.RWMutex
+	filePath string
+	Data     MemoryData
 }
 
 type MemoryData struct {

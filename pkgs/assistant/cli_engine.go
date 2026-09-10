@@ -13,12 +13,12 @@ import (
 )
 
 type CommandResult struct {
-	Command   string `json:"command"`
-	Output    string `json:"output"`
-	ExitCode  int    `json:"exit_code"`
-	Duration  string `json:"duration"`
-	IsSudo    bool   `json:"is_sudo"`
-	Learned   bool   `json:"learned"`
+	Command  string `json:"command"`
+	Output   string `json:"output"`
+	ExitCode int    `json:"exit_code"`
+	Duration string `json:"duration"`
+	IsSudo   bool   `json:"is_sudo"`
+	Learned  bool   `json:"learned"`
 }
 
 type CLIEngine struct {

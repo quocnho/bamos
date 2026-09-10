@@ -1,483 +1,1068 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BamOS 3D Mascot AI Assistant & EyeLeo Companion</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body class="state-welcoming">
-  <div id="app-container">
-    
-    <!-- 1. Thông báo trước 30 giây khi sắp đến nghỉ dài (Pre-break Notification) -->
-    <div id="eyeleo-prebreak-toast" class="eyeleo-prebreak-toast hidden">
-      <div class="prebreak-icon">⏰</div>
-      <div class="prebreak-content">
-        <div class="prebreak-title">Sắp đến giờ Nghỉ Dài!</div>
-        <div class="prebreak-text">Còn <b id="prebreak-seconds">30</b> giây nữa sẽ bắt đầu nghỉ 5 phút. Chủ nhân hãy kịp lưu công việc và dòng code nhé!</div>
-      </div>
-      <button id="btn-prebreak-dismiss" class="prebreak-close">×</button>
-    </div>
-
-    <!-- 2. Bong bóng Nghỉ Ngắn (Short Break - 8s) với Cún làm mẫu bài tập mắt -->
-    <div id="eyeleo-shortbreak-bubble" class="bubble eyeleo-bubble eyeleo-shortbreak hidden">
-      <div class="bubble-header">
-        <div class="assistant-tag">
-          <span class="eyeleo-badge short">👀 Nghỉ Ngắn 20-20-20</span>
-          <span class="status-text" id="shortbreak-exercise-name">Chớp mắt liên tục</span>
-        </div>
-        <button id="btn-shortbreak-skip" class="icon-btn close-btn" title="Bỏ qua">×</button>
-      </div>
-      <div class="bubble-body eyeleo-body">
-        <div class="exercise-guide-box">
-          <div class="exercise-icon" id="shortbreak-icon">👀</div>
-          <div class="exercise-text" id="shortbreak-instruction">
-            Chủ nhân hãy nhìn theo mắt em và chớp mắt liên tục để giữ ẩm màng mắt nhé!
-          </div>
-        </div>
-        <div class="eyeleo-timer-bar-wrapper">
-          <div class="eyeleo-timer-bar" id="shortbreak-progress"></div>
-          <span class="eyeleo-seconds-num" id="shortbreak-countdown">8s</span>
-        </div>
-      </div>
-      <div class="bubble-tail"></div>
-    </div>
-
-    <!-- 3. Giao diện Nghỉ Dài (Long Break - 5 phút) Glassmorphism Full Overlay -->
-    <div id="eyeleo-longbreak-overlay" class="eyeleo-longbreak-overlay hidden">
-      <div class="longbreak-card">
-        <div class="longbreak-header">
-          <span class="longbreak-badge">🌿 NGHỈ DÀI CÔNG THÁI HỌC</span>
-          <span id="strict-mode-indicator" class="strict-badge hidden">🔒 Chế độ nghiêm ngặt</span>
-        </div>
-        <div class="longbreak-clock" id="longbreak-clock">05:00</div>
-        <div class="longbreak-title" id="longbreak-title">Đã đến lúc giải tỏa áp lực toàn diện!</div>
-        <div class="longbreak-desc" id="longbreak-desc">
-          Chủ nhân đã ngồi tập trung 50 phút rồi ạ. Em mời Chủ nhân đứng dậy, uống một ly nước ấm, vươn vai và nhìn ra ngoài cửa sổ để thư giãn mắt và cột sống nhé! 💧✨
-        </div>
-        <div class="longbreak-actions" id="longbreak-actions">
-          <button id="btn-longbreak-postpone" class="longbreak-btn secondary">⏰ Hoãn 2 phút</button>
-          <button id="btn-longbreak-skip" class="longbreak-btn outline">Bỏ qua lần này</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 4. Modal Bảng Cài Đặt EyeLeo Chuyên Nghiệp -->
-    <div id="eyeleo-settings-modal" class="modal-backdrop hidden">
-      <div class="modal-card">
-        <div class="modal-header">
-          <div class="modal-title">⚙️ Cài Đặt Bảo Vệ Mắt EyeLeo</div>
-          <button id="btn-close-eyeleo-settings" class="icon-btn close-btn">×</button>
-        </div>
-        <div class="modal-body settings-form">
-          <div class="setting-item switch-item">
-            <div>
-              <div class="setting-name">Bật nhắc nhở EyeLeo</div>
-              <div class="setting-desc">Tự động nhắc nghỉ ngắn và nghỉ dài theo công thái học</div>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>BamOS 3D Mascot AI Assistant & EyeLeo Companion</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body class="state-welcoming">
+        <div id="app-container">
+            <!-- 1. Thông báo trước 30 giây khi sắp đến nghỉ dài (Pre-break Notification) -->
+            <div
+                id="eyeleo-prebreak-toast"
+                class="eyeleo-prebreak-toast hidden"
+            >
+                <div class="prebreak-icon">⏰</div>
+                <div class="prebreak-content">
+                    <div class="prebreak-title">Sắp đến giờ Nghỉ Dài!</div>
+                    <div class="prebreak-text">
+                        Còn <b id="prebreak-seconds">30</b> giây nữa sẽ bắt đầu
+                        nghỉ 5 phút. Chủ nhân hãy kịp lưu công việc và dòng code
+                        nhé!
+                    </div>
+                </div>
+                <button id="btn-prebreak-dismiss" class="prebreak-close">
+                    ×
+                </button>
             </div>
-            <label class="toggle-switch">
-              <input type="checkbox" id="set-eyeleo-active" checked>
-              <span class="slider"></span>
-            </label>
-          </div>
 
-          <div class="setting-item">
-            <label for="set-short-interval">Chu kỳ Nghỉ Ngắn (Short Break):</label>
-            <div class="setting-row">
-              <select id="set-short-interval">
-                <option value="5">Mỗi 5 phút</option>
-                <option value="10" selected>Mỗi 10 phút (Khuyên dùng)</option>
-                <option value="15">Mỗi 15 phút</option>
-                <option value="20">Mỗi 20 phút</option>
-              </select>
-              <span class="unit-label">Thời lượng:</span>
-              <select id="set-short-duration">
-                <option value="5">5 giây</option>
-                <option value="8" selected>8 giây</option>
-                <option value="12">12 giây</option>
-              </select>
+            <!-- 2. Bong bóng Nghỉ Ngắn (Short Break - 8s) với Cún làm mẫu bài tập mắt -->
+            <div
+                id="eyeleo-shortbreak-bubble"
+                class="bubble eyeleo-bubble eyeleo-shortbreak hidden"
+            >
+                <div class="bubble-header">
+                    <div class="assistant-tag">
+                        <span class="eyeleo-badge short"
+                            >👀 Nghỉ Ngắn 20-20-20</span
+                        >
+                        <span class="status-text" id="shortbreak-exercise-name"
+                            >Chớp mắt liên tục</span
+                        >
+                    </div>
+                    <button
+                        id="btn-shortbreak-skip"
+                        class="icon-btn close-btn"
+                        title="Bỏ qua"
+                    >
+                        ×
+                    </button>
+                </div>
+                <div class="bubble-body eyeleo-body">
+                    <div class="exercise-guide-box">
+                        <div class="exercise-icon" id="shortbreak-icon">👀</div>
+                        <div class="exercise-text" id="shortbreak-instruction">
+                            Chủ nhân hãy nhìn theo mắt em và chớp mắt liên tục
+                            để giữ ẩm màng mắt nhé!
+                        </div>
+                    </div>
+                    <div class="eyeleo-timer-bar-wrapper">
+                        <div
+                            class="eyeleo-timer-bar"
+                            id="shortbreak-progress"
+                        ></div>
+                        <span
+                            class="eyeleo-seconds-num"
+                            id="shortbreak-countdown"
+                            >8s</span
+                        >
+                    </div>
+                </div>
+                <div class="bubble-tail"></div>
             </div>
-          </div>
 
-          <div class="setting-item">
-            <label for="set-long-interval">Chu kỳ Nghỉ Dài (Long Break):</label>
-            <div class="setting-row">
-              <select id="set-long-interval">
-                <option value="30">Mỗi 30 phút</option>
-                <option value="45">Mỗi 45 phút</option>
-                <option value="50" selected>Mỗi 50 phút (Khuyên dùng)</option>
-                <option value="60">Mỗi 60 phút</option>
-                <option value="90">Mỗi 90 phút</option>
-              </select>
-              <span class="unit-label">Thời lượng:</span>
-              <select id="set-long-duration">
-                <option value="2">2 phút</option>
-                <option value="3">3 phút</option>
-                <option value="5" selected>5 phút</option>
-                <option value="7">7 phút</option>
-              </select>
+            <!-- 3. Giao diện Nghỉ Dài (Long Break - 5 phút) Glassmorphism Full Overlay -->
+            <div
+                id="eyeleo-longbreak-overlay"
+                class="eyeleo-longbreak-overlay hidden"
+            >
+                <div class="longbreak-card">
+                    <div class="longbreak-header">
+                        <span class="longbreak-badge"
+                            >🌿 NGHỈ DÀI CÔNG THÁI HỌC</span
+                        >
+                        <span
+                            id="strict-mode-indicator"
+                            class="strict-badge hidden"
+                            >🔒 Chế độ nghiêm ngặt</span
+                        >
+                    </div>
+                    <div class="longbreak-clock" id="longbreak-clock">
+                        05:00
+                    </div>
+                    <div class="longbreak-title" id="longbreak-title">
+                        Đã đến lúc giải tỏa áp lực toàn diện!
+                    </div>
+                    <div class="longbreak-desc" id="longbreak-desc">
+                        Chủ nhân đã ngồi tập trung 50 phút rồi ạ. Em mời Chủ
+                        nhân đứng dậy, uống một ly nước ấm, vươn vai và nhìn ra
+                        ngoài cửa sổ để thư giãn mắt và cột sống nhé! 💧✨
+                    </div>
+                    <div class="longbreak-actions" id="longbreak-actions">
+                        <button
+                            id="btn-longbreak-postpone"
+                            class="longbreak-btn secondary"
+                        >
+                            ⏰ Hoãn 2 phút
+                        </button>
+                        <button
+                            id="btn-longbreak-skip"
+                            class="longbreak-btn outline"
+                        >
+                            Bỏ qua lần này
+                        </button>
+                    </div>
+                </div>
             </div>
-          </div>
 
-          <div class="setting-item switch-item">
-            <div>
-              <div class="setting-name">Chế độ nghiêm ngặt (Strict Mode)</div>
-              <div class="setting-desc">Vô hiệu hóa nút Bỏ qua khi nghỉ dài, bắt buộc rời máy tính</div>
+            <!-- 4. Modal Bảng Cài Đặt EyeLeo Chuyên Nghiệp -->
+            <div id="eyeleo-settings-modal" class="modal-backdrop hidden">
+                <div class="modal-card">
+                    <div class="modal-header">
+                        <div class="modal-title">
+                            ⚙️ Cài Đặt Bảo Vệ Mắt EyeLeo
+                        </div>
+                        <button
+                            id="btn-close-eyeleo-settings"
+                            class="icon-btn close-btn"
+                        >
+                            ×
+                        </button>
+                    </div>
+                    <div class="modal-body settings-form">
+                        <div class="setting-item switch-item">
+                            <div>
+                                <div class="setting-name">
+                                    Bật nhắc nhở EyeLeo
+                                </div>
+                                <div class="setting-desc">
+                                    Tự động nhắc nghỉ ngắn và nghỉ dài theo công
+                                    thái học
+                                </div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input
+                                    type="checkbox"
+                                    id="set-eyeleo-active"
+                                    checked
+                                />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="set-short-interval"
+                                >Chu kỳ Nghỉ Ngắn (Short Break):</label
+                            >
+                            <div class="setting-row">
+                                <select id="set-short-interval">
+                                    <option value="5">Mỗi 5 phút</option>
+                                    <option value="10" selected>
+                                        Mỗi 10 phút (Khuyên dùng)
+                                    </option>
+                                    <option value="15">Mỗi 15 phút</option>
+                                    <option value="20">Mỗi 20 phút</option>
+                                </select>
+                                <span class="unit-label">Thời lượng:</span>
+                                <select id="set-short-duration">
+                                    <option value="5">5 giây</option>
+                                    <option value="8" selected>8 giây</option>
+                                    <option value="12">12 giây</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="set-long-interval"
+                                >Chu kỳ Nghỉ Dài (Long Break):</label
+                            >
+                            <div class="setting-row">
+                                <select id="set-long-interval">
+                                    <option value="30">Mỗi 30 phút</option>
+                                    <option value="45">Mỗi 45 phút</option>
+                                    <option value="50" selected>
+                                        Mỗi 50 phút (Khuyên dùng)
+                                    </option>
+                                    <option value="60">Mỗi 60 phút</option>
+                                    <option value="90">Mỗi 90 phút</option>
+                                </select>
+                                <span class="unit-label">Thời lượng:</span>
+                                <select id="set-long-duration">
+                                    <option value="2">2 phút</option>
+                                    <option value="3">3 phút</option>
+                                    <option value="5" selected>5 phút</option>
+                                    <option value="7">7 phút</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="setting-item switch-item">
+                            <div>
+                                <div class="setting-name">
+                                    Chế độ nghiêm ngặt (Strict Mode)
+                                </div>
+                                <div class="setting-desc">
+                                    Vô hiệu hóa nút Bỏ qua khi nghỉ dài, bắt
+                                    buộc rời máy tính
+                                </div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="set-strict-mode" />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item switch-item">
+                            <div>
+                                <div class="setting-name">
+                                    Thông báo trước 30 giây
+                                </div>
+                                <div class="setting-desc">
+                                    Hiện thông báo nhắc lưu code/tài liệu trước
+                                    đợt nghỉ dài
+                                </div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input
+                                    type="checkbox"
+                                    id="set-prebreak-notify"
+                                    checked
+                                />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item switch-item">
+                            <div>
+                                <div class="setting-name">
+                                    Tự động nhận diện không hoạt động
+                                </div>
+                                <div class="setting-desc">
+                                    Reset bộ đếm nếu rời máy tính quá 3 phút
+                                    (D-Bus Mutter)
+                                </div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input
+                                    type="checkbox"
+                                    id="set-auto-idle"
+                                    checked
+                                />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item switch-item">
+                            <div>
+                                <div class="setting-name">
+                                    Âm thanh chuông thư giãn (Chime)
+                                </div>
+                                <div class="setting-desc">
+                                    Phát tiếng chuông êm dịu khi đến giờ và khi
+                                    hết giờ nghỉ
+                                </div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input
+                                    type="checkbox"
+                                    id="set-sound-enabled"
+                                    checked
+                                />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            id="btn-save-settings"
+                            class="modal-btn primary"
+                        >
+                            Lưu Cài Đặt
+                        </button>
+                    </div>
+                </div>
             </div>
-            <label class="toggle-switch">
-              <input type="checkbox" id="set-strict-mode">
-              <span class="slider"></span>
-            </label>
-          </div>
 
-          <div class="setting-item switch-item">
-            <div>
-              <div class="setting-name">Thông báo trước 30 giây</div>
-              <div class="setting-desc">Hiện thông báo nhắc lưu code/tài liệu trước đợt nghỉ dài</div>
+            <!-- Bong bóng hội thoại AI Chat & RAG -->
+            <div id="speech-bubble" class="bubble">
+                <div class="bubble-header" data-drag="true">
+                    <div class="assistant-tag">
+                        <span
+                            class="rag-indicator"
+                            id="rag-badge"
+                            title="RAG Tri thức nội bộ"
+                            >📚 RAG</span
+                        >
+                        <span class="status-text" id="status-label"
+                            >Em chào Chủ nhân!</span
+                        >
+                    </div>
+                    <div class="window-controls">
+                        <button
+                            id="btn-stop-stream"
+                            class="icon-btn stop-btn hidden"
+                            title="Dừng câu trả lời"
+                        >
+                            ⏹
+                        </button>
+                        <button
+                            id="btn-always-on-top"
+                            class="icon-btn active"
+                            title="Ghim trên cùng màn hình (Always on Top)"
+                        >
+                            📌
+                        </button>
+                        <button
+                            id="btn-eyeleo-toggle"
+                            class="icon-btn active"
+                            title="Bật/Tắt nhắc EyeLeo (mắt/nước)"
+                        >
+                            ⏰
+                        </button>
+                        <button
+                            id="btn-sleep-cún"
+                            class="icon-btn"
+                            title="Cho cún ngủ canh nhà"
+                        >
+                            💤
+                        </button>
+                        <button
+                            id="btn-minimize"
+                            class="icon-btn"
+                            title="Thu nhỏ bong bóng"
+                        >
+                            −
+                        </button>
+                        <button
+                            id="btn-close"
+                            class="icon-btn close-btn"
+                            title="Đóng ứng dụng và tắt toàn bộ dịch vụ AI/RAG"
+                        >
+                            ×
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Thanh bối cảnh Cục Xương (Directory Context Bar) -->
+                <div id="bone-context-bar" class="bone-context-bar hidden">
+                    <div class="bone-context-info">
+                        <span class="bone-icon">🍖</span>
+                        <span class="bone-text" id="bone-dir-text"
+                            >/etc/nixos</span
+                        >
+                    </div>
+                    <button
+                        id="btn-clear-bone"
+                        class="bone-clear-btn"
+                        title="Gỡ bỏ bối cảnh thư mục"
+                    >
+                        ×
+                    </button>
+                </div>
+
+                <!-- Thanh xem trước tài liệu/hình ảnh đính kèm (+) -->
+                <div
+                    id="attached-preview-bar"
+                    class="attached-preview-bar hidden"
+                >
+                    <div class="attached-tag">
+                        <span id="attached-icon">📎</span>
+                        <span id="attached-filename" class="attached-filename"
+                            >tailieu.pdf</span
+                        >
+                    </div>
+                    <button
+                        id="btn-remove-attachment"
+                        class="remove-attachment-btn"
+                        title="Gỡ đính kèm"
+                    >
+                        ×
+                    </button>
+                </div>
+
+                <div class="bubble-body" id="chat-stream">
+                    <div class="welcome-msg" id="chat-welcome">
+                        🐶 <b>Xin chào Chủ nhân!</b> Em đang ở đây, sẵn sàng hỗ
+                        trợ ạ! Chủ nhân hãy nhấp vào ô chat để bắt đầu nhé!
+                    </div>
+                </div>
+
+                <div class="bubble-footer">
+                    <div class="smart-suggestions" id="smart-chips">
+                        <button class="chip" data-query="bam info">
+                            ⚡ Bam Info
+                        </button>
+                        <button class="chip" data-query="bam health">
+                            🛡️ Bam Health
+                        </button>
+                        <button
+                            class="chip"
+                            data-query="Thông tin phần cứng hệ thống"
+                        >
+                            💻 Phần cứng
+                        </button>
+                        <button
+                            class="chip"
+                            data-query="Đang chạy những ứng dụng nào"
+                        >
+                            📊 Ứng dụng chạy
+                        </button>
+                        <button
+                            class="chip"
+                            data-query="Đọc file /etc/nixos/configuration.nix"
+                        >
+                            📄 Đọc config
+                        </button>
+                    </div>
+                    <div class="input-wrapper">
+                        <!-- Nút dấu + đính kèm hình ảnh, tài liệu (tách biệt hoàn toàn với input type file) -->
+                        <input
+                            type="file"
+                            id="file-upload-input"
+                            class="hidden-file-input"
+                            accept="image/*,.pdf,.txt,.md,.nix,.json,.yaml,.yml,.sh,.go,.py,.csv"
+                        />
+                        <button
+                            type="button"
+                            id="btn-attach"
+                            class="attach-btn"
+                            title="Thêm hình ảnh, tài liệu (+)"
+                        >
+                            <svg
+                                width="15"
+                                height="15"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.6"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </button>
+                        <input
+                            type="text"
+                            id="chat-input"
+                            placeholder="Hỏi em, dán link hoặc chạy lệnh... (Enter)"
+                            autocomplete="off"
+                        />
+                        <button
+                            id="btn-rag-toggle"
+                            class="toggle-btn active"
+                            title="Bật/Tắt RAG Tri Thức"
+                        >
+                            📚
+                        </button>
+                        <button
+                            id="btn-send"
+                            class="send-btn"
+                            title="Gửi câu hỏi"
+                        >
+                            ➤
+                        </button>
+                    </div>
+                </div>
+                <div class="bubble-tail"></div>
             </div>
-            <label class="toggle-switch">
-              <input type="checkbox" id="set-prebreak-notify" checked>
-              <span class="slider"></span>
-            </label>
-          </div>
 
-          <div class="setting-item switch-item">
-            <div>
-              <div class="setting-name">Tự động nhận diện không hoạt động</div>
-              <div class="setting-desc">Reset bộ đếm nếu rời máy tính quá 3 phút (D-Bus Mutter)</div>
+            <!-- Chú cún con Mascot 3D Chibi (Original BamOS Mascot) -->
+            <div
+                id="pet-wrapper"
+                class="pet-draggable"
+                title="Kéo để di chuyển • Bấm để trò chuyện cùng em"
+            >
+                <div id="heart-burst" class="heart-effect">❤️</div>
+                <div id="zzz-bubble" class="zzz-effect">z Z Z</div>
+
+                <!-- Chú cún 3D Vector SVG Đa Tầng -->
+                <svg
+                    id="puppy-svg"
+                    viewBox="0 0 220 220"
+                    width="170"
+                    height="170"
+                >
+                    <defs>
+                        <!-- Gradient 3D mặt và thân -->
+                        <radialGradient
+                            id="grad3DFace"
+                            cx="40%"
+                            cy="35%"
+                            r="65%"
+                        >
+                            <stop offset="0%" stop-color="#FFEAA7" />
+                            <stop offset="50%" stop-color="#FDCB6E" />
+                            <stop offset="85%" stop-color="#E17055" />
+                            <stop offset="100%" stop-color="#D63031" />
+                        </radialGradient>
+
+                        <radialGradient
+                            id="grad3DBody"
+                            cx="35%"
+                            cy="30%"
+                            r="70%"
+                        >
+                            <stop offset="0%" stop-color="#FFEAA7" />
+                            <stop offset="60%" stop-color="#FDCB6E" />
+                            <stop offset="90%" stop-color="#E17055" />
+                            <stop offset="100%" stop-color="#C0392B" />
+                        </radialGradient>
+
+                        <!-- Gradient tai ngoài 3D -->
+                        <linearGradient
+                            id="grad3DEar"
+                            x1="20%"
+                            y1="0%"
+                            x2="80%"
+                            y2="100%"
+                        >
+                            <stop offset="0%" stop-color="#E17055" />
+                            <stop offset="60%" stop-color="#D63031" />
+                            <stop offset="100%" stop-color="#8E1A1A" />
+                        </linearGradient>
+
+                        <!-- Gradient lòng trong tai hồng phấn 3D mềm mại -->
+                        <linearGradient
+                            id="grad3DEarInner"
+                            x1="0%"
+                            y1="0%"
+                            x2="100%"
+                            y2="100%"
+                        >
+                            <stop offset="0%" stop-color="#FFB8B8" />
+                            <stop offset="70%" stop-color="#FF7675" />
+                            <stop offset="100%" stop-color="#E84393" />
+                        </linearGradient>
+
+                        <!-- Gradient má phúng phính -->
+                        <radialGradient
+                            id="grad3DMuzzle"
+                            cx="50%"
+                            cy="35%"
+                            r="55%"
+                        >
+                            <stop offset="0%" stop-color="#FFFFFF" />
+                            <stop offset="65%" stop-color="#FFFDF0" />
+                            <stop offset="100%" stop-color="#FEEAA0" />
+                        </radialGradient>
+
+                        <!-- Gradient mắt ngọc hổ phách 3D -->
+                        <radialGradient
+                            id="grad3DIris"
+                            cx="45%"
+                            cy="40%"
+                            r="55%"
+                        >
+                            <stop offset="0%" stop-color="#8B4513" />
+                            <stop offset="45%" stop-color="#5C2C16" />
+                            <stop offset="80%" stop-color="#2D150B" />
+                            <stop offset="100%" stop-color="#120703" />
+                        </radialGradient>
+
+                        <!-- Gradient chuông vàng kim loại 3D -->
+                        <radialGradient
+                            id="grad3DBell"
+                            cx="35%"
+                            cy="30%"
+                            r="60%"
+                        >
+                            <stop offset="0%" stop-color="#FFF9D2" />
+                            <stop offset="45%" stop-color="#F1C40F" />
+                            <stop offset="85%" stop-color="#D35400" />
+                            <stop offset="100%" stop-color="#7E3200" />
+                        </radialGradient>
+
+                        <!-- Đổ bóng mềm dưới đất -->
+                        <radialGradient
+                            id="gradGroundShadow"
+                            cx="50%"
+                            cy="50%"
+                            r="50%"
+                        >
+                            <stop offset="0%" stop-color="rgba(0,0,0,0.35)" />
+                            <stop offset="60%" stop-color="rgba(0,0,0,0.18)" />
+                            <stop offset="100%" stop-color="rgba(0,0,0,0)" />
+                        </radialGradient>
+                    </defs>
+
+                    <!-- Bóng đổ sàn 3D -->
+                    <ellipse
+                        cx="110"
+                        cy="204"
+                        rx="72"
+                        ry="12"
+                        fill="url(#gradGroundShadow)"
+                        class="puppy-shadow"
+                    />
+
+                    <!-- Đuôi vẫy 3D -->
+                    <g class="tail-group">
+                        <path
+                            d="M 152 165 C 185 155, 198 120, 185 98 C 176 104, 168 128, 150 152 Z"
+                            fill="url(#grad3DEar)"
+                        />
+                        <circle cx="184" cy="100" r="8" fill="#FFFDF0" />
+                    </g>
+
+                    <!-- Chân sau nằm canh nhà -->
+                    <ellipse
+                        cx="58"
+                        cy="190"
+                        rx="22"
+                        ry="14"
+                        fill="url(#grad3DEar)"
+                        class="back-paw-left"
+                    />
+                    <ellipse
+                        cx="162"
+                        cy="190"
+                        rx="22"
+                        ry="14"
+                        fill="url(#grad3DEar)"
+                        class="back-paw-right"
+                    />
+
+                    <!-- Thân mình 3D Chibi -->
+                    <!-- Thân mình 3D Chibi -->
+                    <g class="body-group">
+                        <path
+                            d="M 64 125 C 50 170, 62 198, 110 198 C 158 198, 170 170, 156 125 C 144 98, 76 98, 64 125 Z"
+                            fill="url(#grad3DBody)"
+                        />
+                        <!-- Yếm ngực kem mềm mại -->
+                        <path
+                            d="M 86 138 C 80 168, 86 190, 110 190 C 134 190, 140 168, 134 138 C 128 126, 92 126, 86 138 Z"
+                            fill="url(#grad3DMuzzle)"
+                            opacity="0.95"
+                        />
+                        <!-- Chữ BamAI 3D nổi bật, sang trọng trên ngực cún -->
+                        <g class="chest-logo-group">
+                            <!-- Đổ bóng chữ tạo khối nổi 3D -->
+                            <text
+                                x="110"
+                                y="167"
+                                font-size="9"
+                                font-weight="900"
+                                font-family="'Segoe UI', Roboto, sans-serif"
+                                text-anchor="middle"
+                                fill="#E17055"
+                                opacity="0.4"
+                            >
+                                BamAI
+                            </text>
+                            <!-- Chữ chính màu xanh ngọc đồng bộ thương hiệu BamOS -->
+                            <text
+                                x="110"
+                                y="166"
+                                font-size="9"
+                                font-weight="900"
+                                font-family="'Segoe UI', Roboto, sans-serif"
+                                text-anchor="middle"
+                                fill="#008080"
+                                letter-spacing="0.5"
+                            >
+                                BamAI
+                            </text>
+                        </g>
+                    </g>
+
+                    <!-- Chân trước 3D (Tư thế đứng hoặc nằm duỗi canh nhà) -->
+                    <g class="front-paws">
+                        <g class="paw-left">
+                            <ellipse
+                                cx="86"
+                                cy="195"
+                                rx="14"
+                                ry="9"
+                                fill="url(#grad3DFace)"
+                            />
+                            <ellipse
+                                cx="86"
+                                cy="196"
+                                rx="10"
+                                ry="6"
+                                fill="#FFFDF0"
+                            />
+                            <!-- Móng vuốt nhỏ xinh -->
+                            <circle cx="80" cy="199" r="1.8" fill="#E17055" />
+                            <circle cx="86" cy="201" r="1.8" fill="#E17055" />
+                            <circle cx="92" cy="199" r="1.8" fill="#E17055" />
+                        </g>
+                        <g class="paw-right">
+                            <ellipse
+                                cx="134"
+                                cy="195"
+                                rx="14"
+                                ry="9"
+                                fill="url(#grad3DFace)"
+                            />
+                            <ellipse
+                                cx="134"
+                                cy="196"
+                                rx="10"
+                                ry="6"
+                                fill="#FFFDF0"
+                            />
+                            <circle cx="128" cy="199" r="1.8" fill="#E17055" />
+                            <circle cx="134" cy="201" r="1.8" fill="#E17055" />
+                            <circle cx="140" cy="199" r="1.8" fill="#E17055" />
+                        </g>
+                    </g>
+
+                    <!-- Vòng cổ BamOS xanh ngọc 3D -->
+                    <path
+                        d="M 72 118 Q 110 134 148 118 Q 110 126 72 118"
+                        fill="#00CEC9"
+                        stroke="#00A8A4"
+                        stroke-width="2.5"
+                    />
+                    <!-- Chuông vàng kim loại 3D với khe chuông -->
+                    <circle
+                        cx="110"
+                        cy="128"
+                        r="8.5"
+                        fill="url(#grad3DBell)"
+                        class="bell"
+                    />
+                    <circle cx="110" cy="130" r="1.8" fill="#5C2C16" />
+
+                    <!-- Đầu chú cún 3D Chibi -->
+                    <g class="head-group">
+                        <!-- Đôi tai chó thiết kế lớn gấp 2 lần diện tích, vểnh cao 3D tinh anh, ngộ nghĩnh (Pricked Ears 2x) -->
+                        <!-- Tai trái vểnh chếch lên bên trái (Diện tích lớn gấp 2) -->
+                        <g class="ear ear-left-perky">
+                            <path
+                                d="M 80 58 C 66 42, 38 12, 44 0 C 58 -2, 88 24, 102 46 Z"
+                                fill="url(#grad3DEar)"
+                            />
+                            <!-- Lòng tai trong màu hồng phấn mềm mại lớn gấp đôi -->
+                            <path
+                                d="M 78 52 C 67 38, 48 15, 52 5 C 61 3, 83 25, 94 44 Z"
+                                fill="url(#grad3DEarInner)"
+                                opacity="0.9"
+                            />
+                        </g>
+                        <!-- Tai phải vểnh chếch lên bên phải (Diện tích lớn gấp 2) -->
+                        <g class="ear ear-right-perky">
+                            <path
+                                d="M 140 58 C 154 42, 182 12, 176 0 C 162 -2, 132 24, 118 46 Z"
+                                fill="url(#grad3DEar)"
+                            />
+                            <!-- Lòng tai trong màu hồng phấn mềm mại lớn gấp đôi -->
+                            <path
+                                d="M 142 52 C 153 38, 172 15, 168 5 C 159 3, 137 25, 126 44 Z"
+                                fill="url(#grad3DEarInner)"
+                                opacity="0.9"
+                            />
+                        </g>
+
+                        <!-- Khối mặt cầu 3D tròn xoe dễ thương -->
+                        <ellipse
+                            cx="110"
+                            cy="74"
+                            rx="52"
+                            ry="46"
+                            fill="url(#grad3DFace)"
+                        />
+
+                        <!-- Điểm sáng bóng highlight trên trán tạo cảm giác 3D nổi -->
+                        <ellipse
+                            cx="96"
+                            cy="48"
+                            rx="18"
+                            ry="10"
+                            fill="#FFFFFF"
+                            opacity="0.35"
+                            transform="rotate(-15, 96, 48)"
+                        />
+
+                        <!-- Mõm chú cún tròn trịa mềm mại -->
+                        <ellipse
+                            cx="110"
+                            cy="88"
+                            rx="30"
+                            ry="22"
+                            fill="url(#grad3DMuzzle)"
+                        />
+
+                        <!-- MẮT TRÁI 3D (Có thể thức hoặc nhắm mắt ngủ canh nhà) -->
+                        <g class="eye-container eye-left-container">
+                            <!-- Mắt mở tròn xoe long lanh -->
+                            <g class="eye-open eye-left">
+                                <g class="eye-pupil-group eye-pupil-left">
+                                    <ellipse
+                                        cx="88"
+                                        cy="68"
+                                        rx="11"
+                                        ry="14"
+                                        fill="url(#grad3DIris)"
+                                    />
+                                    <!-- Đốm sáng phản chiếu 3 tầng cực kỳ long lanh -->
+                                    <circle
+                                        cx="85"
+                                        cy="62"
+                                        r="4.5"
+                                        fill="#FFFFFF"
+                                    />
+                                    <circle
+                                        cx="92"
+                                        cy="74"
+                                        r="2.2"
+                                        fill="#FFFFFF"
+                                    />
+                                    <circle
+                                        cx="83"
+                                        cy="73"
+                                        r="1.2"
+                                        fill="#FFFFFF"
+                                    />
+                                </g>
+                            </g>
+                            <!-- Mí mắt và Lông mi cong vút khi ngủ -->
+                            <g class="eye-closed eye-left-closed">
+                                <!-- Cung mí mắt cong mềm mại -->
+                                <path
+                                    d="M 76 72 Q 88 82 100 72"
+                                    stroke="#8B4513"
+                                    stroke-width="3"
+                                    stroke-linecap="round"
+                                    fill="none"
+                                />
+                                <!-- Hàng lông mi cong vút đáng yêu -->
+                                <path
+                                    d="M 77 71 Q 72 65 71 61"
+                                    stroke="#5C2C16"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    fill="none"
+                                    class="eyelash"
+                                />
+                                <path
+                                    d="M 85 75 Q 83 67 81 63"
+                                    stroke="#5C2C16"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    fill="none"
+                                    class="eyelash"
+                                />
+                                <path
+                                    d="M 94 75 Q 95 67 96 63"
+                                    stroke="#5C2C16"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    fill="none"
+                                    class="eyelash"
+                                />
+                                <path
+                                    d="M 99 71 Q 104 65 106 61"
+                                    stroke="#5C2C16"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    fill="none"
+                                    class="eyelash"
+                                />
+                            </g>
+                        </g>
+
+                        <!-- MẮT PHẢI 3D -->
+                        <g class="eye-container eye-right-container">
+                            <!-- Mắt mở tròn xoe long lanh -->
+                            <g class="eye-open eye-right">
+                                <g class="eye-pupil-group eye-pupil-right">
+                                    <ellipse
+                                        cx="132"
+                                        cy="68"
+                                        rx="11"
+                                        ry="14"
+                                        fill="url(#grad3DIris)"
+                                    />
+                                    <circle
+                                        cx="129"
+                                        cy="62"
+                                        r="4.5"
+                                        fill="#FFFFFF"
+                                    />
+                                    <circle
+                                        cx="136"
+                                        cy="74"
+                                        r="2.2"
+                                        fill="#FFFFFF"
+                                    />
+                                    <circle
+                                        cx="127"
+                                        cy="73"
+                                        r="1.2"
+                                        fill="#FFFFFF"
+                                    />
+                                </g>
+                            </g>
+                            <!-- Mí mắt và Lông mi cong vút khi ngủ -->
+                            <g class="eye-closed eye-right-closed">
+                                <path
+                                    d="M 120 72 Q 132 82 144 72"
+                                    stroke="#8B4513"
+                                    stroke-width="3"
+                                    stroke-linecap="round"
+                                    fill="none"
+                                />
+                                <path
+                                    d="M 121 71 Q 116 65 114 61"
+                                    stroke="#5C2C16"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    fill="none"
+                                    class="eyelash"
+                                />
+                                <path
+                                    d="M 126 75 Q 125 67 124 63"
+                                    stroke="#5C2C16"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    fill="none"
+                                    class="eyelash"
+                                />
+                                <path
+                                    d="M 135 75 Q 137 67 139 63"
+                                    stroke="#5C2C16"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    fill="none"
+                                    class="eyelash"
+                                />
+                                <path
+                                    d="M 143 71 Q 148 65 150 61"
+                                    stroke="#5C2C16"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    fill="none"
+                                    class="eyelash"
+                                />
+                            </g>
+                        </g>
+
+                        <!-- Mũi đen bóng 3D có vệt sáng bóng -->
+                        <path
+                            d="M 103 82 Q 110 78 117 82 Q 110 93 103 82 Z"
+                            fill="#2D150B"
+                        />
+                        <ellipse
+                            cx="107"
+                            cy="81"
+                            rx="2.5"
+                            ry="1.2"
+                            fill="#FFFFFF"
+                            opacity="0.85"
+                        />
+
+                        <!-- Miệng / Lưỡi hồng và Cục Xương ngậm trong miệng -->
+                        <g class="mouth-group">
+                            <path
+                                class="mouth-line"
+                                d="M 102 90 Q 110 95 118 90"
+                                stroke="#5C2C16"
+                                stroke-width="2.2"
+                                fill="none"
+                                stroke-linecap="round"
+                            />
+                            <path
+                                class="tongue"
+                                d="M 106 92 C 106 102, 114 102, 114 92 Z"
+                                fill="#FF7675"
+                            />
+                            <!-- Cục xương 3D nhỏ ngậm ngang miệng chú cún khi có bối cảnh thư mục -->
+                            <g
+                                id="mouth-bone"
+                                class="mouth-bone hidden"
+                                transform="translate(86, 86) rotate(-8, 24, 8)"
+                            >
+                                <!-- Khối cục xương 3D ngà vàng viền nâu cam -->
+                                <path
+                                    d="M 10 5 C 10 1, 4 1, 4 5 C 1 5, 1 11, 4 11 C 4 15, 10 15, 10 11 L 38 11 C 38 15, 44 15, 44 11 C 47 11, 47 5, 44 5 C 44 1, 38 1, 38 5 Z"
+                                    fill="#FFFDF0"
+                                    stroke="#E17055"
+                                    stroke-width="1.8"
+                                    stroke-linejoin="round"
+                                />
+                                <!-- Highlight sáng 3D trên thân xương -->
+                                <rect
+                                    x="12"
+                                    y="6.5"
+                                    width="24"
+                                    height="2.5"
+                                    rx="1.2"
+                                    fill="#FFFFFF"
+                                    opacity="0.9"
+                                />
+                            </g>
+                        </g>
+
+                        <!-- Má hồng ửng đào 3D đáng yêu -->
+                        <ellipse
+                            cx="70"
+                            cy="82"
+                            rx="7.5"
+                            ry="5.5"
+                            fill="#FF7675"
+                            opacity="0.5"
+                        />
+                        <ellipse
+                            cx="150"
+                            cy="82"
+                            rx="7.5"
+                            ry="5.5"
+                            fill="#FF7675"
+                            opacity="0.5"
+                        />
+
+                        <!-- Phụ kiện Ly Nước Uống 3D (Hiện khi Long break nhắc uống nước) -->
+                        <g
+                            id="cup-drink"
+                            class="cup-drink hidden"
+                            transform="translate(136, 118)"
+                        >
+                            <!-- Cốc thủy tinh xanh dương ngọc -->
+                            <path
+                                d="M 4 2 L 20 2 L 18 24 C 18 26, 6 26, 6 24 Z"
+                                fill="rgba(0, 180, 216, 0.45)"
+                                stroke="#0077B6"
+                                stroke-width="1.6"
+                            />
+                            <!-- Mặt nước sóng sánh -->
+                            <ellipse
+                                cx="12"
+                                cy="7"
+                                rx="6.5"
+                                ry="2"
+                                fill="#90E0EF"
+                                opacity="0.9"
+                            />
+                            <!-- Ống hút đỏ sọc trắng -->
+                            <line
+                                x1="12"
+                                y1="12"
+                                x2="22"
+                                y2="-4"
+                                stroke="#E63946"
+                                stroke-width="2.2"
+                                stroke-linecap="round"
+                            />
+                            <!-- Giọt nước lung linh -->
+                            <circle
+                                cx="16"
+                                cy="14"
+                                r="1.5"
+                                fill="#FFFFFF"
+                                opacity="0.8"
+                            />
+                        </g>
+                    </g>
+                </svg>
             </div>
-            <label class="toggle-switch">
-              <input type="checkbox" id="set-auto-idle" checked>
-              <span class="slider"></span>
-            </label>
-          </div>
-
-          <div class="setting-item switch-item">
-            <div>
-              <div class="setting-name">Âm thanh chuông thư giãn (Chime)</div>
-              <div class="setting-desc">Phát tiếng chuông êm dịu khi đến giờ và khi hết giờ nghỉ</div>
-            </div>
-            <label class="toggle-switch">
-              <input type="checkbox" id="set-sound-enabled" checked>
-              <span class="slider"></span>
-            </label>
-          </div>
         </div>
-        <div class="modal-footer">
-          <button id="btn-save-settings" class="modal-btn primary">Lưu Cài Đặt</button>
-        </div>
-      </div>
-    </div>
 
-    <!-- Bong bóng hội thoại AI Chat & RAG -->
-    <div id="speech-bubble" class="bubble">
-      <div class="bubble-header" data-drag="true">
-        <div class="assistant-tag">
-          <span class="rag-indicator" id="rag-badge" title="RAG Tri thức nội bộ">📚 RAG</span>
-          <span class="status-text" id="status-label">Em chào Chủ nhân!</span>
-        </div>
-        <div class="window-controls">
-          <button id="btn-stop-stream" class="icon-btn stop-btn hidden" title="Dừng câu trả lời">⏹</button>
-          <button id="btn-always-on-top" class="icon-btn active" title="Ghim trên cùng màn hình (Always on Top)">📌</button>
-          <button id="btn-eyeleo-toggle" class="icon-btn active" title="Bật/Tắt nhắc EyeLeo (mắt/nước)">⏰</button>
-          <button id="btn-sleep-cún" class="icon-btn" title="Cho cún ngủ canh nhà">💤</button>
-          <button id="btn-minimize" class="icon-btn" title="Thu nhỏ bong bóng">−</button>
-          <button id="btn-close" class="icon-btn close-btn" title="Đóng ứng dụng và tắt toàn bộ dịch vụ AI/RAG">×</button>
-        </div>
-      </div>
-
-      <!-- Thanh bối cảnh Cục Xương (Directory Context Bar) -->
-      <div id="bone-context-bar" class="bone-context-bar hidden">
-        <div class="bone-context-info">
-          <span class="bone-icon">🍖</span>
-          <span class="bone-text" id="bone-dir-text">/etc/nixos</span>
-        </div>
-        <button id="btn-clear-bone" class="bone-clear-btn" title="Gỡ bỏ bối cảnh thư mục">×</button>
-      </div>
-
-      <!-- Thanh xem trước tài liệu/hình ảnh đính kèm (+) -->
-      <div id="attached-preview-bar" class="attached-preview-bar hidden">
-        <div class="attached-tag">
-          <span id="attached-icon">📎</span>
-          <span id="attached-filename" class="attached-filename">tailieu.pdf</span>
-        </div>
-        <button id="btn-remove-attachment" class="remove-attachment-btn" title="Gỡ đính kèm">×</button>
-      </div>
-
-      <div class="bubble-body" id="chat-stream">
-        <div class="welcome-msg" id="chat-welcome">
-          🐶 <b>Xin chào Chủ nhân!</b> Em đang ở đây, sẵn sàng hỗ trợ ạ! Chủ nhân hãy nhấp vào ô chat để bắt đầu nhé!
-        </div>
-      </div>
-
-      <div class="bubble-footer">
-        <div class="smart-suggestions" id="smart-chips">
-          <button class="chip" data-query="bam info">⚡ Bam Info</button>
-          <button class="chip" data-query="bam health">🛡️ Bam Health</button>
-          <button class="chip" data-query="Thông tin phần cứng hệ thống">💻 Phần cứng</button>
-          <button class="chip" data-query="Đang chạy những ứng dụng nào">📊 Ứng dụng chạy</button>
-          <button class="chip" data-query="Đọc file /etc/nixos/configuration.nix">📄 Đọc config</button>
-        </div>
-        <div class="input-wrapper">
-          <!-- Nút dấu + đính kèm hình ảnh, tài liệu (tách biệt hoàn toàn với input type file) -->
-          <input type="file" id="file-upload-input" class="hidden-file-input" accept="image/*,.pdf,.txt,.md,.nix,.json,.yaml,.yml,.sh,.go,.py,.csv" />
-          <button type="button" id="btn-attach" class="attach-btn" title="Thêm hình ảnh, tài liệu (+)">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-          </button>
-          <input 
-            type="text" 
-            id="chat-input" 
-            placeholder="Hỏi em, dán link hoặc chạy lệnh... (Enter)" 
-            autocomplete="off"
-          />
-          <button id="btn-rag-toggle" class="toggle-btn active" title="Bật/Tắt RAG Tri Thức">
-            📚
-          </button>
-          <button id="btn-send" class="send-btn" title="Gửi câu hỏi">
-            ➤
-          </button>
-        </div>
-      </div>
-      <div class="bubble-tail"></div>
-    </div>
-
-    <!-- Chú cún con Mascot 3D Chibi (Original BamOS Mascot) -->
-    <div id="pet-wrapper" class="pet-draggable" title="Kéo để di chuyển • Bấm để trò chuyện cùng em">
-      <div id="heart-burst" class="heart-effect">❤️</div>
-      <div id="zzz-bubble" class="zzz-effect">z Z Z</div>
-      
-      <!-- Chú cún 3D Vector SVG Đa Tầng -->
-      <svg id="puppy-svg" viewBox="0 0 220 220" width="170" height="170">
-        <defs>
-          <!-- Gradient 3D mặt và thân -->
-          <radialGradient id="grad3DFace" cx="40%" cy="35%" r="65%">
-            <stop offset="0%" stop-color="#FFEAA7" />
-            <stop offset="50%" stop-color="#FDCB6E" />
-            <stop offset="85%" stop-color="#E17055" />
-            <stop offset="100%" stop-color="#D63031" />
-          </radialGradient>
-
-          <radialGradient id="grad3DBody" cx="35%" cy="30%" r="70%">
-            <stop offset="0%" stop-color="#FFEAA7" />
-            <stop offset="60%" stop-color="#FDCB6E" />
-            <stop offset="90%" stop-color="#E17055" />
-            <stop offset="100%" stop-color="#C0392B" />
-          </radialGradient>
-
-          <!-- Gradient tai ngoài 3D -->
-          <linearGradient id="grad3DEar" x1="20%" y1="0%" x2="80%" y2="100%">
-            <stop offset="0%" stop-color="#E17055" />
-            <stop offset="60%" stop-color="#D63031" />
-            <stop offset="100%" stop-color="#8E1A1A" />
-          </linearGradient>
-
-          <!-- Gradient lòng trong tai hồng phấn 3D mềm mại -->
-          <linearGradient id="grad3DEarInner" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#FFB8B8" />
-            <stop offset="70%" stop-color="#FF7675" />
-            <stop offset="100%" stop-color="#E84393" />
-          </linearGradient>
-
-          <!-- Gradient má phúng phính -->
-          <radialGradient id="grad3DMuzzle" cx="50%" cy="35%" r="55%">
-            <stop offset="0%" stop-color="#FFFFFF" />
-            <stop offset="65%" stop-color="#FFFDF0" />
-            <stop offset="100%" stop-color="#FEEAA0" />
-          </radialGradient>
-
-          <!-- Gradient mắt ngọc hổ phách 3D -->
-          <radialGradient id="grad3DIris" cx="45%" cy="40%" r="55%">
-            <stop offset="0%" stop-color="#8B4513" />
-            <stop offset="45%" stop-color="#5C2C16" />
-            <stop offset="80%" stop-color="#2D150B" />
-            <stop offset="100%" stop-color="#120703" />
-          </radialGradient>
-
-          <!-- Gradient chuông vàng kim loại 3D -->
-          <radialGradient id="grad3DBell" cx="35%" cy="30%" r="60%">
-            <stop offset="0%" stop-color="#FFF9D2" />
-            <stop offset="45%" stop-color="#F1C40F" />
-            <stop offset="85%" stop-color="#D35400" />
-            <stop offset="100%" stop-color="#7E3200" />
-          </radialGradient>
-
-          <!-- Đổ bóng mềm dưới đất -->
-          <radialGradient id="gradGroundShadow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="rgba(0,0,0,0.35)" />
-            <stop offset="60%" stop-color="rgba(0,0,0,0.18)" />
-            <stop offset="100%" stop-color="rgba(0,0,0,0)" />
-          </radialGradient>
-        </defs>
-
-        <!-- Bóng đổ sàn 3D -->
-        <ellipse cx="110" cy="204" rx="72" ry="12" fill="url(#gradGroundShadow)" class="puppy-shadow" />
-
-        <!-- Đuôi vẫy 3D -->
-        <g class="tail-group">
-          <path d="M 152 165 C 185 155, 198 120, 185 98 C 176 104, 168 128, 150 152 Z" fill="url(#grad3DEar)" />
-          <circle cx="184" cy="100" r="8" fill="#FFFDF0" />
-        </g>
-
-        <!-- Chân sau nằm canh nhà -->
-        <ellipse cx="58" cy="190" rx="22" ry="14" fill="url(#grad3DEar)" class="back-paw-left" />
-        <ellipse cx="162" cy="190" rx="22" ry="14" fill="url(#grad3DEar)" class="back-paw-right" />
-
-        <!-- Thân mình 3D Chibi -->
-        <!-- Thân mình 3D Chibi -->
-        <g class="body-group">
-          <path d="M 64 125 C 50 170, 62 198, 110 198 C 158 198, 170 170, 156 125 C 144 98, 76 98, 64 125 Z" 
-                fill="url(#grad3DBody)" />
-          <!-- Yếm ngực kem mềm mại -->
-          <path d="M 86 138 C 80 168, 86 190, 110 190 C 134 190, 140 168, 134 138 C 128 126, 92 126, 86 138 Z" 
-                fill="url(#grad3DMuzzle)" opacity="0.95" />
-          <!-- Chữ BamAI 3D nổi bật, sang trọng trên ngực cún -->
-          <g class="chest-logo-group">
-            <!-- Đổ bóng chữ tạo khối nổi 3D -->
-            <text x="110" y="167" font-size="9" font-weight="900" font-family="'Segoe UI', Roboto, sans-serif" 
-                  text-anchor="middle" fill="#E17055" opacity="0.4">BamAI</text>
-            <!-- Chữ chính màu xanh ngọc đồng bộ thương hiệu BamOS -->
-            <text x="110" y="166" font-size="9" font-weight="900" font-family="'Segoe UI', Roboto, sans-serif" 
-                  text-anchor="middle" fill="#008080" letter-spacing="0.5">BamAI</text>
-          </g>
-        </g>
-
-        <!-- Chân trước 3D (Tư thế đứng hoặc nằm duỗi canh nhà) -->
-        <g class="front-paws">
-          <g class="paw-left">
-            <ellipse cx="86" cy="195" rx="14" ry="9" fill="url(#grad3DFace)" />
-            <ellipse cx="86" cy="196" rx="10" ry="6" fill="#FFFDF0" />
-            <!-- Móng vuốt nhỏ xinh -->
-            <circle cx="80" cy="199" r="1.8" fill="#E17055" />
-            <circle cx="86" cy="201" r="1.8" fill="#E17055" />
-            <circle cx="92" cy="199" r="1.8" fill="#E17055" />
-          </g>
-          <g class="paw-right">
-            <ellipse cx="134" cy="195" rx="14" ry="9" fill="url(#grad3DFace)" />
-            <ellipse cx="134" cy="196" rx="10" ry="6" fill="#FFFDF0" />
-            <circle cx="128" cy="199" r="1.8" fill="#E17055" />
-            <circle cx="134" cy="201" r="1.8" fill="#E17055" />
-            <circle cx="140" cy="199" r="1.8" fill="#E17055" />
-          </g>
-        </g>
-
-        <!-- Vòng cổ BamOS xanh ngọc 3D -->
-        <path d="M 72 118 Q 110 134 148 118 Q 110 126 72 118" fill="#00CEC9" stroke="#00A8A4" stroke-width="2.5" />
-        <!-- Chuông vàng kim loại 3D với khe chuông -->
-        <circle cx="110" cy="128" r="8.5" fill="url(#grad3DBell)" class="bell" />
-        <circle cx="110" cy="130" r="1.8" fill="#5C2C16" />
-
-        <!-- Đầu chú cún 3D Chibi -->
-        <g class="head-group">
-          <!-- Đôi tai chó thiết kế lớn gấp 2 lần diện tích, vểnh cao 3D tinh anh, ngộ nghĩnh (Pricked Ears 2x) -->
-          <!-- Tai trái vểnh chếch lên bên trái (Diện tích lớn gấp 2) -->
-          <g class="ear ear-left-perky">
-            <path d="M 80 58 C 66 42, 38 12, 44 0 C 58 -2, 88 24, 102 46 Z" fill="url(#grad3DEar)" />
-            <!-- Lòng tai trong màu hồng phấn mềm mại lớn gấp đôi -->
-            <path d="M 78 52 C 67 38, 48 15, 52 5 C 61 3, 83 25, 94 44 Z" fill="url(#grad3DEarInner)" opacity="0.9" />
-          </g>
-          <!-- Tai phải vểnh chếch lên bên phải (Diện tích lớn gấp 2) -->
-          <g class="ear ear-right-perky">
-            <path d="M 140 58 C 154 42, 182 12, 176 0 C 162 -2, 132 24, 118 46 Z" fill="url(#grad3DEar)" />
-            <!-- Lòng tai trong màu hồng phấn mềm mại lớn gấp đôi -->
-            <path d="M 142 52 C 153 38, 172 15, 168 5 C 159 3, 137 25, 126 44 Z" fill="url(#grad3DEarInner)" opacity="0.9" />
-          </g>
-
-          <!-- Khối mặt cầu 3D tròn xoe dễ thương -->
-          <ellipse cx="110" cy="74" rx="52" ry="46" fill="url(#grad3DFace)" />
-          
-          <!-- Điểm sáng bóng highlight trên trán tạo cảm giác 3D nổi -->
-          <ellipse cx="96" cy="48" rx="18" ry="10" fill="#FFFFFF" opacity="0.35" transform="rotate(-15, 96, 48)" />
-
-          <!-- Mõm chú cún tròn trịa mềm mại -->
-          <ellipse cx="110" cy="88" rx="30" ry="22" fill="url(#grad3DMuzzle)" />
-
-          <!-- MẮT TRÁI 3D (Có thể thức hoặc nhắm mắt ngủ canh nhà) -->
-          <g class="eye-container eye-left-container">
-            <!-- Mắt mở tròn xoe long lanh -->
-            <g class="eye-open eye-left">
-              <g class="eye-pupil-group eye-pupil-left">
-                <ellipse cx="88" cy="68" rx="11" ry="14" fill="url(#grad3DIris)" />
-                <!-- Đốm sáng phản chiếu 3 tầng cực kỳ long lanh -->
-                <circle cx="85" cy="62" r="4.5" fill="#FFFFFF" />
-                <circle cx="92" cy="74" r="2.2" fill="#FFFFFF" />
-                <circle cx="83" cy="73" r="1.2" fill="#FFFFFF" />
-              </g>
-            </g>
-            <!-- Mí mắt và Lông mi cong vút khi ngủ -->
-            <g class="eye-closed eye-left-closed">
-              <!-- Cung mí mắt cong mềm mại -->
-              <path d="M 76 72 Q 88 82 100 72" stroke="#8B4513" stroke-width="3" stroke-linecap="round" fill="none" />
-              <!-- Hàng lông mi cong vút đáng yêu -->
-              <path d="M 77 71 Q 72 65 71 61" stroke="#5C2C16" stroke-width="2" stroke-linecap="round" fill="none" class="eyelash" />
-              <path d="M 85 75 Q 83 67 81 63" stroke="#5C2C16" stroke-width="2" stroke-linecap="round" fill="none" class="eyelash" />
-              <path d="M 94 75 Q 95 67 96 63" stroke="#5C2C16" stroke-width="2" stroke-linecap="round" fill="none" class="eyelash" />
-              <path d="M 99 71 Q 104 65 106 61" stroke="#5C2C16" stroke-width="2" stroke-linecap="round" fill="none" class="eyelash" />
-            </g>
-          </g>
-
-          <!-- MẮT PHẢI 3D -->
-          <g class="eye-container eye-right-container">
-            <!-- Mắt mở tròn xoe long lanh -->
-            <g class="eye-open eye-right">
-              <g class="eye-pupil-group eye-pupil-right">
-                <ellipse cx="132" cy="68" rx="11" ry="14" fill="url(#grad3DIris)" />
-                <circle cx="129" cy="62" r="4.5" fill="#FFFFFF" />
-                <circle cx="136" cy="74" r="2.2" fill="#FFFFFF" />
-                <circle cx="127" cy="73" r="1.2" fill="#FFFFFF" />
-              </g>
-            </g>
-            <!-- Mí mắt và Lông mi cong vút khi ngủ -->
-            <g class="eye-closed eye-right-closed">
-              <path d="M 120 72 Q 132 82 144 72" stroke="#8B4513" stroke-width="3" stroke-linecap="round" fill="none" />
-              <path d="M 121 71 Q 116 65 114 61" stroke="#5C2C16" stroke-width="2" stroke-linecap="round" fill="none" class="eyelash" />
-              <path d="M 126 75 Q 125 67 124 63" stroke="#5C2C16" stroke-width="2" stroke-linecap="round" fill="none" class="eyelash" />
-              <path d="M 135 75 Q 137 67 139 63" stroke="#5C2C16" stroke-width="2" stroke-linecap="round" fill="none" class="eyelash" />
-              <path d="M 143 71 Q 148 65 150 61" stroke="#5C2C16" stroke-width="2" stroke-linecap="round" fill="none" class="eyelash" />
-            </g>
-          </g>
-
-          <!-- Mũi đen bóng 3D có vệt sáng bóng -->
-          <path d="M 103 82 Q 110 78 117 82 Q 110 93 103 82 Z" fill="#2D150B" />
-          <ellipse cx="107" cy="81" rx="2.5" ry="1.2" fill="#FFFFFF" opacity="0.85" />
-
-          <!-- Miệng / Lưỡi hồng và Cục Xương ngậm trong miệng -->
-          <g class="mouth-group">
-            <path class="mouth-line" d="M 102 90 Q 110 95 118 90" stroke="#5C2C16" stroke-width="2.2" fill="none" stroke-linecap="round" />
-            <path class="tongue" d="M 106 92 C 106 102, 114 102, 114 92 Z" fill="#FF7675" />
-            <!-- Cục xương 3D nhỏ ngậm ngang miệng chú cún khi có bối cảnh thư mục -->
-            <g id="mouth-bone" class="mouth-bone hidden" transform="translate(86, 86) rotate(-8, 24, 8)">
-              <!-- Khối cục xương 3D ngà vàng viền nâu cam -->
-              <path d="M 10 5 C 10 1, 4 1, 4 5 C 1 5, 1 11, 4 11 C 4 15, 10 15, 10 11 L 38 11 C 38 15, 44 15, 44 11 C 47 11, 47 5, 44 5 C 44 1, 38 1, 38 5 Z" 
-                    fill="#FFFDF0" stroke="#E17055" stroke-width="1.8" stroke-linejoin="round" />
-              <!-- Highlight sáng 3D trên thân xương -->
-              <rect x="12" y="6.5" width="24" height="2.5" rx="1.2" fill="#FFFFFF" opacity="0.9" />
-            </g>
-          </g>
-
-          <!-- Má hồng ửng đào 3D đáng yêu -->
-          <ellipse cx="70" cy="82" rx="7.5" ry="5.5" fill="#FF7675" opacity="0.5" />
-          <ellipse cx="150" cy="82" rx="7.5" ry="5.5" fill="#FF7675" opacity="0.5" />
-
-          <!-- Phụ kiện Ly Nước Uống 3D (Hiện khi Long break nhắc uống nước) -->
-          <g id="cup-drink" class="cup-drink hidden" transform="translate(136, 118)">
-            <!-- Cốc thủy tinh xanh dương ngọc -->
-            <path d="M 4 2 L 20 2 L 18 24 C 18 26, 6 26, 6 24 Z" fill="rgba(0, 180, 216, 0.45)" stroke="#0077B6" stroke-width="1.6" />
-            <!-- Mặt nước sóng sánh -->
-            <ellipse cx="12" cy="7" rx="6.5" ry="2" fill="#90E0EF" opacity="0.9" />
-            <!-- Ống hút đỏ sọc trắng -->
-            <line x1="12" y1="12" x2="22" y2="-4" stroke="#E63946" stroke-width="2.2" stroke-linecap="round" />
-            <!-- Giọt nước lung linh -->
-            <circle cx="16" cy="14" r="1.5" fill="#FFFFFF" opacity="0.8" />
-          </g>
-        </g>
-      </svg>
-    </div>
-
-  </div>
-
-  <script src="app.js"></script>
-</body>
+        <!-- Nạp ứng dụng dạng ES module: điểm vào duy nhất là js/main.js -->
+        <script type="module" src="js/main.js"></script>
+    </body>
 </html>

@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"unicode/utf8"
 )
 
 type AIService struct {
@@ -58,6 +59,19 @@ type StreamChoice struct {
 type StreamChunk struct {
 	Choices []StreamChoice `json:"choices"`
 }
+
+// Biểu thức chính quy dùng chung: biên dịch một lần thay vì mỗi lần gọi.
+var (
+	webURLRegex   = regexp.MustCompile(`https?://[^\s<>"]+`)
+	htmlScriptRe  = regexp.MustCompile(`(?is)<script.*?</script>`)
+	htmlStyleRe   = regexp.MustCompile(`(?is)<style.*?</style>`)
+	htmlCommentRe = regexp.MustCompile(`(?is)<!--.*?-->`)
+	htmlTagRe     = regexp.MustCompile(`<[^>]+>`)
+	spaceRunRe    = regexp.MustCompile(`\s{2,}`)
+)
+
+// maxWebContextBytes giới hạn lượng nội dung trang web đưa vào ngữ cảnh model.
+const maxWebContextBytes = 4000
 
 const PuppySystemPrompt = `Bạn là BamOS Puppy (Mascot Assistant) - một chú cún cưng AI thông minh, đáng yêu và tận tụy trên hệ điều hành BamOS (NixOS GNOME).
 Quy tắc xưng hô và phong cách:
@@ -133,10 +147,10 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 	if isCliCommand && cmdStr != "" {
 		cmdStr = strings.Trim(cmdStr, "`\"' ")
 		onChunk(fmt.Sprintf("🐶 <b>Em đang thực thi lệnh Bam CLI:</b> ` %s `\n\n", cmdStr))
-		
+
 		// Gửi marker bắt đầu terminal để frontend hiển thị terminal window live
 		onChunk(fmt.Sprintf("<terminal cmd=\"%s\">\n", escapeHtmlAttr(cmdStr)))
-		
+
 		res := s.cli.ExecuteCommandStream(ctx, cmdStr, activeDir, true, func(line string) {
 			onChunk(line + "\n")
 		})
@@ -160,8 +174,7 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 	}
 
 	// 0.3 Nhận diện ý định DUYỆT TRANG WEB KHI CÓ LINK (Web Browsing)
-	urlRegex := regexp.MustCompile(`https?://[^\s<>"]+`)
-	foundUrls := urlRegex.FindAllString(trimmed, -1)
+	foundUrls := webURLRegex.FindAllString(trimmed, -1)
 	var webContext string
 
 	if len(foundUrls) > 0 {
@@ -578,23 +591,29 @@ func fetchWebContent(ctx context.Context, rawUrl string) (string, error) {
 
 	html := string(bodyBytes)
 	// Loại bỏ script, style, comment
-	reScript := regexp.MustCompile(`(?is)<script.*?</script>`)
-	reStyle := regexp.MustCompile(`(?is)<style.*?</style>`)
-	reComment := regexp.MustCompile(`(?is)<!--.*?-->`)
-	reTags := regexp.MustCompile(`<[^>]+>`)
-	reSpaces := regexp.MustCompile(`\s{2,}`)
-
-	cleaned := reScript.ReplaceAllString(html, " ")
-	cleaned = reStyle.ReplaceAllString(cleaned, " ")
-	cleaned = reComment.ReplaceAllString(cleaned, " ")
-	cleaned = reTags.ReplaceAllString(cleaned, " ")
-	cleaned = reSpaces.ReplaceAllString(cleaned, " ")
+	cleaned := htmlScriptRe.ReplaceAllString(html, " ")
+	cleaned = htmlStyleRe.ReplaceAllString(cleaned, " ")
+	cleaned = htmlCommentRe.ReplaceAllString(cleaned, " ")
+	cleaned = htmlTagRe.ReplaceAllString(cleaned, " ")
+	cleaned = spaceRunRe.ReplaceAllString(cleaned, " ")
 	cleaned = strings.TrimSpace(cleaned)
 
-	// Giới hạn độ dài nội dung đưa vào context để tránh tràn token
-	if len(cleaned) > 4000 {
-		cleaned = cleaned[:4000] + "\n...(Nội dung trang web còn tiếp)..."
+	// Giới hạn độ dài nội dung đưa vào context để tránh tràn token.
+	if len(cleaned) > maxWebContextBytes {
+		cleaned = truncateUTF8(cleaned, maxWebContextBytes) + "\n...(Nội dung trang web còn tiếp)..."
 	}
 	return cleaned, nil
 }
 
+// truncateUTF8 cắt chuỗi theo số byte nhưng không cắt giữa ký tự UTF-8
+// (tiếng Việt dùng nhiều byte cho mỗi ký tự có dấu).
+func truncateUTF8(s string, maxBytes int) string {
+	if len(s) <= maxBytes {
+		return s
+	}
+	cut := maxBytes
+	for cut > 0 && !utf8.RuneStart(s[cut]) {
+		cut--
+	}
+	return s[:cut]
+}
