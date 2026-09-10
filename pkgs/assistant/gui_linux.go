@@ -68,6 +68,57 @@ static void trigger_window_close() {
     g_idle_add(do_close, NULL);
 }
 
+static gboolean do_show(gpointer user_data) {
+    if (g_app.window != NULL) {
+        gtk_widget_show_all(g_app.window);
+        gtk_window_present(GTK_WINDOW(g_app.window));
+    }
+    return G_SOURCE_REMOVE;
+}
+
+static void trigger_window_show() {
+    g_idle_add(do_show, NULL);
+}
+
+static gboolean on_window_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
+    // Xóa triệt để nền đệm thành trong suốt tuyệt đối bằng toán tử Cairo CLEAR
+    cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
+    cairo_paint(cr);
+    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+    return FALSE;
+}
+
+static void reposition_to_bottom_right(GtkWindow *window) {
+    if (window == NULL) return;
+    GdkDisplay *display = gdk_display_get_default();
+    if (display == NULL) return;
+
+    GdkMonitor *monitor = gdk_display_get_primary_monitor(display);
+    if (monitor == NULL) {
+        int n = gdk_display_get_n_monitors(display);
+        if (n > 0) {
+            monitor = gdk_display_get_monitor(display, 0);
+        }
+    }
+    if (monitor != NULL) {
+        GdkRectangle workarea;
+        gdk_monitor_get_workarea(monitor, &workarea);
+        int winW = 440;
+        int winH = 640;
+        // Đặt sát góc dưới bên phải, chừa lề nhỏ 20px
+        int posX = workarea.x + workarea.width - winW - 20;
+        int posY = workarea.y + workarea.height - winH - 20;
+        if (posX < 0) posX = 20;
+        if (posY < 0) posY = 20;
+        gtk_window_move(window, posX, posY);
+    }
+}
+
+static gboolean on_window_map(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
+    reposition_to_bottom_right(GTK_WINDOW(widget));
+    return FALSE;
+}
+
 static void setup_window_and_webview(const char *app_url) {
     gtk_init(NULL, NULL);
 
@@ -75,7 +126,7 @@ static void setup_window_and_webview(const char *app_url) {
     g_app.window = window;
 
     gtk_window_set_title(GTK_WINDOW(window), "BamOS Mascot Assistant");
-    gtk_window_set_default_size(GTK_WINDOW(window), 420, 520);
+    gtk_window_set_default_size(GTK_WINDOW(window), 440, 640);
     gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
     gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
     gtk_window_set_keep_above(GTK_WINDOW(window), TRUE);
@@ -90,17 +141,28 @@ static void setup_window_and_webview(const char *app_url) {
         gtk_widget_set_visual(window, visual);
     }
 
-    // CSS làm trong suốt hoàn toàn khung GtkWindow, loại bỏ mọi bóng mờ Mutter & viền GTK
+    // Kết nối sự kiện draw để xóa sạch nền và bóng viền
+    g_signal_connect(window, "draw", G_CALLBACK(on_window_draw), NULL);
+    g_signal_connect(window, "map-event", G_CALLBACK(on_window_map), NULL);
+
+    // CSS làm trong suốt hoàn toàn khung GtkWindow, loại bỏ mọi bóng mờ Mutter, viền GTK và vệt cuộn
     GtkCssProvider *css = gtk_css_provider_new();
     gtk_css_provider_load_from_data(css,
-        "window, decoration, .background, scrolledwindow, viewport {"
-        "  background-color: rgba(0, 0, 0, 0);"
-        "  background-image: none;"
-        "  box-shadow: none;"
-        "  border: none;"
-        "  outline: none;"
-        "  margin: 0;"
-        "  padding: 0;"
+        "window, decoration, .background, scrolledwindow, viewport, undershoot, overshoot {"
+        "  background-color: rgba(0, 0, 0, 0) !important;"
+        "  background-image: none !important;"
+        "  box-shadow: none !important;"
+        "  border: none !important;"
+        "  border-width: 0 !important;"
+        "  outline: none !important;"
+        "  margin: 0 !important;"
+        "  padding: 0 !important;"
+        "}"
+        "undershoot.top, undershoot.bottom, undershoot.left, undershoot.right,"
+        "overshoot.top, overshoot.bottom, overshoot.left, overshoot.right {"
+        "  background: none !important;"
+        "  border: none !important;"
+        "  box-shadow: none !important;"
         "}",
         -1, NULL);
     gtk_style_context_add_provider_for_screen(
@@ -121,6 +183,8 @@ static void setup_window_and_webview(const char *app_url) {
         "  closeApp: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'close'})); },"
         "  wakeAI: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'wake_ai'})); },"
         "  evaluateSleepOrStop: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'evaluate_sleep_or_stop'})); },"
+        "  setContextDir: function(dir) { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'set_directory', directory: dir})); },"
+        "  clearContextDir: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'clear_directory'})); },"
         "  ask: function(q, rag) { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'ask', question: q, use_rag: rag})); }"
         "};";
 
@@ -146,32 +210,15 @@ static void setup_window_and_webview(const char *app_url) {
     gtk_container_add(GTK_CONTAINER(scrolled), webview);
     gtk_container_add(GTK_CONTAINER(window), scrolled);
 
-    // Định vị cún ở góc dưới bên phải màn hình (tương thích Wayland & X11)
-    GdkDisplay *display = gdk_display_get_default();
-    if (display != NULL) {
-        GdkMonitor *monitor = gdk_display_get_primary_monitor(display);
-        if (monitor == NULL) {
-            int n = gdk_display_get_n_monitors(display);
-            if (n > 0) {
-                monitor = gdk_display_get_monitor(display, 0);
-            }
-        }
-        if (monitor != NULL) {
-            GdkRectangle workarea;
-            gdk_monitor_get_workarea(monitor, &workarea);
-            int posX = workarea.x + workarea.width - 440;
-            int posY = workarea.y + workarea.height - 540;
-            if (posX < 0) posX = 50;
-            if (posY < 0) posY = 50;
-            gtk_window_move(GTK_WINDOW(window), posX, posY);
-        }
-    }
+    // Định vị ban đầu ở góc dưới bên phải
+    reposition_to_bottom_right(GTK_WINDOW(window));
 
     // Nạp URL giao diện chú cún từ local web server
     webkit_web_view_load_uri(WEBKIT_WEB_VIEW(webview), app_url);
 
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     gtk_widget_show_all(window);
+    reposition_to_bottom_right(GTK_WINDOW(window));
 }
 
 static void run_main_loop() {
@@ -186,6 +233,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -196,9 +244,10 @@ import (
 var frontendFS embed.FS
 
 type NativeMessage struct {
-	Action   string `json:"action"`
-	Question string `json:"question"`
-	UseRAG   bool   `json:"use_rag"`
+	Action    string `json:"action"`
+	Question  string `json:"question"`
+	Directory string `json:"directory"`
+	UseRAG    bool   `json:"use_rag"`
 }
 
 var globalAI *AIService
@@ -217,6 +266,14 @@ func handleScriptMessage(cMessage *C.char) {
 		C.trigger_window_drag()
 	case "close":
 		C.trigger_window_close()
+	case "set_directory":
+		if globalAI != nil && globalAI.mem != nil {
+			globalAI.mem.SetActiveDirectory(msg.Directory)
+		}
+	case "clear_directory":
+		if globalAI != nil && globalAI.mem != nil {
+			globalAI.mem.SetActiveDirectory("")
+		}
 	case "wake_ai":
 		if globalAI != nil {
 			go globalAI.StartAIServicesOnDemand(
@@ -291,11 +348,52 @@ func StartUI(ai *AIService) {
 		return
 	}
 
-	// Khởi tạo HTTP server nội bộ nạp trọn bộ frontend với MIME type đầy đủ
-	server := httptest.NewServer(http.FileServer(http.FS(subFS)))
-	defer server.Close()
+	mux := http.NewServeMux()
+	fileServer := http.FileServer(http.FS(subFS))
+	mux.Handle("/", fileServer)
 
-	cURL := C.CString(server.URL)
+	// API nhận bối cảnh thư mục từ Cục Xương (Files Manager / CLI)
+	mux.HandleFunc("/api/context-dir", func(w http.ResponseWriter, r *http.Request) {
+		dir := r.URL.Query().Get("path")
+		if dir != "" {
+			if globalAI != nil && globalAI.mem != nil {
+				globalAI.mem.SetActiveDirectory(dir)
+			}
+			escaped := escapeJSString(dir)
+			script := fmt.Sprintf("window.setDirectoryContext && window.setDirectoryContext('%s');", escaped)
+			cScript := C.CString(script)
+			C.eval_js_main_thread(cScript)
+			C.free(unsafe.Pointer(cScript))
+			C.trigger_window_show()
+		}
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"status":"ok","dir":"%s"}`, dir)
+	})
+
+	// API hiển thị cún
+	mux.HandleFunc("/api/show", func(w http.ResponseWriter, r *http.Request) {
+		C.trigger_window_show()
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintln(w, `{"status":"ok"}`)
+	})
+
+	// Khởi tạo HTTP server nội bộ trên port cố định 9195 (hoặc random nếu bận)
+	listener, err := net.Listen("tcp", "127.0.0.1:9195")
+	var serverURL string
+	if err == nil {
+		server := &http.Server{Handler: mux}
+		go func() {
+			_ = server.Serve(listener)
+		}()
+		serverURL = "http://127.0.0.1:9195"
+	} else {
+		// Nếu 9195 bận thì fallback httptest
+		fallbackServer := httptest.NewServer(mux)
+		defer fallbackServer.Close()
+		serverURL = fallbackServer.URL
+	}
+
+	cURL := C.CString(serverURL)
 	defer C.free(unsafe.Pointer(cURL))
 
 	C.setup_window_and_webview(cURL)

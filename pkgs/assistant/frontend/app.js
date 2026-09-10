@@ -14,6 +14,13 @@
   const btnEyeleoToggle = document.getElementById('btn-eyeleo-toggle');
   const heartBurst = document.getElementById('heart-burst');
 
+  // Cục Xương Context Elements
+  const boneContextBar = document.getElementById('bone-context-bar');
+  const boneDirText = document.getElementById('bone-dir-text');
+  const btnClearBone = document.getElementById('btn-clear-bone');
+  const mouthBone = document.getElementById('mouth-bone');
+  let currentContextDir = "";
+
   // EyeLeo Elements
   const eyeleoBubble = document.getElementById('eyeleo-bubble');
   const eyeleoTypeBadge = document.getElementById('eyeleo-type-badge');
@@ -296,6 +303,56 @@
       replyEl.innerHTML = `<span style="color: #E53E3E;">Lỗi: ${escapeHtml(errMsg)}</span>`;
     }
     resetInactivityTimer();
+  };
+
+  // ===================================================
+  // TÍNH NĂNG CỤC XƯƠNG: NẠP VÀ GỠ BỐI CẢNH THƯ MỤC
+  // ===================================================
+  function setBoneContext(dirPath) {
+    if (!dirPath) return;
+    currentContextDir = dirPath;
+    boneDirText.textContent = dirPath;
+    boneContextBar.classList.remove('hidden');
+    if (mouthBone) mouthBone.classList.remove('hidden');
+
+    if (window.assistantNative && window.assistantNative.setContextDir) {
+      window.assistantNative.setContextDir(dirPath);
+    }
+
+    if (!aiWoken) wakeUpCún();
+    petHappy();
+    speechBubble.classList.remove('hidden');
+    statusLabel.textContent = 'Đã nhận Cục Xương bối cảnh!';
+    chatStream.innerHTML = `
+      <div class="ai-reply">
+        🍖 <b>Gâu gâu! Em đã ngậm Cục Xương bối cảnh:</b><br>
+        <code>${escapeHtml(dirPath)}</code><br><br>
+        Chủ nhân muốn em làm gì trong thư mục này ạ? (Ví dụ: <i>"thống kê số lượng tập tin nix"</i>, <i>"tìm file cấu hình"</i>, <i>"chạy lệnh git status"</i>...)
+      </div>
+    `;
+    chatInput.placeholder = `Hỏi về thư mục ${dirPath}...`;
+    chatInput.focus();
+  }
+
+  function clearBoneContext() {
+    currentContextDir = "";
+    boneContextBar.classList.add('hidden');
+    if (mouthBone) mouthBone.classList.add('hidden');
+    if (window.assistantNative && window.assistantNative.clearContextDir) {
+      window.assistantNative.clearContextDir();
+    }
+    chatInput.placeholder = "Nói chuyện cùng em... (Enter để gửi)";
+    statusLabel.textContent = 'Đã gỡ bối cảnh thư mục';
+  }
+
+  btnClearBone.addEventListener('click', (e) => {
+    e.stopPropagation();
+    clearBoneContext();
+  });
+
+  // Cho phép gọi từ ngoài (ví dụ CGo hoặc IPC)
+  window.setDirectoryContext = function(dirPath) {
+    setBoneContext(dirPath);
   };
 
   // ===================================================

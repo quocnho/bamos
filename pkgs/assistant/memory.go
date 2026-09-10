@@ -16,12 +16,20 @@ type UserMemory struct {
 }
 
 type MemoryData struct {
-	UserName       string            `json:"user_name"`
-	FavoriteTopics map[string]int    `json:"favorite_topics"`
-	RecentFiles    []string          `json:"recent_files"`
-	WorkHours      map[string]int    `json:"work_hours"` // "morning", "afternoon", "evening", "night"
-	TotalQueries   int               `json:"total_queries"`
-	LastActive     string            `json:"last_active"`
+	UserName        string                 `json:"user_name"`
+	FavoriteTopics  map[string]int         `json:"favorite_topics"`
+	RecentFiles     []string               `json:"recent_files"`
+	LearnedCommands map[string]CommandMemo `json:"learned_commands"`
+	ActiveDirectory string                 `json:"active_directory"`
+	WorkHours       map[string]int         `json:"work_hours"` // "morning", "afternoon", "evening", "night"
+	TotalQueries    int                    `json:"total_queries"`
+	LastActive      string                 `json:"last_active"`
+}
+
+type CommandMemo struct {
+	Description string `json:"description"`
+	Count       int    `json:"count"`
+	LastUsed    string `json:"last_used"`
 }
 
 func NewUserMemory() *UserMemory {
@@ -33,10 +41,11 @@ func NewUserMemory() *UserMemory {
 	um := &UserMemory{
 		filePath: memFile,
 		Data: MemoryData{
-			UserName:       "Chủ nhân",
-			FavoriteTopics: make(map[string]int),
-			RecentFiles:    make([]string, 0),
-			WorkHours:      make(map[string]int),
+			UserName:        "Chủ nhân",
+			FavoriteTopics:  make(map[string]int),
+			RecentFiles:     make([]string, 0),
+			LearnedCommands: make(map[string]CommandMemo),
+			WorkHours:       make(map[string]int),
 		},
 	}
 	um.load()
@@ -51,9 +60,58 @@ func (um *UserMemory) load() {
 	if um.Data.FavoriteTopics == nil {
 		um.Data.FavoriteTopics = make(map[string]int)
 	}
+	if um.Data.LearnedCommands == nil {
+		um.Data.LearnedCommands = make(map[string]CommandMemo)
+	}
 	if um.Data.WorkHours == nil {
 		um.Data.WorkHours = make(map[string]int)
 	}
+}
+
+func (um *UserMemory) LearnCommand(cmd string, desc string) {
+	um.mu.Lock()
+	defer um.mu.Unlock()
+
+	memo, exists := um.Data.LearnedCommands[cmd]
+	if !exists {
+		memo = CommandMemo{
+			Description: desc,
+			Count:       1,
+			LastUsed:    time.Now().Format("2006-01-02 15:04:05"),
+		}
+	} else {
+		memo.Count++
+		memo.LastUsed = time.Now().Format("2006-01-02 15:04:05")
+		if desc != "" {
+			memo.Description = desc
+		}
+	}
+	um.Data.LearnedCommands[cmd] = memo
+	um.save()
+}
+
+func (um *UserMemory) GetLearnedCommand(cmd string) (string, bool) {
+	um.mu.RLock()
+	defer um.mu.RUnlock()
+
+	memo, exists := um.Data.LearnedCommands[cmd]
+	if !exists {
+		return "", false
+	}
+	return fmt.Sprintf("%s (đã dùng %d lần)", memo.Description, memo.Count), true
+}
+
+func (um *UserMemory) SetActiveDirectory(dir string) {
+	um.mu.Lock()
+	defer um.mu.Unlock()
+	um.Data.ActiveDirectory = dir
+	um.save()
+}
+
+func (um *UserMemory) GetActiveDirectory() string {
+	um.mu.RLock()
+	defer um.mu.RUnlock()
+	return um.Data.ActiveDirectory
 }
 
 func (um *UserMemory) save() {

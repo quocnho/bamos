@@ -20,14 +20,17 @@ type AIService struct {
 	rag *RAGManager
 	fs  *FSTool
 	mem *UserMemory
+	cli *CLIEngine
 }
 
 func NewAIService(cfg Config, rag *RAGManager, fsTool *FSTool, mem *UserMemory) *AIService {
+	cliEngine := NewCLIEngine(mem)
 	return &AIService{
 		cfg: cfg,
 		rag: rag,
 		fs:  fsTool,
 		mem: mem,
+		cli: cliEngine,
 	}
 }
 
@@ -70,6 +73,132 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 	// Ghi nhận truy vấn vào bộ nhớ thói quen
 	if s.mem != nil {
 		s.mem.RecordQuery(question)
+	}
+
+	// Lấy thư mục bối cảnh hiện tại (nếu có Cục Xương)
+	activeDir := ""
+	if s.mem != nil {
+		activeDir = s.mem.GetActiveDirectory()
+	}
+
+	// 0. Nhận diện ý định THÔNG TIN HỆ THỐNG & PHẦN CỨNG
+	if strings.Contains(lower, "thông tin hệ thống") || strings.Contains(lower, "thông tin máy") || strings.Contains(lower, "cấu hình máy") || strings.Contains(lower, "phần cứng") || strings.Contains(lower, "kiểm tra phần cứng") {
+		sys := GetHardwareAndSystemInfo()
+		var sb strings.Builder
+		sb.WriteString("🐶 <b>Gâu gâu! Em gửi Chủ nhân thông tin hệ thống và phần cứng máy tính ạ:</b>\n\n")
+		sb.WriteString(fmt.Sprintf("💻 <b>Hệ điều hành:</b> %s (Kernel: `%s`)\n", sys.OS, sys.Kernel))
+		sb.WriteString(fmt.Sprintf("🏷️ <b>Tên máy:</b> `%s`\n", sys.HostName))
+		sb.WriteString(fmt.Sprintf("⚡ <b>Bộ vi xử lý (CPU):</b> %s (%d nhân)\n", sys.CPU, sys.Cores))
+		sb.WriteString(fmt.Sprintf("🎮 <b>Đồ họa (GPU):</b> %s\n", sys.GPU))
+		sb.WriteString(fmt.Sprintf("🧠 <b>Bộ nhớ RAM:</b> Đang dùng %s / Tổng %s\n", sys.MemoryUsed, sys.MemoryTotal))
+		sb.WriteString(fmt.Sprintf("💾 <b>Ổ đĩa gốc (/):</b> %s\n\n", sys.DiskUsage))
+		sb.WriteString("Chủ nhân có muốn em tối ưu hoặc dọn dẹp hệ thống không ạ?")
+		onChunk(sb.String())
+		onDone()
+		return
+	}
+
+	// 0.1 Nhận diện ý định KIỂM TRA ỨNG DỤNG ĐANG CHẠY
+	if strings.Contains(lower, "đang chạy ứng dụng") || strings.Contains(lower, "ứng dụng đang mở") || strings.Contains(lower, "ứng dụng nào đang chạy") || strings.Contains(lower, "tiến trình đang chạy") || strings.Contains(lower, "process") {
+		apps := GetRunningApps()
+		var sb strings.Builder
+		sb.WriteString(fmt.Sprintf("🐶 <b>Gâu gâu! Em đang đánh hơi thấy %d ứng dụng và tiến trình nổi bật đang hoạt động:</b>\n\n", len(apps)))
+		for i, app := range apps {
+			sb.WriteString(fmt.Sprintf("%d. <b>%s</b> (PID: `%s`) — CPU: `%s` | RAM: `%s`\n", i+1, app.Name, app.PID, app.CPU, app.Memory))
+		}
+		sb.WriteString("\nChủ nhân có muốn em đóng ứng dụng nào để tiết kiệm tài nguyên không ạ?")
+		onChunk(sb.String())
+		onDone()
+		return
+	}
+
+	// 0.2 Nhận diện ý định THỰC THI LỆNH CLI (Bao gồm cả sudo)
+	if strings.HasPrefix(lower, "chạy lệnh ") || strings.HasPrefix(lower, "thực thi lệnh ") || strings.HasPrefix(lower, "run ") || strings.HasPrefix(lower, "lệnh ") || strings.HasPrefix(lower, "$ ") {
+		cmdStr := trimmed
+		for _, prefix := range []string{"chạy lệnh ", "thực thi lệnh ", "run ", "lệnh ", "$ "} {
+			if strings.HasPrefix(lower, prefix) {
+				cmdStr = trimmed[len(prefix):]
+				break
+			}
+		}
+		cmdStr = strings.Trim(cmdStr, "`\"' ")
+
+		onChunk(fmt.Sprintf("🐶 Em đang thực thi lệnh: ` %s `...\n\n", cmdStr))
+		res := s.cli.ExecuteCommand(ctx, cmdStr, activeDir, true)
+
+		var sb strings.Builder
+		if res.ExitCode == 0 {
+			sb.WriteString(fmt.Sprintf("✅ <b>Thành công (trong %s):</b>\n", res.Duration))
+		} else {
+			sb.WriteString(fmt.Sprintf("❌ <b>Lỗi (Mã thoát: %d - trong %s):</b>\n", res.ExitCode, res.Duration))
+		}
+
+		if res.Output != "" {
+			sb.WriteString(fmt.Sprintf("```bash\n%s\n```\n", res.Output))
+		} else {
+			sb.WriteString("*(Lệnh đã hoàn thành không có đầu ra)*\n")
+		}
+
+		if res.Learned {
+			sb.WriteString("🧠 <i>Em đã tự học và ghi nhớ lệnh này vào sổ tay tri thức rồi ạ!</i>")
+		}
+
+		onChunk(sb.String())
+		onDone()
+		return
+	}
+
+	// 0.4 Nhận diện ý định THỐNG KÊ TỆP TIN (File Statistics trong thư mục bối cảnh Cục Xương)
+	if strings.Contains(lower, "thống kê") && (strings.Contains(lower, "tập tin") || strings.Contains(lower, "file") || strings.Contains(lower, "số lượng")) {
+		ext := ""
+		if strings.Contains(lower, "nix") {
+			ext = ".nix"
+		} else if strings.Contains(lower, "go") {
+			ext = ".go"
+		} else if strings.Contains(lower, "sh") {
+			ext = ".sh"
+		} else if strings.Contains(lower, "md") {
+			ext = ".md"
+		} else if strings.Contains(lower, "json") {
+			ext = ".json"
+		}
+
+		targetDir := activeDir
+		if targetDir == "" {
+			targetDir = "/etc/nixos"
+		}
+
+		findCmd := fmt.Sprintf("find %s -type f", targetDir)
+		if ext != "" {
+			findCmd = fmt.Sprintf("find %s -type f -name \"*%s\"", targetDir, ext)
+		}
+		countCmd := fmt.Sprintf("%s 2>/dev/null | wc -l", findCmd)
+		res := s.cli.ExecuteCommand(ctx, countCmd, targetDir, false)
+
+		count := strings.TrimSpace(res.Output)
+		var sb strings.Builder
+		sb.WriteString(fmt.Sprintf("🐶 <b>Gâu gâu! Em đã thống kê xong trong thư mục ` %s `:</b>\n\n", targetDir))
+		if ext != "" {
+			sb.WriteString(fmt.Sprintf("📊 Số lượng tệp tin có đuôi <b>`%s`</b>: <b>%s</b> tệp tin.\n", ext, count))
+		} else {
+			sb.WriteString(fmt.Sprintf("📊 Tổng số lượng tệp tin: <b>%s</b> tệp tin.\n", count))
+		}
+
+		// Liệt kê tối đa 5 tệp tiêu biểu
+		listCmd := fmt.Sprintf("%s 2>/dev/null | head -n 6", findCmd)
+		listRes := s.cli.ExecuteCommand(ctx, listCmd, targetDir, false)
+		if listRes.Output != "" {
+			sb.WriteString("\n<b>Một số tệp tiêu biểu:</b>\n")
+			for _, f := range strings.Split(strings.TrimSpace(listRes.Output), "\n") {
+				if f != "" {
+					sb.WriteString(fmt.Sprintf("- 📄 `%s`\n", f))
+				}
+			}
+		}
+		sb.WriteString("\nChủ nhân cần em đọc hay phân tích nội dung tệp nào thì bảo em nhé! 🐾")
+		onChunk(sb.String())
+		onDone()
+		return
 	}
 
 	// 1. Nhận diện ý định TÌM KIẾM TỆP TIN (Filesystem Search)
@@ -175,8 +304,11 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 		}
 	}
 
-	// Ghép System Prompt + Thói quen + Tài liệu đính kèm + RAG
+	// Ghép System Prompt + Thói quen + Thư mục bối cảnh Cục Xương + Tài liệu đính kèm + RAG
 	systemContent := PuppySystemPrompt
+	if activeDir != "" {
+		systemContent += fmt.Sprintf("\n\n=== BỐI CẢNH THƯ MỤC HIỆN TẠI (TỪ CỤC XƯƠNG FILE MANAGER) ===\nChủ nhân đang mở và làm việc trong thư mục: `%s`\nMọi yêu cầu thống kê, tìm kiếm, đọc tệp hoặc chạy lệnh của Chủ nhân hãy ưu tiên thực hiện trong thư mục này.\n=============================================================", activeDir)
+	}
 	if s.mem != nil {
 		habit := s.mem.GetHabitContext()
 		if habit != "" {

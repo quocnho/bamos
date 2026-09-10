@@ -32,10 +32,11 @@ html, body {
    =================================================== */
 .bubble {
   position: absolute;
-  bottom: 195px;
-  width: 330px;
-  max-width: 90vw;
-  background: rgba(255, 255, 255, 0.92);
+  bottom: 200px;
+  width: 350px;
+  max-width: 92vw;
+  max-height: calc(100vh - 220px);
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.7);
@@ -43,6 +44,7 @@ html, body {
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22), 0 2px 6px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   transform-origin: bottom center;
   z-index: 100;
@@ -56,12 +58,80 @@ html, body {
 }
 
 .bubble-header {
-  padding: 10px 14px 6px 14px;
+  flex-shrink: 0;
+  padding: 10px 14px 8px 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   cursor: grab;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Thanh bối cảnh Cục Xương */
+.bone-context-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, rgba(244, 162, 97, 0.22), rgba(231, 111, 81, 0.15));
+  border-bottom: 1px dashed rgba(231, 111, 81, 0.35);
+  padding: 5px 12px;
+  font-size: 11.5px;
+  color: #C0392B;
+  transition: all 0.25s ease;
+}
+
+.bone-context-bar.hidden {
+  display: none !important;
+}
+
+.bone-context-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bone-icon {
+  font-size: 14px;
+  animation: boneWiggle 2s infinite ease-in-out;
+}
+
+@keyframes boneWiggle {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(10deg); }
+}
+
+.bone-text {
+  font-weight: 700;
+  color: #B23B18;
+  font-family: monospace;
+}
+
+.bone-clear-btn {
+  background: none;
+  border: none;
+  color: #C0392B;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0 4px;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.bone-clear-btn:hover {
+  background: rgba(192, 57, 43, 0.2);
+}
+
+.mouth-bone {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.mouth-bone.hidden {
+  display: none !important;
 }
 
 .assistant-tag {
@@ -126,14 +196,15 @@ html, body {
 }
 
 .bubble-body {
+  flex: 1 1 auto;
   padding: 12px 16px;
-  max-height: 230px;
   overflow-y: auto;
   font-size: 13.5px;
   line-height: 1.55;
   color: #2D3748;
   word-break: break-word;
   user-select: text;
+  min-height: 60px;
 }
 
 .bubble-body::-webkit-scrollbar {
@@ -146,6 +217,7 @@ html, body {
 }
 
 .bubble-footer {
+  flex-shrink: 0;
   padding: 6px 12px 12px 12px;
 }
 

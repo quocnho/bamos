@@ -47,6 +47,15 @@
         </div>
       </div>
 
+      <!-- Thanh bối cảnh Cục Xương (Directory Context Bar) -->
+      <div id="bone-context-bar" class="bone-context-bar hidden">
+        <div class="bone-context-info">
+          <span class="bone-icon">🍖</span>
+          <span class="bone-text" id="bone-dir-text">/etc/nixos</span>
+        </div>
+        <button id="btn-clear-bone" class="bone-clear-btn" title="Gỡ bỏ bối cảnh thư mục">×</button>
+      </div>
+
       <div class="bubble-body" id="chat-stream">
         <div class="welcome-msg" id="chat-welcome">
           🐶 <b>Xin chào Chủ nhân!</b> Em đang ở đây, sẵn sàng hỗ trợ ạ! Chủ nhân hãy nhấp vào ô chat để bắt đầu nhé!
@@ -55,9 +64,11 @@
 
       <div class="bubble-footer">
         <div class="smart-suggestions" id="smart-chips">
+          <button class="chip" data-query="Thông tin phần cứng hệ thống">💻 Phần cứng</button>
+          <button class="chip" data-query="Đang chạy những ứng dụng nào">⚡ Ứng dụng chạy</button>
+          <button class="chip" data-query="Thống kê số lượng tập tin nix">📊 Thống kê .nix</button>
           <button class="chip" data-query="Tìm file .nix">🔍 Tìm file .nix</button>
           <button class="chip" data-query="Đọc file /etc/nixos/configuration.nix">📄 Đọc config</button>
-          <button class="chip" data-query="Tìm file trong Documents">📁 Documents</button>
         </div>
         <div class="input-wrapper">
           <input 
@@ -246,10 +257,18 @@
           <path d="M 103 82 Q 110 78 117 82 Q 110 93 103 82 Z" fill="#2D150B" />
           <ellipse cx="107" cy="81" rx="2.5" ry="1.2" fill="#FFFFFF" opacity="0.85" />
 
-          <!-- Miệng / Lưỡi hồng -->
+          <!-- Miệng / Lưỡi hồng và Cục Xương ngậm trong miệng -->
           <g class="mouth-group">
             <path class="mouth-line" d="M 102 90 Q 110 95 118 90" stroke="#5C2C16" stroke-width="2.2" fill="none" stroke-linecap="round" />
             <path class="tongue" d="M 106 92 C 106 102, 114 102, 114 92 Z" fill="#FF7675" />
+            <!-- Cục xương 3D nhỏ ngậm ngang miệng chú cún khi có bối cảnh thư mục -->
+            <g id="mouth-bone" class="mouth-bone hidden" transform="translate(86, 86) rotate(-8, 24, 8)">
+              <!-- Khối cục xương 3D ngà vàng viền nâu cam -->
+              <path d="M 10 5 C 10 1, 4 1, 4 5 C 1 5, 1 11, 4 11 C 4 15, 10 15, 10 11 L 38 11 C 38 15, 44 15, 44 11 C 47 11, 47 5, 44 5 C 44 1, 38 1, 38 5 Z" 
+                    fill="#FFFDF0" stroke="#E17055" stroke-width="1.8" stroke-linejoin="round" />
+              <!-- Highlight sáng 3D trên thân xương -->
+              <rect x="12" y="6.5" width="24" height="2.5" rx="1.2" fill="#FFFFFF" opacity="0.9" />
+            </g>
           </g>
 
           <!-- Má hồng ửng đào 3D đáng yêu -->
