@@ -94,13 +94,13 @@ static void setup_window_and_webview(const char *app_url) {
     GtkCssProvider *css = gtk_css_provider_new();
     gtk_css_provider_load_from_data(css,
         "window, decoration, .background, scrolledwindow, viewport {"
-        "  background-color: rgba(0, 0, 0, 0) !important;"
-        "  background-image: none !important;"
-        "  box-shadow: none !important;"
-        "  border: none !important;"
-        "  outline: none !important;"
-        "  margin: 0 !important;"
-        "  padding: 0 !important;"
+        "  background-color: rgba(0, 0, 0, 0);"
+        "  background-image: none;"
+        "  box-shadow: none;"
+        "  border: none;"
+        "  outline: none;"
+        "  margin: 0;"
+        "  padding: 0;"
         "}",
         -1, NULL);
     gtk_style_context_add_provider_for_screen(

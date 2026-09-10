@@ -105,6 +105,14 @@ func (rm *RAGManager) RetrieveContext(ctx context.Context, query string, topK in
 		return "", fmt.Errorf("không thể lấy embedding: %w", err)
 	}
 
+	count := col.Count()
+	if count == 0 {
+		return "", nil
+	}
+	if topK > count {
+		topK = count
+	}
+
 	res, err := col.QueryEmbedding(ctx, emb, topK, nil, nil)
 	if err != nil {
 		return "", fmt.Errorf("query chromem thất bại: %w", err)
