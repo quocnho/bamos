@@ -108,8 +108,47 @@ static void set_window_state_path(const char *path) {
     }
 }
 
-// Khôi phục khung khít từ lần chạy trước (neo theo góc dưới-phải).
-static void set_initial_geometry(int right, int bottom, gboolean keep_above) {
+// Lấy vùng làm việc (logical px) + scale factor của màn hình chính.
+static void current_workarea_and_scale(int *w, int *h, int *scale) {
+    GdkRectangle area;
+    get_workarea(&area);
+    *w = area.width;
+    *h = area.height;
+    *scale = 1;
+    GdkDisplay *dpy = gdk_display_get_default();
+    GdkMonitor *mon = dpy != NULL ? gdk_display_get_primary_monitor(dpy) : NULL;
+    if (mon != NULL) *scale = gdk_monitor_get_scale_factor(mon);
+}
+
+// Khôi phục khung khít từ lần chạy trước (neo theo góc dưới-phải = vị trí pet).
+//
+// Hỗ trợ màn hình ĐỔI độ phân giải / tỉ lệ: mốc neo được lưu kèm kích thước vùng
+// làm việc + scale lúc ghi. Nếu hiện tại khác, bảo toàn KHOẢNG CÁCH TỚI GÓC
+// DƯỚI-PHẢI (nơi pet neo) rồi quy đổi — nhờ vậy pet vẫn nằm đúng chỗ.
+static void set_initial_geometry(int right, int bottom, int saved_ww, int saved_wh, int saved_scale, gboolean keep_above) {
+    GdkRectangle area;
+    get_workarea(&area);
+    int cur_ww = 0, cur_wh = 0, cur_scale = 1;
+    current_workarea_and_scale(&cur_ww, &cur_wh, &cur_scale);
+
+    if (saved_ww > 0 && saved_wh > 0 &&
+        (saved_ww != cur_ww || saved_wh != cur_wh || saved_scale != cur_scale)) {
+        double fx = (double)(saved_ww - right) / (double)saved_ww;   // khoảng cách tới mép phải
+        double fy = (double)(saved_wh - bottom) / (double)saved_wh; // khoảng cách tới mép dưới
+        if (fx < 0) fx = 0;
+        if (fy < 0) fy = 0;
+        right = area.x + area.width - (int)(fx * area.width);
+        bottom = area.y + area.height - (int)(fy * area.height);
+        g_print("[BamAI GUI] Đổi màn hình %dx%d/scale=%d -> %dx%d/scale=%d; mốc neo quy đổi: right=%d bottom=%d\n",
+                saved_ww, saved_wh, saved_scale, cur_ww, cur_wh, cur_scale, right, bottom);
+    }
+
+    // Kẹp vào vùng làm việc để không "mất" cửa sổ sau khi đổi cấu hình.
+    if (right > area.x + area.width) right = area.x + area.width;
+    if (bottom > area.y + area.height) bottom = area.y + area.height;
+    if (right < area.x + 60) right = area.x + 60;
+    if (bottom < area.y + 60) bottom = area.y + 60;
+
     g_saved_right = right;
     g_saved_bottom = bottom;
     g_has_saved_position = TRUE;
@@ -134,11 +173,16 @@ static gboolean do_save_window_state(gpointer user_data) {
         if (!g_has_saved_position) return G_SOURCE_REMOVE;
     }
 
+    int ww = 0, wh = 0, sc = 1;
+    current_workarea_and_scale(&ww, &wh, &sc);
+
     FILE *fp = fopen(g_state_path, "w");
     if (fp != NULL) {
-        // CHỈ lưu góc dưới-phải. Trạng thái ghim thuộc assistant_config.json để
-        // tránh hai nguồn sự thật gây kẹt trạng thái.
-        fprintf(fp, "{\"right\":%d,\"bottom\":%d}\n", g_saved_right, g_saved_bottom);
+        // Lưu góc dưới-phải (mốc neo pet) + vùng làm việc & scale lúc ghi để lần
+        // sau đổi độ phân giải/tỉ lệ vẫn quy đổi đúng. Trạng thái ghim thuộc
+        // assistant_config.json để tránh hai nguồn sự thật.
+        fprintf(fp, "{\"right\":%d,\"bottom\":%d,\"work_w\":%d,\"work_h\":%d,\"scale\":%d}\n",
+                g_saved_right, g_saved_bottom, ww, wh, sc);
         fclose(fp);
     }
     return G_SOURCE_REMOVE;
@@ -541,6 +585,48 @@ static void on_webview_load_changed(WebKitWebView *webview, WebKitLoadEvent even
     }
 }
 
+// Chờ compositor sẵn sàng rồi mới hiện cửa sổ với visual RGBA.
+//
+// Đây là mấu chốt của lỗi "cửa sổ ĐEN lúc cold-boot": app tự khởi động chỉ sau
+// vài giây, có thể TRƯỚC khi Mutter bật compositing. Lúc đó
+// gdk_screen_is_composited() = FALSE → không gắn được visual RGBA → cửa sổ ĐỤC,
+// mà CSS lại đặt nền trong suốt ⇒ vùng nền hiện thành ĐEN. Visual không đổi được
+// sau khi cửa sổ đã realize, nên phải chờ TRƯỚC khi show.
+#define SHOW_WAIT_MS 250
+#define SHOW_WAIT_MAX_TICKS 480 // 480 x 250ms = 120s
+
+static int g_show_wait_ticks = 0;
+
+static gboolean try_show_window(gpointer user_data) {
+    if (g_app.window == NULL) return G_SOURCE_REMOVE;
+
+    GdkScreen *screen = gtk_widget_get_screen(g_app.window);
+    gboolean composited = (screen != NULL) && gdk_screen_is_composited(screen);
+
+    if (!composited && g_show_wait_ticks < SHOW_WAIT_MAX_TICKS) {
+        g_show_wait_ticks++;
+        if (g_show_wait_ticks == 1 || g_show_wait_ticks % 20 == 0) {
+            g_print("[BamAI GUI] Chờ compositor (nền trong suốt)… %dms\n",
+                    g_show_wait_ticks * SHOW_WAIT_MS);
+        }
+        return G_SOURCE_CONTINUE;
+    }
+
+    if (composited) {
+        GdkVisual *visual = gdk_screen_get_rgba_visual(screen);
+        if (visual != NULL) gtk_widget_set_visual(g_app.window, visual);
+    }
+
+    gtk_widget_show_all(g_app.window);
+    apply_initial_position(GTK_WINDOW(g_app.window));
+    gtk_window_present(GTK_WINDOW(g_app.window));
+    if (g_app.webview != NULL) gtk_widget_queue_draw(g_app.webview);
+
+    g_print("[BamAI GUI] Hiện cửa sổ: composited=%d sau %dms\n",
+            composited, g_show_wait_ticks * SHOW_WAIT_MS);
+    return G_SOURCE_REMOVE;
+}
+
 static void setup_window_and_webview(const char *app_url) {
     gtk_init(NULL, NULL);
 
@@ -679,6 +765,15 @@ static void setup_window_and_webview(const char *app_url) {
     GtkWidget *webview = webkit_web_view_new_with_user_content_manager(manager);
     g_app.webview = webview;
 
+    // TẮT tăng tốc phần cứng cho WebView. Trên XWayland + GPU hybrid (Intel +
+    // NVIDIA), đường compositing tăng tốc tạo một cửa sổ con X11 ĐỤC phủ kín
+    // vùng web → cửa sổ thành một khối ĐEN, phá nền trong suốt. Không tăng tốc
+    // thì WebKit vẽ trực tiếp vào widget và alpha được tôn trọng.
+    WebKitSettings *wsettings = webkit_settings_new();
+    webkit_settings_set_hardware_acceleration_policy(
+        wsettings, WEBKIT_HARDWARE_ACCELERATION_POLICY_NEVER);
+    webkit_web_view_set_settings(WEBKIT_WEB_VIEW(webview), wsettings);
+
     // Vẽ lại frame đầu ngay khi trang nạp xong (tránh cửa sổ đen trên XWayland).
     g_signal_connect(webview, "load-changed", G_CALLBACK(on_webview_load_changed), NULL);
 
@@ -699,8 +794,10 @@ static void setup_window_and_webview(const char *app_url) {
     webkit_web_view_load_uri(WEBKIT_WEB_VIEW(webview), app_url);
 
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
-    gtk_widget_show_all(window);
-    apply_initial_position(GTK_WINDOW(window));
+    // KHÔNG hiện ngay: chờ compositor sẵn sàng để gắn được visual RGBA (nền trong
+    // suốt thật). Hiện khi chưa composited sẽ cho cửa sổ ĐỤC → nền "trong suốt"
+    // của CSS hiển thị thành ĐEN.
+    g_timeout_add(0, try_show_window, NULL);
 }
 
 static void run_main_loop() {
@@ -1063,11 +1160,15 @@ func StartUI(ai *AIService, startupPanel string) {
 	C.run_main_loop()
 }
 
-// windowState là khung "khít" lưu giữa các lần chạy: chỉ cần góc dưới-phải
-// (kích thước do nội dung quyết định). Trạng thái ghim nằm trong Config.
+// windowState là mốc neo lưu giữa các lần chạy: góc dưới-phải (vị trí pet) +
+// vùng làm việc & scale lúc ghi (để quy đổi khi đổi độ phân giải/tỉ lệ màn hình).
+// Trạng thái ghim nằm trong Config.
 type windowState struct {
 	Right  int `json:"right"`
 	Bottom int `json:"bottom"`
+	WorkW  int `json:"work_w"`
+	WorkH  int `json:"work_h"`
+	Scale  int `json:"scale"`
 }
 
 // applySavedWindowState đọc khung đã lưu và chuyển sang tầng C trước khi tạo
@@ -1097,10 +1198,22 @@ func applySavedWindowState(ai *AIService) {
 			continue
 		}
 		var st windowState
-		if json.Unmarshal(data, &st) == nil && st.Right > 0 && st.Bottom > 0 {
-			C.set_initial_geometry(C.int(st.Right), C.int(st.Bottom), cBool(keepAbove))
-			return
+		if json.Unmarshal(data, &st) != nil || st.Right <= 0 || st.Bottom <= 0 {
+			continue
 		}
+		// File CŨ (không có work_w/work_h/scale) lưu toạ độ ở hệ màn hình cũ →
+		// không thể quy đổi tin cậy (từng khiến pet lạc ra giữa màn hình khi đổi
+		// tỉ lệ). Bỏ qua để dùng mặc định góc dưới-phải.
+		if st.WorkW <= 0 || st.WorkH <= 0 || st.Scale <= 0 {
+			fmt.Printf("[BamAI GUI] Mốc neo cũ (%s) thiếu thông tin màn hình → dùng mặc định góc dưới-phải\n", p)
+			continue
+		}
+		C.set_initial_geometry(
+			C.int(st.Right), C.int(st.Bottom),
+			C.int(st.WorkW), C.int(st.WorkH), C.int(st.Scale),
+			cBool(keepAbove),
+		)
+		return
 	}
 
 	// Chưa có khung đã lưu: dùng mặc định nhưng vẫn ghi lại sau này.

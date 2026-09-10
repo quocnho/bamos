@@ -37,19 +37,24 @@ func preferX11Backend() {
 	fmt.Println("[BamAI GUI] Không có DISPLAY — dùng backend mặc định của GTK (Wayland)")
 }
 
-// preferStableWebKitRendering tắt renderer DMA-BUF của WebKitGTK.
+// preferStableWebKitRendering tắt đường dựng hình tăng tốc / DMA-BUF của WebKitGTK.
 //
-// Lý do: trên XWayland + GPU NVIDIA/hybrid, renderer DMA-BUF của WebKit hay cho
-// ra cửa sổ ĐEN (nội dung không vẽ) cho tới khi người dùng click/chạm vào cửa sổ
-// — đúng hiện tượng gặp khi BamAI tự khởi động lúc cold-boot. Tắt DMA-BUF để
-// WebKit dùng đường vẽ dự phòng (ổn định) và vẽ frame đầu ngay.
+// Lý do: trên XWayland + GPU hybrid (Intel + NVIDIA), đường compositing tăng tốc
+// của WebKit tạo một cửa sổ con X11 ĐỤC phủ kín vùng web → cửa sổ thành một
+// khối ĐEN và nền trong suốt bị phá. Đây đúng là hiện tượng gặp khi BamAI tự
+// khởi động lúc cold-boot. Tắt để WebKit vẽ trực tiếp và tôn trọng alpha.
 //
-// Có thể ghi đè bằng WEBKIT_DISABLE_DMABUF_RENDERER=0 nếu máy không gặp lỗi.
+// Ghi đè được: WEBKIT_DISABLE_COMPOSITING_MODE=0 nếu máy không gặp lỗi.
 // PHẢI gọi TRƯỚC khi GTK/WebKit khởi tạo.
 func preferStableWebKitRendering() {
-	if os.Getenv("WEBKIT_DISABLE_DMABUF_RENDERER") == "" {
-		_ = os.Setenv("WEBKIT_DISABLE_DMABUF_RENDERER", "1")
-		fmt.Println("[BamAI GUI] WEBKIT_DISABLE_DMABUF_RENDERER=1 (tránh cửa sổ đen trên XWayland/NVIDIA)")
+	for _, kv := range [][2]string{
+		{"WEBKIT_DISABLE_DMABUF_RENDERER", "1"},
+		{"WEBKIT_DISABLE_COMPOSITING_MODE", "1"},
+	} {
+		if os.Getenv(kv[0]) == "" {
+			_ = os.Setenv(kv[0], kv[1])
+			fmt.Printf("[BamAI GUI] %s=%s (tránh cửa sổ đen trên XWayland/NVIDIA)\n", kv[0], kv[1])
+		}
 	}
 }
 
