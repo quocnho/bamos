@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -28,6 +31,11 @@ func NewCLIEngine(mem *UserMemory) *CLIEngine {
 
 // ExecuteCommand thực thi câu lệnh shell trong môi trường NixOS
 func (e *CLIEngine) ExecuteCommand(ctx context.Context, rawCmd string, workingDir string, allowSudo bool) CommandResult {
+	return e.ExecuteCommandStream(ctx, rawCmd, workingDir, allowSudo, nil)
+}
+
+// ExecuteCommandStream thực thi câu lệnh shell và stream từng dòng output tới terminal GUI
+func (e *CLIEngine) ExecuteCommandStream(ctx context.Context, rawCmd string, workingDir string, allowSudo bool, onOutput func(string)) CommandResult {
 	start := time.Now()
 	trimmed := strings.TrimSpace(rawCmd)
 	isSudo := false
@@ -38,29 +46,108 @@ func (e *CLIEngine) ExecuteCommand(ctx context.Context, rawCmd string, workingDi
 		trimmed = strings.TrimSpace(strings.TrimPrefix(trimmed, "sudo "))
 	}
 
+	// Đảm bảo lệnh bam luôn tìm được trong NixOS
+	cmdToRun := trimmed
+	if strings.HasPrefix(trimmed, "bam ") || trimmed == "bam" {
+		// Ưu tiên /run/current-system/sw/bin/bam hoặc /etc/nixos/pkgs/bam/bam.sh
+		if _, err := exec.LookPath("bam"); err != nil {
+			if _, err2 := os.Stat("/etc/nixos/pkgs/bam/bam.sh"); err2 == nil {
+				cmdToRun = "/etc/nixos/pkgs/bam/bam.sh" + strings.TrimPrefix(trimmed, "bam")
+			}
+		}
+	}
+
 	var cmd *exec.Cmd
 	if isSudo {
-		// Kiểm tra nếu sudo không cần pass được
 		checkSudo := exec.Command("sudo", "-n", "true")
 		if err := checkSudo.Run(); err == nil {
-			cmd = exec.CommandContext(ctx, "sudo", "bash", "-c", trimmed)
+			cmd = exec.CommandContext(ctx, "sudo", "bash", "-c", cmdToRun)
 		} else {
-			// Dùng pkexec để bật hộp thoại GUI nhập pass bảo mật nếu trên desktop
-			cmd = exec.CommandContext(ctx, "pkexec", "bash", "-c", trimmed)
+			cmd = exec.CommandContext(ctx, "pkexec", "bash", "-c", cmdToRun)
 		}
 	} else {
-		cmd = exec.CommandContext(ctx, "bash", "-c", trimmed)
+		cmd = exec.CommandContext(ctx, "bash", "-c", cmdToRun)
 	}
 
 	if workingDir != "" {
 		cmd.Dir = workingDir
 	}
 
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
+	var fullOutput strings.Builder
+	stdoutPipe, errOut := cmd.StdoutPipe()
+	stderrPipe, errErr := cmd.StderrPipe()
 
-	err := cmd.Run()
+	if errOut != nil || errErr != nil {
+		var combined bytes.Buffer
+		cmd.Stdout = &combined
+		cmd.Stderr = &combined
+		err := cmd.Run()
+		outStr := strings.TrimSpace(combined.String())
+		if onOutput != nil && outStr != "" {
+			onOutput(outStr)
+		}
+		duration := time.Since(start).Round(time.Millisecond).String()
+		exitCode := 0
+		if err != nil {
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				exitCode = exitErr.ExitCode()
+			} else {
+				exitCode = 1
+			}
+		}
+		return CommandResult{
+			Command:  rawCmd,
+			Output:   outStr,
+			ExitCode: exitCode,
+			Duration: duration,
+			IsSudo:   isSudo,
+			Learned:  exitCode == 0,
+		}
+	}
+
+	if err := cmd.Start(); err != nil {
+		duration := time.Since(start).Round(time.Millisecond).String()
+		return CommandResult{
+			Command:  rawCmd,
+			Output:   fmt.Sprintf("Lỗi khởi tạo lệnh: %v", err),
+			ExitCode: 1,
+			Duration: duration,
+			IsSudo:   isSudo,
+			Learned:  false,
+		}
+	}
+
+	// Đọc stdout và stderr song song
+	outScanner := bufio.NewScanner(stdoutPipe)
+	errScanner := bufio.NewScanner(stderrPipe)
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		for outScanner.Scan() {
+			line := outScanner.Text()
+			fullOutput.WriteString(line + "\n")
+			if onOutput != nil {
+				onOutput(line)
+			}
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		for errScanner.Scan() {
+			line := errScanner.Text()
+			fullOutput.WriteString(line + "\n")
+			if onOutput != nil {
+				onOutput(line)
+			}
+		}
+	}()
+
+	wg.Wait()
+	err := cmd.Wait()
 	duration := time.Since(start).Round(time.Millisecond).String()
 	exitCode := 0
 	if err != nil {
@@ -71,15 +158,7 @@ func (e *CLIEngine) ExecuteCommand(ctx context.Context, rawCmd string, workingDi
 		}
 	}
 
-	output := strings.TrimSpace(stdout.String())
-	if stderr.Len() > 0 {
-		errStr := strings.TrimSpace(stderr.String())
-		if output != "" {
-			output += "\n" + errStr
-		} else {
-			output = errStr
-		}
-	}
+	output := strings.TrimSpace(fullOutput.String())
 
 	// Tự học lệnh vào cơ sở tri thức người dùng
 	learned := false

@@ -119,6 +119,23 @@ static gboolean on_window_map(GtkWidget *widget, GdkEvent *event, gpointer user_
     return FALSE;
 }
 
+static gboolean do_fullscreen(gpointer user_data) {
+    gboolean enable = GPOINTER_TO_INT(user_data);
+    if (g_app.window != NULL) {
+        if (enable) {
+            gtk_window_fullscreen(GTK_WINDOW(g_app.window));
+        } else {
+            gtk_window_unfullscreen(GTK_WINDOW(g_app.window));
+            reposition_to_bottom_right(GTK_WINDOW(g_app.window));
+        }
+    }
+    return G_SOURCE_REMOVE;
+}
+
+static void trigger_window_fullscreen(gboolean enable) {
+    g_idle_add(do_fullscreen, GINT_TO_POINTER(enable));
+}
+
 static void setup_window_and_webview(const char *app_url) {
     gtk_init(NULL, NULL);
 
@@ -185,6 +202,10 @@ static void setup_window_and_webview(const char *app_url) {
         "  evaluateSleepOrStop: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'evaluate_sleep_or_stop'})); },"
         "  setContextDir: function(dir) { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'set_directory', directory: dir})); },"
         "  clearContextDir: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'clear_directory'})); },"
+        "  getIdleTime: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'get_idle_time'})); },"
+        "  activateAndRaise: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'activate_and_raise'})); },"
+        "  setFullscreen: function(fs) { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'set_fullscreen', fullscreen: !!fs})); },"
+        "  stopGeneration: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'stop'})); },"
         "  ask: function(q, rag) { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'ask', question: q, use_rag: rag})); }"
         "};";
 
@@ -236,6 +257,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"os/exec"
 	"strings"
 	"unsafe"
 )
@@ -244,13 +266,15 @@ import (
 var frontendFS embed.FS
 
 type NativeMessage struct {
-	Action    string `json:"action"`
-	Question  string `json:"question"`
-	Directory string `json:"directory"`
-	UseRAG    bool   `json:"use_rag"`
+	Action     string `json:"action"`
+	Question   string `json:"question"`
+	Directory  string `json:"directory"`
+	UseRAG     bool   `json:"use_rag"`
+	Fullscreen bool   `json:"fullscreen"`
 }
 
 var globalAI *AIService
+var currentCancel context.CancelFunc
 
 //export handleScriptMessage
 func handleScriptMessage(cMessage *C.char) {
@@ -266,6 +290,27 @@ func handleScriptMessage(cMessage *C.char) {
 		C.trigger_window_drag()
 	case "close":
 		C.trigger_window_close()
+	case "activate_and_raise":
+		C.trigger_window_show()
+	case "stop":
+		if currentCancel != nil {
+			currentCancel()
+			currentCancel = nil
+		}
+	case "set_fullscreen":
+		var enable C.gboolean = 0
+		if msg.Fullscreen {
+			enable = 1
+		}
+		C.trigger_window_fullscreen(enable)
+	case "get_idle_time":
+		go func() {
+			idleMs := getMutterIdleTimeMs()
+			script := fmt.Sprintf("window.onIdleTimeUpdate && window.onIdleTimeUpdate(%d);", idleMs)
+			cScript := C.CString(script)
+			C.eval_js_main_thread(cScript)
+			C.free(unsafe.Pointer(cScript))
+		}()
 	case "set_directory":
 		if globalAI != nil && globalAI.mem != nil {
 			globalAI.mem.SetActiveDirectory(msg.Directory)
@@ -298,10 +343,19 @@ func handleScriptMessage(cMessage *C.char) {
 		}
 	case "ask":
 		if globalAI != nil {
+			if currentCancel != nil {
+				currentCancel()
+			}
+			ctx, cancel := context.WithCancel(context.Background())
+			currentCancel = cancel
+
 			go func() {
+				defer func() {
+					currentCancel = nil
+				}()
 				isFirst := true
 				globalAI.AskStream(
-					context.Background(),
+					ctx,
 					msg.Question,
 					msg.UseRAG,
 					func(chunk string) {
@@ -337,6 +391,24 @@ func escapeJSString(s string) string {
 	s = strings.ReplaceAll(s, "\n", "\\n")
 	s = strings.ReplaceAll(s, "\r", "")
 	return s
+}
+
+func getMutterIdleTimeMs() int64 {
+	cmd := exec.Command("gdbus", "call", "--session", "--dest", "org.gnome.Mutter.IdleMonitor",
+		"--object-path", "/org/gnome/Mutter/IdleMonitor/Core",
+		"--method", "org.gnome.Mutter.IdleMonitor.GetIdletime")
+	out, err := cmd.Output()
+	if err != nil {
+		return 0
+	}
+	// Output có định dạng: "(uint64 12345,)"
+	s := strings.TrimSpace(string(out))
+	s = strings.TrimPrefix(s, "(uint64 ")
+	s = strings.TrimSuffix(s, ",)")
+	s = strings.TrimSpace(s)
+	var val int64
+	_, _ = fmt.Sscanf(s, "%d", &val)
+	return val
 }
 
 func StartUI(ai *AIService) {

@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -112,40 +113,71 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 		return
 	}
 
-	// 0.2 Nhận diện ý định THỰC THI LỆNH CLI (Bao gồm cả sudo)
-	if strings.HasPrefix(lower, "chạy lệnh ") || strings.HasPrefix(lower, "thực thi lệnh ") || strings.HasPrefix(lower, "run ") || strings.HasPrefix(lower, "lệnh ") || strings.HasPrefix(lower, "$ ") {
-		cmdStr := trimmed
+	// 0.2 Nhận diện ý định THỰC THI LỆNH CLI (Bao gồm Bam CLI và lệnh hệ thống)
+	isCliCommand := false
+	cmdStr := ""
+
+	if strings.HasPrefix(lower, "bam ") || lower == "bam" {
+		isCliCommand = true
+		cmdStr = trimmed
+	} else {
 		for _, prefix := range []string{"chạy lệnh ", "thực thi lệnh ", "run ", "lệnh ", "$ "} {
 			if strings.HasPrefix(lower, prefix) {
-				cmdStr = trimmed[len(prefix):]
+				isCliCommand = true
+				cmdStr = strings.TrimSpace(trimmed[len(prefix):])
 				break
 			}
 		}
-		cmdStr = strings.Trim(cmdStr, "`\"' ")
+	}
 
-		onChunk(fmt.Sprintf("🐶 Em đang thực thi lệnh: ` %s `...\n\n", cmdStr))
-		res := s.cli.ExecuteCommand(ctx, cmdStr, activeDir, true)
+	if isCliCommand && cmdStr != "" {
+		cmdStr = strings.Trim(cmdStr, "`\"' ")
+		onChunk(fmt.Sprintf("🐶 <b>Em đang thực thi lệnh Bam CLI:</b> ` %s `\n\n", cmdStr))
+		
+		// Gửi marker bắt đầu terminal để frontend hiển thị terminal window live
+		onChunk(fmt.Sprintf("<terminal cmd=\"%s\">\n", escapeHtmlAttr(cmdStr)))
+		
+		res := s.cli.ExecuteCommandStream(ctx, cmdStr, activeDir, true, func(line string) {
+			onChunk(line + "\n")
+		})
+
+		onChunk("</terminal>\n\n")
 
 		var sb strings.Builder
 		if res.ExitCode == 0 {
-			sb.WriteString(fmt.Sprintf("✅ <b>Thành công (trong %s):</b>\n", res.Duration))
+			sb.WriteString(fmt.Sprintf("✅ <b>Lệnh hoàn tất thành công</b> (thời gian: <code>%s</code>).\n", res.Duration))
 		} else {
-			sb.WriteString(fmt.Sprintf("❌ <b>Lỗi (Mã thoát: %d - trong %s):</b>\n", res.ExitCode, res.Duration))
-		}
-
-		if res.Output != "" {
-			sb.WriteString(fmt.Sprintf("```bash\n%s\n```\n", res.Output))
-		} else {
-			sb.WriteString("*(Lệnh đã hoàn thành không có đầu ra)*\n")
+			sb.WriteString(fmt.Sprintf("⚠️ <b>Lệnh kết thúc với mã thoát: %d</b> (thời gian: <code>%s</code>).\n", res.ExitCode, res.Duration))
 		}
 
 		if res.Learned {
-			sb.WriteString("🧠 <i>Em đã tự học và ghi nhớ lệnh này vào sổ tay tri thức rồi ạ!</i>")
+			sb.WriteString("🧠 <i>Em đã tự học và ghi nhớ lệnh này vào sổ tay tri thức của Chủ nhân rồi ạ!</i>\n")
 		}
 
 		onChunk(sb.String())
 		onDone()
 		return
+	}
+
+	// 0.3 Nhận diện ý định DUYỆT TRANG WEB KHI CÓ LINK (Web Browsing)
+	urlRegex := regexp.MustCompile(`https?://[^\s<>"]+`)
+	foundUrls := urlRegex.FindAllString(trimmed, -1)
+	var webContext string
+
+	if len(foundUrls) > 0 {
+		targetUrl := foundUrls[0]
+		onChunk(fmt.Sprintf("🌐 <i>Em đang truy cập và đọc nội dung trang web:</i> <a href=\"%s\" target=\"_blank\">%s</a>...\n\n", targetUrl, targetUrl))
+
+		webBody, err := fetchWebContent(ctx, targetUrl)
+		if err == nil && webBody != "" {
+			webContext = fmt.Sprintf("=== NỘI DUNG TẢI VỀ TỪ TRANG WEB: %s ===\n%s\n==============================================\n", targetUrl, webBody)
+			// Rút ngắn câu hỏi hoặc hướng dẫn tóm tắt
+			if strings.TrimSpace(strings.ReplaceAll(trimmed, targetUrl, "")) == "" {
+				question = fmt.Sprintf("Hãy tóm tắt và phân tích các nội dung nổi bật nhất của trang web %s mà em vừa tải về.", targetUrl)
+			}
+		} else {
+			onChunk(fmt.Sprintf("⚠️ <i>(Không thể tải trực tiếp trang web: %v, em sẽ trả lời dựa trên hiểu biết của em nhé!)</i>\n\n", err))
+		}
 	}
 
 	// 0.4 Nhận diện ý định THỐNG KÊ TỆP TIN (File Statistics trong thư mục bối cảnh Cục Xương)
@@ -317,6 +349,9 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 	}
 	if attachedDocContext != "" {
 		systemContent += "\n\n" + attachedDocContext
+	}
+	if webContext != "" {
+		systemContent += "\n\n" + webContext
 	}
 	if ragContext != "" {
 		systemContent += "\n\n" + ragContext
@@ -501,3 +536,58 @@ func (s *AIService) EvaluateAndSleepOrStopAI() string {
 	fmt.Println("[BamAI Power] Cún tạm ngủ canh nhà (giữ warm dịch vụ AI).")
 	return "warm_sleep"
 }
+
+func escapeHtmlAttr(s string) string {
+	s = strings.ReplaceAll(s, "&", "&amp;")
+	s = strings.ReplaceAll(s, "\"", "&quot;")
+	s = strings.ReplaceAll(s, "<", "&lt;")
+	s = strings.ReplaceAll(s, ">", "&gt;")
+	return s
+}
+
+// fetchWebContent tải và trích xuất nội dung văn bản chính từ URL trang web
+func fetchWebContent(ctx context.Context, rawUrl string) (string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawUrl, nil)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 BamAI/1.0")
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("HTTP status %d", resp.StatusCode)
+	}
+
+	bodyBytes, err := io.ReadAll(io.LimitReader(resp.Body, 500*1024)) // Tối đa 500KB
+	if err != nil {
+		return "", err
+	}
+
+	html := string(bodyBytes)
+	// Loại bỏ script, style, comment
+	reScript := regexp.MustCompile(`(?is)<script.*?</script>`)
+	reStyle := regexp.MustCompile(`(?is)<style.*?</style>`)
+	reComment := regexp.MustCompile(`(?is)<!--.*?-->`)
+	reTags := regexp.MustCompile(`<[^>]+>`)
+	reSpaces := regexp.MustCompile(`\s{2,}`)
+
+	cleaned := reScript.ReplaceAllString(html, " ")
+	cleaned = reStyle.ReplaceAllString(cleaned, " ")
+	cleaned = reComment.ReplaceAllString(cleaned, " ")
+	cleaned = reTags.ReplaceAllString(cleaned, " ")
+	cleaned = reSpaces.ReplaceAllString(cleaned, " ")
+	cleaned = strings.TrimSpace(cleaned)
+
+	// Giới hạn độ dài nội dung đưa vào context để tránh tràn token
+	if len(cleaned) > 4000 {
+		cleaned = cleaned[:4000] + "\n...(Nội dung trang web còn tiếp)..."
+	}
+	return cleaned, nil
+}
+

@@ -27,6 +27,7 @@ buildGoModule rec {
 
   postInstall = ''
     install -Dm644 org.bamos.assistant.desktop $out/share/applications/org.bamos.assistant.desktop
+    install -Dm644 org.bamos.assistant.desktop $out/etc/xdg/autostart/org.bamos.assistant.desktop
     install -Dm644 ${../../assets/icons/bamai.svg} $out/share/icons/hicolor/scalable/apps/bamos-assistant.svg
     install -Dm755 nautilus-bone-context.sh $out/bin/bam-bone-context
     install -Dm755 nautilus-bone-context.sh "$out/share/nautilus/scripts/🍖 Gửi thư mục vào BamAI (Cục Xương)"
