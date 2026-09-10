@@ -14,6 +14,7 @@
 // ============================================================================
 
 import { setPetState, setAddressing } from "./core/state.js";
+import { els } from "./core/dom.js";
 import { native } from "./core/native.js";
 import { initWindowFit } from "./core/window-fit.js";
 import { initPet, scheduleStartupSleep, syncAlwaysOnTop } from "./pet/pet.js";
@@ -147,7 +148,13 @@ function bootstrap() {
     openPanelFromHash();
 
     // Khởi động: vẫy đuôi chào mừng, hẹn giờ tự ngủ nếu không tương tác.
+    // Giao diện chạy ĐỘC LẬP với dịch vụ AI: chỉ khi người dùng bấm vào chú cún
+    // hoặc vào ô nhập liệu thì dịch vụ AI mới được khởi động (xem pet.wake()).
     setPetState("welcoming");
+    if (els.statusLabel) {
+        els.statusLabel.textContent =
+            "Sẵn sàng — bấm vào em hoặc ô nhập để bắt đầu";
+    }
     scheduleStartupSleep();
 }
 

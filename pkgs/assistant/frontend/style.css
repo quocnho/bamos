@@ -668,9 +668,11 @@ input[type="file"].hidden {
     align-items: flex-start;
     gap: 10px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-    z-index: 1200;
-    animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    transition: all 0.3s ease;
+    /* Lên CAO NHẤT trong cửa sổ chính (trên cả thẻ thiết lập) và hiện chậm rãi
+       để người dùng kịp nhận ra nhắc nhở nghỉ ngơi. */
+    z-index: 3000;
+    animation: slideInRight 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.45s ease;
 }
 
 @keyframes slideInRight {

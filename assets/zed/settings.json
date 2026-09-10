@@ -117,11 +117,17 @@
         "typescript-language-server": {
             "binary": {
                 "path": "/run/current-system/sw/bin/typescript-language-server",
+                // --stdio là BẮT BUỘC: khi tự khai báo binary trong settings,
+                // Zed không thêm tham số mặc định của adapter giúp ta.
+                "arguments": ["--stdio"],
             },
         },
         "vue-language-server": {
             "binary": {
                 "path": "/run/current-system/sw/bin/vue-language-server",
+                // Volar cũng cần --stdio (thiếu sẽ báo
+                // "Connection input stream is not set").
+                "arguments": ["--stdio"],
             },
         },
     },

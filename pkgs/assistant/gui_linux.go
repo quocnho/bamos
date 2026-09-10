@@ -414,6 +414,42 @@ static void trigger_window_show() {
     g_idle_add(do_show, NULL);
 }
 
+// Đưa cửa sổ lên CAO NHẤT khi có nhắc nhở nghỉ ngơi: hiện + ghim tạm trên cùng
+// (kể cả khi người dùng đã tắt ghim), rồi trả lại trạng thái ghim sau 12 giây.
+static gboolean restore_keep_above_after_notify(gpointer user_data) {
+    if (g_app.window != NULL) {
+        gtk_window_set_keep_above(GTK_WINDOW(g_app.window), g_keep_above);
+    }
+    return G_SOURCE_REMOVE;
+}
+
+static gboolean do_raise_notification(gpointer user_data) {
+    if (g_app.window == NULL) return G_SOURCE_REMOVE;
+
+    mark_geom_busy();
+    gtk_widget_show_all(g_app.window);
+    gtk_window_deiconify(GTK_WINDOW(g_app.window));
+    gtk_window_set_keep_above(GTK_WINDOW(g_app.window), TRUE);
+    gtk_window_present_with_time(GTK_WINDOW(g_app.window), GDK_CURRENT_TIME);
+
+    GdkWindow *gdk_win = gtk_widget_get_window(g_app.window);
+    if (gdk_win != NULL) {
+        gdk_window_raise(gdk_win);
+    }
+
+    gtk_window_set_urgency_hint(GTK_WINDOW(g_app.window), TRUE);
+    g_timeout_add(2500, clear_urgency_hint, NULL);
+    // Nhắc nhở hiện lâu hơn để người dùng kịp đọc, sau đó trả lại trạng thái ghim.
+    g_timeout_add(12000, restore_keep_above_after_notify, NULL);
+
+    g_timeout_add(150, reapply_anchor_position, NULL);
+    return G_SOURCE_REMOVE;
+}
+
+static void trigger_window_raise_notification() {
+    g_idle_add(do_raise_notification, NULL);
+}
+
 static gboolean on_window_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
     // Xóa triệt để nền đệm thành trong suốt tuyệt đối bằng toán tử Cairo CLEAR
     cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
@@ -491,6 +527,20 @@ static void trigger_window_fullscreen(gboolean enable) {
     g_idle_add(do_fullscreen, GINT_TO_POINTER(enable));
 }
 
+// Buộc WebKit vẽ lại frame đầu khi trang nạp xong. Trên XWayland, WebView có
+// thể không composite cho tới khi có tương tác → cửa sổ trống/đen cho tới lúc
+// người dùng click. Chủ động queue_draw + present để nội dung hiện ngay.
+static void on_webview_load_changed(WebKitWebView *webview, WebKitLoadEvent event, gpointer user_data) {
+    if (event != WEBKIT_LOAD_FINISHED) return;
+    gtk_widget_queue_draw(GTK_WIDGET(webview));
+    if (g_app.window != NULL) {
+        gtk_widget_queue_draw(g_app.window);
+        if (gtk_widget_get_visible(g_app.window)) {
+            gtk_window_present(GTK_WINDOW(g_app.window));
+        }
+    }
+}
+
 static void setup_window_and_webview(const char *app_url) {
     gtk_init(NULL, NULL);
 
@@ -542,6 +592,13 @@ static void setup_window_and_webview(const char *app_url) {
     // nên các rule dưới đây không dùng `!important`.
     GtkCssProvider *css = gtk_css_provider_new();
     gtk_css_provider_load_from_data(css,
+        // Quy tắc bao trùm: mọi widget GTK của ứng dụng (kể cả WebKitWebView
+        // TRƯỚC khi nội dung được vẽ) đều trong suốt. Nếu không, widget WebView
+        // vẽ nền theme (tối/đen) trong lúc chờ frame đầu → cửa sổ "đen".
+        "* {"
+        "  background-color: rgba(0, 0, 0, 0);"
+        "  background-image: none;"
+        "}"
         "window, decoration, .background, scrolledwindow, viewport, undershoot, overshoot {"
         "  background-color: rgba(0, 0, 0, 0);"
         "  background-image: none;"
@@ -587,6 +644,7 @@ static void setup_window_and_webview(const char *app_url) {
         "    clearContextDir: function() { post({action: 'clear_directory'}); },"
         "    getIdleTime: function() { post({action: 'get_idle_time'}); },"
         "    activateAndRaise: function() { post({action: 'activate_and_raise'}); },"
+        "    raiseNotification: function() { post({action: 'raise_notification'}); },"
         "    setFullscreen: function(fs) { post({action: 'set_fullscreen', fullscreen: !!fs}); },"
         "    setContentSize: function(w, h) { post({action: 'window_fit', width: w, height: h}); },"
         "    setWindowFull: function(full) { post({action: 'window_full', full: !!full}); },"
@@ -620,6 +678,9 @@ static void setup_window_and_webview(const char *app_url) {
     // Khởi tạo WebKit WebView với nền trong suốt
     GtkWidget *webview = webkit_web_view_new_with_user_content_manager(manager);
     g_app.webview = webview;
+
+    // Vẽ lại frame đầu ngay khi trang nạp xong (tránh cửa sổ đen trên XWayland).
+    g_signal_connect(webview, "load-changed", G_CALLBACK(on_webview_load_changed), NULL);
 
     GdkRGBA transparent = {0.0, 0.0, 0.0, 0.0};
     webkit_web_view_set_background_color(WEBKIT_WEB_VIEW(webview), &transparent);
@@ -733,6 +794,9 @@ func handleScriptMessage(cMessage *C.char) {
 		C.trigger_window_set_keep_above(enable)
 	case "activate_and_raise":
 		C.trigger_window_show()
+	case "raise_notification":
+		// Nhắc nhở nghỉ ngơi: đưa cửa sổ lên cao nhất (ghim tạm trên cùng).
+		C.trigger_window_raise_notification()
 	case "stop":
 		if currentCancel != nil {
 			currentCancel()
@@ -933,24 +997,20 @@ func StartUI(ai *AIService, startupPanel string) {
 	})
 
 	// API mở bảng thiết lập trong giao diện (menu GNOME Shell gọi vào).
+	// KHÔNG khởi động dịch vụ AI: bảng thiết lập chỉ đọc/ghi cấu hình cục bộ;
+	// dịch vụ AI chỉ được bật khi người dùng click chú cún / ô nhập liệu.
 	mux.HandleFunc("/api/open-settings", func(w http.ResponseWriter, r *http.Request) {
 		panel := r.URL.Query().Get("panel")
 		C.trigger_window_show()
-		if globalAI != nil {
-			go globalAI.EnsureServices(nil, nil)
-		}
 		evalJS(fmt.Sprintf("window.openSettingsPanel && window.openSettingsPanel('%s');", escapeJSString(panel)))
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, `{"status":"ok","panel":"%s"}`, panel)
 	})
 
-	// API hiển thị cún
+	// API hiển thị cún — chỉ hiện cửa sổ, KHÔNG tự bật dịch vụ AI (tiết kiệm tài
+	// nguyên; AI bật khi người dùng click chú cún hoặc ô nhập liệu).
 	mux.HandleFunc("/api/show", func(w http.ResponseWriter, r *http.Request) {
 		C.trigger_window_show()
-		// Hiện cửa sổ chat ⇒ kiểm tra & khởi động lại dịch vụ AI nếu đã tắt.
-		if globalAI != nil {
-			go globalAI.EnsureServices(nil, nil)
-		}
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintln(w, `{"status":"ok"}`)
 	})
@@ -1025,7 +1085,17 @@ func applySavedWindowState(ai *AIService) {
 	C.set_window_state_path(cPath)
 	C.free(unsafe.Pointer(cPath))
 
-	if data, err := os.ReadFile(statePath); err == nil {
+	// Đọc mốc neo đã lưu: ưu tiên vị trí MỚI (/var/lib/bamos/state), rồi tới vị
+	// trí CŨ (~/.config/bamos) để di trú một lần cho các bản trước.
+	paths := []string{statePath}
+	if legacy := getLegacyWindowStatePath(); legacy != statePath {
+		paths = append(paths, legacy)
+	}
+	for _, p := range paths {
+		data, err := os.ReadFile(p)
+		if err != nil {
+			continue
+		}
 		var st windowState
 		if json.Unmarshal(data, &st) == nil && st.Right > 0 && st.Bottom > 0 {
 			C.set_initial_geometry(C.int(st.Right), C.int(st.Bottom), cBool(keepAbove))

@@ -37,6 +37,22 @@ func preferX11Backend() {
 	fmt.Println("[BamAI GUI] Không có DISPLAY — dùng backend mặc định của GTK (Wayland)")
 }
 
+// preferStableWebKitRendering tắt renderer DMA-BUF của WebKitGTK.
+//
+// Lý do: trên XWayland + GPU NVIDIA/hybrid, renderer DMA-BUF của WebKit hay cho
+// ra cửa sổ ĐEN (nội dung không vẽ) cho tới khi người dùng click/chạm vào cửa sổ
+// — đúng hiện tượng gặp khi BamAI tự khởi động lúc cold-boot. Tắt DMA-BUF để
+// WebKit dùng đường vẽ dự phòng (ổn định) và vẽ frame đầu ngay.
+//
+// Có thể ghi đè bằng WEBKIT_DISABLE_DMABUF_RENDERER=0 nếu máy không gặp lỗi.
+// PHẢI gọi TRƯỚC khi GTK/WebKit khởi tạo.
+func preferStableWebKitRendering() {
+	if os.Getenv("WEBKIT_DISABLE_DMABUF_RENDERER") == "" {
+		_ = os.Setenv("WEBKIT_DISABLE_DMABUF_RENDERER", "1")
+		fmt.Println("[BamAI GUI] WEBKIT_DISABLE_DMABUF_RENDERER=1 (tránh cửa sổ đen trên XWayland/NVIDIA)")
+	}
+}
+
 // assistantPort là cổng HTTP nội bộ. Có thể đổi bằng BAMAI_PORT để chạy
 // instance thử nghiệm song song mà không đụng tới ứng dụng đang chạy.
 func assistantPort() string {
@@ -64,6 +80,7 @@ func main() {
 	fmt.Println("==================================================")
 
 	preferX11Backend()
+	preferStableWebKitRendering()
 
 	// --settings <panel>: mở bảng thiết lập (rag|llm|eyeleo|about) — dùng bởi menu
 	// sổ xuống trên thanh trên cùng của GNOME Shell.

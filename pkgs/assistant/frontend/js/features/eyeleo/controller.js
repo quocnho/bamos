@@ -134,15 +134,15 @@ export class EyeLeoController {
     // 1. Cảnh báo trước giờ nghỉ dài
     // -------------------------------------------------------------------------
     // 1. Cảnh báo trước 30 giây (Pre-break notification).
-    // Đưa cửa sổ BamAI lên trên cùng TRƯỚC, rồi mới hiện thông báo để người
-    // dùng chắc chắn nhìn thấy nhắc nhở.
+    // Đưa cửa sổ BamAI lên TRÊN CÙNG trước, rồi mới hiện thông báo (chậm rãi
+    // hơn) để người dùng chắc chắn nhìn thấy nhắc nhở.
     showPrebreakNotification(remainingSeconds) {
         this.prebreakFired = true;
         els.prebreakSeconds.textContent = remainingSeconds;
 
-        native.activateAndRaise();
-        setTimeout(() => show(els.eyeleoPrebreakToast), 150);
-        setTimeout(() => hide(els.eyeleoPrebreakToast), 10000);
+        native.raiseNotification();
+        setTimeout(() => show(els.eyeleoPrebreakToast), 400);
+        setTimeout(() => hide(els.eyeleoPrebreakToast), 15000);
     }
 
     // -------------------------------------------------------------------------
@@ -154,7 +154,7 @@ export class EyeLeoController {
         hide(els.eyeleoPrebreakToast);
         hideBubble();
 
-        native.activateAndRaise();
+        native.raiseNotification();
 
         // Chọn ngẫu nhiên một bài tập mắt.
         const exercise =
@@ -209,7 +209,7 @@ export class EyeLeoController {
         hideBubble();
         hide(els.eyeleoShortbreakBubble);
 
-        native.activateAndRaise();
+        native.raiseNotification();
 
         // Chú cún chuyển sang tư thế vươn vai.
         clearExerciseClasses();

@@ -76,7 +76,26 @@ func getConfigPath() string {
 	return filepath.Join(bamosConfigDir(), "assistant_config.json")
 }
 
+// getWindowStatePath trả về file lưu mốc neo cửa sổ/pet (góc dưới-phải).
+//
+// Ưu tiên thư mục TRẠNG THÁI HỆ THỐNG /var/lib/bamos/state (nằm NGOÀI $HOME):
+// nhờ vậy việc dọn cache / xoá dữ liệu WebView / đổi profile KHÔNG làm mất vị
+// trí người dùng đã kéo thả. Ghi đè bằng BAMAI_STATE_DIR khi chạy instance thử.
 func getWindowStatePath() string {
+	if dir := os.Getenv("BAMAI_STATE_DIR"); dir != "" {
+		_ = os.MkdirAll(dir, 0o755)
+		return filepath.Join(dir, "window_state.json")
+	}
+	sysDir := "/var/lib/bamos/state"
+	if err := os.MkdirAll(sysDir, 0o755); err == nil {
+		return filepath.Join(sysDir, "window_state.json")
+	}
+	return getLegacyWindowStatePath()
+}
+
+// getLegacyWindowStatePath là vị trí CŨ (~/.config/bamos) — chỉ dùng để ĐỌC
+// nhằm di trú vị trí đã lưu từ các bản trước.
+func getLegacyWindowStatePath() string {
 	return filepath.Join(bamosConfigDir(), "window_state.json")
 }
 

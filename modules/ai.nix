@@ -133,6 +133,10 @@ in
       # Thư mục tri thức RAG — dùng bởi RAG chromem-go NHÚNG trong BamAI
       # (pkgs/assistant/rag.go, mặc định /var/lib/bamos/rag/knowledge.db).
       "d /var/lib/bamos/rag 0777 root root -"
+      # Thư mục TRẠNG THÁI (ngoài $HOME): BamAI lưu vị trí pet/cửa sổ tại đây
+      # (/var/lib/bamos/state/window_state.json) để dọn cache/đổi profile không
+      # làm mất vị trí đã kéo thả.
+      "d /var/lib/bamos/state 0777 root root -"
     ];
 
     # Tự động tạo Shortcut trên màn hình Desktop của người dùng

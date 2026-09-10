@@ -47,8 +47,19 @@ systemctl --user restart zed-settings
 - **Which-key bật sẵn** (`which_key.enabled`): gõ `<space>` → chờ ~400ms → hiện bảng
   nhóm phím (delay đặt trong settings, gần `timeoutlen` của nvim).
 - Mỗi binding trong `keymap.json` có chú thích nvim tương ứng để dễ đối chiếu.
-- Zed dùng chung **LSP qua PATH** như nvim: `nil` (Nix) chỉ đường dẫn tuyệt đối trong
-  settings; các server khác Zed tự dò (đã cài trên máy dev).
+- Zed dùng chung **LSP qua PATH** như nvim. Các server dưới đây được ghim **đường dẫn
+  tuyệt đối** trong `settings.json` (ổn định kể cả khi PATH bị tối giản):
+  `nil` (Nix), `typescript-language-server`, `vue-language-server` (Volar).
+- **Lưu ý quan trọng:** `typescript-language-server` và `vue-language-server` **bắt buộc**
+  có tham số `--stdio`. Khi tự khai báo `lsp.<server>.binary` trong settings, Zed KHÔNG
+  tự thêm tham số mặc định của adapter — thiếu `--stdio` sẽ lỗi ngay khi khởi động:
+  `error: required option '--stdio' not specified`. Vì vậy luôn khai báo đủ:
+
+  ```json
+  "binary": { "path": "/run/current-system/sw/bin/typescript-language-server", "arguments": ["--stdio"] }
+  ```
+
+  (Vue: Volar thiếu `--stdio` cũng báo `Connection input stream is not set`.)
 
 ---
 

@@ -29,6 +29,8 @@ export const native = {
     closeApp: () => call("closeApp"),
     setAlwaysOnTop: (enabled) => call("setAlwaysOnTop", enabled),
     activateAndRaise: () => call("activateAndRaise"),
+    // Nhắc nhở nghỉ ngơi: đưa cửa sổ lên cao nhất (ghim tạm trên cùng ~12s).
+    raiseNotification: () => call("raiseNotification"),
     setFullscreen: (enabled) => call("setFullscreen", enabled),
 
     // Kích thước cửa sổ (khít nội dung chat + pet)
