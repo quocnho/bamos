@@ -178,10 +178,11 @@
         </div>
         <div class="window-controls">
           <button id="btn-stop-stream" class="icon-btn stop-btn hidden" title="Dừng câu trả lời">⏹</button>
+          <button id="btn-always-on-top" class="icon-btn active" title="Ghim trên cùng màn hình (Always on Top)">📌</button>
           <button id="btn-eyeleo-toggle" class="icon-btn active" title="Bật/Tắt nhắc EyeLeo (mắt/nước)">⏰</button>
           <button id="btn-sleep-cún" class="icon-btn" title="Cho cún ngủ canh nhà">💤</button>
           <button id="btn-minimize" class="icon-btn" title="Thu nhỏ bong bóng">−</button>
-          <button id="btn-close" class="icon-btn close-btn" title="Ẩn cún cưng">×</button>
+          <button id="btn-close" class="icon-btn close-btn" title="Đóng ứng dụng và tắt toàn bộ dịch vụ AI/RAG">×</button>
         </div>
       </div>
 
@@ -218,15 +219,18 @@
           <button class="chip" data-query="Đọc file /etc/nixos/configuration.nix">📄 Đọc config</button>
         </div>
         <div class="input-wrapper">
-          <!-- Nút dấu + đính kèm hình ảnh, tài liệu -->
-          <input type="file" id="file-upload-input" class="hidden" accept="image/*,.pdf,.txt,.md,.nix,.json,.yaml,.yml,.sh,.go,.py,.csv" />
-          <button id="btn-attach" class="attach-btn" title="Thêm hình ảnh, tài liệu (+)">
-            +
+          <!-- Nút dấu + đính kèm hình ảnh, tài liệu (tách biệt hoàn toàn với input type file) -->
+          <input type="file" id="file-upload-input" class="hidden-file-input" accept="image/*,.pdf,.txt,.md,.nix,.json,.yaml,.yml,.sh,.go,.py,.csv" />
+          <button type="button" id="btn-attach" class="attach-btn" title="Thêm hình ảnh, tài liệu (+)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
           </button>
           <input 
             type="text" 
             id="chat-input" 
-            placeholder="Hỏi em hoặc dán link/chạy lệnh... (Enter để gửi)" 
+            placeholder="Hỏi em, dán link hoặc chạy lệnh... (Enter)" 
             autocomplete="off"
           />
           <button id="btn-rag-toggle" class="toggle-btn active" title="Bật/Tắt RAG Tri Thức">
@@ -367,18 +371,18 @@
 
         <!-- Đầu chú cún 3D Chibi -->
         <g class="head-group">
-          <!-- Đôi tai chó nhỏ nhắn, vểnh cao lên tinh anh, ngộ nghĩnh (Pricked Ears) -->
-          <!-- Tai trái vểnh chếch lên bên trái -->
+          <!-- Đôi tai chó thiết kế lớn gấp 2 lần diện tích, vểnh cao 3D tinh anh, ngộ nghĩnh (Pricked Ears 2x) -->
+          <!-- Tai trái vểnh chếch lên bên trái (Diện tích lớn gấp 2) -->
           <g class="ear ear-left-perky">
-            <path d="M 76 56 C 68 44, 52 24, 55 14 C 64 12, 84 32, 92 46 Z" fill="url(#grad3DEar)" />
-            <!-- Lòng tai trong màu hồng phấn mềm mại -->
-            <path d="M 74 52 C 68 42, 58 26, 60 19 C 66 18, 79 33, 86 45 Z" fill="url(#grad3DEarInner)" opacity="0.9" />
+            <path d="M 80 58 C 66 42, 38 12, 44 0 C 58 -2, 88 24, 102 46 Z" fill="url(#grad3DEar)" />
+            <!-- Lòng tai trong màu hồng phấn mềm mại lớn gấp đôi -->
+            <path d="M 78 52 C 67 38, 48 15, 52 5 C 61 3, 83 25, 94 44 Z" fill="url(#grad3DEarInner)" opacity="0.9" />
           </g>
-          <!-- Tai phải vểnh chếch lên bên phải -->
+          <!-- Tai phải vểnh chếch lên bên phải (Diện tích lớn gấp 2) -->
           <g class="ear ear-right-perky">
-            <path d="M 144 56 C 152 44, 168 24, 165 14 C 156 12, 136 32, 128 46 Z" fill="url(#grad3DEar)" />
-            <!-- Lòng tai trong màu hồng phấn mềm mại -->
-            <path d="M 146 52 C 152 42, 162 26, 160 19 C 154 18, 141 33, 134 45 Z" fill="url(#grad3DEarInner)" opacity="0.9" />
+            <path d="M 140 58 C 154 42, 182 12, 176 0 C 162 -2, 132 24, 118 46 Z" fill="url(#grad3DEar)" />
+            <!-- Lòng tai trong màu hồng phấn mềm mại lớn gấp đôi -->
+            <path d="M 142 52 C 153 38, 172 15, 168 5 C 159 3, 137 25, 126 44 Z" fill="url(#grad3DEarInner)" opacity="0.9" />
           </g>
 
           <!-- Khối mặt cầu 3D tròn xoe dễ thương -->

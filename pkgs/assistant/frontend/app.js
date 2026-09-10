@@ -10,9 +10,12 @@
   const statusLabel = document.getElementById('status-label');
   const btnMinimize = document.getElementById('btn-minimize');
   const btnClose = document.getElementById('btn-close');
+  const btnAlwaysOnTop = document.getElementById('btn-always-on-top');
   const btnSleep = document.getElementById('btn-sleep-cún');
   const btnEyeleoToggle = document.getElementById('btn-eyeleo-toggle');
   const heartBurst = document.getElementById('heart-burst');
+
+  let isAlwaysOnTop = true; // Mặc định luôn on top góc màn hình
 
   // Cục Xương Context Elements
   const boneContextBar = document.getElementById('bone-context-bar');
@@ -206,8 +209,23 @@
     speechBubble.classList.add('hidden');
   });
 
+  if (btnAlwaysOnTop) {
+    btnAlwaysOnTop.addEventListener('click', (e) => {
+      e.stopPropagation();
+      isAlwaysOnTop = !isAlwaysOnTop;
+      btnAlwaysOnTop.classList.toggle('active', isAlwaysOnTop);
+      btnAlwaysOnTop.title = isAlwaysOnTop 
+        ? 'Ghim trên cùng màn hình (Always on Top: BẬT)' 
+        : 'Ghim trên cùng màn hình (Always on Top: TẮT)';
+      if (window.assistantNative && window.assistantNative.setAlwaysOnTop) {
+        window.assistantNative.setAlwaysOnTop(isAlwaysOnTop);
+      }
+    });
+  }
+
   btnClose.addEventListener('click', (e) => {
     e.stopPropagation();
+    statusLabel.textContent = 'Đang đóng ứng dụng và tắt AI/RAG...';
     if (window.assistantNative && window.assistantNative.closeApp) {
       window.assistantNative.closeApp();
     } else {

@@ -503,6 +503,13 @@ func (s *AIService) StartAIServicesOnDemand(onProgress func(string), onReady fun
 	}()
 }
 
+func (s *AIService) StopAllServices() {
+	fmt.Println("[BamAI Power] Đóng toàn bộ dịch vụ AI & RAG theo lệnh người dùng...")
+	_ = exec.Command("pkill", "-9", "-f", "bamos-ai-server").Run()
+	_ = exec.Command("pkill", "-9", "-f", "llama-server").Run()
+	_ = exec.Command("pkill", "-9", "-f", "bamos-rag").Run()
+}
+
 func (s *AIService) EvaluateAndSleepOrStopAI() string {
 	hour := time.Now().Hour()
 	shouldFullStop := true

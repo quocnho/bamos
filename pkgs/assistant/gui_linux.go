@@ -68,10 +68,29 @@ static void trigger_window_close() {
     g_idle_add(do_close, NULL);
 }
 
+static gboolean do_set_keep_above(gpointer user_data) {
+    gboolean enable = GPOINTER_TO_INT(user_data);
+    if (g_app.window != NULL) {
+        gtk_window_set_keep_above(GTK_WINDOW(g_app.window), enable);
+    }
+    return G_SOURCE_REMOVE;
+}
+
+static void trigger_window_set_keep_above(gboolean enable) {
+    g_idle_add(do_set_keep_above, GINT_TO_POINTER(enable));
+}
+
 static gboolean do_show(gpointer user_data) {
     if (g_app.window != NULL) {
         gtk_widget_show_all(g_app.window);
+        gtk_window_set_keep_above(GTK_WINDOW(g_app.window), TRUE);
+        gtk_window_deiconify(GTK_WINDOW(g_app.window));
         gtk_window_present(GTK_WINDOW(g_app.window));
+        GdkWindow *gdk_win = gtk_widget_get_window(g_app.window);
+        if (gdk_win != NULL) {
+            gdk_window_raise(gdk_win);
+            gdk_window_focus(gdk_win, GDK_CURRENT_TIME);
+        }
     }
     return G_SOURCE_REMOVE;
 }
@@ -105,11 +124,11 @@ static void reposition_to_bottom_right(GtkWindow *window) {
         gdk_monitor_get_workarea(monitor, &workarea);
         int winW = 440;
         int winH = 640;
-        // Đặt sát góc dưới bên phải, chừa lề nhỏ 20px
-        int posX = workarea.x + workarea.width - winW - 20;
-        int posY = workarea.y + workarea.height - winH - 20;
-        if (posX < 0) posX = 20;
-        if (posY < 0) posY = 20;
+        // Đặt sát góc dưới bên phải màn hình
+        int posX = workarea.x + workarea.width - winW - 12;
+        int posY = workarea.y + workarea.height - winH - 12;
+        if (posX < 0) posX = 0;
+        if (posY < 0) posY = 0;
         gtk_window_move(window, posX, posY);
     }
 }
@@ -198,6 +217,7 @@ static void setup_window_and_webview(const char *app_url) {
         "window.assistantNative = {"
         "  dragWindow: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'drag'})); },"
         "  closeApp: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'close'})); },"
+        "  setAlwaysOnTop: function(enable) { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'set_always_on_top', always_on_top: !!enable})); },"
         "  wakeAI: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'wake_ai'})); },"
         "  evaluateSleepOrStop: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'evaluate_sleep_or_stop'})); },"
         "  setContextDir: function(dir) { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'set_directory', directory: dir})); },"
@@ -266,11 +286,12 @@ import (
 var frontendFS embed.FS
 
 type NativeMessage struct {
-	Action     string `json:"action"`
-	Question   string `json:"question"`
-	Directory  string `json:"directory"`
-	UseRAG     bool   `json:"use_rag"`
-	Fullscreen bool   `json:"fullscreen"`
+	Action      string `json:"action"`
+	Question    string `json:"question"`
+	Directory   string `json:"directory"`
+	UseRAG      bool   `json:"use_rag"`
+	Fullscreen  bool   `json:"fullscreen"`
+	AlwaysOnTop bool   `json:"always_on_top"`
 }
 
 var globalAI *AIService
@@ -289,7 +310,17 @@ func handleScriptMessage(cMessage *C.char) {
 	case "drag":
 		C.trigger_window_drag()
 	case "close":
+		// Khi người dùng đóng ứng dụng, tắt sạch mọi dịch vụ AI và RAG
+		if globalAI != nil {
+			go globalAI.StopAllServices()
+		}
 		C.trigger_window_close()
+	case "set_always_on_top":
+		var enable C.gboolean = 0
+		if msg.AlwaysOnTop {
+			enable = 1
+		}
+		C.trigger_window_set_keep_above(enable)
 	case "activate_and_raise":
 		C.trigger_window_show()
 	case "stop":
