@@ -334,3 +334,37 @@ func (s *AIService) StartAIServicesOnDemand(onProgress func(string), onReady fun
 		onReady()
 	}()
 }
+
+func (s *AIService) EvaluateAndSleepOrStopAI() string {
+	hour := time.Now().Hour()
+	shouldFullStop := true
+
+	if s.mem != nil {
+		var slot string
+		switch {
+		case hour >= 5 && hour < 12:
+			slot = "morning"
+		case hour >= 12 && hour < 18:
+			slot = "afternoon"
+		case hour >= 18 && hour < 23:
+			slot = "evening"
+		default:
+			slot = "night"
+		}
+		// Nếu khung giờ này có tần suất dùng liên tục cao (> 12 lần), ưu tiên giữ warm
+		if s.mem.Data.WorkHours[slot] > 12 {
+			shouldFullStop = false
+		}
+	}
+
+	if shouldFullStop {
+		fmt.Println("[BamAI Power] Đã tự động tắt dịch vụ AI & RAG để giải phóng 100% tài nguyên.")
+		_ = exec.Command("pkill", "-f", "bamos-ai-server").Run()
+		_ = exec.Command("pkill", "-f", "llama-server").Run()
+		_ = exec.Command("pkill", "-f", "bamos-rag").Run()
+		return "stopped"
+	}
+
+	fmt.Println("[BamAI Power] Cún tạm ngủ canh nhà (giữ warm dịch vụ AI).")
+	return "warm_sleep"
+}

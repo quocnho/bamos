@@ -120,6 +120,7 @@ static void setup_window_and_webview(const char *app_url) {
         "  dragWindow: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'drag'})); },"
         "  closeApp: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'close'})); },"
         "  wakeAI: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'wake_ai'})); },"
+        "  evaluateSleepOrStop: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'evaluate_sleep_or_stop'})); },"
         "  ask: function(q, rag) { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'ask', question: q, use_rag: rag})); }"
         "};";
 
@@ -233,6 +234,10 @@ func handleScriptMessage(cMessage *C.char) {
 					C.free(unsafe.Pointer(cScript))
 				},
 			)
+		}
+	case "evaluate_sleep_or_stop":
+		if globalAI != nil {
+			go globalAI.EvaluateAndSleepOrStopAI()
 		}
 	case "ask":
 		if globalAI != nil {

@@ -26,11 +26,17 @@
   const btnEyeleoDismiss = document.getElementById('btn-eyeleo-dismiss');
 
   let useRag = true;
-  let currentState = 'sleeping'; // Khởi động ban đầu: ngủ say
-  let aiWoken = false;           // Chưa đánh thức AI
+  let currentState = 'welcoming'; // Khởi động ban đầu: vẫy đuôi chào mừng
+  let aiWoken = false;            // Chưa kích hoạt AI backend
   let isDragging = false;
   let startX = 0;
   let startY = 0;
+
+  // Timers
+  let startupWelcomeTimer = null;
+  let aiInactivityTimer = null;
+  const STARTUP_TIMEOUT_MS = 60 * 1000;    // 1 phút: không bấm gì sẽ nằm ngủ canh nhà
+  const INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000; // 5 phút: không dùng AI sẽ tự động tắt/ngủ dịch vụ
 
   // Cấu hình EyeLeo Health
   let eyeleoEnabled = true;
@@ -41,6 +47,33 @@
   function setState(state) {
     currentState = state;
     document.body.className = `state-${state}`;
+  }
+
+  // Khởi tạo timer 5 phút sau khi dùng AI
+  function resetInactivityTimer() {
+    if (aiInactivityTimer) clearTimeout(aiInactivityTimer);
+    if (!aiWoken) return;
+
+    aiInactivityTimer = setTimeout(() => {
+      // 5 phút trôi qua không active
+      console.log('[BamAI] 5 phút không tương tác -> Kiểm tra thói quen người dùng để ngủ/tắt dịch vụ AI...');
+      if (window.assistantNative && window.assistantNative.evaluateSleepOrStop) {
+        window.assistantNative.evaluateSleepOrStop();
+      }
+      aiWoken = false;
+      putCúnToSleep();
+      statusLabel.textContent = 'Đã tạm nghỉ để tiết kiệm tài nguyên';
+    }, INACTIVITY_TIMEOUT_MS);
+  }
+
+  // Khởi tạo timer 1 phút lúc bật máy tính
+  function scheduleStartupSleep() {
+    if (startupWelcomeTimer) clearTimeout(startupWelcomeTimer);
+    startupWelcomeTimer = setTimeout(() => {
+      if (!aiWoken) {
+        putCúnToSleep();
+      }
+    }, STARTUP_TIMEOUT_MS);
   }
 
   // Hiệu ứng vuốt ve cún
@@ -55,16 +88,21 @@
     }, 1500);
   }
 
-  // Đánh thức cún và kích hoạt AI
+  // Đánh thức cún và kích hoạt toàn bộ AI
   function wakeUpCún() {
+    if (startupWelcomeTimer) {
+      clearTimeout(startupWelcomeTimer);
+      startupWelcomeTimer = null;
+    }
+
     if (!aiWoken) {
       aiWoken = true;
       petHappy();
       speechBubble.classList.remove('hidden');
-      statusLabel.textContent = 'Đang khởi động AI & RAG...';
+      statusLabel.textContent = 'Đang khởi động toàn bộ AI & RAG...';
       chatStream.innerHTML = `
         <div class="ai-reply">
-          🐶 <b>Gâu gâu!</b> Em đã thức dậy rồi! Đang gọi <code>bam ai start</code> để kích hoạt llama-server và cơ sở tri thức RAG... Vui lòng đợi em vài giây nhé!
+          🐶 <b>Gâu gâu!</b> Em đã thức dậy phục vụ Chủ nhân rồi đây ạ! Đang khởi động llama-server và cơ sở tri thức... Vui lòng đợi em trong giây lát nhé!
         </div>
       `;
 
@@ -72,7 +110,7 @@
         window.assistantNative.wakeAI();
       }
     } else {
-      // Nếu đã thức rồi thì chỉ toggle bong bóng chat
+      // Nếu đã thức rồi thì toggle bong bóng chat
       const isHidden = speechBubble.classList.contains('hidden');
       if (isHidden) {
         speechBubble.classList.remove('hidden');
@@ -82,6 +120,7 @@
         speechBubble.classList.add('hidden');
       }
     }
+    resetInactivityTimer();
   }
 
   // Callback từ Go khi AI đang khởi động
@@ -93,16 +132,17 @@
   // Callback từ Go khi AI và RAG đã sẵn sàng
   window.onAIReady = function() {
     setState('idle');
-    statusLabel.textContent = 'Sẵn sàng!';
+    statusLabel.textContent = 'Sẵn sàng phục vụ Chủ nhân!';
     chatStream.innerHTML = `
       <div class="ai-reply">
-        ✨ <b>Gâu gâu!</b> Hệ thống AI và RAG đã sẵn sàng 100%! Chủ nhân hãy hỏi em bất cứ điều gì nhé!
+        ✨ <b>Gâu gâu!</b> Toàn bộ dịch vụ AI và RAG đã sẵn sàng 100%! Chủ nhân hãy hỏi em bất cứ điều gì nhé!
       </div>
     `;
     chatInput.focus();
+    resetInactivityTimer();
   };
 
-  // Cho cún đi ngủ lại (tiết kiệm tài nguyên)
+  // Cho cún nằm xuống ngủ canh nhà (tiết kiệm tài nguyên tuyệt đối)
   function putCúnToSleep() {
     setState('sleeping');
     speechBubble.classList.add('hidden');
@@ -110,6 +150,10 @@
 
   btnSleep.addEventListener('click', (e) => {
     e.stopPropagation();
+    if (window.assistantNative && window.assistantNative.evaluateSleepOrStop) {
+      window.assistantNative.evaluateSleepOrStop();
+    }
+    aiWoken = false;
     putCúnToSleep();
   });
 
@@ -184,10 +228,15 @@
     const question = chatInput.value.trim();
     if (!question) return;
 
+    if (!aiWoken) {
+      wakeUpCún();
+    }
+    resetInactivityTimer();
+
     chatInput.value = '';
     chatStream.innerHTML = `
-      <div class="user-query"><b>Bạn:</b> ${escapeHtml(question)}</div>
-      <div class="ai-reply" id="current-reply"><i>Đang tra cứu và suy nghĩ...</i></div>
+      <div class="user-query"><b>Chủ nhân:</b> ${escapeHtml(question)}</div>
+      <div class="ai-reply" id="current-reply"><i>Em đang tra cứu và suy nghĩ...</i></div>
     `;
     chatStream.scrollTop = chatStream.scrollHeight;
 
@@ -204,6 +253,14 @@
     if (e.key === 'Enter') sendQuestion();
   });
 
+  // Khi click hoặc focus vào ô chat, nếu cún đang ngủ hoặc đón chào thì kích hoạt ngay
+  chatInput.addEventListener('focus', () => {
+    if (!aiWoken) {
+      wakeUpCún();
+    }
+    resetInactivityTimer();
+  });
+
   function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
@@ -213,7 +270,7 @@
   // Callbacks streaming chat
   window.onAIChunk = function(chunkText, isFirst) {
     setState('talking');
-    statusLabel.textContent = 'Cún đang trả lời...';
+    statusLabel.textContent = 'Em đang trả lời...';
     const replyEl = document.getElementById('current-reply');
     if (replyEl) {
       if (isFirst || replyEl.querySelector('i')) {
@@ -222,11 +279,13 @@
       replyEl.innerHTML += escapeHtml(chunkText).replace(/\n/g, '<br>');
       chatStream.scrollTop = chatStream.scrollHeight;
     }
+    resetInactivityTimer();
   };
 
   window.onAIDone = function() {
     setState('idle');
-    statusLabel.textContent = 'Sẵn sàng!';
+    statusLabel.textContent = 'Sẵn sàng phục vụ Chủ nhân!';
+    resetInactivityTimer();
   };
 
   window.onAIError = function(errMsg) {
@@ -236,6 +295,7 @@
     if (replyEl) {
       replyEl.innerHTML = `<span style="color: #E53E3E;">Lỗi: ${escapeHtml(errMsg)}</span>`;
     }
+    resetInactivityTimer();
   };
 
   // ===================================================
@@ -369,7 +429,8 @@
   // Bắt đầu bộ đếm EyeLeo
   startEyeleoScheduler();
 
-  // Khởi động ở trạng thái ngủ
-  setState('sleeping');
+  // Khởi động mặc định: nhảy nhảy, vẫy đuôi mừng rỡ đón chào Chủ nhân
+  setState('welcoming');
+  scheduleStartupSleep();
 
 })();

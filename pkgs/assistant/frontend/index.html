@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BamOS Mascot AI Assistant & EyeLeo Companion</title>
+  <title>BamOS 3D Mascot AI Assistant & EyeLeo Companion</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="state-sleeping">
+<body class="state-welcoming">
   <div id="app-container">
     
     <!-- Bong bóng nhắc nhở sức khỏe EyeLeo (Nghỉ mắt, Uống nước, Vươn vai) -->
@@ -33,15 +33,15 @@
     </div>
 
     <!-- Bong bóng hội thoại AI Chat & RAG -->
-    <div id="speech-bubble" class="bubble hidden">
+    <div id="speech-bubble" class="bubble">
       <div class="bubble-header" data-drag="true">
         <div class="assistant-tag">
           <span class="rag-indicator" id="rag-badge" title="RAG Tri thức nội bộ">📚 RAG</span>
-          <span class="status-text" id="status-label">Đang ngủ ngoan...</span>
+          <span class="status-text" id="status-label">Em chào Chủ nhân!</span>
         </div>
         <div class="window-controls">
           <button id="btn-eyeleo-toggle" class="icon-btn active" title="Bật/Tắt nhắc EyeLeo (mắt/nước)">⏰</button>
-          <button id="btn-sleep-cún" class="icon-btn" title="Cho cún đi ngủ">💤</button>
+          <button id="btn-sleep-cún" class="icon-btn" title="Cho cún ngủ canh nhà">💤</button>
           <button id="btn-minimize" class="icon-btn" title="Thu nhỏ bong bóng">−</button>
           <button id="btn-close" class="icon-btn close-btn" title="Ẩn cún cưng">×</button>
         </div>
@@ -49,7 +49,7 @@
 
       <div class="bubble-body" id="chat-stream">
         <div class="welcome-msg" id="chat-welcome">
-          Gâu gâu! Em là trợ lý cún cưng BamOS kiêm bạn đồng hành sức khỏe EyeLeo. Nhấp vào em để trò chuyện hoặc cứ để em nhắc chủ nhân nghỉ mắt nhé!
+          🐶 <b>Xin chào Chủ nhân!</b> Em đang ở đây, sẵn sàng hỗ trợ ạ! Chủ nhân hãy nhấp vào ô chat để bắt đầu nhé!
         </div>
       </div>
 
@@ -63,7 +63,7 @@
           <input 
             type="text" 
             id="chat-input" 
-            placeholder="Hỏi cún cưng... (Enter để gửi)" 
+            placeholder="Nói chuyện cùng em... (Enter để gửi)" 
             autocomplete="off"
           />
           <button id="btn-rag-toggle" class="toggle-btn active" title="Bật/Tắt RAG Tri Thức">
@@ -77,106 +77,184 @@
       <div class="bubble-tail"></div>
     </div>
 
-    <!-- Chú cún con Mascot (Rover Puppy) có thể kéo thả di chuyển -->
-    <div id="pet-wrapper" class="pet-draggable" title="Kéo để di chuyển • Bấm để đánh thức AI / vuốt ve">
+    <!-- Chú cún con Mascot 3D Chibi (Original BamOS Mascot) -->
+    <div id="pet-wrapper" class="pet-draggable" title="Kéo để di chuyển • Bấm để trò chuyện cùng em">
       <div id="heart-burst" class="heart-effect">❤️</div>
       <div id="zzz-bubble" class="zzz-effect">z Z Z</div>
       
-      <!-- Chú cún SVG động tương tác -->
-      <svg id="puppy-svg" viewBox="0 0 200 220" width="160" height="176">
+      <!-- Chú cún 3D Vector SVG Đa Tầng -->
+      <svg id="puppy-svg" viewBox="0 0 220 220" width="170" height="170">
         <defs>
-          <linearGradient id="furGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#FFD166" />
-            <stop offset="100%" stop-color="#F4A261" />
+          <!-- Gradient 3D mặt và thân -->
+          <radialGradient id="grad3DFace" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#FFEAA7" />
+            <stop offset="50%" stop-color="#FDCB6E" />
+            <stop offset="85%" stop-color="#E17055" />
+            <stop offset="100%" stop-color="#D63031" />
+          </radialGradient>
+
+          <radialGradient id="grad3DBody" cx="35%" cy="30%" r="70%">
+            <stop offset="0%" stop-color="#FFEAA7" />
+            <stop offset="60%" stop-color="#FDCB6E" />
+            <stop offset="90%" stop-color="#E17055" />
+            <stop offset="100%" stop-color="#C0392B" />
+          </radialGradient>
+
+          <!-- Gradient tai mềm 3D -->
+          <linearGradient id="grad3DEar" x1="20%" y1="0%" x2="80%" y2="100%">
+            <stop offset="0%" stop-color="#E17055" />
+            <stop offset="60%" stop-color="#D63031" />
+            <stop offset="100%" stop-color="#8E1A1A" />
           </linearGradient>
-          <linearGradient id="earGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#E76F51" />
-            <stop offset="100%" stop-color="#D94E34" />
-          </linearGradient>
-          <linearGradient id="bellyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#FFFDF7" />
-            <stop offset="100%" stop-color="#FFE7C4" />
-          </linearGradient>
-          <filter id="softShadow" x="-10%" y="-10%" width="130%" height="130%">
-            <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="rgba(0,0,0,0.3)" />
-          </filter>
+
+          <!-- Gradient má phúng phính -->
+          <radialGradient id="grad3DMuzzle" cx="50%" cy="35%" r="55%">
+            <stop offset="0%" stop-color="#FFFFFF" />
+            <stop offset="65%" stop-color="#FFFDF0" />
+            <stop offset="100%" stop-color="#FEEAA0" />
+          </radialGradient>
+
+          <!-- Gradient mắt ngọc hổ phách 3D -->
+          <radialGradient id="grad3DIris" cx="45%" cy="40%" r="55%">
+            <stop offset="0%" stop-color="#8B4513" />
+            <stop offset="45%" stop-color="#5C2C16" />
+            <stop offset="80%" stop-color="#2D150B" />
+            <stop offset="100%" stop-color="#120703" />
+          </radialGradient>
+
+          <!-- Gradient chuông vàng kim loại 3D -->
+          <radialGradient id="grad3DBell" cx="35%" cy="30%" r="60%">
+            <stop offset="0%" stop-color="#FFF9D2" />
+            <stop offset="45%" stop-color="#F1C40F" />
+            <stop offset="85%" stop-color="#D35400" />
+            <stop offset="100%" stop-color="#7E3200" />
+          </radialGradient>
+
+          <!-- Đổ bóng mềm dưới đất -->
+          <radialGradient id="gradGroundShadow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="rgba(0,0,0,0.35)" />
+            <stop offset="60%" stop-color="rgba(0,0,0,0.18)" />
+            <stop offset="100%" stop-color="rgba(0,0,0,0)" />
+          </radialGradient>
         </defs>
 
-        <!-- Bóng dưới chân cún -->
-        <ellipse cx="100" cy="205" rx="65" ry="12" fill="rgba(0, 0, 0, 0.25)" class="puppy-shadow" />
+        <!-- Bóng đổ sàn 3D -->
+        <ellipse cx="110" cy="204" rx="72" ry="12" fill="url(#gradGroundShadow)" class="puppy-shadow" />
 
-        <!-- Cái đuôi ngoe nguẩy -->
+        <!-- Đuôi vẫy 3D -->
         <g class="tail-group">
-          <path d="M 145 165 C 175 160, 185 130, 175 110 C 168 115, 160 135, 145 155 Z" fill="url(#earGrad)" />
-          <circle cx="174" cy="112" r="7" fill="#FFE7C4" />
+          <path d="M 152 165 C 185 155, 198 120, 185 98 C 176 104, 168 128, 150 152 Z" fill="url(#grad3DEar)" />
+          <circle cx="184" cy="100" r="8" fill="#FFFDF0" />
         </g>
 
-        <!-- Chân sau -->
-        <ellipse cx="58" cy="188" rx="20" ry="13" fill="#E76F51" />
-        <ellipse cx="142" cy="188" rx="20" ry="13" fill="#E76F51" />
+        <!-- Chân sau nằm canh nhà -->
+        <ellipse cx="58" cy="190" rx="22" ry="14" fill="url(#grad3DEar)" class="back-paw-left" />
+        <ellipse cx="162" cy="190" rx="22" ry="14" fill="url(#grad3DEar)" class="back-paw-right" />
 
-        <!-- Thân mình chú cún -->
+        <!-- Thân mình 3D Chibi -->
         <g class="body-group">
-          <path d="M 60 120 C 50 170, 60 195, 100 195 C 140 195, 150 170, 140 120 C 130 95, 70 95, 60 120 Z" 
-                fill="url(#furGrad)" filter="url(#softShadow)" />
-          <!-- Đốm yếm bụng màu kem -->
-          <path d="M 80 135 C 75 165, 80 188, 100 188 C 120 188, 125 165, 120 135 C 115 125, 85 125, 80 135 Z" 
-                fill="url(#bellyGrad)" />
+          <path d="M 64 125 C 50 170, 62 198, 110 198 C 158 198, 170 170, 156 125 C 144 98, 76 98, 64 125 Z" 
+                fill="url(#grad3DBody)" />
+          <!-- Yếm ngực kem mềm mại -->
+          <path d="M 86 138 C 80 168, 86 190, 110 190 C 134 190, 140 168, 134 138 C 128 126, 92 126, 86 138 Z" 
+                fill="url(#grad3DMuzzle)" opacity="0.95" />
         </g>
 
-        <!-- Chân trước -->
+        <!-- Chân trước 3D (Tư thế đứng hoặc nằm duỗi canh nhà) -->
         <g class="front-paws">
-          <path d="M 75 165 L 75 198 A 10 8 0 0 0 95 198 L 95 165 Z" fill="url(#furGrad)" />
-          <circle cx="85" cy="198" r="8" fill="#FFFDF7" />
-          
-          <path d="M 105 165 L 105 198 A 10 8 0 0 0 125 198 L 125 165 Z" fill="url(#furGrad)" />
-          <circle cx="115" cy="198" r="8" fill="#FFFDF7" />
+          <g class="paw-left">
+            <ellipse cx="86" cy="195" rx="14" ry="9" fill="url(#grad3DFace)" />
+            <ellipse cx="86" cy="196" rx="10" ry="6" fill="#FFFDF0" />
+            <!-- Móng vuốt nhỏ xinh -->
+            <circle cx="80" cy="199" r="1.8" fill="#E17055" />
+            <circle cx="86" cy="201" r="1.8" fill="#E17055" />
+            <circle cx="92" cy="199" r="1.8" fill="#E17055" />
+          </g>
+          <g class="paw-right">
+            <ellipse cx="134" cy="195" rx="14" ry="9" fill="url(#grad3DFace)" />
+            <ellipse cx="134" cy="196" rx="10" ry="6" fill="#FFFDF0" />
+            <circle cx="128" cy="199" r="1.8" fill="#E17055" />
+            <circle cx="134" cy="201" r="1.8" fill="#E17055" />
+            <circle cx="140" cy="199" r="1.8" fill="#E17055" />
+          </g>
         </g>
 
-        <!-- Vòng cổ màu xanh công nghệ BamOS kèm chuông vàng -->
-        <path d="M 70 115 Q 100 130 130 115 Q 100 122 70 115" fill="#2A9D8F" stroke="#264653" stroke-width="2" />
-        <circle cx="100" cy="123" r="6" fill="#F4A261" stroke="#E76F51" stroke-width="1.5" class="bell" />
+        <!-- Vòng cổ BamOS xanh ngọc 3D -->
+        <path d="M 72 118 Q 110 134 148 118 Q 110 126 72 118" fill="#00CEC9" stroke="#00A8A4" stroke-width="2.5" />
+        <!-- Chuông vàng kim loại 3D với khe chuông -->
+        <circle cx="110" cy="128" r="8.5" fill="url(#grad3DBell)" class="bell" />
+        <circle cx="110" cy="130" r="1.8" fill="#5C2C16" />
 
-        <!-- Đầu chú cún -->
+        <!-- Đầu chú cún 3D Chibi -->
         <g class="head-group">
-          <!-- Tai trái -->
-          <path class="ear ear-left" d="M 68 55 C 30 50, 20 95, 38 120 C 48 125, 58 100, 68 75 Z" fill="url(#earGrad)" />
-          <!-- Tai phải -->
-          <path class="ear ear-right" d="M 132 55 C 170 50, 180 95, 162 120 C 152 125, 142 100, 132 75 Z" fill="url(#earGrad)" />
+          <!-- Tai trái mềm mại rủ xuống -->
+          <path class="ear ear-left" d="M 66 52 C 22 45, 12 100, 36 128 C 48 135, 58 106, 68 76 Z" fill="url(#grad3DEar)" />
+          <!-- Tai phải mềm mại rủ xuống -->
+          <path class="ear ear-right" d="M 154 52 C 198 45, 208 100, 184 128 C 172 135, 162 106, 152 76 Z" fill="url(#grad3DEar)" />
 
-          <!-- Khối mặt đầu -->
-          <ellipse cx="100" cy="72" rx="46" ry="40" fill="url(#furGrad)" filter="url(#softShadow)" />
+          <!-- Khối mặt cầu 3D tròn xoe dễ thương -->
+          <ellipse cx="110" cy="74" rx="52" ry="46" fill="url(#grad3DFace)" />
+          
+          <!-- Điểm sáng bóng highlight trên trán tạo cảm giác 3D nổi -->
+          <ellipse cx="96" cy="48" rx="18" ry="10" fill="#FFFFFF" opacity="0.35" transform="rotate(-15, 96, 48)" />
 
-          <!-- Mõm chú cún -->
-          <ellipse cx="100" cy="85" rx="26" ry="20" fill="url(#bellyGrad)" />
+          <!-- Mõm chú cún tròn trịa mềm mại -->
+          <ellipse cx="110" cy="88" rx="30" ry="22" fill="url(#grad3DMuzzle)" />
 
-          <!-- Mắt trái -->
-          <g class="eye eye-left">
-            <ellipse cx="80" cy="65" rx="8" ry="11" fill="#264653" class="eyeball" />
-            <circle cx="78" cy="61" r="3.5" fill="#FFFFFF" class="pupil" />
-            <circle cx="83" cy="69" r="1.5" fill="#FFFFFF" />
+          <!-- MẮT TRÁI 3D (Có thể thức hoặc nhắm mắt ngủ canh nhà) -->
+          <g class="eye-container eye-left-container">
+            <!-- Mắt mở tròn xoe long lanh -->
+            <g class="eye-open eye-left">
+              <ellipse cx="88" cy="68" rx="11" ry="14" fill="url(#grad3DIris)" />
+              <!-- Đốm sáng phản chiếu 3 tầng cực kỳ long lanh -->
+              <circle cx="85" cy="62" r="4.5" fill="#FFFFFF" />
+              <circle cx="92" cy="74" r="2.2" fill="#FFFFFF" />
+              <circle cx="83" cy="73" r="1.2" fill="#FFFFFF" />
+            </g>
+            <!-- Mí mắt và Lông mi cong vút khi ngủ -->
+            <g class="eye-closed eye-left-closed">
+              <!-- Cung mí mắt cong mềm mại -->
+              <path d="M 76 72 Q 88 82 100 72" stroke="#8B4513" stroke-width="3" stroke-linecap="round" fill="none" />
+              <!-- Hàng lông mi cong vút đáng yêu -->
+              <path d="M 77 71 Q 72 65 71 61" stroke="#5C2C16" stroke-width="2" stroke-linecap="round" fill="none" class="eyelash" />
+              <path d="M 85 75 Q 83 67 81 63" stroke="#5C2C16" stroke-width="2" stroke-linecap="round" fill="none" class="eyelash" />
+              <path d="M 94 75 Q 95 67 96 63" stroke="#5C2C16" stroke-width="2" stroke-linecap="round" fill="none" class="eyelash" />
+              <path d="M 99 71 Q 104 65 106 61" stroke="#5C2C16" stroke-width="2" stroke-linecap="round" fill="none" class="eyelash" />
+            </g>
           </g>
 
-          <!-- Mắt phải -->
-          <g class="eye eye-right">
-            <ellipse cx="120" cy="65" rx="8" ry="11" fill="#264653" class="eyeball" />
-            <circle cx="118" cy="61" r="3.5" fill="#FFFFFF" class="pupil" />
-            <circle cx="123" cy="69" r="1.5" fill="#FFFFFF" />
+          <!-- MẮT PHẢI 3D -->
+          <g class="eye-container eye-right-container">
+            <!-- Mắt mở tròn xoe long lanh -->
+            <g class="eye-open eye-right">
+              <ellipse cx="132" cy="68" rx="11" ry="14" fill="url(#grad3DIris)" />
+              <circle cx="129" cy="62" r="4.5" fill="#FFFFFF" />
+              <circle cx="136" cy="74" r="2.2" fill="#FFFFFF" />
+              <circle cx="127" cy="73" r="1.2" fill="#FFFFFF" />
+            </g>
+            <!-- Mí mắt và Lông mi cong vút khi ngủ -->
+            <g class="eye-closed eye-right-closed">
+              <path d="M 120 72 Q 132 82 144 72" stroke="#8B4513" stroke-width="3" stroke-linecap="round" fill="none" />
+              <path d="M 121 71 Q 116 65 114 61" stroke="#5C2C16" stroke-width="2" stroke-linecap="round" fill="none" class="eyelash" />
+              <path d="M 126 75 Q 125 67 124 63" stroke="#5C2C16" stroke-width="2" stroke-linecap="round" fill="none" class="eyelash" />
+              <path d="M 135 75 Q 137 67 139 63" stroke="#5C2C16" stroke-width="2" stroke-linecap="round" fill="none" class="eyelash" />
+              <path d="M 143 71 Q 148 65 150 61" stroke="#5C2C16" stroke-width="2" stroke-linecap="round" fill="none" class="eyelash" />
+            </g>
           </g>
 
-          <!-- Mũi đen bóng -->
-          <path d="M 94 80 Q 100 76 106 80 Q 100 89 94 80 Z" fill="#264653" />
-          <ellipse cx="98" cy="79" rx="2" ry="1" fill="#FFFFFF" opacity="0.8" />
+          <!-- Mũi đen bóng 3D có vệt sáng bóng -->
+          <path d="M 103 82 Q 110 78 117 82 Q 110 93 103 82 Z" fill="#2D150B" />
+          <ellipse cx="107" cy="81" rx="2.5" ry="1.2" fill="#FFFFFF" opacity="0.85" />
 
-          <!-- Miệng / Lưỡi -->
+          <!-- Miệng / Lưỡi hồng -->
           <g class="mouth-group">
-            <path class="mouth-line" d="M 93 86 Q 100 91 107 86" stroke="#264653" stroke-width="2" fill="none" stroke-linecap="round" />
-            <path class="tongue" d="M 96 88 C 96 98, 104 98, 104 88 Z" fill="#E63946" />
+            <path class="mouth-line" d="M 102 90 Q 110 95 118 90" stroke="#5C2C16" stroke-width="2.2" fill="none" stroke-linecap="round" />
+            <path class="tongue" d="M 106 92 C 106 102, 114 102, 114 92 Z" fill="#FF7675" />
           </g>
 
-          <!-- Má hồng -->
-          <circle cx="65" cy="78" r="6" fill="#F4A261" opacity="0.6" />
-          <circle cx="135" cy="78" r="6" fill="#F4A261" opacity="0.6" />
+          <!-- Má hồng ửng đào 3D đáng yêu -->
+          <ellipse cx="70" cy="82" rx="7.5" ry="5.5" fill="#FF7675" opacity="0.5" />
+          <ellipse cx="150" cy="82" rx="7.5" ry="5.5" fill="#FF7675" opacity="0.5" />
         </g>
       </svg>
     </div>
