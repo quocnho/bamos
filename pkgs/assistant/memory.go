@@ -111,14 +111,14 @@ func (um *UserMemory) GetHabitContext() string {
 		return ""
 	}
 
-	var contextStr = "=== THÓI QUEN & BỐI CẢNH NGƯỜI DÙNG ===\n"
+	var contextStr = "=== THÓI QUEN & BỐI CẢNH CỦA CHỦ NHÂN ===\n"
 	if len(um.Data.RecentFiles) > 0 {
-		contextStr += "Các tệp tin gần đây người dùng hay làm việc:\n"
+		contextStr += "Các tệp tin gần đây Chủ nhân hay làm việc:\n"
 		for _, f := range um.Data.RecentFiles {
 			contextStr += fmt.Sprintf(" - %s\n", f)
 		}
 	}
-	contextStr += fmt.Sprintf("Tổng số lần tương tác: %d. Lần gần nhất: %s\n", um.Data.TotalQueries, um.Data.LastActive)
-	contextStr += "========================================\n"
+	contextStr += fmt.Sprintf("Tổng số lần Chủ nhân tương tác: %d. Lần gần nhất: %s\n", um.Data.TotalQueries, um.Data.LastActive)
+	contextStr += "==========================================\n"
 	return contextStr
 }
