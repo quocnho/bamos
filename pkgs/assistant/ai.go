@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"os/exec"
 	"strings"
 	"time"
 )
@@ -158,4 +160,66 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 	}
 
 	onDone()
+}
+
+func (s *AIService) IsAIOffline() bool {
+	client := &http.Client{Timeout: 600 * time.Millisecond}
+	resp, err := client.Get(fmt.Sprintf("%s/health", s.cfg.LlamaHost))
+	if err != nil {
+		return true
+	}
+	defer resp.Body.Close()
+	return resp.StatusCode != http.StatusOK
+}
+
+func (s *AIService) IsRAGOffline() bool {
+	client := &http.Client{Timeout: 600 * time.Millisecond}
+	resp, err := client.Get("http://127.0.0.1:8090/health")
+	if err != nil {
+		return true
+	}
+	defer resp.Body.Close()
+	return resp.StatusCode != http.StatusOK
+}
+
+func (s *AIService) StartAIServicesOnDemand(onProgress func(string), onReady func()) {
+	aiOff := s.IsAIOffline()
+	ragOff := s.IsRAGOffline()
+
+	if !aiOff && !ragOff {
+		onReady()
+		return
+	}
+
+	onProgress("Đang đánh thức AI & RAG (bam ai start)...")
+
+	go func() {
+		// Gọi bam ai start nếu có, hoặc spawn background process
+		cmd := exec.Command("bam", "ai", "start")
+		_ = cmd.Start()
+
+		// Dự phòng nếu lệnh bam chưa có trong PATH
+		if s.IsAIOffline() {
+			_ = exec.Command("bamos-ai-server").Start()
+		}
+		if s.IsRAGOffline() {
+			ragCmd := exec.Command("bamos-rag")
+			ragCmd.Env = append(os.Environ(),
+				"PORT=8090",
+				"STORAGE_PATH=/var/lib/bamos/rag/knowledge.db",
+				"LLAMA_HOST=http://127.0.0.1:9090",
+			)
+			_ = ragCmd.Start()
+		}
+
+		// Đợi kiểm tra tối đa 12 giây
+		for i := 0; i < 24; i++ {
+			time.Sleep(500 * time.Millisecond)
+			if !s.IsAIOffline() && !s.IsRAGOffline() {
+				break
+			}
+		}
+
+		onReady()
+	}()
 }

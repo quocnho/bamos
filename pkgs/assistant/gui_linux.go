@@ -41,10 +41,14 @@ static void eval_js_main_thread(const char *script) {
 static gboolean do_drag(gpointer user_data) {
     if (g_app.window != NULL) {
         GdkSeat *seat = gdk_display_get_default_seat(gdk_display_get_default());
-        GdkDevice *device = gdk_seat_get_pointer(seat);
-        gint x, y;
-        gdk_device_get_position(device, NULL, &x, &y);
-        gtk_window_begin_move_drag(GTK_WINDOW(g_app.window), 1, x, y, GDK_CURRENT_TIME);
+        if (seat != NULL) {
+            GdkDevice *device = gdk_seat_get_pointer(seat);
+            if (device != NULL) {
+                gint x, y;
+                gdk_device_get_position(device, NULL, &x, &y);
+                gtk_window_begin_move_drag(GTK_WINDOW(g_app.window), 1, x, y, GDK_CURRENT_TIME);
+            }
+        }
     }
     return G_SOURCE_REMOVE;
 }
@@ -64,18 +68,20 @@ static void trigger_window_close() {
     g_idle_add(do_close, NULL);
 }
 
-static void setup_window_and_webview(const char *html_content, const char *base_uri) {
+static void setup_window_and_webview(const char *app_url) {
     gtk_init(NULL, NULL);
 
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     g_app.window = window;
 
     gtk_window_set_title(GTK_WINDOW(window), "BamOS Mascot Assistant");
-    gtk_window_set_default_size(GTK_WINDOW(window), 380, 480);
+    gtk_window_set_default_size(GTK_WINDOW(window), 420, 520);
     gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
     gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
     gtk_window_set_keep_above(GTK_WINDOW(window), TRUE);
+    gtk_window_set_type_hint(GTK_WINDOW(window), GDK_WINDOW_TYPE_HINT_UTILITY);
     gtk_window_set_skip_taskbar_hint(GTK_WINDOW(window), TRUE);
+    gtk_widget_set_app_paintable(window, TRUE);
 
     // Bật Visual RGBA trong suốt
     GdkScreen *screen = gtk_window_get_screen(GTK_WINDOW(window));
@@ -84,10 +90,18 @@ static void setup_window_and_webview(const char *html_content, const char *base_
         gtk_widget_set_visual(window, visual);
     }
 
-    // CSS làm trong suốt hoàn toàn khung GtkWindow
+    // CSS làm trong suốt hoàn toàn khung GtkWindow, loại bỏ mọi bóng mờ Mutter & viền GTK
     GtkCssProvider *css = gtk_css_provider_new();
     gtk_css_provider_load_from_data(css,
-        "window, .background { background-color: rgba(0, 0, 0, 0); background-image: none; box-shadow: none; border: none; }",
+        "window, decoration, .background, scrolledwindow, viewport {"
+        "  background-color: rgba(0, 0, 0, 0) !important;"
+        "  background-image: none !important;"
+        "  box-shadow: none !important;"
+        "  border: none !important;"
+        "  outline: none !important;"
+        "  margin: 0 !important;"
+        "  padding: 0 !important;"
+        "}",
         -1, NULL);
     gtk_style_context_add_provider_for_screen(
         screen,
@@ -105,6 +119,7 @@ static void setup_window_and_webview(const char *html_content, const char *base_
         "window.assistantNative = {"
         "  dragWindow: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'drag'})); },"
         "  closeApp: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'close'})); },"
+        "  wakeAI: function() { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'wake_ai'})); },"
         "  ask: function(q, rag) { window.webkit.messageHandlers.assistantNative.postMessage(JSON.stringify({action: 'ask', question: q, use_rag: rag})); }"
         "};";
 
@@ -123,23 +138,36 @@ static void setup_window_and_webview(const char *html_content, const char *base_
     GdkRGBA transparent = {0.0, 0.0, 0.0, 0.0};
     webkit_web_view_set_background_color(WEBKIT_WEB_VIEW(webview), &transparent);
 
-    // Tắt thanh cuộn mặc định của webview
+    // Tắt thanh cuộn và viền mặc định của ScrolledWindow
     GtkWidget *scrolled = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_NONE);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_NEVER, GTK_POLICY_NEVER);
     gtk_container_add(GTK_CONTAINER(scrolled), webview);
     gtk_container_add(GTK_CONTAINER(window), scrolled);
 
-    // Định vị cún ở góc dưới bên phải màn hình
-    GdkRectangle workarea;
-    gdk_monitor_get_workarea(gdk_display_get_primary_monitor(gdk_display_get_default()), &workarea);
-    int posX = workarea.x + workarea.width - 400;
-    int posY = workarea.y + workarea.height - 500;
-    if (posX < 0) posX = 50;
-    if (posY < 0) posY = 50;
-    gtk_window_move(GTK_WINDOW(window), posX, posY);
+    // Định vị cún ở góc dưới bên phải màn hình (tương thích Wayland & X11)
+    GdkDisplay *display = gdk_display_get_default();
+    if (display != NULL) {
+        GdkMonitor *monitor = gdk_display_get_primary_monitor(display);
+        if (monitor == NULL) {
+            int n = gdk_display_get_n_monitors(display);
+            if (n > 0) {
+                monitor = gdk_display_get_monitor(display, 0);
+            }
+        }
+        if (monitor != NULL) {
+            GdkRectangle workarea;
+            gdk_monitor_get_workarea(monitor, &workarea);
+            int posX = workarea.x + workarea.width - 440;
+            int posY = workarea.y + workarea.height - 540;
+            if (posX < 0) posX = 50;
+            if (posY < 0) posY = 50;
+            gtk_window_move(GTK_WINDOW(window), posX, posY);
+        }
+    }
 
-    // Nạp HTML giao diện chú cún
-    webkit_web_view_load_html(WEBKIT_WEB_VIEW(webview), html_content, base_uri);
+    // Nạp URL giao diện chú cún từ local web server
+    webkit_web_view_load_uri(WEBKIT_WEB_VIEW(webview), app_url);
 
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     gtk_widget_show_all(window);
@@ -156,6 +184,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -187,6 +216,24 @@ func handleScriptMessage(cMessage *C.char) {
 		C.trigger_window_drag()
 	case "close":
 		C.trigger_window_close()
+	case "wake_ai":
+		if globalAI != nil {
+			go globalAI.StartAIServicesOnDemand(
+				func(progressMsg string) {
+					escaped := escapeJSString(progressMsg)
+					script := fmt.Sprintf("window.onAIWaking && window.onAIWaking('%s');", escaped)
+					cScript := C.CString(script)
+					C.eval_js_main_thread(cScript)
+					C.free(unsafe.Pointer(cScript))
+				},
+				func() {
+					script := "window.onAIReady && window.onAIReady();"
+					cScript := C.CString(script)
+					C.eval_js_main_thread(cScript)
+					C.free(unsafe.Pointer(cScript))
+				},
+			)
+		}
 	case "ask":
 		if globalAI != nil {
 			go func() {
@@ -233,23 +280,19 @@ func escapeJSString(s string) string {
 func StartUI(ai *AIService) {
 	globalAI = ai
 
-	// Khởi tạo HTTP file server nội bộ để WebKit nạp css, svg, js đồng bộ
-	server := httptest.NewServer(http.FileServer(http.FS(frontendFS)))
-	defer server.Close()
-
-	htmlBytes, err := frontendFS.ReadFile("frontend/index.html")
+	subFS, err := fs.Sub(frontendFS, "frontend")
 	if err != nil {
-		fmt.Printf("[BamAI GUI] Lỗi đọc index.html: %v\n", err)
+		fmt.Printf("[BamAI GUI] Lỗi đọc thư mục frontend: %v\n", err)
 		return
 	}
 
-	cHTML := C.CString(string(htmlBytes))
-	defer C.free(unsafe.Pointer(cHTML))
+	// Khởi tạo HTTP server nội bộ nạp trọn bộ frontend với MIME type đầy đủ
+	server := httptest.NewServer(http.FileServer(http.FS(subFS)))
+	defer server.Close()
 
-	baseURI := server.URL + "/frontend/"
-	cBaseURI := C.CString(baseURI)
-	defer C.free(unsafe.Pointer(cBaseURI))
+	cURL := C.CString(server.URL)
+	defer C.free(unsafe.Pointer(cURL))
 
-	C.setup_window_and_webview(cHTML, cBaseURI)
+	C.setup_window_and_webview(cURL)
 	C.run_main_loop()
 }

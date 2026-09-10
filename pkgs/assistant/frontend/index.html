@@ -3,28 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BamOS Mascot AI Assistant</title>
+  <title>BamOS Mascot AI Assistant & EyeLeo Companion</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="state-idle">
+<body class="state-sleeping">
   <div id="app-container">
     
-    <!-- Bong bóng hội thoại (Speech Bubble) -->
+    <!-- Bong bóng nhắc nhở sức khỏe EyeLeo (Nghỉ mắt, Uống nước, Vươn vai) -->
+    <div id="eyeleo-bubble" class="bubble eyeleo-bubble hidden">
+      <div class="bubble-header">
+        <div class="assistant-tag">
+          <span class="eyeleo-badge" id="eyeleo-type-badge">💧 Uống Nước</span>
+          <span class="status-text" id="eyeleo-timer-label">Đến giờ rồi!</span>
+        </div>
+        <button id="btn-eyeleo-dismiss" class="icon-btn close-btn" title="Bỏ qua">×</button>
+      </div>
+      <div class="bubble-body eyeleo-body">
+        <div class="eyeleo-icon" id="eyeleo-icon">💧</div>
+        <div class="eyeleo-msg" id="eyeleo-msg">
+          Chủ nhân đã làm việc liên tục rồi! Hãy uống một ngụm nước và vươn vai thư giãn 1 phút nhé!
+        </div>
+        <div class="eyeleo-countdown" id="eyeleo-countdown">60s</div>
+      </div>
+      <div class="eyeleo-actions">
+        <button id="btn-eyeleo-done" class="eyeleo-btn primary">Đã làm xong 👍</button>
+        <button id="btn-eyeleo-snooze" class="eyeleo-btn secondary">Nhắc lại sau 5p</button>
+      </div>
+      <div class="bubble-tail"></div>
+    </div>
+
+    <!-- Bong bóng hội thoại AI Chat & RAG -->
     <div id="speech-bubble" class="bubble hidden">
       <div class="bubble-header" data-drag="true">
         <div class="assistant-tag">
           <span class="rag-indicator" id="rag-badge" title="RAG Tri thức nội bộ">📚 RAG</span>
-          <span class="status-text" id="status-label">Chào bạn!</span>
+          <span class="status-text" id="status-label">Đang ngủ ngoan...</span>
         </div>
         <div class="window-controls">
+          <button id="btn-eyeleo-toggle" class="icon-btn active" title="Bật/Tắt nhắc EyeLeo (mắt/nước)">⏰</button>
+          <button id="btn-sleep-cún" class="icon-btn" title="Cho cún đi ngủ">💤</button>
           <button id="btn-minimize" class="icon-btn" title="Thu nhỏ bong bóng">−</button>
           <button id="btn-close" class="icon-btn close-btn" title="Ẩn cún cưng">×</button>
         </div>
       </div>
 
       <div class="bubble-body" id="chat-stream">
-        <div class="welcome-msg">
-          Gâu gâu! Em là trợ lý cún cưng BamOS. Hãy hỏi em bất cứ điều gì hoặc nhờ em tra cứu thông tin nhé!
+        <div class="welcome-msg" id="chat-welcome">
+          Gâu gâu! Em là trợ lý cún cưng BamOS kiêm bạn đồng hành sức khỏe EyeLeo. Nhấp vào em để trò chuyện hoặc cứ để em nhắc chủ nhân nghỉ mắt nhé!
         </div>
       </div>
 
@@ -48,7 +73,7 @@
     </div>
 
     <!-- Chú cún con Mascot (Rover Puppy) có thể kéo thả di chuyển -->
-    <div id="pet-wrapper" class="pet-draggable" title="Kéo để di chuyển • Bấm để trò chuyện / vuốt ve">
+    <div id="pet-wrapper" class="pet-draggable" title="Kéo để di chuyển • Bấm để đánh thức AI / vuốt ve">
       <div id="heart-burst" class="heart-effect">❤️</div>
       <div id="zzz-bubble" class="zzz-effect">z Z Z</div>
       
@@ -122,15 +147,15 @@
 
           <!-- Mắt trái -->
           <g class="eye eye-left">
-            <ellipse cx="80" cy="65" rx="8" ry="11" fill="#264653" />
-            <circle cx="78" cy="61" r="3.5" fill="#FFFFFF" />
+            <ellipse cx="80" cy="65" rx="8" ry="11" fill="#264653" class="eyeball" />
+            <circle cx="78" cy="61" r="3.5" fill="#FFFFFF" class="pupil" />
             <circle cx="83" cy="69" r="1.5" fill="#FFFFFF" />
           </g>
 
           <!-- Mắt phải -->
           <g class="eye eye-right">
-            <ellipse cx="120" cy="65" rx="8" ry="11" fill="#264653" />
-            <circle cx="118" cy="61" r="3.5" fill="#FFFFFF" />
+            <ellipse cx="120" cy="65" rx="8" ry="11" fill="#264653" class="eyeball" />
+            <circle cx="118" cy="61" r="3.5" fill="#FFFFFF" class="pupil" />
             <circle cx="123" cy="69" r="1.5" fill="#FFFFFF" />
           </g>
 

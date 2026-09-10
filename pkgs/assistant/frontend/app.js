@@ -1,4 +1,4 @@
-// BamOS Mascot AI Assistant - Frontend Controller
+// BamOS Mascot AI Assistant & EyeLeo Health Companion
 (function() {
   const petWrapper = document.getElementById('pet-wrapper');
   const speechBubble = document.getElementById('speech-bubble');
@@ -10,36 +10,40 @@
   const statusLabel = document.getElementById('status-label');
   const btnMinimize = document.getElementById('btn-minimize');
   const btnClose = document.getElementById('btn-close');
+  const btnSleep = document.getElementById('btn-sleep-cún');
+  const btnEyeleoToggle = document.getElementById('btn-eyeleo-toggle');
   const heartBurst = document.getElementById('heart-burst');
 
+  // EyeLeo Elements
+  const eyeleoBubble = document.getElementById('eyeleo-bubble');
+  const eyeleoTypeBadge = document.getElementById('eyeleo-type-badge');
+  const eyeleoTimerLabel = document.getElementById('eyeleo-timer-label');
+  const eyeleoIcon = document.getElementById('eyeleo-icon');
+  const eyeleoMsg = document.getElementById('eyeleo-msg');
+  const eyeleoCountdown = document.getElementById('eyeleo-countdown');
+  const btnEyeleoDone = document.getElementById('btn-eyeleo-done');
+  const btnEyeleoSnooze = document.getElementById('btn-eyeleo-snooze');
+  const btnEyeleoDismiss = document.getElementById('btn-eyeleo-dismiss');
+
   let useRag = true;
-  let currentState = 'idle';
-  let sleepTimer = null;
+  let currentState = 'sleeping'; // Khởi động ban đầu: ngủ say
+  let aiWoken = false;           // Chưa đánh thức AI
   let isDragging = false;
   let startX = 0;
   let startY = 0;
 
-  // Đổi trạng thái hiển thị của cún
+  // Cấu hình EyeLeo Health
+  let eyeleoEnabled = true;
+  let eyeleoTimer = null;
+  let countdownInterval = null;
+  let workDurationMinutes = 0;
+
   function setState(state) {
     currentState = state;
     document.body.className = `state-${state}`;
-    resetSleepTimer();
   }
 
-  function resetSleepTimer() {
-    clearTimeout(sleepTimer);
-    if (currentState === 'sleeping') {
-      setState('idle');
-    }
-    // Sau 2 phút không hoạt động sẽ ngủ gật
-    sleepTimer = setTimeout(() => {
-      if (speechBubble.classList.contains('hidden')) {
-        setState('sleeping');
-      }
-    }, 120000);
-  }
-
-  // Hiệu ứng vuốt ve cún (Petting)
+  // Hiệu ứng vuốt ve cún
   function petHappy() {
     heartBurst.classList.add('animate');
     setTimeout(() => {
@@ -47,35 +51,80 @@
     }, 600);
     setState('happy');
     setTimeout(() => {
-      if (currentState === 'happy') setState('idle');
+      if (currentState === 'happy') setState(aiWoken ? 'idle' : 'sleeping');
     }, 1500);
   }
 
-  // Toggle bong bóng thoại
-  function toggleBubble() {
-    const isHidden = speechBubble.classList.contains('hidden');
-    if (isHidden) {
+  // Đánh thức cún và kích hoạt AI
+  function wakeUpCún() {
+    if (!aiWoken) {
+      aiWoken = true;
+      petHappy();
       speechBubble.classList.remove('hidden');
-      chatInput.focus();
+      statusLabel.textContent = 'Đang khởi động AI & RAG...';
+      chatStream.innerHTML = `
+        <div class="ai-reply">
+          🐶 <b>Gâu gâu!</b> Em đã thức dậy rồi! Đang gọi <code>bam ai start</code> để kích hoạt llama-server và cơ sở tri thức RAG... Vui lòng đợi em vài giây nhé!
+        </div>
+      `;
+
+      if (window.assistantNative && window.assistantNative.wakeAI) {
+        window.assistantNative.wakeAI();
+      }
     } else {
-      speechBubble.classList.add('hidden');
+      // Nếu đã thức rồi thì chỉ toggle bong bóng chat
+      const isHidden = speechBubble.classList.contains('hidden');
+      if (isHidden) {
+        speechBubble.classList.remove('hidden');
+        chatInput.focus();
+        setState('idle');
+      } else {
+        speechBubble.classList.add('hidden');
+      }
     }
   }
 
-  // Tương tác kéo thả và click cún
+  // Callback từ Go khi AI đang khởi động
+  window.onAIWaking = function(progressMsg) {
+    statusLabel.textContent = progressMsg;
+    setState('thinking');
+  };
+
+  // Callback từ Go khi AI và RAG đã sẵn sàng
+  window.onAIReady = function() {
+    setState('idle');
+    statusLabel.textContent = 'Sẵn sàng!';
+    chatStream.innerHTML = `
+      <div class="ai-reply">
+        ✨ <b>Gâu gâu!</b> Hệ thống AI và RAG đã sẵn sàng 100%! Chủ nhân hãy hỏi em bất cứ điều gì nhé!
+      </div>
+    `;
+    chatInput.focus();
+  };
+
+  // Cho cún đi ngủ lại (tiết kiệm tài nguyên)
+  function putCúnToSleep() {
+    setState('sleeping');
+    speechBubble.classList.add('hidden');
+  }
+
+  btnSleep.addEventListener('click', (e) => {
+    e.stopPropagation();
+    putCúnToSleep();
+  });
+
+  // Tương tác kéo thả và click chuột vào cún
   petWrapper.addEventListener('mousedown', (e) => {
     isDragging = false;
     startX = e.screenX;
     startY = e.screenY;
 
-    // Lắng nghe di chuyển để phân biệt click vs drag
     const onMouseMove = (moveEvent) => {
       const dx = Math.abs(moveEvent.screenX - startX);
       const dy = Math.abs(moveEvent.screenY - startY);
       if (dx > 5 || dy > 5) {
         isDragging = true;
         window.removeEventListener('mousemove', onMouseMove);
-        // Gọi native drag window qua backend Go
         if (window.assistantNative && window.assistantNative.dragWindow) {
           window.assistantNative.dragWindow();
         }
@@ -86,8 +135,7 @@
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
       if (!isDragging) {
-        petHappy();
-        toggleBubble();
+        wakeUpCún();
       }
     };
 
@@ -95,14 +143,13 @@
     window.addEventListener('mouseup', onMouseUp);
   });
 
-  // Kéo thả từ header của bong bóng
+  // Kéo thả từ header
   document.querySelector('.bubble-header').addEventListener('mousedown', (e) => {
     if (e.target.tagName !== 'BUTTON' && window.assistantNative && window.assistantNative.dragWindow) {
       window.assistantNative.dragWindow();
     }
   });
 
-  // Nút đóng / thu nhỏ
   btnMinimize.addEventListener('click', (e) => {
     e.stopPropagation();
     speechBubble.classList.add('hidden');
@@ -117,7 +164,7 @@
     }
   });
 
-  // Toggle chế độ RAG
+  // Toggle RAG
   btnRagToggle.addEventListener('click', () => {
     useRag = !useRag;
     if (useRag) {
@@ -132,13 +179,16 @@
     chatInput.focus();
   });
 
-  // Gửi câu hỏi tới AI
+  // Gửi câu hỏi AI
   function sendQuestion() {
     const question = chatInput.value.trim();
     if (!question) return;
 
     chatInput.value = '';
-    chatStream.innerHTML = `<div class="user-query"><b>Bạn:</b> ${escapeHtml(question)}</div><div class="ai-reply" id="current-reply"><i>Đang tra cứu và suy nghĩ...</i></div>`;
+    chatStream.innerHTML = `
+      <div class="user-query"><b>Bạn:</b> ${escapeHtml(question)}</div>
+      <div class="ai-reply" id="current-reply"><i>Đang tra cứu và suy nghĩ...</i></div>
+    `;
     chatStream.scrollTop = chatStream.scrollHeight;
 
     statusLabel.textContent = useRag ? 'Đang đọc tri thức...' : 'Đang suy nghĩ...';
@@ -146,20 +196,12 @@
 
     if (window.assistantNative && window.assistantNative.ask) {
       window.assistantNative.ask(question, useRag);
-    } else {
-      // Fallback mô phỏng nếu chạy trong browser test độc lập
-      setTimeout(() => {
-        window.onAIChunk("Gâu gâu! Em nhận được câu hỏi rồi. Đang kết nối tới mô hình BamOS AI...");
-        window.onAIDone();
-      }, 800);
     }
   }
 
   btnSend.addEventListener('click', sendQuestion);
   chatInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      sendQuestion();
-    }
+    if (e.key === 'Enter') sendQuestion();
   });
 
   function escapeHtml(text) {
@@ -168,7 +210,7 @@
     return div.innerHTML;
   }
 
-  // Các hàm callback được gọi từ Golang Backend
+  // Callbacks streaming chat
   window.onAIChunk = function(chunkText, isFirst) {
     setState('talking');
     statusLabel.textContent = 'Cún đang trả lời...';
@@ -196,8 +238,101 @@
     }
   };
 
-  // Đánh thức khi di chuyển chuột
-  window.addEventListener('mousemove', resetSleepTimer);
-  resetSleepTimer();
+  // ===================================================
+  // HỆ THỐNG CHĂM SÓC SỨC KHỎE EYELEO (MẮT, NƯỚC, VƯƠN VAI)
+  // ===================================================
+  function startEyeleoScheduler() {
+    // Mỗi 1 phút tăng biến đếm
+    eyeleoTimer = setInterval(() => {
+      if (!eyeleoEnabled) return;
+      workDurationMinutes++;
+
+      // Mỗi 25 phút: Nghỉ mắt (Eye Break)
+      if (workDurationMinutes % 25 === 0 && workDurationMinutes % 50 !== 0) {
+        triggerEyeBreak();
+      }
+      // Mỗi 50 phút: Uống nước & Vươn vai (Long Break)
+      else if (workDurationMinutes % 50 === 0) {
+        triggerLongBreak();
+      }
+    }, 60000);
+  }
+
+  function triggerEyeBreak() {
+    eyeleoTypeBadge.textContent = '👀 Nghỉ Mắt 20-20-20';
+    eyeleoTypeBadge.style.background = '#F4A261';
+    eyeleoTimerLabel.textContent = 'Quy tắc 20 giây';
+    eyeleoIcon.textContent = '👀';
+    eyeleoMsg.textContent = 'Chủ nhân ơi, hãy rời mắt khỏi màn hình và nhìn ra xa 20 mét trong 20 giây nhé!';
+    
+    // Cún làm mẫu đảo mắt
+    setState('eyeroll');
+    showEyeleoCountdown(20, () => {
+      closeEyeleoBubble();
+      setState(aiWoken ? 'idle' : 'sleeping');
+    });
+  }
+
+  function triggerLongBreak() {
+    eyeleoTypeBadge.textContent = '💧 Uống Nước & Vươn Vai';
+    eyeleoTypeBadge.style.background = '#0077B6';
+    eyeleoTimerLabel.textContent = 'Nghỉ ngơi 1 phút';
+    eyeleoIcon.textContent = '💧';
+    eyeleoMsg.textContent = 'Chủ nhân đã ngồi làm việc gần 1 tiếng rồi! Hãy đứng dậy uống một ly nước và vươn vai thư giãn nhé!';
+
+    setState('happy');
+    showEyeleoCountdown(60, () => {
+      closeEyeleoBubble();
+      setState(aiWoken ? 'idle' : 'sleeping');
+    });
+  }
+
+  function showEyeleoCountdown(seconds, onFinish) {
+    clearInterval(countdownInterval);
+    speechBubble.classList.add('hidden'); // Ưu tiên hiện cảnh báo sức khỏe
+    eyeleoBubble.classList.remove('hidden');
+
+    let remaining = seconds;
+    eyeleoCountdown.textContent = `${remaining}s`;
+
+    countdownInterval = setInterval(() => {
+      remaining--;
+      eyeleoCountdown.textContent = `${remaining}s`;
+      if (remaining <= 0) {
+        clearInterval(countdownInterval);
+        if (onFinish) onFinish();
+      }
+    }, 1000);
+  }
+
+  function closeEyeleoBubble() {
+    clearInterval(countdownInterval);
+    eyeleoBubble.classList.add('hidden');
+  }
+
+  btnEyeleoDone.addEventListener('click', () => {
+    closeEyeleoBubble();
+    petHappy();
+  });
+
+  btnEyeleoDismiss.addEventListener('click', closeEyeleoBubble);
+
+  btnEyeleoSnooze.addEventListener('click', () => {
+    closeEyeleoBubble();
+    // Hoãn 5 phút
+    workDurationMinutes -= 20; 
+  });
+
+  btnEyeleoToggle.addEventListener('click', () => {
+    eyeleoEnabled = !eyeleoEnabled;
+    btnEyeleoToggle.classList.toggle('active', eyeleoEnabled);
+    btnEyeleoToggle.title = eyeleoEnabled ? 'EyeLeo đang BẬT' : 'EyeLeo đang TẮT';
+  });
+
+  // Bắt đầu bộ đếm EyeLeo
+  startEyeleoScheduler();
+
+  // Khởi động ở trạng thái ngủ
+  setState('sleeping');
 
 })();
