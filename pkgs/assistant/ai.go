@@ -81,7 +81,7 @@ Quy tắc xưng hô và phong cách:
 - Nếu có dữ liệu tri thức nội bộ (RAG), dữ liệu tệp tin hoặc thông tin thói quen, hãy sử dụng để phục vụ Chủ nhân thật chu đáo và chính xác.
 - Luôn sẵn sàng hỗ trợ, trả lời ngắn gọn, súc tích, dễ hiểu và lễ phép.`
 
-func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool, onChunk func(string), onDone func(), onError func(string)) {
+func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool, history []ChatMessage, onChunk func(string), onDone func(), onError func(string)) {
 	trimmed := strings.TrimSpace(question)
 	lower := strings.ToLower(trimmed)
 
@@ -377,8 +377,10 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 
 	messages := []ChatMessage{
 		{Role: "system", Content: systemContent},
-		{Role: "user", Content: question},
 	}
+	// Ngữ cảnh hội thoại phía trên → trả lời tiếp mạch đang trao đổi.
+	messages = append(messages, sanitizeHistory(history, maxHistoryMessages)...)
+	messages = append(messages, ChatMessage{Role: "user", Content: question})
 
 	endpoint := fmt.Sprintf("%s/v1/chat/completions", s.cfg.LlamaHost)
 	modelName := "local-slm"
@@ -434,6 +436,7 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 	}
 
 	reader := bufio.NewReader(resp.Body)
+	var answer strings.Builder
 	for {
 		line, err := reader.ReadString('\n')
 		if err != nil {
@@ -457,26 +460,20 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 			if len(chunk.Choices) > 0 {
 				delta := chunk.Choices[0].Delta.Content
 				if delta != "" {
+					answer.WriteString(delta)
 					onChunk(delta)
 				}
 			}
 		}
 	}
 
+	// Lưu lượt hỏi/đáp vào tri thức RAG (chạy nền) để các câu hỏi sau dựa vào.
+	go s.rememberExchange(question, answer.String())
+
 	onDone()
 }
 
 func (s *AIService) IsAIOffline() bool {
-	client := &http.Client{Timeout: 600 * time.Millisecond}
-	resp, err := client.Get(fmt.Sprintf("%s/health", s.cfg.LlamaHost))
-	if err != nil {
-		return true
-	}
-	defer resp.Body.Close()
-	return resp.StatusCode != http.StatusOK
-}
-
-func (s *AIService) IsRAGOffline() bool {
 	client := &http.Client{Timeout: 600 * time.Millisecond}
 	resp, err := client.Get("http://127.0.0.1:8090/health")
 	if err != nil {
@@ -559,6 +556,71 @@ func (s *AIService) EvaluateAndSleepOrStopAI() string {
 
 	fmt.Println("[BamAI Power] Cún tạm ngủ canh nhà (giữ warm dịch vụ AI).")
 	return "warm_sleep"
+}
+
+// maxHistoryMessages giới hạn số lượt hội thoại gửi kèm để không tràn context.
+const maxHistoryMessages = 12
+
+// sanitizeHistory lọc/lược bớt lịch sử hội thoại trước khi đưa vào prompt.
+func sanitizeHistory(history []ChatMessage, maxEntries int) []ChatMessage {
+	if len(history) == 0 {
+		return nil
+	}
+	if maxEntries > 0 && len(history) > maxEntries {
+		history = history[len(history)-maxEntries:]
+	}
+	out := make([]ChatMessage, 0, len(history))
+	for _, m := range history {
+		if m.Role != "user" && m.Role != "assistant" {
+			continue
+		}
+		content := strings.TrimSpace(m.Content)
+		if content == "" {
+			continue
+		}
+		out = append(out, ChatMessage{Role: m.Role, Content: truncateRunes(content, 4000)})
+	}
+	return out
+}
+
+// truncateRunes cắt chuỗi theo số KÝ TỰ (an toàn với tiếng Việt nhiều byte).
+func truncateRunes(s string, max int) string {
+	runes := []rune(s)
+	if len(runes) <= max {
+		return s
+	}
+	return string(runes[:max]) + "…"
+}
+
+// rememberExchange lưu một lượt hỏi/đáp vào tri thức RAG để các câu hỏi sau có
+// thể dựa vào ngữ cảnh hội thoại trước đó.
+func (s *AIService) rememberExchange(question, answer string) {
+	if s.rag == nil || !s.cfg.EnableRAG {
+		return
+	}
+	q := strings.TrimSpace(question)
+	a := strings.TrimSpace(answer)
+	if len([]rune(q)) < 4 || len([]rune(a)) < 40 {
+		return
+	}
+
+	content := fmt.Sprintf(
+		"=== HỘI THOẠI NGÀY %s ===\nCâu hỏi: %s\nTrả lời: %s",
+		time.Now().Format("2006-01-02 15:04"),
+		truncateRunes(q, 1200),
+		truncateRunes(a, 4000),
+	)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+	defer cancel()
+
+	id := fmt.Sprintf("hoi-thoai-%d", time.Now().UnixNano())
+	if err := s.rag.IndexDocument(ctx, id, content, map[string]string{
+		"type":  "conversation",
+		"title": truncateRunes(q, 80),
+	}); err != nil {
+		fmt.Printf("[BamAI RAG] Không lưu được hội thoại: %v\n", err)
+	}
 }
 
 func escapeHtmlAttr(s string) string {

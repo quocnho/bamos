@@ -107,6 +107,7 @@ in
                   "appindicatorsupport@rgcjonas.gmail.com"
                   "caffeine@patapon.info"
                   "quick-settings-audio-panel@rayzeq.github.io"
+                  "bamai@bamos" # BamAI trên thanh trên cùng (assets/gnome-shell-extensions)
                 ];
                 favorite-apps = [
                   "firefox.desktop"

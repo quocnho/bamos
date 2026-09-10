@@ -31,12 +31,19 @@ export const native = {
     activateAndRaise: () => call("activateAndRaise"),
     setFullscreen: (enabled) => call("setFullscreen", enabled),
 
+    // Kích thước cửa sổ (khít nội dung chat + pet)
+    setContentSize: (width, height) => call("setContentSize", width, height),
+    setWindowFull: (full) => call("setWindowFull", full),
+
+    // Nhật ký chẩn đoán (hiện ra stdout của tiến trình Go)
+    log: (message) => call("log", message),
+
     // AI
     wakeAI: () => call("wakeAI"),
     evaluateSleepOrStop: () => call("evaluateSleepOrStop"),
     stopGeneration: () => call("stopGeneration"),
     getIdleTime: () => call("getIdleTime"),
-    ask: (question, useRag) => call("ask", question, useRag),
+    ask: (question, useRag, history) => call("ask", question, useRag, history),
 
     // Bối cảnh thư mục (Cục Xương)
     setContextDir: (dir) => call("setContextDir", dir),

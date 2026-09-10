@@ -1,0 +1,5 @@
+/* Nhãn "🐶 BamAI" trên thanh trên cùng của GNOME Shell. */
+.bamai-panel-label {
+    font-weight: 700;
+    padding: 0 4px;
+}

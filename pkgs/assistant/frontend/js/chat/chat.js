@@ -22,6 +22,13 @@ const attachments = createAttachmentManager();
 let fullAccumulatedReply = "";
 let lastUserText = "";
 
+// Ngữ cảnh hội thoại nhiều lượt: các cặp hỏi/đáp trước được gửi kèm mỗi câu
+// hỏi mới để BamAI trả lời tiếp mạch đang trao đổi.
+const conversation = [];
+const MAX_HISTORY_MESSAGES = 12;
+const MAX_HISTORY_ENTRIES = 20;
+const MAX_HISTORY_CHARS = 2000;
+
 // ---------------------------------------------------------------------------
 // Truy vấn nhanh các element động (được tạo lại mỗi lần đổi innerHTML)
 // ---------------------------------------------------------------------------
@@ -108,8 +115,28 @@ export function send() {
     // Thống kê tần suất từ khóa (features/suggestions.js lắng nghe).
     bus.emit("chat:asked", displayUserMsg);
 
-    native.ask(question, isRagEnabled());
+    // Gửi kèm ngữ cảnh các lượt trước để hội thoại liên tục.
+    native.ask(
+        question,
+        isRagEnabled(),
+        conversation.slice(-MAX_HISTORY_MESSAGES),
+    );
+    pushTurn("user", displayUserMsg);
     return true;
+}
+
+/** Lưu một lượt vào ngữ cảnh hội thoại (giới hạn độ dài để không tràn prompt). */
+function pushTurn(role, content) {
+    const text = String(content || "").trim();
+    if (!text) return;
+    conversation.push({
+        role,
+        content:
+            text.length > MAX_HISTORY_CHARS
+                ? `${text.slice(0, MAX_HISTORY_CHARS)}…`
+                : text,
+    });
+    while (conversation.length > MAX_HISTORY_ENTRIES) conversation.shift();
 }
 
 // ---------------------------------------------------------------------------
@@ -187,6 +214,10 @@ export function handleDone() {
     setPetState("idle");
     hide(els.btnStopStream);
     els.statusLabel.textContent = "Sẵn sàng phục vụ";
+
+    if (fullAccumulatedReply.trim()) {
+        pushTurn("assistant", fullAccumulatedReply);
+    }
 
     const target = replyElement();
     if (target && fullAccumulatedReply) {

@@ -37,6 +37,24 @@ func preferX11Backend() {
 	fmt.Println("[BamAI GUI] Không có DISPLAY — dùng backend mặc định của GTK (Wayland)")
 }
 
+// assistantPort là cổng HTTP nội bộ. Có thể đổi bằng BAMAI_PORT để chạy
+// instance thử nghiệm song song mà không đụng tới ứng dụng đang chạy.
+func assistantPort() string {
+	if port := os.Getenv("BAMAI_PORT"); port != "" {
+		return port
+	}
+	return "9195"
+}
+
+func assistantURL(path string) string {
+	return fmt.Sprintf("http://127.0.0.1:%s%s", assistantPort(), path)
+}
+
+// debugEnabled bật nhật ký chẩn đoán khi đặt BAMAI_DEBUG=1.
+func debugEnabled() bool {
+	return os.Getenv("BAMAI_DEBUG") != ""
+}
+
 func main() {
 	fmt.Println("==================================================")
 	fmt.Println("🐶 BamOS Mascot AI Assistant (Web Tech + Go Core)")
@@ -46,6 +64,26 @@ func main() {
 	fmt.Println("==================================================")
 
 	preferX11Backend()
+
+	// Lệnh điều khiển nhanh từ bên ngoài (GNOME Shell indicator, script...).
+	// --hide: ẩn cửa sổ nhưng vẫn chạy nền; --quit: dừng AI/RAG và thoát.
+	for _, arg := range os.Args[1:] {
+		if arg != "--hide" && arg != "--quit" {
+			continue
+		}
+		if !isAssistantAlreadyRunning() {
+			fmt.Println("[BamAI] Không có BamAI nào đang chạy.")
+			return
+		}
+		endpoint := "/api/hide"
+		if arg == "--quit" {
+			endpoint = "/api/quit"
+		}
+		if _, err := http.Get(assistantURL(endpoint)); err != nil {
+			fmt.Printf("[BamAI] Không gửi được lệnh %s: %v\n", arg, err)
+		}
+		return
+	}
 
 	cfg := loadConfig()
 	fmt.Printf("[BamAI] Khởi tạo cấu hình: Provider=%s, RAG=%t, LlamaHost=%s\n", cfg.Provider, cfg.EnableRAG, cfg.LlamaHost)
@@ -70,14 +108,14 @@ func main() {
 		}
 	}
 
-	// Nếu ứng dụng đang chạy (cổng 9195 đã mở), gửi tín hiệu bối cảnh thư mục sang phiên đang chạy
+	// Nếu ứng dụng đang chạy (cổng nội bộ đã mở), gửi tín hiệu bối cảnh thư mục sang phiên đang chạy
 	if isAssistantAlreadyRunning() {
 		if targetDir != "" {
 			escaped := url.QueryEscape(targetDir)
-			_, _ = http.Get(fmt.Sprintf("http://127.0.0.1:9195/api/context-dir?path=%s", escaped))
+			_, _ = http.Get(assistantURL("/api/context-dir?path=" + escaped))
 			fmt.Printf("[BamAI] Đã gửi Cục Xương bối cảnh `%s` sang BamAI đang chạy!\n", targetDir)
 		} else {
-			_, _ = http.Get("http://127.0.0.1:9195/api/show")
+			_, _ = http.Get(assistantURL("/api/show"))
 			fmt.Println("[BamAI] Đã hiển thị BamAI!")
 		}
 		return
@@ -99,7 +137,7 @@ func main() {
 }
 
 func isAssistantAlreadyRunning() bool {
-	conn, err := net.DialTimeout("tcp", "127.0.0.1:9195", 300*time.Millisecond)
+	conn, err := net.DialTimeout("tcp", "127.0.0.1:"+assistantPort(), 300*time.Millisecond)
 	if err == nil {
 		conn.Close()
 		return true

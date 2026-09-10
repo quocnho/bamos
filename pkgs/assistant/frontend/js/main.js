@@ -13,6 +13,7 @@
 
 import { setPetState, setAddressing } from "./core/state.js";
 import { native } from "./core/native.js";
+import { initWindowFit } from "./core/window-fit.js";
 import { initPet, scheduleStartupSleep, syncAlwaysOnTop } from "./pet/pet.js";
 import { initDrag } from "./pet/drag.js";
 import { initFileDrop } from "./pet/dragdrop.js";
@@ -101,6 +102,9 @@ function bootstrap() {
     initRagSettings();
     initLlmSettings();
     initEyeLeo();
+
+    // Cửa sổ khít đúng vùng chat + pet (và mở rộng khi có bảng thiết lập).
+    initWindowFit();
 
     // Nạp thiết lập (xưng hô, RAG, LLM) để giao diện hiển thị đúng ngay từ đầu.
     native.getSettings();

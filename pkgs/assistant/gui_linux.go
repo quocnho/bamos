@@ -29,12 +29,36 @@ static AppWidgets g_app;
 // ---------------------------------------------------------------------------
 // Trạng thái cửa sổ (vị trí + ghim trên cùng)
 // ---------------------------------------------------------------------------
+// Chiều cao tối đa của cửa sổ khít. Nội dung dài hơn sẽ CUỘN trong khung chat.
+#define MAX_FIT_HEIGHT 864
+
 static char g_state_path[4096] = {0};
 static gboolean g_keep_above = TRUE;
 static gboolean g_has_saved_position = FALSE;
-static gint g_saved_x = 0;
-static gint g_saved_y = 0;
+// Khung "khít" được neo theo góc dưới-phải (toạ độ màn hình).
+static gint g_saved_right = 0;
+static gint g_saved_bottom = 0;
 static guint g_save_timeout = 0;
+
+// Chế độ mở rộng (bảng thiết lập / nghỉ dài): ghi nhớ khung khít để khôi phục.
+static gboolean g_in_full = FALSE;
+static gint g_fit_x = 0, g_fit_y = 0, g_fit_w = 0, g_fit_h = 0;
+
+// Kích thước nội dung do giao diện yêu cầu.
+static gint g_pending_w = 0, g_pending_h = 0;
+
+// Vùng làm việc của màn hình chính (đã trừ panel).
+static void get_workarea(GdkRectangle *area) {
+    area->x = 0; area->y = 0; area->width = 1024; area->height = 768;
+    GdkDisplay *display = gdk_display_get_default();
+    if (display == NULL) return;
+    GdkMonitor *monitor = gdk_display_get_primary_monitor(display);
+    if (monitor == NULL) {
+        int n = gdk_display_get_n_monitors(display);
+        if (n > 0) monitor = gdk_display_get_monitor(display, 0);
+    }
+    if (monitor != NULL) gdk_monitor_get_workarea(monitor, area);
+}
 
 // Đường dẫn file lưu trạng thái cửa sổ (do Go truyền sang).
 static void set_window_state_path(const char *path) {
@@ -43,10 +67,10 @@ static void set_window_state_path(const char *path) {
     }
 }
 
-// Vị trí + trạng thái ghim khôi phục từ lần chạy trước.
-static void set_initial_geometry(int x, int y, gboolean keep_above) {
-    g_saved_x = x;
-    g_saved_y = y;
+// Khôi phục khung khít từ lần chạy trước (neo theo góc dưới-phải).
+static void set_initial_geometry(int right, int bottom, gboolean keep_above) {
+    g_saved_right = right;
+    g_saved_bottom = bottom;
     g_has_saved_position = TRUE;
     g_keep_above = keep_above;
 }
@@ -56,24 +80,24 @@ static void set_default_keep_above(gboolean keep_above) {
     g_keep_above = keep_above;
 }
 
-// Ghi vị trí hiện tại xuống file (chỉ gọi trên luồng GTK).
+// Ghi khung hiện tại xuống file (chỉ khi đang ở chế độ khít).
 static gboolean do_save_window_state(gpointer user_data) {
     g_save_timeout = 0;
-    if (g_app.window == NULL || g_state_path[0] == '\0') return G_SOURCE_REMOVE;
+    if (g_app.window == NULL || g_state_path[0] == '\0' || g_in_full) return G_SOURCE_REMOVE;
 
-    gint x = 0, y = 0;
+    gint x = 0, y = 0, w = 0, h = 0;
     gtk_window_get_position(GTK_WINDOW(g_app.window), &x, &y);
+    gtk_window_get_size(GTK_WINDOW(g_app.window), &w, &h);
 
-    // Ghi nhớ để lần map lại cửa sổ không nhảy về vị trí khởi động.
-    g_saved_x = x;
-    g_saved_y = y;
+    g_saved_right = x + w;
+    g_saved_bottom = y + h;
     g_has_saved_position = TRUE;
 
     FILE *fp = fopen(g_state_path, "w");
     if (fp != NULL) {
-        // CHỈ lưu toạ độ. Trạng thái ghim thuộc về assistant_config.json để
+        // CHỈ lưu góc dưới-phải. Trạng thái ghim thuộc assistant_config.json để
         // tránh hai nguồn sự thật gây kẹt trạng thái.
-        fprintf(fp, "{\"x\":%d,\"y\":%d}\n", x, y);
+        fprintf(fp, "{\"right\":%d,\"bottom\":%d}\n", x + w, y + h);
         fclose(fp);
     }
     return G_SOURCE_REMOVE;
@@ -90,6 +114,89 @@ static gboolean on_window_configure(GtkWidget *widget, GdkEventConfigure *event,
     // Bỏ qua toạ độ tổng hợp (-1) mà một số compositor gửi.
     if (event->x >= 0 && event->y >= 0) schedule_save_window_state();
     return FALSE;
+}
+
+// Áp dụng kích thước nội dung, GIỮ CỐ ĐỊNH góc dưới-phải để nội dung không nhảy.
+static gboolean do_window_fit(gpointer user_data) {
+    if (g_app.window == NULL) return G_SOURCE_REMOVE;
+
+    gint w = g_pending_w, h = g_pending_h;
+    if (w < 80) w = 80;
+    if (h < 80) h = 80;
+
+    // Chốt an toàn: không để cửa sổ vượt quá vùng làm việc của màn hình,
+    // và không vượt quá chiều cao tối đa cho phép (phần dư sẽ cuộn trong khung chat).
+    GdkRectangle area;
+    get_workarea(&area);
+    if (h > MAX_FIT_HEIGHT) h = MAX_FIT_HEIGHT;
+    if (h > area.height - 8) h = area.height - 8;
+    if (w > area.width - 8) w = area.width - 8;
+
+    if (g_in_full) {
+        // Đang mở rộng: chỉ cập nhật khung khít đã nhớ (giữ nguyên góc dưới-phải).
+        gint right = g_fit_x + g_fit_w;
+        gint bottom = g_fit_y + g_fit_h;
+        g_fit_w = w;
+        g_fit_h = h;
+        g_fit_x = right - w;
+        g_fit_y = bottom - h;
+        return G_SOURCE_REMOVE;
+    }
+
+    gint x = 0, y = 0, curW = 0, curH = 0;
+    gtk_window_get_position(GTK_WINDOW(g_app.window), &x, &y);
+    gtk_window_get_size(GTK_WINDOW(g_app.window), &curW, &curH);
+    gint right = x + curW;
+    gint bottom = y + curH;
+
+    gtk_window_resize(GTK_WINDOW(g_app.window), w, h);
+    gtk_window_move(GTK_WINDOW(g_app.window), right - w, bottom - h);
+
+    g_fit_x = right - w;
+    g_fit_y = bottom - h;
+    g_fit_w = w;
+    g_fit_h = h;
+    return G_SOURCE_REMOVE;
+}
+
+static void trigger_window_fit(int w, int h) {
+    g_pending_w = w;
+    g_pending_h = h;
+    g_idle_add(do_window_fit, NULL);
+}
+
+// Mở rộng ra toàn vùng làm việc khi có bảng thiết lập / màn hình nghỉ dài,
+// hoặc thu về đúng khung khít đã nhớ.
+static gboolean do_window_set_full(gpointer user_data) {
+    gboolean enable = GPOINTER_TO_INT(user_data);
+    if (g_app.window == NULL) return G_SOURCE_REMOVE;
+
+    if (enable && !g_in_full) {
+        gint x = 0, y = 0, w = 0, h = 0;
+        gtk_window_get_position(GTK_WINDOW(g_app.window), &x, &y);
+        gtk_window_get_size(GTK_WINDOW(g_app.window), &w, &h);
+        g_fit_x = x;
+        g_fit_y = y;
+        g_fit_w = w;
+        g_fit_h = h;
+
+        GdkRectangle area;
+        get_workarea(&area);
+        gtk_window_resize(GTK_WINDOW(g_app.window), area.width, area.height);
+        gtk_window_move(GTK_WINDOW(g_app.window), area.x, area.y);
+        g_in_full = TRUE;
+    } else if (!enable && g_in_full) {
+        if (g_fit_w > 0 && g_fit_h > 0) {
+            gtk_window_resize(GTK_WINDOW(g_app.window), g_fit_w, g_fit_h);
+            gtk_window_move(GTK_WINDOW(g_app.window), g_fit_x, g_fit_y);
+        }
+        g_in_full = FALSE;
+    }
+    return G_SOURCE_REMOVE;
+}
+
+static void trigger_window_set_full(gboolean enable) {
+    g_idle_add(do_window_set_full, GINT_TO_POINTER(enable));
 }
 
 static gboolean do_eval_js(gpointer user_data) {
@@ -133,6 +240,29 @@ static gboolean do_close(gpointer user_data) {
 
 static void trigger_window_close() {
     g_idle_add(do_close, NULL);
+}
+
+static gboolean do_hide(gpointer user_data) {
+    if (g_app.window != NULL) {
+        gtk_widget_hide(g_app.window);
+    }
+    return G_SOURCE_REMOVE;
+}
+
+static void trigger_window_hide() {
+    g_idle_add(do_hide, NULL);
+}
+
+static gboolean do_quit(gpointer user_data) {
+    if (g_app.window != NULL) {
+        // Huỷ cửa sổ → gtk_main_quit → tiến trình kết thúc.
+        gtk_widget_destroy(g_app.window);
+    }
+    return G_SOURCE_REMOVE;
+}
+
+static void trigger_window_quit() {
+    g_idle_add(do_quit, NULL);
 }
 
 static gboolean do_set_keep_above(gpointer user_data) {
@@ -194,40 +324,35 @@ static gboolean on_window_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
     return FALSE;
 }
 
-static void reposition_to_bottom_right(GtkWindow *window) {
+// Đặt cửa sổ sao cho góc dưới-phải nằm tại (right, bottom) toạ độ màn hình.
+static void move_window_by_bottom_right(GtkWindow *window, int right, int bottom) {
     if (window == NULL) return;
-    GdkDisplay *display = gdk_display_get_default();
-    if (display == NULL) return;
-
-    GdkMonitor *monitor = gdk_display_get_primary_monitor(display);
-    if (monitor == NULL) {
-        int n = gdk_display_get_n_monitors(display);
-        if (n > 0) {
-            monitor = gdk_display_get_monitor(display, 0);
-        }
-    }
-    if (monitor != NULL) {
-        GdkRectangle workarea;
-        gdk_monitor_get_workarea(monitor, &workarea);
-        int winW = 440;
-        int winH = 640;
-        // Đặt sát góc dưới bên phải màn hình
-        int posX = workarea.x + workarea.width - winW - 12;
-        int posY = workarea.y + workarea.height - winH - 12;
-        if (posX < 0) posX = 0;
-        if (posY < 0) posY = 0;
-        gtk_window_move(window, posX, posY);
-    }
+    gint w = 0, h = 0;
+    gtk_window_get_size(window, &w, &h);
+    if (w <= 0) w = 390;
+    if (h <= 0) h = 560;
+    gtk_window_move(window, right - w, bottom - h);
 }
 
-// Khôi phục vị trí lần chạy trước; nếu chưa có thì về góc dưới phải.
+// Góc dưới-phải mặc định: sát góc dưới-phải vùng làm việc.
+static void default_bottom_right(int *right, int *bottom) {
+    GdkRectangle area;
+    get_workarea(&area);
+    *right = area.x + area.width - 12;
+    *bottom = area.y + area.height - 12;
+}
+
+// Khôi phục khung lần chạy trước; nếu chưa có thì về góc dưới-phải màn hình.
 static void apply_initial_position(GtkWindow *window) {
     if (window == NULL) return;
+    int right = 0, bottom = 0;
     if (g_has_saved_position) {
-        gtk_window_move(window, g_saved_x, g_saved_y);
+        right = g_saved_right;
+        bottom = g_saved_bottom;
     } else {
-        reposition_to_bottom_right(window);
+        default_bottom_right(&right, &bottom);
     }
+    move_window_by_bottom_right(window, right, bottom);
 }
 
 static gboolean on_window_map(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
@@ -255,16 +380,35 @@ static void trigger_window_fullscreen(gboolean enable) {
 static void setup_window_and_webview(const char *app_url) {
     gtk_init(NULL, NULL);
 
+    // Đặt WM_CLASS khớp CHÍNH XÁC với StartupWMClass trong desktop file → GNOME
+    // gộp cửa sổ đang chạy với biểu tượng đã ghim trên dock.
+    g_set_prgname("bamos-assistant");
+    gdk_set_program_class("bamos-assistant");
+
+    // Nhật ký chẩn đoán: không gian toạ độ (logical px) + scale factor.
+    {
+        GdkRectangle area;
+        get_workarea(&area);
+        GdkDisplay *dpy = gdk_display_get_default();
+        GdkMonitor *mon = dpy != NULL ? gdk_display_get_primary_monitor(dpy) : NULL;
+        int scale = mon != NULL ? gdk_monitor_get_scale_factor(mon) : 1;
+        g_print("[BamAI GUI] Workarea=%dx%d+%d+%d scale=%d\n",
+                area.width, area.height, area.x, area.y, scale);
+    }
+
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     g_app.window = window;
 
     gtk_window_set_title(GTK_WINDOW(window), "BamOS Mascot Assistant");
-    gtk_window_set_default_size(GTK_WINDOW(window), 440, 640);
-    gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
+    gtk_window_set_default_size(GTK_WINDOW(window), 390, 560);
+    // Cửa sổ PHẢI resizable để tầng C có thể co giãn khít nội dung (JS yêu cầu).
+    gtk_window_set_resizable(GTK_WINDOW(window), TRUE);
     gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
     gtk_window_set_keep_above(GTK_WINDOW(window), g_keep_above);
-    gtk_window_set_type_hint(GTK_WINDOW(window), GDK_WINDOW_TYPE_HINT_UTILITY);
-    gtk_window_set_skip_taskbar_hint(GTK_WINDOW(window), TRUE);
+    // Cửa sổ xuất hiện như một ứng dụng bình thường trong dock/alt-tab để việc
+    // GHIM lên dock hoạt động đúng (khớp StartupWMClass trong desktop file).
+    gtk_window_set_skip_taskbar_hint(GTK_WINDOW(window), FALSE);
+    gtk_window_set_type_hint(GTK_WINDOW(window), GDK_WINDOW_TYPE_HINT_NORMAL);
     gtk_widget_set_app_paintable(window, TRUE);
 
     // Bật Visual RGBA trong suốt
@@ -329,8 +473,11 @@ static void setup_window_and_webview(const char *app_url) {
         "    getIdleTime: function() { post({action: 'get_idle_time'}); },"
         "    activateAndRaise: function() { post({action: 'activate_and_raise'}); },"
         "    setFullscreen: function(fs) { post({action: 'set_fullscreen', fullscreen: !!fs}); },"
+        "    setContentSize: function(w, h) { post({action: 'window_fit', width: w, height: h}); },"
+        "    setWindowFull: function(full) { post({action: 'window_full', full: !!full}); },"
+        "    log: function(message) { post({action: 'log', debug: String(message)}); },"
         "    stopGeneration: function() { post({action: 'stop'}); },"
-        "    ask: function(q, rag) { post({action: 'ask', question: q, use_rag: rag}); },"
+        "    ask: function(q, rag, history) { post({action: 'ask', question: q, use_rag: rag, history: history || []}); },"
         // ---- Bảng thiết lập ----
         "    getSettings: function() { post({action: 'get_settings'}); },"
         "    saveSettings: function(settings) { post({action: 'save_settings', payload: settings}); },"
@@ -410,6 +557,11 @@ type NativeMessage struct {
 	UseRAG      bool            `json:"use_rag"`
 	Fullscreen  bool            `json:"fullscreen"`
 	AlwaysOnTop bool            `json:"always_on_top"`
+	Width       int             `json:"width"`
+	Height      int             `json:"height"`
+	Full        bool            `json:"full"`
+	Debug       string          `json:"debug"`
+	History     []ChatMessage   `json:"history"`
 	Payload     json.RawMessage `json:"payload"`
 }
 
@@ -471,6 +623,21 @@ func handleScriptMessage(cMessage *C.char) {
 			enable = 1
 		}
 		C.trigger_window_fullscreen(enable)
+	case "window_fit":
+		if debugEnabled() {
+			fmt.Printf("[BamAI GUI] Fit cửa sổ -> %dx%d\n", msg.Width, msg.Height)
+		}
+		C.trigger_window_fit(C.int(msg.Width), C.int(msg.Height))
+	case "window_full":
+		if debugEnabled() {
+			fmt.Printf("[BamAI GUI] Mở rộng cửa sổ -> %v\n", msg.Full)
+		}
+		C.trigger_window_set_full(cBool(msg.Full))
+	case "log":
+		// Nhật ký chẩn đoán từ tầng giao diện (WebView không in ra stdout).
+		if debugEnabled() {
+			fmt.Printf("[BamAI UI] %s\n", msg.Debug)
+		}
 	case "get_idle_time":
 		go func() {
 			idleMs := getMutterIdleTimeMs()
@@ -519,6 +686,7 @@ func handleScriptMessage(cMessage *C.char) {
 					ctx,
 					msg.Question,
 					msg.UseRAG,
+					msg.History,
 					func(chunk string) {
 						evalJS(fmt.Sprintf("window.onAIChunk && window.onAIChunk('%s', %t);", escapeJSString(chunk), isFirst))
 						isFirst = false
@@ -622,15 +790,33 @@ func StartUI(ai *AIService) {
 		fmt.Fprintln(w, `{"status":"ok"}`)
 	})
 
-	// Khởi tạo HTTP server nội bộ trên port cố định 9195 (hoặc random nếu bận)
-	listener, err := net.Listen("tcp", "127.0.0.1:9195")
+	// API ẩn cửa sổ (giữ ứng dụng chạy nền)
+	mux.HandleFunc("/api/hide", func(w http.ResponseWriter, r *http.Request) {
+		C.trigger_window_hide()
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintln(w, `{"status":"ok"}`)
+	})
+
+	// API tắt ứng dụng: dừng AI/RAG rồi đóng cửa sổ (tiến trình thoát)
+	mux.HandleFunc("/api/quit", func(w http.ResponseWriter, r *http.Request) {
+		if globalAI != nil {
+			go globalAI.StopAllServices()
+		}
+		C.trigger_window_quit()
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintln(w, `{"status":"ok"}`)
+	})
+
+	// Khởi tạo HTTP server nội bộ trên cổng cố định (hoặc random nếu bận)
+	address := "127.0.0.1:" + assistantPort()
+	listener, err := net.Listen("tcp", address)
 	var serverURL string
 	if err == nil {
 		server := &http.Server{Handler: mux}
 		go func() {
 			_ = server.Serve(listener)
 		}()
-		serverURL = "http://127.0.0.1:9195"
+		serverURL = "http://" + address
 	} else {
 		// Nếu 9195 bận thì fallback httptest
 		fallbackServer := httptest.NewServer(mux)
@@ -645,18 +831,18 @@ func StartUI(ai *AIService) {
 	C.run_main_loop()
 }
 
-// windowState là vị trí cửa sổ lưu giữa các lần chạy.
-// (Trạng thái ghim nằm trong Config — xem applySavedWindowState.)
+// windowState là khung "khít" lưu giữa các lần chạy: chỉ cần góc dưới-phải
+// (kích thước do nội dung quyết định). Trạng thái ghim nằm trong Config.
 type windowState struct {
-	X int `json:"x"`
-	Y int `json:"y"`
+	Right  int `json:"right"`
+	Bottom int `json:"bottom"`
 }
 
-// applySavedWindowState đọc vị trí/ghim đã lưu và chuyển sang tầng C trước
-// khi tạo cửa sổ. Nếu chưa có (hoặc không hợp lệ) thì dùng mặc định.
+// applySavedWindowState đọc khung đã lưu và chuyển sang tầng C trước khi tạo
+// cửa sổ. Nếu chưa có (hoặc không hợp lệ) thì dùng mặc định góc dưới-phải.
 func applySavedWindowState(ai *AIService) {
 	// Trạng thái ghim lấy từ thiết lập người dùng (nguồn duy nhất); chỉ có
-	// toạ độ cửa sổ mới đọc từ window_state.json.
+	// khung cửa sổ mới đọc từ window_state.json.
 	keepAbove := true
 	if ai != nil {
 		keepAbove = ai.cfg.AlwaysOnTop
@@ -669,14 +855,13 @@ func applySavedWindowState(ai *AIService) {
 
 	if data, err := os.ReadFile(statePath); err == nil {
 		var st windowState
-		if json.Unmarshal(data, &st) == nil && st.X >= 0 && st.Y >= 0 {
-			C.set_initial_geometry(C.int(st.X), C.int(st.Y), cBool(keepAbove))
+		if json.Unmarshal(data, &st) == nil && st.Right > 0 && st.Bottom > 0 {
+			C.set_initial_geometry(C.int(st.Right), C.int(st.Bottom), cBool(keepAbove))
 			return
 		}
 	}
 
-	// Chưa có vị trí đã lưu: giữ vị trí mặc định (góc dưới phải) nhưng vẫn
-	// áp dụng trạng thái ghim và sẽ ghi lại vị trí sau này.
+	// Chưa có khung đã lưu: dùng mặc định nhưng vẫn ghi lại sau này.
 	C.set_default_keep_above(cBool(keepAbove))
 }
 

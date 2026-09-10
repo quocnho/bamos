@@ -10,3 +10,7 @@ Categories=Utility;Office;ArtificialIntelligence;
 StartupWMClass=bamos-assistant
 StartupNotify=true
 Keywords=ai;chat;qwen;rag;assistant;
+# Tự khởi động cùng phiên đồ hoạ (XDG autostart). Delay nhẹ để panel/dock của
+# GNOME ổn định trước khi định vị cửa sổ & bật "ghim trên cùng".
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=3
