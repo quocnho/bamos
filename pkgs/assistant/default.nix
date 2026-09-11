@@ -5,15 +5,17 @@
   gtk3,
   webkitgtk_4_1,
   wrapGAppsHook3,
+  sqlite,
+  sqlite-vec,
 }:
 
 buildGoModule rec {
   pname = "bamos-assistant";
-  version = "0.2.0";
+  version = "0.3.0";
 
   src = ./.;
 
-  vendorHash = "sha256-hYe2Qa8Bxf9d6is1a+ik4qFJNEIEYMFmDnzdTsbF70s=";
+  vendorHash = null;
 
   nativeBuildInputs = [
     pkg-config
@@ -23,6 +25,8 @@ buildGoModule rec {
   buildInputs = [
     gtk3
     webkitgtk_4_1
+    sqlite
+    sqlite-vec
   ];
 
   postInstall = ''

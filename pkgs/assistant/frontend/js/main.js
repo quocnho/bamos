@@ -42,6 +42,8 @@ import {
     handleRagIndexProgress,
     handleRagIndexed,
     handleRagCleared,
+    handleRagDocumentsListed,
+    handleRagDocDeleted,
 } from "./features/settings/rag-settings.js";
 import {
     initLlmSettings,
@@ -55,6 +57,21 @@ import {
     handleLLMTestResult,
     handleAIRestarted,
 } from "./features/settings/llm-settings.js";
+
+import {
+    initSystemInspect,
+    handleSystemInspected,
+} from "./features/system-inspect.js";
+import {
+    initWakaTrackerUI,
+    handleWakaStats,
+} from "./features/wakatracker-ui.js";
+import {
+    initProfileUI,
+    handleProfileLoaded,
+    handleQuizQuestions,
+    handleQuizSubmitted,
+} from "./features/profile-ui.js";
 
 import {
     initSettingsPanels,
@@ -94,11 +111,24 @@ function bindNativeCallbacks() {
     window.onLLMTestResult = handleLLMTestResult;
     window.onAIRestarted = handleAIRestarted;
 
-    // Tri thức RAG
+    // Tri thức RAG (FTS5 + sqlite-vec)
     window.onRagStats = handleRagStats;
     window.onRagIndexProgress = handleRagIndexProgress;
     window.onRagIndexed = handleRagIndexed;
     window.onRagCleared = handleRagCleared;
+    window.onRagDocumentsListed = handleRagDocumentsListed;
+    window.onRagDocDeleted = handleRagDocDeleted;
+
+    // Giám sát Hệ thống & NixOS
+    window.onSystemInspected = handleSystemInspected;
+
+    // WakaTracker
+    window.onWakaStats = handleWakaStats;
+
+    // Hồ sơ người dùng & Onboarding Quiz
+    window.onProfileLoaded = handleProfileLoaded;
+    window.onQuizQuestions = handleQuizQuestions;
+    window.onQuizSubmitted = handleQuizSubmitted;
 }
 
 /**
@@ -134,6 +164,9 @@ function bootstrap() {
     initSuggestions();
     initRagSettings();
     initLlmSettings();
+    initSystemInspect();
+    initWakaTrackerUI();
+    initProfileUI();
     initSettingsPanels();
     initSettingsMenu();
     initEyeLeo();

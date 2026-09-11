@@ -808,3 +808,31 @@ input[type="range"] {
     right: var(--fit-pad);
     bottom: var(--fit-pad);
 }
+
+/* ---------------------------------------------------------------------------
+ * 6. Style bổ sung cho System Inspector, WakaTracker & User Profile
+ * ------------------------------------------------------------------------- */
+.issue-card {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.issue-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.mini-btn {
+    transition: background 0.15s;
+}
+.mini-btn:hover {
+    background: #e2e8f0 !important;
+}
+
+.rag-docs-container::-webkit-scrollbar,
+.issues-list::-webkit-scrollbar {
+    width: 5px;
+}
+.rag-docs-container::-webkit-scrollbar-thumb,
+.issues-list::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}

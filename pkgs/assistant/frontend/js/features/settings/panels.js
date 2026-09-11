@@ -16,11 +16,17 @@ import { native } from "../../core/native.js";
 import { openRagSettings } from "./rag-settings.js";
 import { openLlmSettings } from "./llm-settings.js";
 import { openEyeleoSettings } from "../eyeleo/controller.js";
+import { openSystemInspectModal } from "../system-inspect.js";
+import { openWakaModal } from "../wakatracker-ui.js";
+import { openProfileModal } from "../profile-ui.js";
 
 const PANELS = {
     rag: openRagSettings,
     llm: openLlmSettings,
     eyeleo: openEyeleoSettings,
+    system: openSystemInspectModal,
+    waka: openWakaModal,
+    profile: openProfileModal,
     about: () => show(els.aboutModal),
 };
 

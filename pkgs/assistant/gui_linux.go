@@ -746,10 +746,23 @@ static void setup_window_and_webview(const char *app_url) {
         "    setActiveModel: function(path) { post({action: 'set_active_model', payload: {path: path}}); },"
         "    testLLM: function() { post({action: 'test_llm'}); },"
         "    restartAI: function() { post({action: 'restart_ai'}); },"
-        // ---- Tri thức RAG ----
+        // ---- Tri thức RAG (FTS5 + sqlite-vec) ----
         "    ragAddDocuments: function(docs) { post({action: 'rag_add_documents', payload: {documents: docs}}); },"
         "    ragStats: function() { post({action: 'rag_stats'}); },"
-        "    ragClear: function() { post({action: 'rag_clear'}); }"
+        "    ragClear: function() { post({action: 'rag_clear'}); },"
+        "    ragListDocuments: function() { post({action: 'rag_list_documents'}); },"
+        "    ragDeleteDoc: function(src) { post({action: 'rag_delete_doc', payload: {source: src}}); },"
+        // ---- Giám sát Hệ thống & NixOS ----
+        "    systemInspect: function() { post({action: 'system_inspect'}); },"
+        // ---- WakaTracker ----
+        "    wakaStats: function() { post({action: 'waka_stats'}); },"
+        "    addReminder: function(t, d) { post({action: 'add_reminder', payload: {title: t, due_time: d}}); },"
+        "    toggleReminder: function(id) { post({action: 'toggle_reminder', payload: {id: id}}); },"
+        // ---- Hồ sơ người dùng & Onboarding Quiz ----
+        "    getProfile: function() { post({action: 'get_profile'}); },"
+        "    updateProfile: function(p) { post({action: 'update_profile', payload: p}); },"
+        "    getQuiz: function() { post({action: 'get_quiz'}); },"
+        "    submitQuiz: function(ans) { post({action: 'submit_quiz', payload: {answers: ans}}); }"
         "  };"
         "})();";
 
@@ -1008,6 +1021,32 @@ func handleScriptMessage(cMessage *C.char) {
 		go handleRagStats()
 	case "rag_clear":
 		go handleRagClear()
+	case "rag_list_documents":
+		go handleRagListDocuments()
+	case "rag_delete_doc":
+		go handleRagDeleteDoc(msg.Payload)
+
+	// ---- Giám sát Hệ thống & NixOS ----
+	case "system_inspect":
+		go handleSystemInspect()
+
+	// ---- WakaTracker ----
+	case "waka_stats":
+		go handleWakaStats()
+	case "add_reminder":
+		go handleAddReminder(msg.Payload)
+	case "toggle_reminder":
+		go handleToggleReminder(msg.Payload)
+
+	// ---- Hồ sơ người dùng & Onboarding Quiz ----
+	case "get_profile":
+		go handleGetProfile()
+	case "update_profile":
+		go handleUpdateProfile(msg.Payload)
+	case "get_quiz":
+		go handleGetQuiz()
+	case "submit_quiz":
+		go handleSubmitQuiz(msg.Payload)
 	}
 }
 

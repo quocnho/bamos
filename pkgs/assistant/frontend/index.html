@@ -558,7 +558,7 @@
                         <div class="setting-item">
                             <label for="set-rag-topk">
                                 Số đoạn tri thức dùng mỗi câu trả lời:
-                                <b id="set-rag-topk-value">3</b>
+                                <b id="set-rag-topk-value">4</b>
                             </label>
                             <input
                                 type="range"
@@ -566,13 +566,31 @@
                                 min="1"
                                 max="8"
                                 step="1"
-                                value="3"
+                                value="4"
+                            />
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="set-rag-alpha">
+                                ⚖️ Cân bằng Tìm kiếm Lai (Hybrid Search):
+                                <b id="set-rag-alpha-value">65% Vector (Ngữ nghĩa)</b>
+                            </label>
+                            <div class="setting-desc" style="margin-bottom: 6px; font-size: 11.5px; color: #64748b;">
+                                Kéo sang trái: ưu tiên từ khoá chính xác FTS5 (code, log) • Kéo sang phải: ưu tiên ngữ nghĩa vector (sqlite-vec)
+                            </div>
+                            <input
+                                type="range"
+                                id="set-rag-alpha"
+                                min="0"
+                                max="100"
+                                step="5"
+                                value="65"
                             />
                         </div>
 
                         <div class="setting-section">
                             <div class="section-title">
-                                📄 Tài liệu tri thức
+                                📄 Nạp tài liệu tri thức mới
                                 <span class="count-badge" id="rag-count-badge"
                                     >0</span
                                 >
@@ -609,6 +627,16 @@
                                 </button>
                             </div>
                             <div id="rag-status" class="settings-status"></div>
+                        </div>
+
+                        <div class="setting-section">
+                            <div class="section-title">
+                                📚 Tài liệu đã lưu trong SQLite (FTS5 + vec0)
+                                <button id="btn-refresh-rag-docs" class="mini-btn" style="float: right; font-size: 11px; padding: 2px 6px; cursor: pointer; border-radius: 4px; border: 1px solid #cbd5e1; background: #f8fafc;">Làm mới</button>
+                            </div>
+                            <div id="rag-docs-container" class="rag-docs-container" style="max-height: 140px; overflow-y: auto; font-size: 12px; margin-top: 6px;">
+                                <div class="model-empty">Đang tải danh sách tài liệu...</div>
+                            </div>
                         </div>
 
                         <div class="tips-block">
@@ -1042,6 +1070,160 @@
                 </div>
             </div>
 
+            <!-- ===== Modal Giám Sát Hệ Thống & NixOS ===== -->
+            <div id="system-inspect-modal" class="modal-backdrop hidden">
+                <div class="modal-card settings-modal">
+                    <div class="modal-header">
+                        <div class="modal-title">🛡️ Giám Sát Hệ Thống & NixOS</div>
+                        <button id="btn-close-system-inspect" class="icon-btn close-btn">×</button>
+                    </div>
+                    <div class="modal-body settings-form">
+                        <div class="panel-note">
+                            Rà soát lỗi hệ thống từ <code>journalctl</code>, kiểm tra tối ưu cấu hình <code>/etc/nixos</code> và phát hiện ứng dụng chạy ngầm không sử dụng.
+                        </div>
+                        <div class="modal-actions-row" style="margin-bottom: 10px;">
+                            <button id="btn-run-system-inspect" class="modal-btn primary">🔍 Quét & Kiểm Tra Ngay</button>
+                            <span id="system-inspect-status" style="font-size: 12px; color: #64748b; margin-left: 8px;"></span>
+                        </div>
+
+                        <div class="setting-section">
+                            <div class="section-title">⚠️ Cảnh báo Lỗi & Đề xuất Fix Cấu hình</div>
+                            <div id="system-issues-list" class="issues-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto;">
+                                <div class="model-empty">Chưa có cảnh báo nào. Bấm "Quét & Kiểm Tra Ngay".</div>
+                            </div>
+                        </div>
+
+                        <div class="setting-section">
+                            <div class="section-title">💤 Ứng dụng chạy ngầm tốn RAM không sử dụng</div>
+                            <div id="system-idle-apps-list" class="issues-list" style="display: flex; flex-direction: column; gap: 6px; max-height: 140px; overflow-y: auto;">
+                                <div class="model-empty">Không phát hiện ứng dụng ngầm nào lãng phí RAM.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Modal WakaTracker & Năng Suất ===== -->
+            <div id="waka-modal" class="modal-backdrop hidden">
+                <div class="modal-card settings-modal">
+                    <div class="modal-header">
+                        <div class="modal-title">📊 WakaTracker & Nhịp Sinh Hoạt</div>
+                        <button id="btn-close-waka" class="icon-btn close-btn">×</button>
+                    </div>
+                    <div class="modal-body settings-form">
+                        <div class="panel-note">
+                            Theo dõi thời gian làm việc, thống kê danh mục ứng dụng và quản lý lịch nhắc việc.
+                        </div>
+
+                        <!-- Thống kê tổng quan -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                            <div style="background: rgba(42, 157, 143, 0.1); border: 1px solid rgba(42, 157, 143, 0.3); border-radius: 10px; padding: 10px; text-align: center;">
+                                <div style="font-size: 11.5px; color: #2a9d8f; font-weight: 700;">HÔM NAY</div>
+                                <div id="waka-today-hours" style="font-size: 20px; font-weight: 800; color: #1e293b;">0.0 giờ</div>
+                            </div>
+                            <div style="background: rgba(244, 162, 97, 0.12); border: 1px solid rgba(244, 162, 97, 0.3); border-radius: 10px; padding: 10px; text-align: center;">
+                                <div style="font-size: 11.5px; color: #e76f51; font-weight: 700;">7 NGÀY QUA</div>
+                                <div id="waka-7days-hours" style="font-size: 20px; font-weight: 800; color: #1e293b;">0.0 giờ</div>
+                            </div>
+                        </div>
+
+                        <div class="setting-section">
+                            <div class="section-title">⏱️ Phân bổ thời gian theo Danh mục</div>
+                            <div id="waka-categories-list" style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px;"></div>
+                        </div>
+
+                        <div class="setting-section">
+                            <div class="section-title">📅 Lịch hẹn & Nhắc việc cá nhân</div>
+                            <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+                                <input type="text" id="waka-new-reminder-title" class="text-input" placeholder="Nội dung nhắc việc (ví dụ: Họp team, Học NixOS...)" style="flex: 1;" />
+                                <input type="text" id="waka-new-reminder-time" class="text-input" placeholder="15:30" style="width: 70px;" />
+                                <button id="btn-waka-add-reminder" class="modal-btn primary" style="padding: 4px 10px; font-size: 12px;">＋ Thêm</button>
+                            </div>
+                            <div id="waka-reminders-list" style="display: flex; flex-direction: column; gap: 5px; max-height: 120px; overflow-y: auto;">
+                                <div class="model-empty">Chưa có lời nhắc nào.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Modal Hồ Sơ & Đánh Giá Năng Lực (Onboarding Quiz) ===== -->
+            <div id="profile-modal" class="modal-backdrop hidden">
+                <div class="modal-card settings-modal">
+                    <div class="modal-header">
+                        <div class="modal-title">👤 Hồ Sơ & Đánh Giá Năng Lực</div>
+                        <button id="btn-close-profile" class="icon-btn close-btn">×</button>
+                    </div>
+                    <div class="modal-body settings-form">
+                        <div class="panel-note">
+                            Đăng ký lĩnh vực quan tâm, làm bài test nhanh để xếp hạng trình độ và nhận lộ trình nâng cấp kỹ năng.
+                        </div>
+
+                        <!-- Tab chuyển đổi Hồ sơ / Làm bài Test / Lộ trình -->
+                        <div style="display: flex; gap: 6px; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">
+                            <button id="tab-profile-info" class="modal-btn primary" style="font-size: 12px; padding: 4px 10px;">📋 Thông Tin & Sở Thích</button>
+                            <button id="tab-profile-quiz" class="modal-btn" style="font-size: 12px; padding: 4px 10px; background: #f1f5f9; color: #475569;">✍️ Bài Test Năng Lực</button>
+                            <button id="tab-profile-roadmap" class="modal-btn" style="font-size: 12px; padding: 4px 10px; background: #f1f5f9; color: #475569;">🚀 Lộ Trình Kỹ Năng</button>
+                        </div>
+
+                        <!-- Tab 1: Thông tin cá nhân & Sở thích -->
+                        <div id="panel-profile-info">
+                            <div class="setting-item">
+                                <label for="prof-fullname">Họ và tên:</label>
+                                <input type="text" id="prof-fullname" class="text-input" placeholder="Ví dụ: Nguyễn Văn A" />
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="setting-item">
+                                    <label for="prof-age">Tuổi:</label>
+                                    <input type="number" id="prof-age" class="text-input" placeholder="25" />
+                                </div>
+                                <div class="setting-item">
+                                    <label for="prof-phone">Số điện thoại:</label>
+                                    <input type="text" id="prof-phone" class="text-input" placeholder="0901234567" />
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <label for="prof-email">Email:</label>
+                                <input type="email" id="prof-email" class="text-input" placeholder="user@bamos.vn" />
+                            </div>
+                            <div class="setting-item">
+                                <label for="prof-theme-color">🎨 Phong cách màu sắc & Ánh sáng yêu thích:</label>
+                                <select id="prof-theme-color" class="text-input">
+                                    <option value="teal">Xanh Ngọc BamOS (Mặc định)</option>
+                                    <option value="cyan">Cyberpunk Cyan / Neon</option>
+                                    <option value="warm">Cam Hổ Phách Ấm Áp (Cozy Amber)</option>
+                                    <option value="purple">Tím Hoàng Gia (Royal Purple)</option>
+                                    <option value="rose">Hồng Đào Dịu Nhẹ (Peach Rose)</option>
+                                </select>
+                            </div>
+                            <div class="modal-actions-row">
+                                <button id="btn-save-profile" class="modal-btn primary">Lưu Hồ Sơ & Sở Thích</button>
+                                <span id="profile-status" style="font-size: 12px; margin-left: 8px;"></span>
+                            </div>
+                        </div>
+
+                        <!-- Tab 2: Bài test nhanh -->
+                        <div id="panel-profile-quiz" class="hidden">
+                            <div style="background: rgba(42, 157, 143, 0.08); border-radius: 8px; padding: 8px; margin-bottom: 10px; font-size: 12.5px;">
+                                💡 Trả lời 4 câu hỏi trắc nghiệm nhanh để em xác định trình độ và điều chỉnh cách xưng hô, hướng dẫn phù hợp nhất cho Chủ nhân!
+                            </div>
+                            <div id="quiz-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                            <div class="modal-actions-row" style="margin-top: 12px;">
+                                <button id="btn-submit-quiz" class="modal-btn primary">Chấm Điểm & Xếp Level</button>
+                            </div>
+                        </div>
+
+                        <!-- Tab 3: Lộ trình kỹ năng -->
+                        <div id="panel-profile-roadmap" class="hidden">
+                            <div style="margin-bottom: 10px;">
+                                <b>Trình độ hiện tại: </b> <span id="prof-current-level" style="color: #2a9d8f; font-weight: 800;">Chưa đánh giá</span>
+                            </div>
+                            <div id="roadmap-steps-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Tooltip cho chip từ khóa: đặt ngoài .bubble để không bị overflow:hidden cắt -->
             <div id="chip-tooltip" class="chip-tooltip hidden"></div>
 
@@ -1066,6 +1248,27 @@
                     <span class="smi-text">
                         <b>Quản lý nghỉ ngơi</b>
                         <small>Nhắc nghỉ mắt 20-20-20 và nghỉ dài</small>
+                    </span>
+                </button>
+                <button class="settings-menu-item" data-panel="system">
+                    <span class="smi-icon">🛡️</span>
+                    <span class="smi-text">
+                        <b>Giám sát Hệ thống & NixOS</b>
+                        <small>Quét log, cấu hình /etc/nixos, app ngầm</small>
+                    </span>
+                </button>
+                <button class="settings-menu-item" data-panel="waka">
+                    <span class="smi-icon">📊</span>
+                    <span class="smi-text">
+                        <b>WakaTracker & Năng suất</b>
+                        <small>Thời gian làm việc, biểu đồ, lịch nhắc việc</small>
+                    </span>
+                </button>
+                <button class="settings-menu-item" data-panel="profile">
+                    <span class="smi-icon">👤</span>
+                    <span class="smi-text">
+                        <b>Hồ sơ & Đánh giá Năng lực</b>
+                        <small>Đăng ký hỗ trợ, quiz xếp level, lộ trình học</small>
                     </span>
                 </button>
                 <button class="settings-menu-item" data-panel="about">

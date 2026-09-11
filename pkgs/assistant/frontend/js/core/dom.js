@@ -123,6 +123,10 @@ export const els = {
     btnRagClear: $("btn-rag-clear"),
     ragStatus: $("rag-status"),
     btnSaveRagSettings: $("btn-save-rag-settings"),
+    setRagAlpha: $("set-rag-alpha"),
+    setRagAlphaValue: $("set-rag-alpha-value"),
+    btnRefreshRagDocs: $("btn-refresh-rag-docs"),
+    ragDocsContainer: $("rag-docs-container"),
 
     // Bảng thiết lập LLM
     llmSettingsModal: $("llm-settings-modal"),
@@ -149,6 +153,46 @@ export const els = {
     btnLlmTest: $("btn-llm-test"),
     btnLlmRestart: $("btn-llm-restart"),
     btnSaveLlmSettings: $("btn-save-llm-settings"),
+
+    // Giám sát Hệ thống & NixOS
+    systemInspectModal: $("system-inspect-modal"),
+    btnCloseSystemInspect: $("btn-close-system-inspect"),
+    btnRunSystemInspect: $("btn-run-system-inspect"),
+    systemInspectStatus: $("system-inspect-status"),
+    systemIssuesList: $("system-issues-list"),
+    systemIdleAppsList: $("system-idle-apps-list"),
+
+    // WakaTracker
+    wakaModal: $("waka-modal"),
+    btnCloseWaka: $("btn-close-waka"),
+    wakaTodayHours: $("waka-today-hours"),
+    waka7daysHours: $("waka-7days-hours"),
+    wakaCategoriesList: $("waka-categories-list"),
+    wakaNewReminderTitle: $("waka-new-reminder-title"),
+    wakaNewReminderTime: $("waka-new-reminder-time"),
+    btnWakaAddReminder: $("btn-waka-add-reminder"),
+    wakaRemindersList: $("waka-reminders-list"),
+
+    // Hồ sơ người dùng & Onboarding Quiz
+    profileModal: $("profile-modal"),
+    btnCloseProfile: $("btn-close-profile"),
+    tabProfileInfo: $("tab-profile-info"),
+    tabProfileQuiz: $("tab-profile-quiz"),
+    tabProfileRoadmap: $("tab-profile-roadmap"),
+    panelProfileInfo: $("panel-profile-info"),
+    panelProfileQuiz: $("panel-profile-quiz"),
+    panelProfileRoadmap: $("panel-profile-roadmap"),
+    profFullname: $("prof-fullname"),
+    profAge: $("prof-age"),
+    profPhone: $("prof-phone"),
+    profEmail: $("prof-email"),
+    profThemeColor: $("prof-theme-color"),
+    btnSaveProfile: $("btn-save-profile"),
+    profileStatus: $("profile-status"),
+    quizContainer: $("quiz-container"),
+    btnSubmitQuiz: $("btn-submit-quiz"),
+    profCurrentLevel: $("prof-current-level"),
+    roadmapStepsList: $("roadmap-steps-list"),
 };
 
 // ---------------------------------------------------------------------------

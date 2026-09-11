@@ -443,6 +443,161 @@ func handleRagClear() {
 	pushJSON("onRagCleared", map[string]any{"ok": true, "message": "Đã xoá toàn bộ tri thức.", "count": 0})
 }
 
+func handleRagListDocuments() {
+	if globalAI == nil || globalAI.rag == nil {
+		pushJSON("onRagDocumentsListed", map[string]any{"ok": false, "documents": []any{}})
+		return
+	}
+	docs, err := globalAI.rag.ListDocuments()
+	if err != nil {
+		pushJSON("onRagDocumentsListed", map[string]any{"ok": false, "error": err.Error()})
+		return
+	}
+	pushJSON("onRagDocumentsListed", map[string]any{"ok": true, "documents": docs})
+}
+
+func handleRagDeleteDoc(raw json.RawMessage) {
+	if globalAI == nil || globalAI.rag == nil {
+		pushJSON("onRagDocDeleted", map[string]any{"ok": false, "message": "RAG chưa sẵn sàng"})
+		return
+	}
+	var req struct {
+		Source string `json:"source"`
+	}
+	if err := json.Unmarshal(raw, &req); err != nil || req.Source == "" {
+		pushJSON("onRagDocDeleted", map[string]any{"ok": false, "message": "Nguồn tài liệu không hợp lệ"})
+		return
+	}
+	err := globalAI.rag.DeleteDocumentBySource(req.Source)
+	if err != nil {
+		pushJSON("onRagDocDeleted", map[string]any{"ok": false, "message": err.Error()})
+		return
+	}
+	pushJSON("onRagDocDeleted", map[string]any{"ok": true, "message": "Đã xoá tài liệu khỏi tri thức", "count": globalAI.rag.DocumentCount()})
+}
+
+// ---------------------------------------------------------------------------
+// System Inspector & NixOS Config Handlers
+// ---------------------------------------------------------------------------
+
+func handleSystemInspect() {
+	if globalAI == nil || globalAI.inspector == nil {
+		pushJSON("onSystemInspected", map[string]any{"ok": false, "message": "Hệ thống chưa sẵn sàng"})
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	logIssues, _ := globalAI.inspector.InspectRecentLogs(ctx)
+	nixosIssues, _ := globalAI.inspector.CheckNixOSConfiguration()
+	idleApps := globalAI.inspector.DetectIdleBackgroundApps()
+
+	allIssues := append(logIssues, nixosIssues...)
+	pushJSON("onSystemInspected", map[string]any{
+		"ok":        true,
+		"issues":    allIssues,
+		"idle_apps": idleApps,
+		"time":      time.Now().Format("15:04:05"),
+	})
+}
+
+// ---------------------------------------------------------------------------
+// WakaTracker Handlers
+// ---------------------------------------------------------------------------
+
+func handleWakaStats() {
+	if globalAI == nil || globalAI.waka == nil {
+		pushJSON("onWakaStats", map[string]any{"ok": false, "message": "WakaTracker chưa sẵn sàng"})
+		return
+	}
+	summary := globalAI.waka.GetSummary()
+	summary["ok"] = true
+	pushJSON("onWakaStats", summary)
+}
+
+func handleAddReminder(raw json.RawMessage) {
+	if globalAI == nil || globalAI.waka == nil {
+		return
+	}
+	var req struct {
+		Title   string `json:"title"`
+		DueTime string `json:"due_time"`
+	}
+	if err := json.Unmarshal(raw, &req); err == nil && req.Title != "" {
+		r := globalAI.waka.AddReminder(req.Title, req.DueTime)
+		pushJSON("onReminderAdded", map[string]any{"ok": true, "reminder": r})
+	}
+}
+
+func handleToggleReminder(raw json.RawMessage) {
+	if globalAI == nil || globalAI.waka == nil {
+		return
+	}
+	var req struct {
+		ID string `json:"id"`
+	}
+	if err := json.Unmarshal(raw, &req); err == nil && req.ID != "" {
+		globalAI.waka.ToggleReminder(req.ID)
+		pushJSON("onReminderToggled", map[string]any{"ok": true, "id": req.ID})
+	}
+}
+
+// ---------------------------------------------------------------------------
+// User Profile & Onboarding Quiz Handlers
+// ---------------------------------------------------------------------------
+
+func handleGetProfile() {
+	if globalAI == nil || globalAI.profile == nil {
+		pushJSON("onProfileLoaded", map[string]any{"ok": false})
+		return
+	}
+	pushJSON("onProfileLoaded", map[string]any{
+		"ok":      true,
+		"profile": globalAI.profile.Profile,
+	})
+}
+
+func handleUpdateProfile(raw json.RawMessage) {
+	if globalAI == nil || globalAI.profile == nil {
+		return
+	}
+	var p UserProfileData
+	if err := json.Unmarshal(raw, &p); err == nil {
+		globalAI.profile.UpdateProfile(p)
+		pushJSON("onProfileUpdated", map[string]any{
+			"ok":      true,
+			"profile": globalAI.profile.Profile,
+			"message": "Đã cập nhật thông tin hồ sơ",
+		})
+	}
+}
+
+func handleGetQuiz() {
+	if globalAI == nil || globalAI.profile == nil {
+		pushJSON("onQuizQuestions", map[string]any{"ok": false})
+		return
+	}
+	qs := globalAI.profile.GetQuizQuestions()
+	pushJSON("onQuizQuestions", map[string]any{
+		"ok":        true,
+		"questions": qs,
+	})
+}
+
+func handleSubmitQuiz(raw json.RawMessage) {
+	if globalAI == nil || globalAI.profile == nil {
+		return
+	}
+	var req struct {
+		Answers map[int]int `json:"answers"`
+	}
+	if err := json.Unmarshal(raw, &req); err == nil {
+		result := globalAI.profile.SubmitAssessment(req.Answers)
+		result["ok"] = true
+		pushJSON("onQuizSubmitted", result)
+	}
+}
+
 // ---------------------------------------------------------------------------
 // Khởi động / khởi động lại llama-server
 // ---------------------------------------------------------------------------

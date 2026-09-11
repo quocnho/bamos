@@ -64,8 +64,24 @@ export const native = {
     testLLM: () => call("testLLM"),
     restartAI: () => call("restartAI"),
 
-    // Tri thức RAG
+    // Tri thức RAG (FTS5 + sqlite-vec)
     ragAddDocuments: (documents) => call("ragAddDocuments", documents),
     ragStats: () => call("ragStats"),
     ragClear: () => call("ragClear"),
+    ragListDocuments: () => call("ragListDocuments"),
+    ragDeleteDoc: (src) => call("ragDeleteDoc", src),
+
+    // Giám sát Hệ thống & NixOS Log
+    systemInspect: () => call("systemInspect"),
+
+    // WakaTracker & Lịch làm việc/nhắc việc
+    wakaStats: () => call("wakaStats"),
+    addReminder: (title, dueTime) => call("addReminder", title, dueTime),
+    toggleReminder: (id) => call("toggleReminder", id),
+
+    // Hồ sơ người dùng & Onboarding Quiz
+    getProfile: () => call("getProfile"),
+    updateProfile: (profile) => call("updateProfile", profile),
+    getQuiz: () => call("getQuiz"),
+    submitQuiz: (answers) => call("submitQuiz", answers),
 };

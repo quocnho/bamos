@@ -26,14 +26,19 @@ type Config struct {
 	GpuLayers   int     `json:"gpu_layers"`
 	Temperature float64 `json:"temperature"`
 
-	// RAG (tri thức nội bộ)
-	EnableRAG bool   `json:"enable_rag"`
-	RAGDBPath string `json:"rag_db_path"`
-	RAGTopK   int    `json:"rag_top_k"`
+	// RAG (tri thức nội bộ - SQLite FTS5 + sqlite-vec)
+	EnableRAG      bool    `json:"enable_rag"`
+	RAGDBPath      string  `json:"rag_db_path"`
+	RAGTopK        int     `json:"rag_top_k"`
+	RAGHybridAlpha float64 `json:"rag_hybrid_alpha"` // Trọng số: 0.0 (FTS thuần) -> 1.0 (Vector thuần), mặc định 0.65
 
-	// Giao diện & hành vi
-	Addressing  string `json:"addressing"`
-	AlwaysOnTop bool   `json:"always_on_top"`
+	// Giao diện, Cá nhân hoá & Thói quen
+	Addressing        string `json:"addressing"`
+	AlwaysOnTop       bool   `json:"always_on_top"`
+	ThemeStyle        string `json:"theme_style"`        // "default", "cyberpunk", "warm", "nord", "oled"
+	NightLightSync    bool   `json:"night_light_sync"`   // Đồng bộ theo chế độ dịu mắt GNOME Wayland
+	WakaTrackerActive bool   `json:"wakatracker_active"` // Theo dõi thời gian làm việc & năng suất
+	SystemWatchActive bool   `json:"system_watch_active"` // Tự động quét log & cảnh báo ứng dụng ngầm
 }
 
 const (
@@ -45,18 +50,23 @@ const (
 
 func defaultConfig() Config {
 	return Config{
-		Provider:    "local",
-		EnableRAG:   true,
-		LlamaHost:   defaultLlamaHost,
-		ModelDir:    defaultModelDir,
-		ModelPath:   defaultModelPath,
-		RAGDBPath:   defaultRAGDBPath,
-		RAGTopK:     3,
-		Temperature: 0.7,
-		ContextSize: 4096,
-		GpuLayers:   99,
-		Addressing:  "Chủ nhân",
-		AlwaysOnTop: true,
+		Provider:          "local",
+		EnableRAG:         true,
+		LlamaHost:         defaultLlamaHost,
+		ModelDir:          defaultModelDir,
+		ModelPath:         defaultModelPath,
+		RAGDBPath:         defaultRAGDBPath,
+		RAGTopK:           4,
+		RAGHybridAlpha:    0.65,
+		Temperature:       0.7,
+		ContextSize:       4096,
+		GpuLayers:         99,
+		Addressing:        "Chủ nhân",
+		AlwaysOnTop:       true,
+		ThemeStyle:        "default",
+		NightLightSync:    true,
+		WakaTrackerActive: true,
+		SystemWatchActive: true,
 	}
 }
 
@@ -117,7 +127,13 @@ func (c *Config) normalize() {
 		c.RAGDBPath = defaultRAGDBPath
 	}
 	if c.RAGTopK <= 0 {
-		c.RAGTopK = 3
+		c.RAGTopK = 4
+	}
+	if c.RAGHybridAlpha <= 0 || c.RAGHybridAlpha > 1.0 {
+		c.RAGHybridAlpha = 0.65
+	}
+	if c.ThemeStyle == "" {
+		c.ThemeStyle = "default"
 	}
 	if c.Temperature < 0 {
 		c.Temperature = 0.7

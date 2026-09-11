@@ -20,25 +20,31 @@ import (
 )
 
 type AIService struct {
-	cfg Config
-	rag *RAGManager
-	fs  *FSTool
-	mem *UserMemory
-	cli *CLIEngine
+	cfg       Config
+	rag       *RAGManager
+	fs        *FSTool
+	mem       *UserMemory
+	cli       *CLIEngine
+	inspector *SystemInspector
+	waka      *WakaTracker
+	profile   *UserProfileManager
 
 	// Chống khởi động trùng llama-server khi nhiều yêu cầu dồn tới.
 	startMu  sync.Mutex
 	starting bool
 }
 
-func NewAIService(cfg Config, rag *RAGManager, fsTool *FSTool, mem *UserMemory) *AIService {
+func NewAIService(cfg Config, rag *RAGManager, fsTool *FSTool, mem *UserMemory, inspector *SystemInspector, waka *WakaTracker, profile *UserProfileManager) *AIService {
 	cliEngine := NewCLIEngine(mem)
 	return &AIService{
-		cfg: cfg,
-		rag: rag,
-		fs:  fsTool,
-		mem: mem,
-		cli: cliEngine,
+		cfg:       cfg,
+		rag:       rag,
+		fs:        fsTool,
+		mem:       mem,
+		cli:       cliEngine,
+		inspector: inspector,
+		waka:      waka,
+		profile:   profile,
 	}
 }
 

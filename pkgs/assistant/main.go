@@ -134,6 +134,9 @@ func main() {
 	ragMgr := NewRAGManager(cfg.RAGDBPath, cfg.LlamaHost)
 	fsTool := NewFSTool()
 	userMem := NewUserMemory()
+	sysInspector := NewSystemInspector(ragMgr, userMem)
+	wakaTracker := NewWakaTracker()
+	userProfile := NewUserProfileManager(ragMgr)
 
 	// Kiểm tra nếu được gọi kèm tham số đường dẫn (Ví dụ từ Nautilus / CLI)
 	var targetDir string
@@ -168,7 +171,7 @@ func main() {
 		userMem.SetActiveDirectory(targetDir)
 	}
 
-	aiService := NewAIService(cfg, ragMgr, fsTool, userMem)
+	aiService := NewAIService(cfg, ragMgr, fsTool, userMem, sysInspector, wakaTracker, userProfile)
 
 	// Khởi động giao diện người dùng
 	if os.Getenv("DISPLAY") == "" && os.Getenv("WAYLAND_DISPLAY") == "" {
