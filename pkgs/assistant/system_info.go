@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -186,4 +187,33 @@ func GetRunningApps() []RunningApp {
 		}
 	}
 	return apps
+}
+
+// GetSystemPromptContext trả về chuỗi cấu hình hệ thống tóm tắt để nạp vào prompt
+func GetSystemPromptContext() string {
+	sys := GetHardwareAndSystemInfo()
+	var sb strings.Builder
+	sb.WriteString("=== CẤU HÌNH HỆ THỐNG MÁY TÍNH HIỆN TẠI (BAMOS LINUX) ===\n")
+	sb.WriteString(fmt.Sprintf("- Hệ điều hành: %s\n", sys.OS))
+	sb.WriteString(fmt.Sprintf("- Nhân Kernel: %s\n", sys.Kernel))
+	sb.WriteString(fmt.Sprintf("- Tên máy (Hostname): %s\n", sys.HostName))
+	sb.WriteString(fmt.Sprintf("- Vi xử lý (CPU): %s (%d nhân)\n", sys.CPU, sys.Cores))
+	sb.WriteString(fmt.Sprintf("- Bộ nhớ RAM: Đang dùng %s / Tổng %s\n", sys.MemoryUsed, sys.MemoryTotal))
+	sb.WriteString(fmt.Sprintf("- Đồ họa (GPU): %s\n", sys.GPU))
+	sb.WriteString(fmt.Sprintf("- Ổ đĩa phân vùng gốc (/): %s\n", sys.DiskUsage))
+	sb.WriteString("=========================================================")
+	return sb.String()
+}
+
+// SyncSystemToRAG nạp thông tin phần cứng và hệ thống vào RAG
+func SyncSystemToRAG(ctx context.Context, rag *RAGManager) {
+	if rag == nil {
+		return
+	}
+	content := GetSystemPromptContext()
+	_ = rag.IndexDocument(ctx, "system_specs_knowledge", content, map[string]string{
+		"source": "system_hardware",
+		"title":  "Thông số phần cứng & Hệ điều hành BamOS",
+		"domain": "system_knowledge",
+	})
 }

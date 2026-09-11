@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 )
@@ -212,20 +213,8 @@ func (upm *UserProfileManager) SubmitAssessment(answers map[int]int) map[string]
 
 	upm.save()
 
-	// Tự động index hồ sơ và trình độ người dùng vào RAG để LLM thấu hiểu
-	if upm.rag != nil {
-		go func() {
-			_ = upm.rag.IndexDocument(context.Background(), "user_profile_knowledge",
-				fmt.Sprintf("Hồ sơ Chủ nhân: %s. Trình độ hiện tại: %s (Đạt %d/%d điểm kiểm tra). Lĩnh vực quan tâm: %s. Cách xưng hô yêu thích: %s.",
-					upm.Profile.FullName, level, score, total, fmt.Sprintf("%v", upm.Profile.Domains), upm.Profile.Addressing),
-				map[string]string{
-					"source": "user_profile",
-					"title":  "Hồ sơ & Trình độ người dùng",
-					"domain": "user_profile",
-				},
-			)
-		}()
-	}
+	// Tự động đồng bộ tri thức hồ sơ vào RAG
+	upm.SyncToRAG(context.Background())
 
 	return map[string]any{
 		"score":   score,
@@ -263,4 +252,97 @@ func (upm *UserProfileManager) UpdateProfile(p UserProfileData) {
 	}
 
 	upm.save()
+
+	// Tự động đồng bộ tri thức hồ sơ vào RAG
+	upm.SyncToRAG(context.Background())
+}
+
+// GetPromptContext trả về chuỗi thông tin định danh và hồ sơ để nạp vào System Prompt
+func (upm *UserProfileManager) GetPromptContext() string {
+	upm.mu.RLock()
+	defer upm.mu.RUnlock()
+
+	p := upm.Profile
+	var sb strings.Builder
+	sb.WriteString("=== HỒ SƠ & DANH TÍNH CHỦ NHÂN (ĐÃ ĐĂNG KÝ HỆ THỐNG) ===\n")
+	if p.FullName != "" {
+		sb.WriteString(fmt.Sprintf("- Họ và tên: %s\n", p.FullName))
+	}
+	if p.Age > 0 {
+		sb.WriteString(fmt.Sprintf("- Tuổi: %d\n", p.Age))
+	}
+	if p.Email != "" {
+		sb.WriteString(fmt.Sprintf("- Email: %s\n", p.Email))
+	}
+	if p.Phone != "" {
+		sb.WriteString(fmt.Sprintf("- Số điện thoại: %s\n", p.Phone))
+	}
+	if p.Addressing != "" {
+		sb.WriteString(fmt.Sprintf("- Cách xưng hô ưa thích: %s\n", p.Addressing))
+	}
+	if p.CurrentLevel != "" {
+		sb.WriteString(fmt.Sprintf("- Trình độ chuyên môn hiện tại: %s", p.CurrentLevel))
+		if p.TotalQuiz > 0 {
+			sb.WriteString(fmt.Sprintf(" (Đạt %d/%d điểm bài kiểm tra kiến thức)\n", p.QuizScore, p.TotalQuiz))
+		} else {
+			sb.WriteString("\n")
+		}
+	}
+	if len(p.Domains) > 0 {
+		sb.WriteString(fmt.Sprintf("- Lĩnh vực quan tâm & chuyên môn: %s\n", strings.Join(p.Domains, ", ")))
+	}
+	if len(p.RoadmapSteps) > 0 {
+		sb.WriteString("- Lộ trình phát triển năng lực cá nhân:\n")
+		for _, step := range p.RoadmapSteps {
+			status := "Chưa hoàn thành"
+			if step.Completed {
+				status = "Đã hoàn thành"
+			}
+			sb.WriteString(fmt.Sprintf("  + [%s] %s: %s (%s)\n", step.Domain, step.Title, step.Description, status))
+		}
+	}
+	sb.WriteString("QUY TẮC BẮT BUỘC: Khi người dùng hỏi 'tôi tên gì', 'tôi là ai', 'thông tin của tôi', bạn PHẢI nhận ra người dùng là Chủ nhân có họ tên và thông tin nêu trên, trả lời thân thiện, chính xác và lễ phép.\n")
+	sb.WriteString("=========================================================")
+	return sb.String()
+}
+
+// SyncToRAG nạp hoặc cập nhật toàn bộ thông tin hồ sơ vào cơ sở tri thức RAG
+func (upm *UserProfileManager) SyncToRAG(ctx context.Context) {
+	if upm.rag == nil {
+		return
+	}
+
+	upm.mu.RLock()
+	p := upm.Profile
+	upm.mu.RUnlock()
+
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("Thông tin hồ sơ cá nhân của Chủ nhân:\n"))
+	sb.WriteString(fmt.Sprintf("- Họ tên đầy đủ: %s\n", p.FullName))
+	if p.Age > 0 {
+		sb.WriteString(fmt.Sprintf("- Tuổi: %d\n", p.Age))
+	}
+	if p.Email != "" {
+		sb.WriteString(fmt.Sprintf("- Email liên hệ: %s\n", p.Email))
+	}
+	if p.Phone != "" {
+		sb.WriteString(fmt.Sprintf("- Số điện thoại: %s\n", p.Phone))
+	}
+	sb.WriteString(fmt.Sprintf("- Cách xưng hô: %s\n", p.Addressing))
+	sb.WriteString(fmt.Sprintf("- Trình độ chuyên môn: %s\n", p.CurrentLevel))
+	if len(p.Domains) > 0 {
+		sb.WriteString(fmt.Sprintf("- Các lĩnh vực quan tâm: %s\n", strings.Join(p.Domains, ", ")))
+	}
+	if len(p.RoadmapSteps) > 0 {
+		sb.WriteString("- Lộ trình học tập & phát triển kiến thức:\n")
+		for _, step := range p.RoadmapSteps {
+			sb.WriteString(fmt.Sprintf("  * %s (%s): %s\n", step.Title, step.Domain, step.Description))
+		}
+	}
+
+	_ = upm.rag.IndexDocument(ctx, "user_profile_knowledge", sb.String(), map[string]string{
+		"source": "user_profile",
+		"title":  fmt.Sprintf("Hồ sơ cá nhân & Trình độ của %s", p.FullName),
+		"domain": "user_profile",
+	})
 }

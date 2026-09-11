@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -234,4 +235,61 @@ func (wt *WakaTracker) GetSummary() map[string]any {
 		"today_categories":    todayCats,
 		"reminders":           wt.data.Reminders,
 	}
+}
+
+// GetSummaryContext xuất chuỗi ngữ cảnh tóm tắt hoạt động WakaTime & Việc cần làm
+func (wt *WakaTracker) GetSummaryContext() string {
+	sum := wt.GetSummary()
+	var sb strings.Builder
+	sb.WriteString("=== THỐNG KÊ HOẠT ĐỘNG & NĂNG SUẤT LÀM VIỆC (WAKATIME) ===\n")
+	sb.WriteString(fmt.Sprintf("- Thời gian làm việc hôm nay (%s): %s (khoảng %d phút)\n", sum["today_date"], sum["today_hours_text"], sum["today_total_minutes"]))
+	sb.WriteString(fmt.Sprintf("- Tổng thời gian làm việc trong 7 ngày qua: %s\n", sum["seven_days_hours"]))
+
+	if apps, ok := sum["today_apps"].(map[string]int); ok && len(apps) > 0 {
+		sb.WriteString("- Các ứng dụng làm việc hôm nay:\n")
+		for app, sec := range apps {
+			if sec >= 60 {
+				sb.WriteString(fmt.Sprintf("  + %s: %d phút\n", app, sec/60))
+			}
+		}
+	}
+
+	wt.mu.RLock()
+	rems := wt.data.Reminders
+	wt.mu.RUnlock()
+
+	pendingCount := 0
+	for _, r := range rems {
+		if !r.Completed {
+			pendingCount++
+		}
+	}
+
+	if pendingCount > 0 {
+		sb.WriteString(fmt.Sprintf("- Danh sách lời nhắc / việc cần làm chưa hoàn thành (%d việc):\n", pendingCount))
+		for _, r := range rems {
+			if !r.Completed {
+				due := ""
+				if r.DueTime != "" {
+					due = fmt.Sprintf(" (Hạn: %s)", r.DueTime)
+				}
+				sb.WriteString(fmt.Sprintf("  * [Cần làm] %s%s\n", r.Title, due))
+			}
+		}
+	}
+	sb.WriteString("=========================================================")
+	return sb.String()
+}
+
+// SyncToRAG đồng bộ dữ liệu hoạt động và việc cần làm vào RAG
+func (wt *WakaTracker) SyncToRAG(ctx context.Context, rag *RAGManager) {
+	if rag == nil {
+		return
+	}
+	content := wt.GetSummaryContext()
+	_ = rag.IndexDocument(ctx, "wakatracker_activity_knowledge", content, map[string]string{
+		"source": "wakatracker",
+		"title":  "Thống kê hoạt động & Năng suất WakaTime",
+		"domain": "waka_activity",
+	})
 }

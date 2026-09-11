@@ -108,7 +108,114 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 		activeDir = s.mem.GetActiveDirectory()
 	}
 
-	// 0. Nhận diện ý định THÔNG TIN HỆ THỐNG & PHẦN CỨNG
+	// 0. Nhận diện ý định HỒ SƠ & DANH TÍNH CÁ NHÂN ("tôi tên gì", "tôi là ai", "hồ sơ của tôi", ...)
+	isIdentityQuery := strings.Contains(lower, "tôi tên gì") ||
+		strings.Contains(lower, "tên tôi là gì") ||
+		strings.Contains(lower, "tên của tôi là gì") ||
+		strings.Contains(lower, "tôi tên là gì") ||
+		strings.Contains(lower, "tên tôi") ||
+		strings.Contains(lower, "tôi là ai") ||
+		strings.Contains(lower, "hồ sơ của tôi") ||
+		strings.Contains(lower, "thông tin cá nhân") ||
+		strings.Contains(lower, "thông tin của tôi") ||
+		strings.Contains(lower, "tôi bao nhiêu tuổi") ||
+		strings.Contains(lower, "email của tôi") ||
+		strings.Contains(lower, "số điện thoại của tôi") ||
+		strings.Contains(lower, "trình độ của tôi") ||
+		strings.Contains(lower, "lộ trình của tôi")
+
+	if isIdentityQuery && s.profile != nil {
+		p := s.profile.Profile
+		var sb strings.Builder
+		sb.WriteString(fmt.Sprintf("🐶 <b>Gâu gâu! Em chào Chủ nhân %s ạ! Em luôn ghi nhớ rõ ràng thông tin hồ sơ của Chủ nhân:</b>\n\n", p.FullName))
+		sb.WriteString(fmt.Sprintf("👤 <b>Họ và tên:</b> %s\n", p.FullName))
+		if p.Age > 0 {
+			sb.WriteString(fmt.Sprintf("🎂 <b>Tuổi:</b> %d\n", p.Age))
+		}
+		if p.Email != "" {
+			sb.WriteString(fmt.Sprintf("📧 <b>Email:</b> %s\n", p.Email))
+		}
+		if p.Phone != "" {
+			sb.WriteString(fmt.Sprintf("📱 <b>Số điện thoại:</b> %s\n", p.Phone))
+		}
+		if p.Addressing != "" {
+			sb.WriteString(fmt.Sprintf("🤝 <b>Cách xưng hô:</b> Gọi là \"%s\", em tự xưng \"Em\"\n", p.Addressing))
+		}
+		if p.CurrentLevel != "" {
+			sb.WriteString(fmt.Sprintf("⭐ <b>Trình độ chuyên môn:</b> %s", p.CurrentLevel))
+			if p.TotalQuiz > 0 {
+				sb.WriteString(fmt.Sprintf(" (Đạt %d/%d điểm kiểm tra)", p.QuizScore, p.TotalQuiz))
+			}
+			sb.WriteString("\n")
+		}
+		if len(p.Domains) > 0 {
+			sb.WriteString(fmt.Sprintf("🎯 <b>Lĩnh vực quan tâm:</b> %s\n", strings.Join(p.Domains, ", ")))
+		}
+		if len(p.RoadmapSteps) > 0 {
+			sb.WriteString("\n🗺️ <b>Lộ trình nâng cao kiến thức:</b>\n")
+			for _, step := range p.RoadmapSteps {
+				icon := "⏳"
+				if step.Completed {
+					icon = "✅"
+				}
+				sb.WriteString(fmt.Sprintf("- %s <b>%s</b> (%s): %s\n", icon, step.Title, step.Domain, step.Description))
+			}
+		}
+		sb.WriteString("\nEm đã nạp toàn bộ thông tin này vào cơ sở tri thức RAG để luôn đồng hành và hỗ trợ Chủ nhân tốt nhất ạ! 🐾")
+		onChunk(sb.String())
+		onDone()
+		return
+	}
+
+	// 0.1 Nhận diện ý định WAKATIME & THỜI GIAN LÀM VIỆC / LỜI NHẮC VIỆC
+	if (strings.Contains(lower, "wakatime") || strings.Contains(lower, "thời gian làm việc") || strings.Contains(lower, "năng suất làm việc") || strings.Contains(lower, "hôm nay làm được bao lâu") || strings.Contains(lower, "lời nhắc việc") || strings.Contains(lower, "nhắc việc") || strings.Contains(lower, "việc cần làm")) && s.waka != nil {
+		sum := s.waka.GetSummary()
+		var sb strings.Builder
+		sb.WriteString("🐶 <b>Gâu gâu! Em gửi Chủ nhân báo cáo năng suất WakaTime và công việc ạ:</b>\n\n")
+		sb.WriteString(fmt.Sprintf("⏱️ <b>Thời gian làm việc hôm nay:</b> %s (khoảng %d phút)\n", sum["today_hours_text"], sum["today_total_minutes"]))
+		sb.WriteString(fmt.Sprintf("📅 <b>Tổng 7 ngày qua:</b> %s\n", sum["seven_days_hours"]))
+
+		if apps, ok := sum["today_apps"].(map[string]int); ok && len(apps) > 0 {
+			sb.WriteString("\n💻 <b>Ứng dụng làm việc nhiều nhất hôm nay:</b>\n")
+			for app, sec := range apps {
+				if sec >= 60 {
+					sb.WriteString(fmt.Sprintf("- <b>%s</b>: %d phút\n", app, sec/60))
+				}
+			}
+		}
+
+		s.waka.mu.RLock()
+		rems := s.waka.data.Reminders
+		s.waka.mu.RUnlock()
+
+		pendingCount := 0
+		for _, r := range rems {
+			if !r.Completed {
+				pendingCount++
+			}
+		}
+
+		if pendingCount > 0 {
+			sb.WriteString(fmt.Sprintf("\n📝 <b>Chủ nhân có %d lời nhắc việc chưa hoàn thành:</b>\n", pendingCount))
+			for _, r := range rems {
+				if !r.Completed {
+					due := ""
+					if r.DueTime != "" {
+						due = fmt.Sprintf(" (Hạn: %s)", r.DueTime)
+					}
+					sb.WriteString(fmt.Sprintf("- 📌 %s%s\n", r.Title, due))
+				}
+			}
+		} else {
+			sb.WriteString("\n✨ Chủ nhân không còn lời nhắc việc nào tồn đọng. Thật tuyệt vời ạ!\n")
+		}
+
+		onChunk(sb.String())
+		onDone()
+		return
+	}
+
+	// 0.2 Nhận diện ý định THÔNG TIN HỆ THỐNG & PHẦN CỨNG
 	if strings.Contains(lower, "thông tin hệ thống") || strings.Contains(lower, "thông tin máy") || strings.Contains(lower, "cấu hình máy") || strings.Contains(lower, "phần cứng") || strings.Contains(lower, "kiểm tra phần cứng") {
 		sys := GetHardwareAndSystemInfo()
 		var sb strings.Builder
@@ -365,9 +472,32 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 		}
 	}
 
-	// Ghép System Prompt + Thói quen + Thư mục bối cảnh Cục Xương + Tài liệu đính kèm + RAG
+	// Ghép System Prompt + Hồ sơ cá nhân + Hoạt động WakaTime + Cấu hình hệ thống + Thói quen + Thư mục bối cảnh + Tài liệu + RAG
 	systemContent := PuppySystemPrompt
 	systemContent += addressingRule(s.cfg.Addressing)
+
+	// Tiêm hồ sơ cá nhân của Chủ nhân
+	if s.profile != nil {
+		profileCtx := s.profile.GetPromptContext()
+		if profileCtx != "" {
+			systemContent += "\n\n" + profileCtx
+		}
+	}
+
+	// Tiêm hoạt động & năng suất làm việc WakaTime
+	if s.waka != nil {
+		wakaCtx := s.waka.GetSummaryContext()
+		if wakaCtx != "" {
+			systemContent += "\n\n" + wakaCtx
+		}
+	}
+
+	// Tiêm thông tin phần cứng & hệ điều hành hiện tại
+	sysCtx := GetSystemPromptContext()
+	if sysCtx != "" {
+		systemContent += "\n\n" + sysCtx
+	}
+
 	if activeDir != "" {
 		systemContent += fmt.Sprintf("\n\n=== BỐI CẢNH THƯ MỤC HIỆN TẠI (TỪ CỤC XƯƠNG FILE MANAGER) ===\nChủ nhân đang mở và làm việc trong thư mục: `%s`\nMọi yêu cầu thống kê, tìm kiếm, đọc tệp hoặc chạy lệnh của Chủ nhân hãy ưu tiên thực hiện trong thư mục này.\n=============================================================", activeDir)
 	}

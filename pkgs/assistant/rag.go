@@ -198,7 +198,8 @@ func (rm *RAGManager) initDB() {
 const nilString = ""
 
 func (rm *RAGManager) getEmbedding(ctx context.Context, text string) ([]float32, error) {
-	client := &http.Client{Timeout: 8 * time.Second}
+	// Dùng timeout ngắn để không làm nghẽn quá trình nạp tài liệu khi llama-server chưa bật
+	client := &http.Client{Timeout: 1200 * time.Millisecond}
 	reqBody, _ := json.Marshal(openAIEmbeddingReq{Input: text})
 	url := fmt.Sprintf("%s/v1/embeddings", rm.llamaHost)
 

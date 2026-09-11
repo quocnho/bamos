@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"net/http"
@@ -172,6 +173,32 @@ func main() {
 	}
 
 	aiService := NewAIService(cfg, ragMgr, fsTool, userMem, sysInspector, wakaTracker, userProfile)
+
+	// Đồng bộ họ tên người dùng từ Profile vào Memory
+	if userProfile != nil && userProfile.Profile.FullName != "" && userMem != nil {
+		userMem.mu.Lock()
+		userMem.Data.UserName = userProfile.Profile.FullName
+		userMem.save()
+		userMem.mu.Unlock()
+	}
+
+	// Tự động đồng bộ Hồ sơ cá nhân, Thông số hệ thống & Hoạt động WakaTime vào cơ sở tri thức RAG
+	go func() {
+		time.Sleep(1 * time.Second) // Chờ db khởi tạo trọn vẹn
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		if userProfile != nil {
+			userProfile.SyncToRAG(ctx)
+		}
+		if ragMgr != nil {
+			SyncSystemToRAG(ctx, ragMgr)
+		}
+		if wakaTracker != nil && ragMgr != nil {
+			wakaTracker.SyncToRAG(ctx, ragMgr)
+		}
+		fmt.Println("[BamAI] Đã đồng bộ Hồ sơ cá nhân, Cấu hình hệ thống & WakaTime vào cơ sở tri thức RAG.")
+	}()
 
 	// Khởi động giao diện người dùng
 	if os.Getenv("DISPLAY") == "" && os.Getenv("WAYLAND_DISPLAY") == "" {
