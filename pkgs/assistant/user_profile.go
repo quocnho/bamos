@@ -37,14 +37,19 @@ type UserProfileData struct {
 
 // AvailableDomains danh sách các lĩnh vực chuyên môn để người dùng chọn tối đa 3
 var AvailableDomains = []string{
-	"NixOS & Linux System",
-	"Lập trình Backend & Go",
-	"AI, SLM & RAG Vector Search",
-	"Frontend Web & UI/UX Design",
-	"DevOps, Docker & Cloud Native",
-	"An toàn thông tin & Bảo mật",
-	"Khoa học dữ liệu & Data Analytics",
-	"Embedded, IoT & Phần cứng",
+	"Công nghệ thông tin & Phát triển phần mềm",
+	"Dữ liệu & Trí tuệ nhân tạo (AI / Data)",
+	"Kỹ thuật & Tự động hóa (Cơ khí, Điện tử, Xây dựng...)",
+	"Sản xuất & Vận hành chuỗi cung ứng (Manufacturing / Supply Chain)",
+	"Marketing, Truyền thông & Quan hệ công chúng (PR)",
+	"Bán hàng & Phát triển kinh doanh (Sales / BD)",
+	"Tài chính, Kế toán & Kiểm toán",
+	"Nhân sự, Tuyển dụng & Đào tạo nội bộ (HR)",
+	"Thiết kế, Nghệ thuật & Sáng tạo nội dung (UI/UX, Đồ họa, Video...)",
+	"Pháp chế & Tuân thủ (Legal & Compliance)",
+	"Y tế, Dược phẩm & Chăm sóc sức khỏe",
+	"Giáo dục, Giảng dạy & Nghiên cứu (R&D)",
+	"Quản trị & Điều hành chung (C-Level, Founder, Quản lý tổng quát)",
 }
 
 // GetAddressingPronouns trả về (userTitle, assistantTitle) dựa trên cách xưng hô

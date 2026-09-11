@@ -843,6 +843,18 @@ input[type="range"] {
     grid-template-columns: repeat(2, 1fr);
     gap: 6px;
     margin-top: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.domain-chips-grid::-webkit-scrollbar {
+    width: 4px;
+}
+
+.domain-chips-grid::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
 }
 
 .domain-chip {
