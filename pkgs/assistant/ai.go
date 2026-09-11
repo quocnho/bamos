@@ -85,17 +85,22 @@ var (
 // maxWebContextBytes giới hạn lượng nội dung trang web đưa vào ngữ cảnh model.
 const maxWebContextBytes = 4000
 
-const PuppySystemPrompt = `Bạn là BamOS Puppy (Mascot Assistant) - một chú cún cưng AI thông minh, đáng yêu và tận tụy trên hệ điều hành BamOS (NixOS GNOME).
-Quy tắc xưng hô và phong cách:
-- BẮT BUỘC xưng hô: Luôn luôn gọi người dùng là "Chủ nhân" (hoặc "Chủ nhân ơi", "Chủ nhân ạ"), và tự xưng là "Em". TUYỆT ĐỐI KHÔNG dùng từ "bạn", "người dùng", "tôi".
-- Khi chào hỏi hoặc mở đầu, hãy dùng các câu như: "Em chào Chủ nhân ạ!", "Chúc Chủ nhân một ngày làm việc thật vui vẻ và hiệu quả!", "Dạ, em nghe đây ạ!".
-- Đôi khi thêm tiếng "Gâu gâu!" vui vẻ ở đầu hoặc cuối câu một cách tự nhiên, đáng yêu.
-- Nếu có dữ liệu tri thức nội bộ (RAG), dữ liệu tệp tin hoặc thông tin thói quen, hãy sử dụng để phục vụ Chủ nhân thật chu đáo và chính xác.
-- Luôn sẵn sàng hỗ trợ, trả lời ngắn gọn, súc tích, dễ hiểu và lễ phép.`
+const PuppySystemPrompt = `Bạn là BamOS Assistant - trợ lý AI thông minh, tận tụy và lịch thiệp trên hệ điều hành BamOS (NixOS).
+Quy tắc phong cách và xưng hô:
+- Luôn tuân thủ nghiêm ngặt danh xưng của người dùng và ngôi xưng của trợ lý được quy định trong ngữ cảnh hồ sơ người dùng bên dưới.
+- Luôn giữ thái độ nhã nhặn, tôn trọng, hữu ích, dễ hiểu và trả lời ngắn gọn, súc tích.
+- Nếu có dữ liệu tri thức nội bộ (RAG), dữ liệu tệp tin hoặc thông tin thói quen, hãy sử dụng để giải đáp câu hỏi một cách chu đáo và chính xác nhất.`
 
 func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool, history []ChatMessage, onChunk func(string), onDone func(), onError func(string)) {
 	trimmed := strings.TrimSpace(question)
 	lower := strings.ToLower(trimmed)
+
+	// Lấy danh xưng người dùng và ngôi xưng của trợ lý từ hồ sơ cá nhân (fallback sang cấu hình nếu chưa có)
+	userAddr := s.cfg.Addressing
+	if s.profile != nil && s.profile.Profile.Addressing != "" {
+		userAddr = s.profile.Profile.Addressing
+	}
+	userTitle, botTitle := GetAddressingPronouns(userAddr)
 
 	// Ghi nhận truy vấn vào bộ nhớ thói quen
 	if s.mem != nil {
@@ -127,7 +132,7 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 	if isIdentityQuery && s.profile != nil {
 		p := s.profile.Profile
 		var sb strings.Builder
-		sb.WriteString(fmt.Sprintf("🐶 <b>Gâu gâu! Em chào Chủ nhân %s ạ! Em luôn ghi nhớ rõ ràng thông tin hồ sơ của Chủ nhân:</b>\n\n", p.FullName))
+		sb.WriteString(fmt.Sprintf("🐶 <b>%s chào %s %s ạ! %s luôn ghi nhớ rõ ràng thông tin hồ sơ của %s:</b>\n\n", botTitle, userTitle, p.FullName, botTitle, userTitle))
 		sb.WriteString(fmt.Sprintf("👤 <b>Họ và tên:</b> %s\n", p.FullName))
 		if p.Age > 0 {
 			sb.WriteString(fmt.Sprintf("🎂 <b>Tuổi:</b> %d\n", p.Age))
@@ -138,9 +143,7 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 		if p.Phone != "" {
 			sb.WriteString(fmt.Sprintf("📱 <b>Số điện thoại:</b> %s\n", p.Phone))
 		}
-		if p.Addressing != "" {
-			sb.WriteString(fmt.Sprintf("🤝 <b>Cách xưng hô:</b> Gọi là \"%s\", em tự xưng \"Em\"\n", p.Addressing))
-		}
+		sb.WriteString(fmt.Sprintf("🤝 <b>Cách xưng hô:</b> Gọi %s là \"%s\", %s tự xưng là \"%s\"\n", userTitle, userTitle, botTitle, botTitle))
 		if p.CurrentLevel != "" {
 			sb.WriteString(fmt.Sprintf("⭐ <b>Trình độ chuyên môn:</b> %s", p.CurrentLevel))
 			if p.TotalQuiz > 0 {
@@ -149,7 +152,7 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 			sb.WriteString("\n")
 		}
 		if len(p.Domains) > 0 {
-			sb.WriteString(fmt.Sprintf("🎯 <b>Lĩnh vực quan tâm:</b> %s\n", strings.Join(p.Domains, ", ")))
+			sb.WriteString(fmt.Sprintf("🎯 <b>3 lĩnh vực quan tâm:</b> %s\n", strings.Join(p.Domains, ", ")))
 		}
 		if len(p.RoadmapSteps) > 0 {
 			sb.WriteString("\n🗺️ <b>Lộ trình nâng cao kiến thức:</b>\n")
@@ -161,7 +164,7 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 				sb.WriteString(fmt.Sprintf("- %s <b>%s</b> (%s): %s\n", icon, step.Title, step.Domain, step.Description))
 			}
 		}
-		sb.WriteString("\nEm đã nạp toàn bộ thông tin này vào cơ sở tri thức RAG để luôn đồng hành và hỗ trợ Chủ nhân tốt nhất ạ! 🐾")
+		sb.WriteString(fmt.Sprintf("\n%s đã nạp toàn bộ thông tin này vào cơ sở tri thức RAG để luôn đồng hành và hỗ trợ %s tốt nhất ạ! 🐾", botTitle, userTitle))
 		onChunk(sb.String())
 		onDone()
 		return
@@ -171,7 +174,7 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 	if (strings.Contains(lower, "wakatime") || strings.Contains(lower, "thời gian làm việc") || strings.Contains(lower, "năng suất làm việc") || strings.Contains(lower, "hôm nay làm được bao lâu") || strings.Contains(lower, "lời nhắc việc") || strings.Contains(lower, "nhắc việc") || strings.Contains(lower, "việc cần làm")) && s.waka != nil {
 		sum := s.waka.GetSummary()
 		var sb strings.Builder
-		sb.WriteString("🐶 <b>Gâu gâu! Em gửi Chủ nhân báo cáo năng suất WakaTime và công việc ạ:</b>\n\n")
+		sb.WriteString(fmt.Sprintf("🐶 <b>%s gửi %s báo cáo năng suất WakaTime và công việc ạ:</b>\n\n", botTitle, userTitle))
 		sb.WriteString(fmt.Sprintf("⏱️ <b>Thời gian làm việc hôm nay:</b> %s (khoảng %d phút)\n", sum["today_hours_text"], sum["today_total_minutes"]))
 		sb.WriteString(fmt.Sprintf("📅 <b>Tổng 7 ngày qua:</b> %s\n", sum["seven_days_hours"]))
 
@@ -196,7 +199,7 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 		}
 
 		if pendingCount > 0 {
-			sb.WriteString(fmt.Sprintf("\n📝 <b>Chủ nhân có %d lời nhắc việc chưa hoàn thành:</b>\n", pendingCount))
+			sb.WriteString(fmt.Sprintf("\n📝 <b>%s có %d lời nhắc việc chưa hoàn thành:</b>\n", userTitle, pendingCount))
 			for _, r := range rems {
 				if !r.Completed {
 					due := ""
@@ -207,7 +210,7 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 				}
 			}
 		} else {
-			sb.WriteString("\n✨ Chủ nhân không còn lời nhắc việc nào tồn đọng. Thật tuyệt vời ạ!\n")
+			sb.WriteString(fmt.Sprintf("\n✨ %s không còn lời nhắc việc nào tồn đọng. Thật tuyệt vời ạ!\n", userTitle))
 		}
 
 		onChunk(sb.String())
@@ -219,14 +222,14 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 	if strings.Contains(lower, "thông tin hệ thống") || strings.Contains(lower, "thông tin máy") || strings.Contains(lower, "cấu hình máy") || strings.Contains(lower, "phần cứng") || strings.Contains(lower, "kiểm tra phần cứng") {
 		sys := GetHardwareAndSystemInfo()
 		var sb strings.Builder
-		sb.WriteString("🐶 <b>Gâu gâu! Em gửi Chủ nhân thông tin hệ thống và phần cứng máy tính ạ:</b>\n\n")
+		sb.WriteString(fmt.Sprintf("🐶 <b>%s gửi %s thông tin hệ thống và phần cứng máy tính ạ:</b>\n\n", botTitle, userTitle))
 		sb.WriteString(fmt.Sprintf("💻 <b>Hệ điều hành:</b> %s (Kernel: `%s`)\n", sys.OS, sys.Kernel))
 		sb.WriteString(fmt.Sprintf("🏷️ <b>Tên máy:</b> `%s`\n", sys.HostName))
 		sb.WriteString(fmt.Sprintf("⚡ <b>Bộ vi xử lý (CPU):</b> %s (%d nhân)\n", sys.CPU, sys.Cores))
 		sb.WriteString(fmt.Sprintf("🎮 <b>Đồ họa (GPU):</b> %s\n", sys.GPU))
 		sb.WriteString(fmt.Sprintf("🧠 <b>Bộ nhớ RAM:</b> Đang dùng %s / Tổng %s\n", sys.MemoryUsed, sys.MemoryTotal))
 		sb.WriteString(fmt.Sprintf("💾 <b>Ổ đĩa gốc (/):</b> %s\n\n", sys.DiskUsage))
-		sb.WriteString("Chủ nhân có muốn em tối ưu hoặc dọn dẹp hệ thống không ạ?")
+		sb.WriteString(fmt.Sprintf("%s có muốn %s tối ưu hoặc dọn dẹp hệ thống không ạ?", userTitle, botTitle))
 		onChunk(sb.String())
 		onDone()
 		return
@@ -844,13 +847,9 @@ func escapeHtmlAttr(s string) string {
 }
 
 // addressingRule bổ sung quy tắc xưng hô theo thiết lập của người dùng.
-// Trả về chuỗi rỗng khi dùng mặc định "Chủ nhân" (đã có sẵn trong system prompt).
 func addressingRule(addressing string) string {
-	addressing = strings.TrimSpace(addressing)
-	if addressing == "" || addressing == "Chủ nhân" {
-		return ""
-	}
-	return fmt.Sprintf("\n- XƯNG HÔ THEO THIẾT LẬP: Gọi người dùng là \"%s\" và tự xưng là \"Em\". Quy tắc này THAY THẾ cho hướng dẫn gọi \"Chủ nhân\" ở trên.", addressing)
+	userTitle, botTitle := GetAddressingPronouns(addressing)
+	return fmt.Sprintf("\n- XƯNG HÔ THEO HỒ SƠ: Gọi người dùng là \"%s\" và tự xưng là \"%s\". Tuyệt đối tuân thủ cặp đại từ xưng hô này trong toàn bộ câu trả lời, không dùng đại từ khác.", userTitle, botTitle)
 }
 
 // fetchWebContent tải và trích xuất nội dung văn bản chính từ URL trang web

@@ -34,11 +34,15 @@ body {
 /* ===================================================
    BONG BÓNG THOẠI CHUNG (GLASSMORPHISM)
    =================================================== */
+:root {
+    --app-window-width: 480px;
+}
+
 .bubble {
     position: absolute;
     right: 14px;
     bottom: 185px;
-    width: 350px;
+    width: var(--app-window-width, 480px);
     max-width: 92vw;
     max-height: calc(100vh - 210px);
     background: rgba(255, 255, 255, 0.94);
@@ -956,7 +960,7 @@ input[type="file"].hidden {
 }
 
 .modal-card {
-    width: 380px;
+    width: var(--app-window-width, 480px);
     max-width: calc(var(--screen-width, 1920px) - 16px);
     flex-shrink: 0;
     background: #ffffff;

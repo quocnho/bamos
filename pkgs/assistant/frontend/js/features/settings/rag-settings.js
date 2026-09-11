@@ -100,28 +100,6 @@ async function addFiles(fileList) {
     renderPending();
 }
 
-function selectedAddressing() {
-    if (!els.setAddressing) return "Chủ nhân";
-    if (els.setAddressing.value === "__custom__") {
-        return (els.setAddressingCustom.value || "").trim() || "Chủ nhân";
-    }
-    return els.setAddressing.value || "Chủ nhân";
-}
-
-function fillAddressing(value) {
-    const addressing = (value || "Chủ nhân").trim() || "Chủ nhân";
-    if (ADDRESSING_PRESETS.includes(addressing)) {
-        els.setAddressing.value = addressing;
-        toggle(els.setAddressingCustom, false);
-        els.setAddressingCustom.value = "";
-    } else {
-        els.setAddressing.value = "__custom__";
-        toggle(els.setAddressingCustom, true);
-        els.setAddressingCustom.value = addressing;
-    }
-    setAddressing(addressing);
-}
-
 // ---------------------------------------------------------------------------
 // Callback từ Go
 // ---------------------------------------------------------------------------
@@ -140,8 +118,6 @@ export function handleSettingsLoaded(result) {
     const alpha = settings.rag_hybrid_alpha !== undefined ? Math.round(settings.rag_hybrid_alpha * 100) : 65;
     if (els.setRagAlpha) els.setRagAlpha.value = String(alpha);
     updateAlphaLabel(alpha);
-
-    fillAddressing(settings.addressing);
 }
 
 function updateAlphaLabel(val) {
@@ -199,7 +175,8 @@ export function handleRagDocumentsListed(result) {
 
         const delBtn = row.querySelector(".mini-del-btn");
         delBtn.addEventListener("click", () => {
-            if (confirm(`Chủ nhân có chắc chắn muốn xoá tài liệu "${doc.source}" khỏi tri thức không?`)) {
+            const userTitle = getAddressing() || "Bạn";
+            if (confirm(`${userTitle} có chắc chắn muốn xoá tài liệu "${doc.source}" khỏi tri thức không?`)) {
                 native.ragDeleteDoc(doc.source);
             }
         });
@@ -276,17 +253,14 @@ function saveSettings() {
     const enabled = els.setRagEnabled ? els.setRagEnabled.checked : true;
     const topK = els.setRagTopk ? parseInt(els.setRagTopk.value, 10) : 4;
     const alphaVal = els.setRagAlpha ? parseInt(els.setRagAlpha.value, 10) / 100.0 : 0.65;
-    const addressing = selectedAddressing();
 
     setRagEnabled(enabled);
-    setAddressing(addressing);
     setStatus("Đang lưu thiết lập…");
 
     native.saveSettings({
         enable_rag: enabled,
         rag_top_k: topK,
         rag_hybrid_alpha: alphaVal,
-        addressing,
     });
 }
 
@@ -364,19 +338,6 @@ export function initRagSettings() {
 
     els.setRagEnabled.addEventListener("change", () => {
         setRagEnabled(els.setRagEnabled.checked);
-    });
-
-    els.setAddressing.addEventListener("change", () => {
-        const custom = els.setAddressing.value === "__custom__";
-        toggle(els.setAddressingCustom, custom);
-        if (custom) {
-            els.setAddressingCustom.focus();
-        } else {
-            setAddressing(els.setAddressing.value);
-        }
-    });
-    els.setAddressingCustom.addEventListener("input", () => {
-        setAddressing(els.setAddressingCustom.value);
     });
 
     // Chọn tệp

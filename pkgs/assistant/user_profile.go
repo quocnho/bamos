@@ -25,14 +25,50 @@ type UserProfileData struct {
 	Age           int             `json:"age"`
 	Email         string          `json:"email"`
 	Phone         string          `json:"phone"`
-	Addressing    string          `json:"addressing"` // "Chủ nhân", "Anh", "Chị", "Bạn"...
-	Domains       []string        `json:"domains"`    // "NixOS & Linux", "Backend Golang", "AI & RAG"...
+	Addressing    string          `json:"addressing"` // "Chủ nhân", "Anh", "Chị", "Ông", "Bà", "Bạn", hoặc tự nhập
+	Domains       []string        `json:"domains"`    // Chọn tối đa 3 lĩnh vực quan tâm
 	CurrentLevel  string          `json:"current_level"` // "Newbie", "Junior", "Intermediate", "Senior"
 	QuizScore     int             `json:"quiz_score"`
 	TotalQuiz     int             `json:"total_quiz"`
 	AssessmentAt  string          `json:"assessment_at"`
 	RoadmapSteps  []RoadmapStep   `json:"roadmap_steps"`
 	Preferences   UserPreferences `json:"preferences"`
+}
+
+// AvailableDomains danh sách các lĩnh vực chuyên môn để người dùng chọn tối đa 3
+var AvailableDomains = []string{
+	"NixOS & Linux System",
+	"Lập trình Backend & Go",
+	"AI, SLM & RAG Vector Search",
+	"Frontend Web & UI/UX Design",
+	"DevOps, Docker & Cloud Native",
+	"An toàn thông tin & Bảo mật",
+	"Khoa học dữ liệu & Data Analytics",
+	"Embedded, IoT & Phần cứng",
+}
+
+// GetAddressingPronouns trả về (userTitle, assistantTitle) dựa trên cách xưng hô
+func GetAddressingPronouns(addressing string) (string, string) {
+	addr := strings.TrimSpace(addressing)
+	if addr == "" {
+		addr = "Bạn"
+	}
+	switch strings.ToLower(addr) {
+	case "chủ nhân":
+		return "Chủ nhân", "Em"
+	case "anh":
+		return "Anh", "Em"
+	case "chị":
+		return "Chị", "Em"
+	case "ông":
+		return "Ông", "Cháu"
+	case "bà":
+		return "Bà", "Cháu"
+	case "bạn":
+		return "Bạn", "Tôi"
+	default:
+		return addr, "Em"
+	}
 }
 
 type UserPreferences struct {
@@ -245,7 +281,11 @@ func (upm *UserProfileManager) UpdateProfile(p UserProfileData) {
 		upm.Profile.Addressing = p.Addressing
 	}
 	if len(p.Domains) > 0 {
-		upm.Profile.Domains = p.Domains
+		if len(p.Domains) > 3 {
+			upm.Profile.Domains = p.Domains[:3]
+		} else {
+			upm.Profile.Domains = p.Domains
+		}
 	}
 	if p.Preferences.ThemeColor != "" {
 		upm.Profile.Preferences = p.Preferences
@@ -263,8 +303,10 @@ func (upm *UserProfileManager) GetPromptContext() string {
 	defer upm.mu.RUnlock()
 
 	p := upm.Profile
+	userTitle, botTitle := GetAddressingPronouns(p.Addressing)
+
 	var sb strings.Builder
-	sb.WriteString("=== HỒ SƠ & DANH TÍNH CHỦ NHÂN (ĐÃ ĐĂNG KÝ HỆ THỐNG) ===\n")
+	sb.WriteString("=== HỒ SƠ & DANH TÍNH NGƯỜI DÙNG (USER PROFILE) ===\n")
 	if p.FullName != "" {
 		sb.WriteString(fmt.Sprintf("- Họ và tên: %s\n", p.FullName))
 	}
@@ -277,22 +319,22 @@ func (upm *UserProfileManager) GetPromptContext() string {
 	if p.Phone != "" {
 		sb.WriteString(fmt.Sprintf("- Số điện thoại: %s\n", p.Phone))
 	}
-	if p.Addressing != "" {
-		sb.WriteString(fmt.Sprintf("- Cách xưng hô ưa thích: %s\n", p.Addressing))
-	}
+	sb.WriteString(fmt.Sprintf("- Danh xưng người dùng: %s\n", userTitle))
+	sb.WriteString(fmt.Sprintf("- Ngôi xưng của Trợ lý: %s\n", botTitle))
+
 	if p.CurrentLevel != "" {
-		sb.WriteString(fmt.Sprintf("- Trình độ chuyên môn hiện tại: %s", p.CurrentLevel))
+		sb.WriteString(fmt.Sprintf("- Trình độ chuyên môn: %s", p.CurrentLevel))
 		if p.TotalQuiz > 0 {
-			sb.WriteString(fmt.Sprintf(" (Đạt %d/%d điểm bài kiểm tra kiến thức)\n", p.QuizScore, p.TotalQuiz))
+			sb.WriteString(fmt.Sprintf(" (Đạt %d/%d điểm kiểm tra năng lực)\n", p.QuizScore, p.TotalQuiz))
 		} else {
 			sb.WriteString("\n")
 		}
 	}
 	if len(p.Domains) > 0 {
-		sb.WriteString(fmt.Sprintf("- Lĩnh vực quan tâm & chuyên môn: %s\n", strings.Join(p.Domains, ", ")))
+		sb.WriteString(fmt.Sprintf("- 3 lĩnh vực quan tâm hàng đầu: %s\n", strings.Join(p.Domains, ", ")))
 	}
 	if len(p.RoadmapSteps) > 0 {
-		sb.WriteString("- Lộ trình phát triển năng lực cá nhân:\n")
+		sb.WriteString("- Lộ trình kỹ năng cá nhân hoá:\n")
 		for _, step := range p.RoadmapSteps {
 			status := "Chưa hoàn thành"
 			if step.Completed {
@@ -301,8 +343,10 @@ func (upm *UserProfileManager) GetPromptContext() string {
 			sb.WriteString(fmt.Sprintf("  + [%s] %s: %s (%s)\n", step.Domain, step.Title, step.Description, status))
 		}
 	}
-	sb.WriteString("QUY TẮC BẮT BUỘC: Khi người dùng hỏi 'tôi tên gì', 'tôi là ai', 'thông tin của tôi', bạn PHẢI nhận ra người dùng là Chủ nhân có họ tên và thông tin nêu trên, trả lời thân thiện, chính xác và lễ phép.\n")
-	sb.WriteString("=========================================================")
+	sb.WriteString(fmt.Sprintf("QUY TẮC BẮT BUỘC VỀ XƯNG HÔ VÀ DANH TÍNH:\n"))
+	sb.WriteString(fmt.Sprintf("- Khi trò chuyện, bạn BẮT BUỘC gọi người dùng là \"%s\" (hoặc \"%s ơi\", \"%s ạ\"), và tự xưng là \"%s\". TUYỆT ĐỐI KHÔNG dùng từ ngữ xưng hô khác làm sai lệch thiết lập này.\n", userTitle, userTitle, userTitle, botTitle))
+	sb.WriteString(fmt.Sprintf("- Khi người dùng hỏi 'tôi tên gì', 'tôi là ai', 'thông tin của tôi', bạn PHẢI nhận diện người dùng chính là %s %s có hồ sơ nêu trên, trả lời thân thiện, chính xác và lịch thiệp.\n", userTitle, p.FullName))
+	sb.WriteString("====================================================")
 	return sb.String()
 }
 

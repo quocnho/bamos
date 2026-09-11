@@ -11,7 +11,7 @@ export const EYE_EXERCISES = [
         icon: "✨",
         cssClass: "exercise-blink",
         instruction:
-            "Chủ nhân hãy nhìn theo mắt em và chớp mắt liên tục để tuyến lệ làm ẩm màng giác mạc nhé!",
+            "Hãy nhìn theo mắt cún cưng và chớp mắt đều đặn để tuyến lệ làm ẩm màng giác mạc nhé!",
     },
     {
         id: "left-right",
@@ -19,7 +19,7 @@ export const EYE_EXERCISES = [
         icon: "👀",
         cssClass: "exercise-left-right",
         instruction:
-            "Chủ nhân hãy cùng em liếc mắt sang trái 2 giây, rồi sang phải 2 giây để thư giãn cơ vận nhãn nhé!",
+            "Hãy liếc mắt sang trái 2 giây, rồi sang phải 2 giây để thư giãn các cơ vận nhãn nhé!",
     },
     {
         id: "roll",
@@ -27,7 +27,7 @@ export const EYE_EXERCISES = [
         icon: "🔄",
         cssClass: "exercise-roll",
         instruction:
-            "Chủ nhân hãy đảo mắt chầm chậm theo hình vòng tròn cùng em để xua tan mỏi mắt nhé!",
+            "Hãy đảo mắt chầm chậm theo hình vòng tròn để xua tan cảm giác mỏi mắt nhé!",
     },
     {
         id: "look-far",
@@ -35,7 +35,7 @@ export const EYE_EXERCISES = [
         icon: "🏞️",
         cssClass: "exercise-look-far",
         instruction:
-            "Chủ nhân hãy phóng tầm mắt qua cửa sổ hoặc nhìn một điểm thật xa để cơ thể mi được thả lỏng hoàn toàn nhé!",
+            "Hãy phóng tầm mắt qua cửa sổ hoặc nhìn một điểm thật xa để cơ thể mi được thả lỏng hoàn toàn!",
     },
 ];
 

@@ -534,28 +534,6 @@
                         </div>
 
                         <div class="setting-item">
-                            <label for="set-addressing"
-                                >Cách xưng hô với bạn:</label
-                            >
-                            <div class="setting-row">
-                                <select id="set-addressing">
-                                    <option value="Chủ nhân">Chủ nhân</option>
-                                    <option value="Anh">Anh</option>
-                                    <option value="Chị">Chị</option>
-                                    <option value="Bạn">Bạn</option>
-                                    <option value="Em">Em</option>
-                                    <option value="__custom__">Khác…</option>
-                                </select>
-                                <input
-                                    type="text"
-                                    id="set-addressing-custom"
-                                    class="text-input hidden"
-                                    placeholder="Nhập cách gọi riêng…"
-                                />
-                            </div>
-                        </div>
-
-                        <div class="setting-item">
                             <label for="set-rag-topk">
                                 Số đoạn tri thức dùng mỗi câu trả lời:
                                 <b id="set-rag-topk-value">4</b>
@@ -1186,16 +1164,49 @@
                                 <label for="prof-email">Email:</label>
                                 <input type="email" id="prof-email" class="text-input" placeholder="user@bamos.vn" />
                             </div>
-                            <div class="setting-item">
-                                <label for="prof-theme-color">🎨 Phong cách màu sắc & Ánh sáng yêu thích:</label>
-                                <select id="prof-theme-color" class="text-input">
-                                    <option value="teal">Xanh Ngọc BamOS (Mặc định)</option>
-                                    <option value="cyan">Cyberpunk Cyan / Neon</option>
-                                    <option value="warm">Cam Hổ Phách Ấm Áp (Cozy Amber)</option>
-                                    <option value="purple">Tím Hoàng Gia (Royal Purple)</option>
-                                    <option value="rose">Hồng Đào Dịu Nhẹ (Peach Rose)</option>
-                                </select>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="setting-item">
+                                    <label for="prof-addressing">Cách xưng hô với bạn:</label>
+                                    <select id="prof-addressing" class="text-input">
+                                        <option value="Chủ nhân">Chủ nhân (Em)</option>
+                                        <option value="Anh">Anh (Em)</option>
+                                        <option value="Chị">Chị (Em)</option>
+                                        <option value="Ông">Ông (Cháu)</option>
+                                        <option value="Bà">Bà (Cháu)</option>
+                                        <option value="Bạn">Bạn (Tôi)</option>
+                                        <option value="__custom__">Tự thêm...</option>
+                                    </select>
+                                    <input
+                                        type="text"
+                                        id="prof-addressing-custom"
+                                        class="text-input hidden"
+                                        style="margin-top: 6px;"
+                                        placeholder="Nhập đại từ (ví dụ: Thầy, Cô, Sếp...)"
+                                    />
+                                </div>
+                                <div class="setting-item">
+                                    <label for="prof-theme-color">🎨 Phong cách màu sắc:</label>
+                                    <select id="prof-theme-color" class="text-input">
+                                        <option value="teal">Xanh Ngọc BamOS (Mặc định)</option>
+                                        <option value="cyan">Cyberpunk Cyan / Neon</option>
+                                        <option value="warm">Cam Hổ Phách Ấm Áp</option>
+                                        <option value="purple">Tím Hoàng Gia</option>
+                                        <option value="rose">Hồng Đào Dịu Nhẹ</option>
+                                    </select>
+                                </div>
                             </div>
+
+                            <!-- Chọn tối đa 3 lĩnh vực chuyên môn -->
+                            <div class="setting-item" style="margin-top: 4px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <label style="font-weight: 700; color: #1e293b;">🎯 Lĩnh vực & chuyên môn quan tâm:</label>
+                                    <span id="prof-domains-counter" style="font-size: 11.5px; font-weight: 700; color: #2a9d8f;">(Chọn tối đa 3)</span>
+                                </div>
+                                <div id="prof-domains-container" class="domain-chips-grid">
+                                    <!-- Sẽ được render động bằng JS từ available_domains -->
+                                </div>
+                            </div>
+
                             <div class="modal-actions-row">
                                 <button id="btn-save-profile" class="modal-btn primary">Lưu Hồ Sơ & Sở Thích</button>
                                 <span id="profile-status" style="font-size: 12px; margin-left: 8px;"></span>

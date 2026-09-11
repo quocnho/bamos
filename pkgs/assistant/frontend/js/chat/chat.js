@@ -162,14 +162,15 @@ export function send() {
     let displayUserMsg = question;
     if (attachment) {
         attachments.consume();
+        const userTitle = getAddressing() || "Người dùng";
         if (attachment.type === "image") {
             displayUserMsg = `🖼️ [Đính kèm ảnh: ${attachment.name}] ${question}`;
-            question = `[Chủ nhân gửi kèm tệp ảnh ${attachment.name}]\n${question}`;
+            question = `[${userTitle} gửi kèm tệp ảnh ${attachment.name}]\n${question}`;
         } else {
             displayUserMsg = `📄 [Đính kèm file: ${attachment.name}] ${question}`;
             const intro =
                 question ||
-                `Chủ nhân gửi tệp ${attachment.name}, hãy đọc và phân tích tóm tắt nội dung này nhé!`;
+                `${userTitle} gửi tệp ${attachment.name}, hãy đọc và phân tích tóm tắt nội dung này nhé!`;
             question = `=== NỘI DUNG TỆP ĐÍNH KÈM: ${attachment.name} ===\n${attachment.content}\n===================================\n${intro}`;
         }
     }

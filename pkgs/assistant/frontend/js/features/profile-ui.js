@@ -2,10 +2,23 @@
 // features/profile-ui.js — Giao diện Hồ sơ người dùng & Onboarding Quiz
 // ============================================================================
 
-import { els, show, hide } from "../core/dom.js";
+import { els, show, hide, toggle } from "../core/dom.js";
 import { native } from "../core/native.js";
 
+const ADDRESSING_PRESETS = ["Chủ nhân", "Anh", "Chị", "Ông", "Bà", "Bạn"];
+
 let currentQuestions = [];
+let selectedDomains = [];
+let availableDomainsList = [
+    "NixOS & Linux System",
+    "Lập trình Backend & Go",
+    "AI, SLM & RAG Vector Search",
+    "Frontend Web & UI/UX Design",
+    "DevOps, Docker & Cloud Native",
+    "An toàn thông tin & Bảo mật",
+    "Khoa học dữ liệu & Data Analytics",
+    "Embedded, IoT & Phần cứng",
+];
 
 export function openProfileModal() {
     show(els.profileModal);
@@ -43,6 +56,17 @@ export function handleProfileLoaded(result) {
     if (els.profAge) els.profAge.value = p.age || "";
     if (els.profPhone) els.profPhone.value = p.phone || "";
     if (els.profEmail) els.profEmail.value = p.email || "";
+
+    // Xử lý xưng hô
+    fillProfileAddressing(p.addressing || "Chủ nhân");
+
+    // Xử lý lĩnh vực chuyên môn (tối đa 3)
+    if (result.available_domains && Array.isArray(result.available_domains)) {
+        availableDomainsList = result.available_domains;
+    }
+    selectedDomains = Array.isArray(p.domains) ? p.domains.slice(0, 3) : [];
+    renderDomainChips();
+
     if (els.profThemeColor && p.preferences) {
         els.profThemeColor.value = p.preferences.theme_color || "teal";
     }
@@ -50,6 +74,75 @@ export function handleProfileLoaded(result) {
         els.profCurrentLevel.textContent = p.current_level || "Chưa đánh giá";
     }
     renderRoadmap(p.roadmap_steps || []);
+}
+
+function fillProfileAddressing(val) {
+    const addr = (val || "Chủ nhân").trim();
+    if (ADDRESSING_PRESETS.includes(addr)) {
+        if (els.profAddressing) els.profAddressing.value = addr;
+        toggle(els.profAddressingCustom, false);
+        if (els.profAddressingCustom) els.profAddressingCustom.value = "";
+    } else {
+        if (els.profAddressing) els.profAddressing.value = "__custom__";
+        toggle(els.profAddressingCustom, true);
+        if (els.profAddressingCustom) els.profAddressingCustom.value = addr;
+    }
+}
+
+function getSelectedAddressing() {
+    if (!els.profAddressing) return "Chủ nhân";
+    if (els.profAddressing.value === "__custom__") {
+        return (els.profAddressingCustom ? els.profAddressingCustom.value : "").trim() || "Chủ nhân";
+    }
+    return els.profAddressing.value || "Chủ nhân";
+}
+
+function renderDomainChips() {
+    const container = els.profDomainsContainer;
+    if (!container) return;
+    container.innerHTML = "";
+
+    availableDomainsList.forEach((domain) => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "domain-chip" + (selectedDomains.includes(domain) ? " active" : "");
+        chip.textContent = domain;
+        chip.addEventListener("click", () => toggleDomain(domain));
+        container.appendChild(chip);
+    });
+
+    updateDomainsCounter();
+}
+
+function toggleDomain(domain) {
+    const idx = selectedDomains.indexOf(domain);
+    if (idx >= 0) {
+        selectedDomains.splice(idx, 1);
+    } else {
+        if (selectedDomains.length >= 3) {
+            if (els.profileStatus) {
+                els.profileStatus.textContent = "Chỉ được chọn tối đa 3 lĩnh vực quan tâm!";
+                els.profileStatus.style.color = "#ef4444";
+                setTimeout(() => {
+                    if (els.profileStatus) els.profileStatus.textContent = "";
+                }, 2500);
+            }
+            return;
+        }
+        selectedDomains.push(domain);
+    }
+    renderDomainChips();
+}
+
+function updateDomainsCounter() {
+    if (els.profDomainsCounter) {
+        els.profDomainsCounter.textContent = `(${selectedDomains.length}/3 lĩnh vực)`;
+        if (selectedDomains.length === 3) {
+            els.profDomainsCounter.style.color = "#2a9d8f";
+        } else {
+            els.profDomainsCounter.style.color = "#64748b";
+        }
+    }
 }
 
 export function handleQuizQuestions(result) {
@@ -94,7 +187,7 @@ function submitQuiz() {
     });
 
     if (Object.keys(answers).length < currentQuestions.length) {
-        alert("Chủ nhân vui lòng trả lời hết tất cả các câu hỏi trước khi chấm điểm nhé!");
+        alert("Vui lòng trả lời hết tất cả các câu hỏi trước khi chấm điểm nhé!");
         return;
     }
 
@@ -142,6 +235,8 @@ function saveProfile() {
         age: els.profAge ? parseInt(els.profAge.value, 10) || 0 : 0,
         phone: els.profPhone ? els.profPhone.value.trim() : "",
         email: els.profEmail ? els.profEmail.value.trim() : "",
+        addressing: getSelectedAddressing(),
+        domains: selectedDomains.slice(0, 3),
         preferences: {
             theme_color: els.profThemeColor ? els.profThemeColor.value : "teal",
         },
@@ -149,7 +244,10 @@ function saveProfile() {
     native.updateProfile(profile);
     if (els.profileStatus) {
         els.profileStatus.textContent = "Đã lưu hồ sơ thành công!";
-        setTimeout(() => (els.profileStatus.textContent = ""), 3000);
+        els.profileStatus.style.color = "#2a9d8f";
+        setTimeout(() => {
+            if (els.profileStatus) els.profileStatus.textContent = "";
+        }, 3000);
     }
 }
 
@@ -176,5 +274,14 @@ export function initProfileUI() {
     }
     if (els.btnSubmitQuiz) {
         els.btnSubmitQuiz.addEventListener("click", submitQuiz);
+    }
+    if (els.profAddressing) {
+        els.profAddressing.addEventListener("change", () => {
+            const isCustom = els.profAddressing.value === "__custom__";
+            toggle(els.profAddressingCustom, isCustom);
+            if (isCustom && els.profAddressingCustom) {
+                els.profAddressingCustom.focus();
+            }
+        });
     }
 }

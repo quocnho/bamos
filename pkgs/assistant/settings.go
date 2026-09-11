@@ -552,8 +552,9 @@ func handleGetProfile() {
 		return
 	}
 	pushJSON("onProfileLoaded", map[string]any{
-		"ok":      true,
-		"profile": globalAI.profile.Profile,
+		"ok":                true,
+		"profile":           globalAI.profile.Profile,
+		"available_domains": AvailableDomains,
 	})
 }
 
@@ -564,6 +565,11 @@ func handleUpdateProfile(raw json.RawMessage) {
 	var p UserProfileData
 	if err := json.Unmarshal(raw, &p); err == nil {
 		globalAI.profile.UpdateProfile(p)
+		// Đồng bộ cách xưng hô sang cấu hình hệ thống để duy trì tính nhất quán
+		if p.Addressing != "" {
+			globalAI.cfg.Addressing = p.Addressing
+			_ = saveConfig(globalAI.cfg)
+		}
 		pushJSON("onProfileUpdated", map[string]any{
 			"ok":      true,
 			"profile": globalAI.profile.Profile,
