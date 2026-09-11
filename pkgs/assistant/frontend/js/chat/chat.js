@@ -319,6 +319,25 @@ function flashCopy(button, ok) {
 }
 
 function onStreamClick(e) {
+    // 1. Sao chép riêng khối code
+    const codeBtn = e.target && e.target.closest ? e.target.closest(".code-copy-btn") : null;
+    if (codeBtn) {
+        const wrapper = codeBtn.closest(".code-block-wrapper");
+        const codeEl = wrapper ? wrapper.querySelector("pre code") : null;
+        if (codeEl) {
+            copyText(codeEl.textContent || "").then((ok) => {
+                codeBtn.textContent = ok ? "✅ Đã chép" : "⚠️ Lỗi";
+                codeBtn.classList.add("copied");
+                setTimeout(() => {
+                    codeBtn.textContent = "📋 Sao chép";
+                    codeBtn.classList.remove("copied");
+                }, 1500);
+            });
+        }
+        return;
+    }
+
+    // 2. Sao chép toàn bộ tin nhắn
     const button =
         e.target && e.target.closest ? e.target.closest(".msg-copy") : null;
     if (!button) return;

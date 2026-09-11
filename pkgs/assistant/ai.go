@@ -85,11 +85,16 @@ var (
 // maxWebContextBytes giới hạn lượng nội dung trang web đưa vào ngữ cảnh model.
 const maxWebContextBytes = 4000
 
-const PuppySystemPrompt = `Bạn là BamOS Assistant - trợ lý AI thông minh, tận tụy và lịch thiệp trên hệ điều hành BamOS (NixOS).
-Quy tắc phong cách và xưng hô:
-- Luôn tuân thủ nghiêm ngặt danh xưng của người dùng và ngôi xưng của trợ lý được quy định trong ngữ cảnh hồ sơ người dùng bên dưới.
-- Luôn giữ thái độ nhã nhặn, tôn trọng, hữu ích, dễ hiểu và trả lời ngắn gọn, súc tích.
-- Nếu có dữ liệu tri thức nội bộ (RAG), dữ liệu tệp tin hoặc thông tin thói quen, hãy sử dụng để giải đáp câu hỏi một cách chu đáo và chính xác nhất.`
+const PuppySystemPrompt = "Bạn là BamOS Assistant - trợ lý AI thông minh, tận tụy và lịch thiệp trên hệ điều hành BamOS (NixOS).\n\n" +
+	"Quy tắc phong cách và xưng hô:\n" +
+	"- Luôn tuân thủ nghiêm ngặt danh xưng của người dùng và ngôi xưng của trợ lý được quy định trong ngữ cảnh hồ sơ người dùng bên dưới.\n" +
+	"- Luôn giữ thái độ nhã nhặn, tôn trọng, hữu ích, dễ hiểu và trả lời súc tích.\n\n" +
+	"Quy chuẩn hiển thị nội dung tối ưu cho khung chat (độ rộng ~480px):\n" +
+	"1. Cấu trúc rõ ràng, dễ đọc: Chia câu trả lời thành các đoạn ngắn (2-4 dòng), dùng tiêu đề phụ (###) và gạch đầu dòng (-) thay vì các khối văn bản liền mạch dài dòng.\n" +
+	"2. Nổi bật thông tin: Dùng **chữ in đậm** cho các khái niệm, từ khóa, tham số hoặc số liệu quan trọng.\n" +
+	"3. Code & Lệnh: Mọi câu lệnh, tên file, đường dẫn hoặc biến PHẢI đặt trong code block `lệnh` hoặc khối code ```ngôn_ngữ ... ``` có thụt đầu dòng rõ ràng.\n" +
+	"4. Bảng biểu & So sánh: Khi so sánh hoặc liệt kê nhiều thuộc tính, hãy dùng bảng Markdown (| Cột 1 | Cột 2 |) để thông tin gọn gàng và dễ nắm bắt.\n" +
+	"5. Danh sách từng bước: Nếu hướng dẫn thao tác, hãy đánh số thứ tự (1., 2., 3.) kèm theo giải thích ngắn gọn mỗi bước."
 
 func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool, history []ChatMessage, onChunk func(string), onDone func(), onError func(string)) {
 	trimmed := strings.TrimSpace(question)
@@ -239,11 +244,11 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 	if strings.Contains(lower, "đang chạy ứng dụng") || strings.Contains(lower, "ứng dụng đang mở") || strings.Contains(lower, "ứng dụng nào đang chạy") || strings.Contains(lower, "tiến trình đang chạy") || strings.Contains(lower, "process") {
 		apps := GetRunningApps()
 		var sb strings.Builder
-		sb.WriteString(fmt.Sprintf("🐶 <b>Gâu gâu! Em đang đánh hơi thấy %d ứng dụng và tiến trình nổi bật đang hoạt động:</b>\n\n", len(apps)))
+		sb.WriteString(fmt.Sprintf("🐶 <b>%s tìm thấy %d tiến trình nổi bật đang hoạt động trên hệ thống:</b>\n\n", botTitle, len(apps)))
 		for i, app := range apps {
-			sb.WriteString(fmt.Sprintf("%d. <b>%s</b> (PID: `%s`) — CPU: `%s` | RAM: `%s`\n", i+1, app.Name, app.PID, app.CPU, app.Memory))
+			sb.WriteString(fmt.Sprintf("%d. <b>%s</b> (PID: ` %s `) — CPU: ` %s ` • RAM: ` %s `\n", i+1, app.Name, app.PID, app.CPU, app.Memory))
 		}
-		sb.WriteString("\nChủ nhân có muốn em đóng ứng dụng nào để tiết kiệm tài nguyên không ạ?")
+		sb.WriteString(fmt.Sprintf("\n%s có muốn %s tối ưu hóa tiến trình nào không ạ?", userTitle, botTitle))
 		onChunk(sb.String())
 		onDone()
 		return
@@ -268,7 +273,7 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 
 	if isCliCommand && cmdStr != "" {
 		cmdStr = strings.Trim(cmdStr, "`\"' ")
-		onChunk(fmt.Sprintf("🐶 <b>Em đang thực thi lệnh Bam CLI:</b> ` %s `\n\n", cmdStr))
+		onChunk(fmt.Sprintf("🐶 <b>%s đang thực thi lệnh Bam CLI:</b> ` %s `\n\n", botTitle, cmdStr))
 
 		// Gửi marker bắt đầu terminal để frontend hiển thị terminal window live
 		onChunk(fmt.Sprintf("<terminal cmd=\"%s\">\n", escapeHtmlAttr(cmdStr)))
@@ -287,7 +292,7 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 		}
 
 		if res.Learned {
-			sb.WriteString("🧠 <i>Em đã tự học và ghi nhớ lệnh này vào sổ tay tri thức của Chủ nhân rồi ạ!</i>\n")
+			sb.WriteString(fmt.Sprintf("🧠 <i>%s đã tự học và ghi nhớ lệnh này vào sổ tay tri thức của %s rồi ạ!</i>\n", botTitle, userTitle))
 		}
 
 		onChunk(sb.String())
