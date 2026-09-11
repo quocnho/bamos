@@ -810,7 +810,7 @@ static void setup_window_and_webview(const char *app_url) {
     // KHÔNG hiện ngay: chờ compositor sẵn sàng để gắn được visual RGBA (nền trong
     // suốt thật). Hiện khi chưa composited sẽ cho cửa sổ ĐỤC → nền "trong suốt"
     // của CSS hiển thị thành ĐEN.
-    g_timeout_add(0, try_show_window, NULL);
+    g_timeout_add(SHOW_WAIT_MS, try_show_window, NULL);
 }
 
 static void run_main_loop() {

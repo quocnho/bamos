@@ -32,6 +32,9 @@ const MODAL_IDS = [
     "recent-sessions-modal",
     "about-modal",
     "eyeleo-settings-modal",
+    "system-inspect-modal",
+    "waka-modal",
+    "profile-modal",
 ];
 
 // Overlay toàn màn hình thật sự (nghỉ dài) — vẫn mở rộng ra vùng làm việc.
