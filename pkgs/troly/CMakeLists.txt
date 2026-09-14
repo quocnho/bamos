@@ -23,6 +23,7 @@ set(SOURCES
     src/presentation/RAGViewModel.cpp
     src/presentation/LLMViewModel.cpp
     src/presentation/ActionViewModel.cpp
+    src/presentation/ExtensionsViewModels.cpp
 )
 
 set(HEADERS
@@ -33,6 +34,7 @@ set(HEADERS
     src/domain/EyeLeoConfig.hpp
     src/domain/Intent.hpp
     src/domain/ModelSlot.hpp
+    src/domain/UserProfile.hpp
     src/usecases/IRAGService.hpp
     src/usecases/IInferenceEngine.hpp
     src/usecases/IIntentClassifier.hpp
@@ -47,12 +49,15 @@ set(HEADERS
     src/infrastructure/FastHeuristicIntentClassifier.hpp
     src/infrastructure/DynamicMoERouter.hpp
     src/infrastructure/DefaultSafetyGuard.hpp
+    src/infrastructure/SystemInspectorService.hpp
+    src/infrastructure/WakaTrackerService.hpp
     src/presentation/ChatViewModel.hpp
     src/presentation/SystemMonitorViewModel.hpp
     src/presentation/EyeLeoViewModel.hpp
     src/presentation/RAGViewModel.hpp
     src/presentation/LLMViewModel.hpp
     src/presentation/ActionViewModel.hpp
+    src/presentation/ExtensionsViewModels.hpp
 )
 
 qt_add_executable(troly
@@ -113,5 +118,11 @@ target_link_libraries(test_action PRIVATE
     Threads::Threads
 )
 add_test(NAME ActionTests COMMAND test_action)
+
+add_executable(test_system_inspector
+    tests/test_system_inspector.cpp
+)
+target_include_directories(test_system_inspector PRIVATE src)
+add_test(NAME SystemInspectorTests COMMAND test_system_inspector)
 
 install(TARGETS troly DESTINATION bin)

@@ -25,8 +25,17 @@ ModalDialog {
                 RowLayout {
                     Text { text: "RAM Sử Dụng:"; color: "#A6ADC8"; font.pixelSize: 12 }
                     Text {
-                        text: (typeof systemMonitorVM !== "undefined" ? systemMonitorVM.ramUsage.toFixed(1) : "38.5") + "%"
+                        text: (typeof systemInspectorVM !== "undefined" ? systemInspectorVM.ramUsage.toFixed(1) : "38.5") + "%"
                         color: "#89B4FA"
+                        font.bold: true
+                        font.pixelSize: 12
+                    }
+                }
+                RowLayout {
+                    Text { text: "Dung lượng /nix/store:"; color: "#A6ADC8"; font.pixelSize: 12 }
+                    Text {
+                        text: typeof systemInspectorVM !== "undefined" ? systemInspectorVM.nixStoreSize : "42.5 GB"
+                        color: "#F9E2AF"
                         font.bold: true
                         font.pixelSize: 12
                     }
@@ -39,10 +48,29 @@ ModalDialog {
         }
 
         Text {
-            text: "Quản lý Dịch vụ Edge AI:"
+            text: "Trạng thái sức khỏe hệ thống:"
             color: "#CDD6F4"
             font.bold: true
             font.pixelSize: 13
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            height: 36
+            radius: 6
+            color: "#181825"
+            border.color: "#313244"
+            RowLayout {
+                anchors.fill: parent
+                anchors.margins: 8
+                Text { text: "🛡️"; font.pixelSize: 14 }
+                Text {
+                    text: typeof systemInspectorVM !== "undefined" ? systemInspectorVM.statusSummary : "Hệ thống hoạt động ổn định"
+                    color: (typeof systemInspectorVM !== "undefined" && systemInspectorVM.isHealthy) ? "#A6E3A1" : "#F38BA8"
+                    font.pixelSize: 11
+                    Layout.fillWidth: true
+                }
+            }
         }
 
         RowLayout {

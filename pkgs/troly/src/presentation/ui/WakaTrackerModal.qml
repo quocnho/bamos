@@ -23,8 +23,17 @@ ModalDialog {
                 anchors.margins: 8
                 Text { text: "⏱️"; font.pixelSize: 18 }
                 ColumnLayout {
-                    Text { text: "Hôm nay: 4 giờ 25 phút lập trình"; color: "#CDD6F4"; font.bold: true; font.pixelSize: 12 }
-                    Text { text: "Ngôn ngữ chủ yếu: C++ (72%), Nix (18%), QML (10%)"; color: "#A6ADC8"; font.pixelSize: 11 }
+                    Text {
+                        text: "Hôm nay: " + (typeof wakaTrackerVM !== "undefined" ? wakaTrackerVM.formattedTime : "4 giờ 25 phút") + " lập trình"
+                        color: "#CDD6F4"
+                        font.bold: true
+                        font.pixelSize: 12
+                    }
+                    Text {
+                        text: "Ngôn ngữ: " + (typeof wakaTrackerVM !== "undefined" ? ("C++ (" + wakaTrackerVM.cppPercent + "%), Nix (" + wakaTrackerVM.nixPercent + "%), QML (" + wakaTrackerVM.qmlPercent + "%)") : "C++ (72%), Nix (18%), QML (10%)")
+                        color: "#A6ADC8"
+                        font.pixelSize: 11
+                    }
                 }
             }
         }

@@ -48,7 +48,8 @@ plan/troly/
 | **Sprint 03 (Vector RAG)** | [sprint-03/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-03/PLAN.md) | Động cơ tri thức SQLite WAL & sqlite-vec RRF (`v01.03.00`) | 🟢 COMPLETED |
 | **Sprint 04 (MoE & Inference)**| [sprint-04/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-04/PLAN.md) | Suy luận SSE, Intent Classifier <30ms, MoE Router (`v01.04.00`) | 🟢 COMPLETED |
 | **Sprint 05 (Action & Safety)**| [sprint-05/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-05/PLAN.md) | Dispatcher, Safety Guard 4 cấp độ, Human-in-the-Loop (`v01.05.00`) | 🟢 COMPLETED |
-| **Sprint 05 Review** | [sprint-05/REVIEW.md](file:///etc/nixos/plan/troly/sprints/sprint-05/REVIEW.md) | Nghiệm thu 7/7 Tasks hoàn tất 100% CTest & Nix build | 🟢 PASSED |
+| **Sprint 06 (System & Persona)**| [sprint-06/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-06/PLAN.md) | System Inspector, WakaTracker & Adaptive Persona (`v01.06.00`) | 🟢 COMPLETED |
+| **Sprint 06 Review** | [sprint-06/REVIEW.md](file:///etc/nixos/plan/troly/sprints/sprint-06/REVIEW.md) | Nghiệm thu 7/7 Tasks hoàn tất 100% CTest (5/5) & Nix build | 🟢 PASSED |
 | **Daily Scrum** | [DAILY_SCRUM.md](file:///etc/nixos/plan/troly/scrum/DAILY_SCRUM.md) | Nhật ký hàng ngày của các AI Agent | 🟢 ACTIVE |
 
 ---

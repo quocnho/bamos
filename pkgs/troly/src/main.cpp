@@ -18,8 +18,11 @@
 #include "infrastructure/DynamicMoERouter.hpp"
 #include "infrastructure/FastHeuristicIntentClassifier.hpp"
 #include "infrastructure/DefaultSafetyGuard.hpp"
+#include "infrastructure/SystemInspectorService.hpp"
+#include "infrastructure/WakaTrackerService.hpp"
 #include "presentation/LLMViewModel.hpp"
 #include "presentation/ActionViewModel.hpp"
+#include "presentation/ExtensionsViewModels.hpp"
 
 int main(int argc, char *argv[]) {
     // Tối ưu hỗ trợ Wayland / XWayland
@@ -53,6 +56,8 @@ int main(int argc, char *argv[]) {
     eyeLeoService->start();
 
     auto safetyGuard = std::make_shared<troly::infrastructure::DefaultSafetyGuard>();
+    auto inspectorService = std::make_shared<troly::infrastructure::SystemInspectorService>();
+    auto wakaService = std::make_shared<troly::infrastructure::WakaTrackerService>();
 
     auto chatVM = std::make_unique<troly::presentation::ChatViewModel>(inferenceEngine, ragRepo, moeRouter);
     auto systemMonitorVM = std::make_unique<troly::presentation::SystemMonitorViewModel>();
@@ -60,6 +65,9 @@ int main(int argc, char *argv[]) {
     auto ragVM = std::make_unique<troly::presentation::RAGViewModel>(ragRepo);
     auto llmVM = std::make_unique<troly::presentation::LLMViewModel>(moeRouter);
     auto actionVM = std::make_unique<troly::presentation::ActionViewModel>(actionDispatcher, safetyGuard);
+    auto systemInspectorVM = std::make_unique<troly::presentation::SystemInspectorViewModel>(inspectorService);
+    auto wakaTrackerVM = std::make_unique<troly::presentation::WakaTrackerViewModel>(wakaService);
+    auto userProfileVM = std::make_unique<troly::presentation::UserProfileViewModel>();
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("chatVM", chatVM.get());
@@ -68,6 +76,9 @@ int main(int argc, char *argv[]) {
     engine.rootContext()->setContextProperty("ragVM", ragVM.get());
     engine.rootContext()->setContextProperty("llmVM", llmVM.get());
     engine.rootContext()->setContextProperty("actionVM", actionVM.get());
+    engine.rootContext()->setContextProperty("systemInspectorVM", systemInspectorVM.get());
+    engine.rootContext()->setContextProperty("wakaTrackerVM", wakaTrackerVM.get());
+    engine.rootContext()->setContextProperty("userProfileVM", userProfileVM.get());
 
     const QUrl url(QStringLiteral("qrc:/ui/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
