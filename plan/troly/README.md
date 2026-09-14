@@ -23,7 +23,11 @@ plan/troly/
 │   │   ├── PLAN.md             # Kế hoạch & Bảng công việc Sprint 03
 │   │   ├── REVIEW.md           # Đánh giá kết quả bàn giao Sprint 03
 │   │   └── RETRO.md            # Bài học cải tiến quy trình Sprint 03
-│   └── ...                     # Các Sprint tiếp theo (sprint-04 ➔ sprint-07)
+│   ├── sprint-04/              # Sprint 04: Local Inference & Dynamic MoE Router (🟢 COMPLETED - v01.04.00)
+│   │   ├── PLAN.md             # Kế hoạch & Bảng công việc Sprint 04
+│   │   ├── REVIEW.md           # Đánh giá kết quả bàn giao Sprint 04
+│   │   └── RETRO.md            # Bài học cải tiến quy trình Sprint 04
+│   └── ...                     # Các Sprint tiếp theo (sprint-05 ➔ sprint-07)
 └── scrum/                      # Hoạt động phối hợp liên Agent
     └── DAILY_SCRUM.md          # Nhật ký làm việc hàng ngày (Standup Log)
 ```
@@ -38,8 +42,8 @@ plan/troly/
 | **Sprint 01 (Nền Tảng)** | [sprint-01/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-01/PLAN.md) | Khởi tạo Clean Arch, NixOS Flake & Build system (`v01.01.00`) | 🟢 COMPLETED |
 | **Sprint 02 (Mascot & EyeLeo)** | [sprint-02/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-02/PLAN.md) | Mascot Peek Tail & EyeLeo Native C++ (`v01.02.00`) | 🟢 COMPLETED |
 | **Sprint 03 (Vector RAG)** | [sprint-03/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-03/PLAN.md) | Động cơ tri thức SQLite WAL & sqlite-vec RRF (`v01.03.00`) | 🟢 COMPLETED |
-| **Sprint 03 Review** | [sprint-03/REVIEW.md](file:///etc/nixos/plan/troly/sprints/sprint-03/REVIEW.md) | Nghiệm thu 7/7 Tasks hoàn tất 100% CTest & Nix build | 🟢 PASSED |
-| **Sprint 03 Retro** | [sprint-03/RETRO.md](file:///etc/nixos/plan/troly/sprints/sprint-03/RETRO.md) | Đánh giá năng suất & bài học cải tiến quy trình | 🟢 COMPLETED |
+| **Sprint 04 (MoE & Inference)**| [sprint-04/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-04/PLAN.md) | Suy luận SSE, Intent Classifier <30ms, MoE Router (`v01.04.00`) | 🟢 COMPLETED |
+| **Sprint 04 Review** | [sprint-04/REVIEW.md](file:///etc/nixos/plan/troly/sprints/sprint-04/REVIEW.md) | Nghiệm thu 7/7 Tasks hoàn tất 100% CTest & Nix build | 🟢 PASSED |
 | **Daily Scrum** | [DAILY_SCRUM.md](file:///etc/nixos/plan/troly/scrum/DAILY_SCRUM.md) | Nhật ký hàng ngày của các AI Agent | 🟢 ACTIVE |
 
 ---

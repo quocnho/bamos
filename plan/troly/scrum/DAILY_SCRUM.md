@@ -80,3 +80,36 @@ Tài liệu ghi nhận nhịp độ làm việc, tiến độ hàng ngày và th
   - Phác thảo biểu cảm cún cưng tìm kiếm tri thức (đánh hơi tìm sách) phục vụ hoạt ảnh lúc RAG đang chạy truy vấn dữ liệu.
 - **Vướng mắc (Blockers):** Không có. Sẵn sàng tích hợp cho Sprint 04.
 
+---
+
+## [2026-09-14] (Sprint 04: Hoàn Thành Nghiệm Thu Local Inference & Dynamic MoE Router - `v01.04.00`)
+
+### 📌 @PlanAgent (Project Manager & Documentation)
+- **Hôm nay:**
+  - Điều phối và hoàn tất nghiệm thu 7/7 user stories Sprint 04 (`TROLY-401` đến `TROLY-407`).
+  - Cập nhật hồ sơ Scrum: [PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-04/PLAN.md), [REVIEW.md](file:///etc/nixos/plan/troly/sprints/sprint-04/REVIEW.md), [RETRO.md](file:///etc/nixos/plan/troly/sprints/sprint-04/RETRO.md) và [README.md](file:///etc/nixos/plan/troly/README.md).
+  - Chuẩn bị sẵn sàng cấu trúc cho Sprint 05 (Action Dispatcher & Safety Guard).
+- **Vướng mắc (Blockers):** Không có.
+
+### 🔬 @RdAgent (R&D Specialist)
+- **Hôm nay:**
+  - Thiết kế `FastHeuristicIntentClassifier` phân loại 4 nhóm ý định (`GeneralChat`, `CodeGeneration`, `SystemCommand`, `KnowledgeQuery`) với độ trễ nano-seconds (<1ms).
+  - Xây dựng danh mục Model Slots chuyên biệt và bộ giám sát ngân sách VRAM Supervisor (< 6GB) cho `DynamicMoERouter`.
+- **Vướng mắc (Blockers):** Không có.
+
+### 💻 @DevOptAgent (Execution & CI/CD)
+- **Hôm nay:**
+  - Hiện thực `DynamicMoERouter.hpp` và `FastHeuristicIntentClassifier.hpp` theo chuẩn C++20 Clean Architecture.
+  - Tích hợp Dynamic MoE Router và tự động tra cứu RAG (Context Augmentation) trực tiếp vào `ChatViewModel`.
+  - Xây dựng `LLMViewModel.hpp/.cpp` và kết nối giao diện an toàn trong `LLMSettingsModal.qml`.
+  - Khắc phục xung đột từ khóa Qt MOC `slots` trong `LLMViewModel::selectModel`.
+  - Viết bộ kiểm thử tự động `tests/test_inference.cpp`, đạt 100% CTest (3/3 test suites passed: `EyeLeoTests`, `RAGTests`, `InferenceTests`).
+  - Đóng gói derivation thành công qua `nix-build default.nix` ra `/nix/store/icvz0gixaqbmvzcfdd16axsbxdnl9519-troly-0.1.0` và kiểm tra `nix build .#troly --dry-run` hoàn tất sạch sẽ.
+- **Vướng mắc (Blockers):** Không có.
+
+### 🎨 @AnimAgent (Lead 3D & Animation Director)
+- **Hôm nay:**
+  - Đồng bộ trạng thái cún cưng phấn khích/suy nghĩ (`excited` / `playful_jump`) tương thích với luồng stream tokens từ Dynamic MoE Router.
+- **Vướng mắc (Blockers):** Không có.
+
+

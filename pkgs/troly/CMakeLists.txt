@@ -21,6 +21,7 @@ set(SOURCES
     src/presentation/SystemMonitorViewModel.cpp
     src/presentation/EyeLeoViewModel.cpp
     src/presentation/RAGViewModel.cpp
+    src/presentation/LLMViewModel.cpp
 )
 
 set(HEADERS
@@ -29,8 +30,11 @@ set(HEADERS
     src/domain/KnowledgeChunk.hpp
     src/domain/CommandResult.hpp
     src/domain/EyeLeoConfig.hpp
+    src/domain/Intent.hpp
+    src/domain/ModelSlot.hpp
     src/usecases/IRAGService.hpp
     src/usecases/IInferenceEngine.hpp
+    src/usecases/IIntentClassifier.hpp
     src/usecases/IActionDispatcher.hpp
     src/usecases/ISafetyGuard.hpp
     src/usecases/IEyeLeoService.hpp
@@ -39,10 +43,13 @@ set(HEADERS
     src/infrastructure/LinuxActionDispatcher.hpp
     src/infrastructure/EyeLeoService.hpp
     src/infrastructure/DocumentIngestionWorker.hpp
+    src/infrastructure/FastHeuristicIntentClassifier.hpp
+    src/infrastructure/DynamicMoERouter.hpp
     src/presentation/ChatViewModel.hpp
     src/presentation/SystemMonitorViewModel.hpp
     src/presentation/EyeLeoViewModel.hpp
     src/presentation/RAGViewModel.hpp
+    src/presentation/LLMViewModel.hpp
 )
 
 qt_add_executable(troly
@@ -82,5 +89,15 @@ target_link_libraries(test_rag PRIVATE
     Threads::Threads
 )
 add_test(NAME RAGTests COMMAND test_rag)
+
+add_executable(test_inference
+    tests/test_inference.cpp
+    src/infrastructure/LlamaInferenceEngine.cpp
+)
+target_include_directories(test_inference PRIVATE src)
+target_link_libraries(test_inference PRIVATE
+    Threads::Threads
+)
+add_test(NAME InferenceTests COMMAND test_inference)
 
 install(TARGETS troly DESTINATION bin)

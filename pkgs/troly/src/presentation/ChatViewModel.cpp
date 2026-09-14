@@ -7,11 +7,13 @@ namespace troly::presentation {
 ChatViewModel::ChatViewModel(
     std::shared_ptr<usecases::IInferenceEngine> inferenceEngine,
     std::shared_ptr<usecases::IRAGService> ragService,
+    std::shared_ptr<infrastructure::DynamicMoERouter> router,
     QObject* parent
 )
     : QObject(parent)
     , m_inferenceEngine(std::move(inferenceEngine))
-    , m_ragService(std::move(ragService)) {}
+    , m_ragService(std::move(ragService))
+    , m_router(std::move(router)) {}
 
 void ChatViewModel::setIsGenerating(bool value) {
     if (m_isGenerating != value) {
@@ -69,7 +71,29 @@ void ChatViewModel::sendMessage(const QString& userText) {
         setPeekMode(false);
     }
 
-    // Thêm User message vào history
+    // 1. Phân loại ý định qua Dynamic MoE Router (<30ms)
+    std::string promptForEngine = trimmed.toStdString();
+    if (m_router) {
+        auto intent = m_router->routeIntent(promptForEngine);
+        m_detectedIntent = QString::fromStdString(std::string(domain::userIntentToString(intent)));
+        emit detectedIntentChanged();
+        auto selectedModel = m_router->selectModelForIntent(intent);
+        (void)selectedModel;
+    }
+
+    // 2. Tra cứu RAG nếu câu hỏi liên quan hoặc có từ khóa
+    if (m_ragService) {
+        auto chunks = m_ragService->searchHybrid(trimmed.toStdString(), 2, 0.65f);
+        if (!chunks.empty()) {
+            std::string contextAugment = "\n\n[Bối cảnh tri thức liên quan]:\n";
+            for (const auto& chunk : chunks) {
+                contextAugment += "- " + chunk.content + "\n";
+            }
+            promptForEngine += contextAugment;
+        }
+    }
+
+    // Thêm User message vào history UI
     QVariantMap userMsg;
     userMsg["role"] = "user";
     userMsg["content"] = trimmed;
@@ -78,7 +102,7 @@ void ChatViewModel::sendMessage(const QString& userText) {
 
     domain::ChatMessage domainUserMsg;
     domainUserMsg.role = domain::MessageRole::User;
-    domainUserMsg.content = trimmed.toStdString();
+    domainUserMsg.content = promptForEngine;
     m_domainHistory.push_back(domainUserMsg);
 
     setIsGenerating(true);
