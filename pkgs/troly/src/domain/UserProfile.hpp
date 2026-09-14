@@ -9,6 +9,7 @@ struct UserProfile {
     std::string addressing{"Chủ nhân"};
     std::string technicalLevel{"Senior Systems Architect"};
     std::string preferredLanguages{"C++20, Nix, QML"};
+    std::string themeStyle{"teal"};
 
     [[nodiscard]] std::string makeSystemPrompt() const {
         return "Bạn là Trợ lý ảo BamOS ('troly'), hiện diện dưới hình hài chú cún cưng thông minh trung thành. "

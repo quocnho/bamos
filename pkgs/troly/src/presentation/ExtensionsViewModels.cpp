@@ -72,6 +72,13 @@ void UserProfileViewModel::setTechnicalLevel(const QString& lvl) {
     }
 }
 
+void UserProfileViewModel::setThemeStyle(const QString& theme) {
+    if (themeStyle() != theme) {
+        m_profile.themeStyle = theme.toStdString();
+        emit profileChanged();
+    }
+}
+
 void UserProfileViewModel::saveProfile() {
     emit profileChanged();
 }

@@ -3,7 +3,7 @@ import QtQuick.Controls
 
 Item {
     id: quickMenu
-    width: 220
+    width: 236
     height: menuCol.implicitHeight + 16
     visible: false
 
@@ -11,26 +11,26 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        radius: 10
-        color: "#1E1E2E"
-        border.color: "#45475A"
+        radius: 12
+        color: ThemeManager.cardBg
+        border.color: ThemeManager.borderDim
         border.width: 1
 
         Column {
             id: menuCol
             anchors.fill: parent
             anchors.margins: 8
-            spacing: 4
+            spacing: 3
 
             Repeater {
                 model: [
                     { id: "rag", label: "📚 Thiết lập Tri thức (RAG)" },
-                    { id: "llm", label: "📓 Thiết lập LLM / SLM" },
+                    { id: "llm", label: "🧠 Thiết lập LLM / SLM" },
                     { id: "evolving", label: "🧬 Trung Tâm Tự Tiến Hóa" },
                     { id: "eyeleo", label: "⏰ Nghỉ mắt EyeLeo (20-20-20)" },
                     { id: "system", label: "🛡️ Giám sát Hệ thống" },
                     { id: "waka", label: "📊 WakaTracker Thống kê" },
-                    { id: "profile", label: "👤 Hồ sơ & Năng lực" },
+                    { id: "profile", label: "👤 Hồ sơ & Màu sắc giao diện" },
                     { id: "about", label: "ℹ️ Giới thiệu BamOS AI" }
                 ]
 
@@ -38,14 +38,14 @@ Item {
                     width: parent.width
                     height: 32
                     radius: 6
-                    color: itemHover.containsMouse ? "#313244" : "transparent"
+                    color: itemHover.containsMouse ? ThemeManager.headerBg : "transparent"
 
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.left: parent.left
                         anchors.leftMargin: 8
                         text: modelData.label
-                        color: "#CDD6F4"
+                        color: itemHover.containsMouse ? ThemeManager.primaryAccent : ThemeManager.textPrimary
                         font.pixelSize: 12
                     }
 

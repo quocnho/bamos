@@ -4,7 +4,7 @@ import QtQuick.Layouts
 
 ModalDialog {
     id: eyeleoDialog
-    title: "⏰ Quản Lý Nghỉ Ngơi & Thị Giác (EyeLeo)"
+    title: "⏰ Quản Lý Nghỉ Ngơi & Thị Giác (EyeLeo 20-20-20)"
 
     ColumnLayout {
         anchors.fill: parent
@@ -14,8 +14,8 @@ ModalDialog {
             Layout.fillWidth: true
             height: 48
             radius: 8
-            color: "#181825"
-            border.color: "#313244"
+            color: ThemeManager.cardBg
+            border.color: ThemeManager.borderDim
             border.width: 1
 
             RowLayout {
@@ -25,7 +25,7 @@ ModalDialog {
                 Text { text: "💡"; font.pixelSize: 16 }
                 Text {
                     text: "Quy tắc 20-20-20: Mỗi 20 phút nhìn xa 20 feet (6m) trong 20 giây để ngừa cận thị và mỏi mắt."
-                    color: "#A6ADC8"
+                    color: ThemeManager.textSecondary
                     font.pixelSize: 11
                     wrapMode: Text.Wrap
                     Layout.fillWidth: true
@@ -35,7 +35,7 @@ ModalDialog {
 
         RowLayout {
             Layout.fillWidth: true
-            Text { text: "Bật nhắc nhở EyeLeo:"; color: "#CDD6F4"; Layout.fillWidth: true }
+            Text { text: "Bật nhắc nhở EyeLeo:"; color: ThemeManager.textPrimary; Layout.fillWidth: true }
             Switch {
                 checked: typeof eyeLeoVM !== "undefined" ? eyeLeoVM.enabled : true
                 onToggled: {
@@ -46,7 +46,7 @@ ModalDialog {
 
         RowLayout {
             Layout.fillWidth: true
-            Text { text: "Chế độ nghiêm ngặt (Strict Mode):"; color: "#CDD6F4"; Layout.fillWidth: true }
+            Text { text: "Chế độ nghiêm ngặt (Strict Mode):"; color: ThemeManager.textPrimary; Layout.fillWidth: true }
             Switch {
                 checked: typeof eyeLeoVM !== "undefined" ? eyeLeoVM.strictMode : false
                 onToggled: {
@@ -57,10 +57,10 @@ ModalDialog {
 
         RowLayout {
             Layout.fillWidth: true
-            Text { text: "Thời gian đã làm việc:"; color: "#CDD6F4"; Layout.fillWidth: true }
+            Text { text: "Thời gian đã làm việc liên tục:"; color: ThemeManager.textPrimary; Layout.fillWidth: true }
             Text {
                 text: (typeof eyeLeoVM !== "undefined" ? eyeLeoVM.workMinutes : 0) + " phút"
-                color: "#A6E3A1"
+                color: ThemeManager.primaryAccent
                 font.bold: true
             }
         }

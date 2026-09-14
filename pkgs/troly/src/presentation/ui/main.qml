@@ -41,6 +41,11 @@ ApplicationWindow {
             root.x = defaultX;
             root.y = defaultY;
         }
+
+        // Khôi phục theme từ userProfileVM nếu có
+        if (typeof userProfileVM !== "undefined" && userProfileVM.themeStyle !== "") {
+            ThemeManager.setTheme(userProfileVM.themeStyle);
+        }
     }
 
     // 🐾 VÙNG 1: FLOATING 3D MASCOT PET (Không viền hộp vuông, nền trong suốt hoàn toàn)
@@ -57,8 +62,8 @@ ApplicationWindow {
             width: Math.min(200, bubbleText.implicitWidth + 20)
             height: bubbleText.implicitHeight + 14
             radius: 12
-            color: "#E6181825"
-            border.color: "#89B4FA"
+            color: ThemeManager.windowBg
+            border.color: ThemeManager.primaryAccent
             border.width: 1.5
             visible: bubbleOpacityAnim.running || bubbleText.text !== ""
             opacity: 1.0
@@ -72,7 +77,7 @@ ApplicationWindow {
                 }
                 font.bold: true
                 font.pixelSize: 11
-                color: "#A6E3A1"
+                color: ThemeManager.primaryAccent
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.Wrap
             }
@@ -193,7 +198,6 @@ ApplicationWindow {
 
             onDoubleClicked: {
                 resetInactivity();
-                // Nhấp đúp vào cún để mở rộng Full Chat
                 if (typeof chatVM !== "undefined") {
                     chatVM.wakeFromPeek();
                 }
@@ -206,14 +210,14 @@ ApplicationWindow {
         id: bgContainer
         anchors.fill: parent
         visible: !root.peekActive
-        radius: 16
-        color: "#E61E1E2E" // Catppuccin Mocha Fluent Glassmorphism
-        border.color: isWindowDropHover ? "#A6E3A1" : "#313244"
+        radius: 18
+        color: ThemeManager.windowBg
+        border.color: isWindowDropHover ? ThemeManager.borderActive : ThemeManager.borderDim
         border.width: isWindowDropHover ? 2 : 1
 
         property bool isWindowDropHover: false
 
-        // DropArea toàn bộ cửa sổ nhận file/thư mục kéo thả từ Nautilus (Phương án A)
+        // DropArea toàn bộ cửa sổ nhận file/thư mục kéo thả từ Nautilus
         DropArea {
             anchors.fill: parent
             onEntered: function(drag) {
@@ -231,11 +235,9 @@ ApplicationWindow {
                     if (urlStr.indexOf("file://") === 0) {
                         urlStr = urlStr.substring(7);
                     }
-                    // Nếu là tệp có đuôi mở rộng -> Đính kèm vào thanh đính kèm
                     if (urlStr.indexOf(".") !== -1 && urlStr.lastIndexOf(".") > urlStr.lastIndexOf("/")) {
                         attachedBar.attachedFilePath = urlStr;
                     } else {
-                        // Nếu là thư mục -> Gán vào bối cảnh thư mục Bone Context
                         boneContextBar.currentPath = urlStr;
                     }
                 }
@@ -256,20 +258,20 @@ ApplicationWindow {
                     text: "🐶 Trợ Lý BamOS"
                     font.bold: true
                     font.pixelSize: 15
-                    color: "#CDD6F4"
+                    color: ThemeManager.textPrimary
                 }
 
                 Rectangle {
                     height: 18
                     radius: 4
-                    color: "#313244"
+                    color: ThemeManager.headerBg
                     implicitWidth: subBadge.implicitWidth + 8
                     Text {
                         id: subBadge
                         anchors.centerIn: parent
                         text: "Offline C++20"
                         font.pixelSize: 10
-                        color: "#A6E3A1"
+                        color: ThemeManager.primaryAccent
                     }
                 }
 
@@ -278,7 +280,7 @@ ApplicationWindow {
                 Text {
                     text: "RAM: " + (typeof systemMonitorVM !== "undefined" ? systemMonitorVM.ramUsage.toFixed(1) : "38.5") + "%"
                     font.pixelSize: 11
-                    color: "#A6ADC8"
+                    color: ThemeManager.textSecondary
                 }
 
                 Button {
@@ -303,7 +305,6 @@ ApplicationWindow {
                     }
                 }
 
-                // Nút 🐾 Núp Lùm Thò Đuôi Mép Màn Hình
                 Button {
                     text: "🐾"
                     flat: true
@@ -348,8 +349,8 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 height: 130
                 radius: 12
-                color: "#181825"
-                border.color: "#313244"
+                color: ThemeManager.cardBg
+                border.color: ThemeManager.borderDim
                 border.width: 1
                 clip: true
 
@@ -368,8 +369,8 @@ ApplicationWindow {
                     width: greetingText.implicitWidth + 14
                     height: 24
                     radius: 12
-                    color: "#313244"
-                    border.color: "#89B4FA"
+                    color: ThemeManager.headerBg
+                    border.color: ThemeManager.primaryAccent
                     border.width: 1
                     visible: typeof chatVM !== "undefined" && (chatVM.mascotState === "greeting" || chatVM.mascotState === "playful_jump")
 
@@ -378,7 +379,7 @@ ApplicationWindow {
                         anchors.centerIn: parent
                         text: typeof chatVM !== "undefined" ? chatVM.mascotGreeting : "Gâu gâu! Em chào chủ nhân ạ! 🐾"
                         font.pixelSize: 11
-                        color: "#CDD6F4"
+                        color: ThemeManager.textPrimary
                     }
                 }
 
@@ -393,7 +394,7 @@ ApplicationWindow {
                         width: 8
                         height: 8
                         radius: 4
-                        color: (typeof chatVM !== "undefined" && chatVM.isGenerating) ? "#F9E2AF" : ((typeof chatVM !== "undefined" && chatVM.mascotState === "sleep") ? "#6C7086" : "#A6E3A1")
+                        color: (typeof chatVM !== "undefined" && chatVM.isGenerating) ? ThemeManager.secondaryAccent : ((typeof chatVM !== "undefined" && chatVM.mascotState === "sleep") ? ThemeManager.textSubtle : ThemeManager.primaryAccent)
                     }
 
                     Text {
@@ -406,7 +407,7 @@ ApplicationWindow {
                             return "Sẵn sàng hỗ trợ";
                         }
                         font.pixelSize: 10
-                        color: "#A6ADC8"
+                        color: ThemeManager.textSecondary
                     }
 
                     Button {
@@ -428,7 +429,7 @@ ApplicationWindow {
                 }
             }
 
-            // Message History View
+            // Message History View với Nút Copy cho từng tin nhắn (như assistant)
             ListView {
                 id: chatListView
                 Layout.fillWidth: true
@@ -440,26 +441,50 @@ ApplicationWindow {
                 delegate: Rectangle {
                     required property var modelData
                     width: chatListView.width
-                    height: contentCol.height + 16
-                    radius: 8
-                    color: modelData.role === "user" ? "#45475A" : "#313244"
+                    height: contentCol.height + 20
+                    radius: 10
+                    color: modelData.role === "user" ? ThemeManager.cardBg : ThemeManager.headerBg
+                    border.color: ThemeManager.borderDim
+                    border.width: 1
 
                     Column {
                         id: contentCol
                         anchors.fill: parent
-                        anchors.margins: 8
-                        spacing: 4
+                        anchors.margins: 10
+                        spacing: 6
 
-                        Text {
-                            text: modelData.role === "user" ? "Chủ nhân" : "Trợ Lý"
-                            font.bold: true
-                            font.pixelSize: 11
-                            color: modelData.role === "user" ? "#89B4FA" : "#A6E3A1"
+                        RowLayout {
+                            width: parent.width
+
+                            Text {
+                                text: modelData.role === "user" ? "Chủ nhân" : "Trợ Lý BamOS"
+                                font.bold: true
+                                font.pixelSize: 11
+                                color: modelData.role === "user" ? ThemeManager.roleUser : ThemeManager.roleAi
+                                Layout.fillWidth: true
+                            }
+
+                            // Nút Copy sao chép nội dung tin nhắn
+                            Text {
+                                text: "📋 Sao chép"
+                                color: ThemeManager.textSubtle
+                                font.pixelSize: 10
+                                MouseArea {
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        inputField.text = modelData.content;
+                                        inputField.selectAll();
+                                        inputField.copy();
+                                    }
+                                }
+                            }
                         }
 
                         Text {
                             text: modelData.content
-                            color: "#CDD6F4"
+                            color: ThemeManager.textPrimary
                             font.pixelSize: 13
                             wrapMode: Text.Wrap
                             width: parent.width
@@ -473,13 +498,15 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 height: 36
                 visible: typeof chatVM !== "undefined" && chatVM.isGenerating
-                color: "#181825"
+                color: ThemeManager.cardBg
                 radius: 8
+                border.color: ThemeManager.borderDim
+                border.width: 1
 
                 Text {
                     anchors.centerIn: parent
                     text: "Đang suy nghĩ... " + (typeof chatVM !== "undefined" ? chatVM.currentStreamingText : "")
-                    color: "#F9E2AF"
+                    color: ThemeManager.secondaryAccent
                     font.pixelSize: 12
                     elide: Text.ElideRight
                     width: parent.width - 16
@@ -515,7 +542,13 @@ ApplicationWindow {
                     id: inputField
                     Layout.fillWidth: true
                     placeholderText: "Hỏi em, dán link hoặc chạy lệnh... (Enter)"
-                    color: "#CDD6F4"
+                    color: ThemeManager.textPrimary
+                    background: Rectangle {
+                        color: ThemeManager.inputBg
+                        radius: 8
+                        border.color: inputField.activeFocus ? ThemeManager.borderActive : ThemeManager.borderDim
+                        border.width: 1
+                    }
                     onAccepted: {
                         if (text.trim() !== "") {
                             var prompt = text;

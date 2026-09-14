@@ -72,6 +72,7 @@ class UserProfileViewModel : public QObject {
     Q_PROPERTY(QString userName READ userName WRITE setUserName NOTIFY profileChanged)
     Q_PROPERTY(QString addressing READ addressing WRITE setAddressing NOTIFY profileChanged)
     Q_PROPERTY(QString technicalLevel READ technicalLevel WRITE setTechnicalLevel NOTIFY profileChanged)
+    Q_PROPERTY(QString themeStyle READ themeStyle WRITE setThemeStyle NOTIFY profileChanged)
 
 public:
     explicit UserProfileViewModel(QObject* parent = nullptr);
@@ -80,11 +81,13 @@ public:
     [[nodiscard]] QString userName() const { return QString::fromStdString(m_profile.userName); }
     [[nodiscard]] QString addressing() const { return QString::fromStdString(m_profile.addressing); }
     [[nodiscard]] QString technicalLevel() const { return QString::fromStdString(m_profile.technicalLevel); }
+    [[nodiscard]] QString themeStyle() const { return QString::fromStdString(m_profile.themeStyle); }
     [[nodiscard]] const domain::UserProfile& profile() const { return m_profile; }
 
     void setUserName(const QString& name);
     void setAddressing(const QString& addr);
     void setTechnicalLevel(const QString& lvl);
+    void setThemeStyle(const QString& theme);
 
     Q_INVOKABLE void saveProfile();
 

@@ -18,6 +18,7 @@ class RAGViewModel : public QObject {
     Q_PROPERTY(int totalFilesCount READ totalFilesCount NOTIFY progressChanged)
     Q_PROPERTY(QString currentFileName READ currentFileName NOTIFY progressChanged)
     Q_PROPERTY(int topK READ topK WRITE setTopK NOTIFY topKChanged)
+    Q_PROPERTY(double hybridAlpha READ hybridAlpha WRITE setHybridAlpha NOTIFY hybridAlphaChanged)
 
 public:
     explicit RAGViewModel(std::shared_ptr<usecases::IRAGService> ragService, QObject* parent = nullptr)
@@ -28,6 +29,14 @@ public:
     [[nodiscard]] int totalFilesCount() const { return m_totalCount; }
     [[nodiscard]] QString currentFileName() const { return m_currentFile; }
     [[nodiscard]] int topK() const { return m_topK; }
+    [[nodiscard]] double hybridAlpha() const { return m_hybridAlpha; }
+
+    Q_INVOKABLE void setHybridAlpha(double alpha) {
+        if (qAbs(m_hybridAlpha - alpha) > 0.001) {
+            m_hybridAlpha = alpha;
+            emit hybridAlphaChanged();
+        }
+    }
 
     Q_INVOKABLE void setTopK(int k) {
         if (m_topK != k) {
@@ -66,6 +75,7 @@ signals:
     void indexingChanged();
     void progressChanged();
     void topKChanged();
+    void hybridAlphaChanged();
 
 private:
     std::shared_ptr<usecases::IRAGService> m_ragService;
@@ -73,6 +83,7 @@ private:
     int m_indexedCount{0};
     int m_totalCount{0};
     int m_topK{5};
+    double m_hybridAlpha{0.65};
     QString m_currentFile;
 };
 

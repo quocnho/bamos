@@ -5,7 +5,7 @@ import QtQuick.Layouts
 Rectangle {
     id: modalRoot
     anchors.fill: parent
-    color: "#8011111B"
+    color: "#99000000"
     visible: false
     z: 999
 
@@ -23,12 +23,12 @@ Rectangle {
 
     Rectangle {
         id: card
-        width: Math.min(parent.width - 32, 400)
-        height: Math.min(parent.height - 48, 520)
+        width: Math.min(parent.width - 32, 420)
+        height: Math.min(parent.height - 48, 540)
         anchors.centerIn: parent
-        radius: 12
-        color: "#1E1E2E"
-        border.color: "#313244"
+        radius: 14
+        color: ThemeManager.cardBg
+        border.color: ThemeManager.borderDim
         border.width: 1
 
         MouseArea {
@@ -47,7 +47,7 @@ Rectangle {
 
                 Text {
                     text: modalRoot.title
-                    color: "#CDD6F4"
+                    color: ThemeManager.textPrimary
                     font.bold: true
                     font.pixelSize: 14
                     Layout.fillWidth: true
@@ -55,8 +55,8 @@ Rectangle {
 
                 Text {
                     text: "×"
-                    color: "#A6ADC8"
-                    font.pixelSize: 20
+                    color: ThemeManager.textSecondary
+                    font.pixelSize: 22
                     font.bold: true
 
                     MouseArea {
@@ -71,7 +71,7 @@ Rectangle {
             Rectangle {
                 Layout.fillWidth: true
                 height: 1
-                color: "#313244"
+                color: ThemeManager.borderDim
             }
 
             // Body container

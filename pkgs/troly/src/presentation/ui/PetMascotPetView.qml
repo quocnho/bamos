@@ -11,6 +11,10 @@ Item {
     property bool isHovered: false
     property bool isWagging: true
 
+    // Trạng thái phụ kiện & EyeLeo exercise
+    property bool hasBoneContext: typeof boneContextBar !== "undefined" ? (boneContextBar.currentPath !== "") : false
+    property bool isDrinkingBreak: typeof eyeLeoVM !== "undefined" ? (eyeLeoVM.isBreakActive && eyeLeoVM.breakType === "long") : false
+
     // Tín hiệu khi người dùng vuốt ve/click vào cún
     signal petClicked()
     signal petDoubleClicked()
@@ -71,6 +75,64 @@ Item {
             opacity: petRoot.mascotState === "sleep" ? 1.0 : 0.0
             visible: opacity > 0.01
             Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.InOutQuad } }
+        }
+
+        // 🍖 Phụ kiện: Cục Xương 3D ngậm miệng (Hiện khi có Bone Context)
+        Rectangle {
+            id: boneAcc
+            width: 38
+            height: 14
+            radius: 6
+            color: "#FFFDF0"
+            border.color: "#E17055"
+            border.width: 1.5
+            visible: petRoot.hasBoneContext && petRoot.mascotState !== "sleep"
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.topMargin: 58
+            rotation: -6
+
+            // Núm 2 đầu cục xương
+            Rectangle { width: 8; height: 8; radius: 4; color: "#FFFDF0"; border.color: "#E17055"; border.width: 1.2; anchors.left: parent.left; anchors.leftMargin: -3; anchors.top: parent.top; anchors.topMargin: -2 }
+            Rectangle { width: 8; height: 8; radius: 4; color: "#FFFDF0"; border.color: "#E17055"; border.width: 1.2; anchors.left: parent.left; anchors.leftMargin: -3; anchors.bottom: parent.bottom; anchors.bottomMargin: -2 }
+            Rectangle { width: 8; height: 8; radius: 4; color: "#FFFDF0"; border.color: "#E17055"; border.width: 1.2; anchors.right: parent.right; anchors.rightMargin: -3; anchors.top: parent.top; anchors.topMargin: -2 }
+            Rectangle { width: 8; height: 8; radius: 4; color: "#FFFDF0"; border.color: "#E17055"; border.width: 1.2; anchors.right: parent.right; anchors.rightMargin: -3; anchors.bottom: parent.bottom; anchors.bottomMargin: -2 }
+
+            Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
+        }
+
+        // ☕ Phụ kiện: Cốc Nước Thủy Tinh (Hiện khi nghỉ dài EyeLeo nhắc uống nước)
+        Rectangle {
+            id: cupDrinkAcc
+            width: 24
+            height: 30
+            radius: 4
+            color: "#6600B4D8"
+            border.color: "#0077B6"
+            border.width: 1.5
+            visible: petRoot.isDrinkingBreak
+            anchors.right: parent.right
+            anchors.rightMargin: 12
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 14
+
+            // Ống hút đỏ
+            Rectangle {
+                width: 3
+                height: 18
+                color: "#E63946"
+                rotation: 20
+                anchors.top: parent.top
+                anchors.topMargin: -8
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            SequentialAnimation on y {
+                running: petRoot.isDrinkingBreak
+                loops: Animation.Infinite
+                NumberAnimation { to: animContainer.height - 48; duration: 900; easing.type: Easing.InOutSine }
+                NumberAnimation { to: animContainer.height - 44; duration: 900; easing.type: Easing.InOutSine }
+            }
         }
 
         // ============================================================
@@ -162,7 +224,6 @@ Item {
         onEntered: {
             petRoot.isHovered = true;
             if (petRoot.mascotState === "idle") {
-                // Nhẹ nhàng chú ý khi trỏ chuột vào
                 animContainer.scale = 1.06;
             }
         }
@@ -178,7 +239,6 @@ Item {
             pettingReactionAnim.restart();
             if (typeof chatVM !== "undefined") {
                 chatVM.playSound("bark");
-                // Chuyển luân phiên trạng thái chào / đứng nếu đang idle
                 if (chatVM.mascotState === "idle") {
                     chatVM.setMascotState("greeting");
                 } else if (chatVM.mascotState === "greeting") {
