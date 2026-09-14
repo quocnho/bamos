@@ -24,7 +24,12 @@ ModalDialog {
                 spacing: 4
                 RowLayout {
                     Text { text: "RAM Sử Dụng:"; color: "#A6ADC8"; font.pixelSize: 12 }
-                    Text { text: systemMonitorVM.ramUsage.toFixed(1) + "%"; color: "#89B4FA"; font.bold: true; font.pixelSize: 12 }
+                    Text {
+                        text: (typeof systemMonitorVM !== "undefined" ? systemMonitorVM.ramUsage.toFixed(1) : "38.5") + "%"
+                        color: "#89B4FA"
+                        font.bold: true
+                        font.pixelSize: 12
+                    }
                 }
                 RowLayout {
                     Text { text: "Hệ điều hành:"; color: "#A6ADC8"; font.pixelSize: 12 }
@@ -40,16 +45,37 @@ ModalDialog {
             font.pixelSize: 13
         }
 
-        Rectangle {
+        RowLayout {
             Layout.fillWidth: true
-            height: 36
-            radius: 6
-            color: "#181825"
-            RowLayout {
-                anchors.fill: parent
-                anchors.margins: 8
-                Text { text: "llama-server.service"; color: "#CDD6F4"; Layout.fillWidth: true }
-                Text { text: "Đang chạy (Active)"; color: "#A6E3A1"; font.pixelSize: 11 }
+            Text { text: "llama.cpp Local Server:"; color: "#CDD6F4"; Layout.fillWidth: true }
+            Rectangle {
+                width: 80
+                height: 24
+                radius: 6
+                color: "#313244"
+                Text {
+                    anchors.centerIn: parent
+                    text: "Đang chạy"
+                    color: "#A6E3A1"
+                    font.pixelSize: 11
+                }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            Text { text: "Hybrid Vector DB (SQLite WAL):"; color: "#CDD6F4"; Layout.fillWidth: true }
+            Rectangle {
+                width: 80
+                height: 24
+                radius: 6
+                color: "#313244"
+                Text {
+                    anchors.centerIn: parent
+                    text: "Sẵn sàng"
+                    color: "#89B4FA"
+                    font.pixelSize: 11
+                }
             }
         }
 

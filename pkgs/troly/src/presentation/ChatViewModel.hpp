@@ -16,6 +16,8 @@ class ChatViewModel : public QObject {
     Q_PROPERTY(QString currentStreamingText READ currentStreamingText NOTIFY currentStreamingTextChanged)
     Q_PROPERTY(QVariantList messageHistory READ messageHistory NOTIFY messageHistoryChanged)
     Q_PROPERTY(QString mascotState READ mascotState WRITE setMascotState NOTIFY mascotStateChanged)
+    Q_PROPERTY(bool isPeekMode READ isPeekMode WRITE setPeekMode NOTIFY peekModeChanged)
+    Q_PROPERTY(QString mascotGreeting READ mascotGreeting NOTIFY mascotGreetingChanged)
 
 public:
     explicit ChatViewModel(
@@ -28,17 +30,24 @@ public:
     [[nodiscard]] QString currentStreamingText() const { return m_currentStreamingText; }
     [[nodiscard]] QVariantList messageHistory() const { return m_messageHistory; }
     [[nodiscard]] QString mascotState() const { return m_mascotState; }
+    [[nodiscard]] bool isPeekMode() const { return m_isPeekMode; }
+    [[nodiscard]] QString mascotGreeting() const { return m_mascotGreeting; }
 
     Q_INVOKABLE void sendMessage(const QString& userText);
     Q_INVOKABLE void abortGeneration();
     Q_INVOKABLE void clearHistory();
     Q_INVOKABLE void setMascotState(const QString& state);
+    Q_INVOKABLE void setPeekMode(bool peek);
+    Q_INVOKABLE void togglePeekMode();
+    Q_INVOKABLE void wakeFromPeek();
 
 signals:
     void isGeneratingChanged();
     void currentStreamingTextChanged();
     void messageHistoryChanged();
     void mascotStateChanged();
+    void peekModeChanged();
+    void mascotGreetingChanged();
     void errorOccurred(const QString& errorMessage);
 
 private:
@@ -46,7 +55,9 @@ private:
     std::shared_ptr<usecases::IRAGService> m_ragService;
 
     bool m_isGenerating{false};
+    bool m_isPeekMode{false};
     QString m_mascotState{"idle"};
+    QString m_mascotGreeting{"Gâu gâu! Em chào chủ nhân ạ! 🐶"};
     QString m_currentStreamingText;
     QVariantList m_messageHistory;
     std::vector<domain::ChatMessage> m_domainHistory;

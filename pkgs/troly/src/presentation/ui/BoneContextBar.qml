@@ -7,12 +7,14 @@ Rectangle {
     height: 32
     radius: 8
     color: "#24273A"
-    border.color: "#F5A97F"
-    border.width: 1
+    border.color: isHoveredDrop ? "#A6E3A1" : "#F5A97F"
+    border.width: isHoveredDrop ? 2 : 1
     visible: currentPath !== ""
 
     property string currentPath: "/etc/nixos"
+    property bool isHoveredDrop: false
     signal cleared()
+    signal pathSelected(string path)
 
     RowLayout {
         anchors.fill: parent
@@ -27,7 +29,7 @@ Rectangle {
 
         Text {
             text: "Bối cảnh: " + boneBar.currentPath
-            color: "#F5A97F"
+            color: boneBar.isHoveredDrop ? "#A6E3A1" : "#F5A97F"
             font.pixelSize: 11
             font.bold: true
             elide: Text.ElideMiddle
@@ -48,6 +50,31 @@ Rectangle {
                     boneBar.currentPath = "";
                     boneBar.cleared();
                 }
+            }
+        }
+    }
+
+    // Vùng thả tệp / thư mục chuyên dụng của Bone Context
+    DropArea {
+        anchors.fill: parent
+        onEntered: function(drag) {
+            if (drag.hasUrls) {
+                boneBar.isHoveredDrop = true;
+            }
+        }
+        onExited: {
+            boneBar.isHoveredDrop = false;
+        }
+        onDropped: function(drop) {
+            boneBar.isHoveredDrop = false;
+            if (drop.hasUrls && drop.urls.length > 0) {
+                var urlStr = drop.urls[0].toString();
+                // Bỏ prefix file:// nếu có
+                if (urlStr.indexOf("file://") === 0) {
+                    urlStr = urlStr.substring(7);
+                }
+                boneBar.currentPath = urlStr;
+                boneBar.pathSelected(urlStr);
             }
         }
     }

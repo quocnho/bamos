@@ -15,12 +15,13 @@ plan/troly/
 │   └── BACKLOG.md              # Master Product Backlog & Lộ trình phân kỳ Milestones (F1 - F8)
 ├── sprints/                    # Vòng đời các Sprint thực thi
 │   ├── sprint-01/              # Sprint 01: Core Architecture & Setup (🟢 COMPLETED - v01.01.00)
-│   │   ├── PLAN.md             # Kế hoạch & Bảng công việc Sprint 01
-│   │   ├── REVIEW.md           # Đánh giá kết quả bàn giao Sprint 01
-│   │   └── RETRO.md            # Bài học cải tiến quy trình Sprint 01
-│   ├── sprint-02/              # Sprint 02: Modern Mascot UI & EyeLeo Native (🟡 IN_PROGRESS - v01.02.00)
-│   │   └── PLAN.md             # Kế hoạch & Bảng công việc Sprint 02
-│   └── ...                     # Các Sprint tiếp theo (sprint-03 ➔ sprint-07)
+│   ├── sprint-02/              # Sprint 02: Modern Mascot UI & EyeLeo Native (🟢 COMPLETED - v01.02.00)
+│   │   ├── PLAN.md             # Kế hoạch & Bảng công việc Sprint 02
+│   │   ├── REVIEW.md           # Đánh giá kết quả bàn giao Sprint 02
+│   │   └── RETRO.md            # Bài học cải tiến quy trình Sprint 02
+│   ├── sprint-03/              # Sprint 03: Vector RAG & SQLite WAL Engine (🟡 IN_PROGRESS - v01.03.00)
+│   │   └── PLAN.md             # Kế hoạch & Bảng công việc Sprint 03
+│   └── ...                     # Các Sprint tiếp theo (sprint-04 ➔ sprint-07)
 └── scrum/                      # Hoạt động phối hợp liên Agent
     └── DAILY_SCRUM.md          # Nhật ký làm việc hàng ngày (Standup Log)
 ```
@@ -33,9 +34,10 @@ plan/troly/
 |---|---|---|---|
 | **Master Backlog** | [BACKLOG.md](file:///etc/nixos/plan/troly/backlog/BACKLOG.md) | Bức tranh sản phẩm hoàn chỉnh & Master Roadmap F1 - F8 | 🟢 HOÀN THIỆN |
 | **Sprint 01 (Nền Tảng)** | [sprint-01/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-01/PLAN.md) | Khởi tạo Clean Arch, NixOS Flake & Build system (`v01.01.00`) | 🟢 COMPLETED |
-| **Sprint 01 Review** | [sprint-01/REVIEW.md](file:///etc/nixos/plan/troly/sprints/sprint-01/REVIEW.md) | Biên bản nghiệm thu kết quả chuyển giao Sprint 01 | 🟢 PASSED |
-| **Sprint 01 Retro** | [sprint-01/RETRO.md](file:///etc/nixos/plan/troly/sprints/sprint-01/RETRO.md) | Đánh giá năng suất & hành động cải tiến quy trình | 🟢 COMPLETED |
-| **Sprint Hiện Tại** | [sprint-02/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-02/PLAN.md) | Kế hoạch Sprint 02: Mascot UI & EyeLeo (`v01.02.00`) | 🟡 IN_PROGRESS |
+| **Sprint 02 (Mascot & EyeLeo)** | [sprint-02/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-02/PLAN.md) | Mascot Peek Tail & EyeLeo Native C++ (`v01.02.00`) | 🟢 COMPLETED |
+| **Sprint 02 Review** | [sprint-02/REVIEW.md](file:///etc/nixos/plan/troly/sprints/sprint-02/REVIEW.md) | Nghiệm thu 7/7 Tasks hoàn tất 100% CTest | 🟢 PASSED |
+| **Sprint 02 Retro** | [sprint-02/RETRO.md](file:///etc/nixos/plan/troly/sprints/sprint-02/RETRO.md) | Đánh giá năng suất & bài học cải tiến quy trình | 🟢 COMPLETED |
+| **Sprint Hiện Tại** | [sprint-03/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-03/PLAN.md) | Kế hoạch Sprint 03: Vector RAG & SQLite WAL (`v01.03.00`) | 🟡 IN_PROGRESS |
 | **Daily Scrum** | [DAILY_SCRUM.md](file:///etc/nixos/plan/troly/scrum/DAILY_SCRUM.md) | Nhật ký hàng ngày của các AI Agent | 🟢 ACTIVE |
 
 ---

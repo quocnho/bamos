@@ -36,29 +36,33 @@ ModalDialog {
         RowLayout {
             Layout.fillWidth: true
             Text { text: "Bật nhắc nhở EyeLeo:"; color: "#CDD6F4"; Layout.fillWidth: true }
-            Switch { checked: true }
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-            Text { text: "Nghỉ Ngắn (Short Break):"; color: "#CDD6F4"; Layout.fillWidth: true }
-            ComboBox {
-                model: ["Mỗi 10 phút (Khuyên dùng)", "Mỗi 15 phút", "Mỗi 20 phút"]
-            }
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-            Text { text: "Nghỉ Dài (Long Break):"; color: "#CDD6F4"; Layout.fillWidth: true }
-            ComboBox {
-                model: ["Mỗi 50 phút (Nghỉ 5p)", "Mỗi 60 phút (Nghỉ 5p)", "Mỗi 90 phút (Nghỉ 7p)"]
+            Switch {
+                checked: typeof eyeLeoVM !== "undefined" ? eyeLeoVM.enabled : true
+                onToggled: {
+                    if (typeof eyeLeoVM !== "undefined") eyeLeoVM.setEnabled(checked)
+                }
             }
         }
 
         RowLayout {
             Layout.fillWidth: true
             Text { text: "Chế độ nghiêm ngặt (Strict Mode):"; color: "#CDD6F4"; Layout.fillWidth: true }
-            Switch { checked: false }
+            Switch {
+                checked: typeof eyeLeoVM !== "undefined" ? eyeLeoVM.strictMode : false
+                onToggled: {
+                    if (typeof eyeLeoVM !== "undefined") eyeLeoVM.setStrictMode(checked)
+                }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            Text { text: "Thời gian đã làm việc:"; color: "#CDD6F4"; Layout.fillWidth: true }
+            Text {
+                text: (typeof eyeLeoVM !== "undefined" ? eyeLeoVM.workMinutes : 0) + " phút"
+                color: "#A6E3A1"
+                font.bold: true
+            }
         }
 
         Item { Layout.fillHeight: true }
@@ -67,9 +71,17 @@ ModalDialog {
             Layout.fillWidth: true
 
             Button {
-                text: "👁️ Thử bài tập ngay"
+                text: "👁️ Thử nghỉ ngắn (20s)"
                 onClicked: {
-                    chatVM.setMascotState("excited");
+                    if (typeof eyeLeoVM !== "undefined") eyeLeoVM.triggerShortBreak();
+                    eyeleoDialog.close();
+                }
+            }
+
+            Button {
+                text: "☕ Thử nghỉ dài"
+                onClicked: {
+                    if (typeof eyeLeoVM !== "undefined") eyeLeoVM.triggerLongBreak();
                     eyeleoDialog.close();
                 }
             }
@@ -77,7 +89,7 @@ ModalDialog {
             Item { Layout.fillWidth: true }
 
             Button {
-                text: "Lưu Cài Đặt"
+                text: "Đóng"
                 onClicked: eyeleoDialog.close()
             }
         }

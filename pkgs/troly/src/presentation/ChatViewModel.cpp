@@ -28,6 +28,33 @@ void ChatViewModel::setMascotState(const QString& state) {
     }
 }
 
+void ChatViewModel::setPeekMode(bool peek) {
+    if (m_isPeekMode != peek) {
+        m_isPeekMode = peek;
+        emit peekModeChanged();
+        if (m_isPeekMode) {
+            setMascotState("peek_tail");
+        } else {
+            setMascotState("idle");
+        }
+    }
+}
+
+void ChatViewModel::togglePeekMode() {
+    setPeekMode(!m_isPeekMode);
+}
+
+void ChatViewModel::wakeFromPeek() {
+    if (m_isPeekMode) {
+        m_isPeekMode = false;
+        emit peekModeChanged();
+        // Hiệu ứng cún vồ chuột vui mừng & chào hỏi
+        setMascotState("playful_jump");
+        m_mascotGreeting = "Gâu gâu! Em đây ạ! Chúc chủ nhân một ngày làm việc tràn đầy năng lượng! 🐾";
+        emit mascotGreetingChanged();
+    }
+}
+
 void ChatViewModel::appendStreamingToken(const QString& token) {
     m_currentStreamingText += token;
     emit currentStreamingTextChanged();
@@ -36,6 +63,11 @@ void ChatViewModel::appendStreamingToken(const QString& token) {
 void ChatViewModel::sendMessage(const QString& userText) {
     QString trimmed = userText.trimmed();
     if (trimmed.isEmpty() || m_isGenerating) return;
+
+    // Nếu đang ở chế độ núp lùm thì tự động mở rộng
+    if (m_isPeekMode) {
+        setPeekMode(false);
+    }
 
     // Thêm User message vào history
     QVariantMap userMsg;

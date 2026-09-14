@@ -1,5 +1,5 @@
 # SPRINT 02: Modern Mascot UI & EyeLeo Native
-**Thời gian:** 15/09/2026 - 29/09/2026 | **Trạng thái:** 🟡 IN_PROGRESS | **Phiên bản:** `v01.02.00`
+**Thời gian:** 15/09/2026 - 29/09/2026 | **Trạng thái:** 🟢 COMPLETED | **Phiên bản:** `v01.02.00`
 
 > 🎯 **Mục Tiêu Trọng Tâm Sprint 02:**
 > Hiện thực hóa trải nghiệm tương tác trực quan sống động của người dùng với Troly:
@@ -14,13 +14,13 @@
 
 | Task ID | Component | Phân loại | Người nhận | Ước lượng | Trạng thái | Ghi chú kỹ thuật |
 |---|---|---|---|---|---|---|
-| `TROLY-201` | Mascot Interaction & Peek Tail | `feat` | @AnimAgent, @DevOptAgent | 5 SP | 🟡 IN_PROGRESS | Neo cún vào sát mép phải màn hình, thò đuôi vẫy; click chuột kích hoạt wakeup animation |
-| `TROLY-202` | Disney Animation & FSM Refining | `feat` | @AnimAgent | 3 SP | 🟡 IN_PROGRESS | Cải tiến Bezier easing, squash & stretch khi thở/nhảy, tối ưu Scene Graph 60fps |
-| `TROLY-203` | Native EyeLeo Service & Controller | `feat` | @DevOptAgent | 5 SP | ⚪ TODO | `EyeLeoService.hpp/.cpp`, hẹn giờ 30s cảnh báo, 20s nghỉ ngắn, 5m nghỉ dài, D-Bus idle detector |
-| `TROLY-204` | EyeLeo UI Modals & Exercises | `feat` | @DevOptAgent, @AnimAgent | 5 SP | ⚪ TODO | Cửa sổ overlay bán trong suốt, bài tập đảo mắt theo cún con, countdown strict mode |
-| `TROLY-205` | Quick Action Menu & Modals Wiring | `feat` | @DevOptAgent | 3 SP | ⚪ TODO | Kết nối nút ⚙️ mở Menu thả xuống, hiển thị đầy đủ các panel thiết lập |
-| `TROLY-206` | Bone Context Bar & Nautilus Dnd | `feat` | @DevOptAgent | 3 SP | ⚪ TODO | Thanh ngữ cảnh thư mục, nhận file/folder kéo thả hoặc đọc đường dẫn từ clipboard |
-| `TROLY-207` | Unit Test & BAM Switch Verification | `test` | @DevOptAgent | 2 SP | ⚪ TODO | Kiểm thử ctest các logic timer, build derivation và chạy thử nghiệm `bam dry` |
+| `TROLY-201` | Mascot Interaction & Peek Tail | `feat` | @AnimAgent, @DevOptAgent | 5 SP | 🟢 DONE | Nút 🐾 chuyển đổi Peek Tail, cún núp lùm thò đuôi vẫy, click đuôi bung mở morphing `480x680` |
+| `TROLY-202` | Disney Animation & FSM Refining | `feat` | @AnimAgent | 3 SP | 🟢 DONE | FSM `peek_tail` ➔ `playful_jump` ➔ `greeting` ➔ `idle`, 100% Bezier easing & bounce |
+| `TROLY-203` | Native EyeLeo Service & Controller | `feat` | @DevOptAgent | 5 SP | 🟢 DONE | `EyeLeoService.hpp/.cpp`, hẹn giờ 30s cảnh báo, 20s nghỉ ngắn, 5m nghỉ dài, D-Bus idle detector |
+| `TROLY-204` | EyeLeo UI Modals & Exercises | `feat` | @DevOptAgent, @AnimAgent | 5 SP | 🟢 DONE | Cửa sổ overlay bán trong suốt `EyeLeoBreakOverlay.qml`, bài tập mắt cùng cún con, countdown strict mode |
+| `TROLY-205` | Quick Action Menu & Modals Wiring | `feat` | @DevOptAgent | 3 SP | 🟢 DONE | Kết nối nút ⚙️ mở Menu thả xuống, hiển thị đầy đủ 7 panel thiết lập, bọc fallback an toàn |
+| `TROLY-206` | Bone Context Bar & Nautilus Dnd | `feat` | @DevOptAgent | 3 SP | 🟢 DONE | Thanh ngữ cảnh thư mục, DropArea toàn cửa sổ nhận diện thư mục / file kéo thả từ Nautilus |
+| `TROLY-207` | Unit Test & BAM Switch Verification | `test` | @DevOptAgent | 2 SP | 🟢 DONE | 100% CTest Passed (`EyeLeoTests`), derivation `nix-build` và `nix build .#troly --dry-run` thành công |
 
 ---
 

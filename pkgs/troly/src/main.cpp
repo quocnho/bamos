@@ -9,8 +9,10 @@
 #include "infrastructure/SqliteRAGRepository.hpp"
 #include "infrastructure/LlamaInferenceEngine.hpp"
 #include "infrastructure/LinuxActionDispatcher.hpp"
+#include "infrastructure/EyeLeoService.hpp"
 #include "presentation/ChatViewModel.hpp"
 #include "presentation/SystemMonitorViewModel.hpp"
+#include "presentation/EyeLeoViewModel.hpp"
 
 int main(int argc, char *argv[]) {
     // Tối ưu hỗ trợ Wayland / XWayland
@@ -24,6 +26,7 @@ int main(int argc, char *argv[]) {
     std::cout << "🚀 Troly - Native Edge AI Desktop (C++20 + Qt6)\n";
     std::cout << "   - Clean Architecture Skeleton\n";
     std::cout << "   - Hybrid RAG (FTS5 + SQLite-vec)\n";
+    std::cout << "   - Native EyeLeo Eye Protection Service\n";
     std::cout << "   - Zero Web Overhead\n";
     std::cout << "==================================================\n";
 
@@ -34,12 +37,18 @@ int main(int argc, char *argv[]) {
     auto inferenceEngine = std::make_shared<troly::infrastructure::LlamaInferenceEngine>("http://127.0.0.1:9090");
     auto actionDispatcher = std::make_shared<troly::infrastructure::LinuxActionDispatcher>();
 
+    // Khởi tạo EyeLeo Native Service & khởi động chu kỳ đếm
+    auto eyeLeoService = std::make_shared<troly::infrastructure::EyeLeoService>();
+    eyeLeoService->start();
+
     auto chatVM = std::make_unique<troly::presentation::ChatViewModel>(inferenceEngine, ragRepo);
     auto systemMonitorVM = std::make_unique<troly::presentation::SystemMonitorViewModel>();
+    auto eyeLeoVM = std::make_unique<troly::presentation::EyeLeoViewModel>(eyeLeoService);
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("chatVM", chatVM.get());
     engine.rootContext()->setContextProperty("systemMonitorVM", systemMonitorVM.get());
+    engine.rootContext()->setContextProperty("eyeLeoVM", eyeLeoVM.get());
 
     const QUrl url(QStringLiteral("qrc:/ui/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

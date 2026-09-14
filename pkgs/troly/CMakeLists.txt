@@ -16,8 +16,10 @@ set(SOURCES
     src/infrastructure/SqliteRAGRepository.cpp
     src/infrastructure/LlamaInferenceEngine.cpp
     src/infrastructure/LinuxActionDispatcher.cpp
+    src/infrastructure/EyeLeoService.cpp
     src/presentation/ChatViewModel.cpp
     src/presentation/SystemMonitorViewModel.cpp
+    src/presentation/EyeLeoViewModel.cpp
 )
 
 set(HEADERS
@@ -25,15 +27,19 @@ set(HEADERS
     src/domain/Config.hpp
     src/domain/KnowledgeChunk.hpp
     src/domain/CommandResult.hpp
+    src/domain/EyeLeoConfig.hpp
     src/usecases/IRAGService.hpp
     src/usecases/IInferenceEngine.hpp
     src/usecases/IActionDispatcher.hpp
     src/usecases/ISafetyGuard.hpp
+    src/usecases/IEyeLeoService.hpp
     src/infrastructure/SqliteRAGRepository.hpp
     src/infrastructure/LlamaInferenceEngine.hpp
     src/infrastructure/LinuxActionDispatcher.hpp
+    src/infrastructure/EyeLeoService.hpp
     src/presentation/ChatViewModel.hpp
     src/presentation/SystemMonitorViewModel.hpp
+    src/presentation/EyeLeoViewModel.hpp
 )
 
 qt_add_executable(troly
@@ -51,5 +57,16 @@ target_link_libraries(troly PRIVATE
     SQLite3::SQLite3
     Threads::Threads
 )
+
+enable_testing()
+add_executable(test_eyeleo
+    tests/test_eyeleo.cpp
+    src/infrastructure/EyeLeoService.cpp
+)
+target_include_directories(test_eyeleo PRIVATE src)
+target_link_libraries(test_eyeleo PRIVATE
+    Qt6::Core
+)
+add_test(NAME EyeLeoTests COMMAND test_eyeleo)
 
 install(TARGETS troly DESTINATION bin)
