@@ -41,3 +41,13 @@ Closes: <TICKET-ID> (hoặc Refs: <TICKET-ID>)
 - **Phân rã hạt nhỏ nhất (Atomic Granularity):** Xây dựng hệ thống tập tin phân nhỏ nhất có thể thành các thư mục, tập tin phù hợp, chuyên nghiệp. Không tạo file fat/god class.
 - **Dễ tìm kiếm & định vị:** Nội dung súc tích, module hóa cao để tiết kiệm tối đa token khi AI đọc/ghi mã.
 - **Đường dẫn tương đối (Standalone Portability):** Mọi mã nguồn C++, QML, docs phải sử dụng đường dẫn tương đối để đảm bảo package con (`troly`, `assistant`) có thể chạy độc lập hoặc tách thành repo riêng mà không bị gãy đường dẫn.
+
+---
+
+## 4. Giao Thức Phản Hồi & Tiếp Nhận Yêu Cầu (Refine, Reframe & Execution Plan)
+Khi người dùng đưa ra một yêu cầu mới, Agent **bắt buộc tuân thủ** quy chuẩn tại [.agents/rules/prompt-refinement-protocol.md](file:///.agents/rules/prompt-refinement-protocol.md):
+- **Tái định hình & xác nhận yêu cầu (Reframe & Scope):** Diễn đạt lại yêu cầu bằng ngôn ngữ kỹ thuật chuẩn xác, nêu rõ phạm vi tác động.
+- **Phân tích cấu trúc:** Bóc tách rõ **Ý chính** (Core Requirements), **Ý phụ / Ràng buộc** (Sub-requirements / Constraints), và **Ý liên quan** (Related Context / Dependencies).
+- **Kế hoạch thực hiện:** Vạch rõ các bước hành động cụ thể (Khảo sát -> Triển khai -> Kiểm thử -> Bàn giao/Commit Why-What-Test).
+- **Làm rõ / Xác nhận:** Nêu câu hỏi nếu có điểm mơ hồ hoặc xác nhận trước khi can thiệp vào mã nguồn/hệ thống.
+
