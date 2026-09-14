@@ -48,3 +48,35 @@ Tài liệu ghi nhận nhịp độ làm việc, tiến độ hàng ngày và th
   - Hoàn tất hoạt ảnh Núp lùm thò đuôi vẫy đung đưa liên tục (xoay góc -12° đến 16° Easing InOutQuad).
   - Hiệu ứng Anticipation & Playful Jump vồ chuột khi cún thức giấc (`Easing.OutBack`, `Easing.OutBounce`).
 - **Vướng mắc (Blockers):** Không có.
+
+---
+
+## [2026-09-14] (Sprint 03: Hoàn Thành Nghiệm Thu Vector RAG & SQLite WAL Engine - `v01.03.00`)
+
+### 📌 @PlanAgent (Project Manager & Documentation)
+- **Hôm nay:**
+  - Hoàn tất theo dõi 7/7 user stories Sprint 03 (`TROLY-301` đến `TROLY-307`).
+  - Cập nhật tài liệu Sprint 03: [PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-03/PLAN.md), [REVIEW.md](file:///etc/nixos/plan/troly/sprints/sprint-03/REVIEW.md), [RETRO.md](file:///etc/nixos/plan/troly/sprints/sprint-03/RETRO.md).
+  - Chuẩn bị kế hoạch Sprint 04: Local Inference & Dynamic MoE Router (`v01.04.00`).
+- **Vướng mắc (Blockers):** Không có.
+
+### 🔬 @RdAgent (R&D Specialist)
+- **Hôm nay:**
+  - Thiết kế và hiệu chỉnh thuật toán Hybrid Search Reciprocal Rank Fusion (RRF với hằng số $k=60$).
+  - Đánh giá khả năng nạp động `libvec0.so` và cấu trúc bảng ảo `vec_chunks (chunk_id INT, embedding FLOAT[384])`.
+- **Vướng mắc (Blockers):** Không có. Kết quả tìm kiếm kết hợp BM25 và Vector Cosine đạt hiệu năng tối ưu.
+
+### 💻 @DevOptAgent (Execution & CI/CD)
+- **Hôm nay:**
+  - Hiện thực DDL SQLite WAL và kết nối RAII an toàn trong `SqliteRAGRepository.cpp/.hpp`.
+  - Xây dựng `DocumentIngestionWorker.hpp` hỗ trợ quét tệp chạy ngầm đa luồng `std::jthread`, băm SHA256, chia đoạn (chunking) 500 ký tự.
+  - Xây dựng `RAGViewModel.hpp/.cpp`, đăng ký context property `ragVM` và kết nối với `RAGSettingsModal.qml`.
+  - Viết bộ kiểm thử `tests/test_rag.cpp` (100% CTest Passed cùng `tests/test_eyeleo.cpp`).
+  - Đóng gói derivation thành công qua `nix-build default.nix` và kiểm tra `nix build .#troly --dry-run` từ flake mẹ pass 100%.
+- **Vướng mắc (Blockers):** Đã khắc phục lỗi MOC vtable linker error bằng cách phân tách rõ ràng file `.cpp` và `.hpp` cho `RAGViewModel`.
+
+### 🎨 @AnimAgent (Lead 3D & Animation Director)
+- **Hôm nay:**
+  - Phác thảo biểu cảm cún cưng tìm kiếm tri thức (đánh hơi tìm sách) phục vụ hoạt ảnh lúc RAG đang chạy truy vấn dữ liệu.
+- **Vướng mắc (Blockers):** Không có. Sẵn sàng tích hợp cho Sprint 04.
+

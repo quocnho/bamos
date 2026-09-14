@@ -1,5 +1,5 @@
 # SPRINT 03: Vector RAG & SQLite WAL Engine
-**Thời gian:** 30/09/2026 - 14/10/2026 | **Trạng thái:** 🟡 IN_PROGRESS | **Phiên bản:** `v01.03.00`
+**Thời gian:** 30/09/2026 - 14/10/2026 | **Trạng thái:** 🟢 COMPLETED | **Phiên bản:** `v01.03.00`
 
 > 🎯 **Mục Tiêu Trọng Tâm Sprint 03:**
 > Hiện thực hóa động cơ tri thức cục bộ **Hybrid RAG Engine (100% Air-gapped)**:
@@ -15,13 +15,13 @@
 
 | Task ID | Component | Phân loại | Người nhận | Ước lượng | Trạng thái | Ghi chú kỹ thuật |
 |---|---|---|---|---|---|---|
-| `TROLY-301` | SQLite DDL & Migration Engine | `feat` | @DevOptAgent | 5 SP | ⚪ TODO | Tạo bảng `collections`, `documents`, `doc_chunks`, `chunks_fts`, `vec_chunks` |
-| `TROLY-302` | sqlite-vec Extension Loader | `feat` | @DevOptAgent, @RdAgent | 5 SP | ⚪ TODO | Nạp `libvec0.so` qua `sqlite3_load_extension`, hỗ trợ truy vấn vector Cosine `vec0` |
-| `TROLY-303` | Hybrid RRF Scoring Algorithm | `feat` | @RdAgent, @DevOptAgent | 5 SP | ⚪ TODO | Kết hợp BM25 rank và Vector distance rank với hệ số $RRF(d) = \sum \frac{1}{k + r(d)}$ ($k=60$) |
-| `TROLY-304` | Asynchronous Document Ingestion | `feat` | @DevOptAgent | 5 SP | ⚪ TODO | Quét thư mục nền `std::jthread`, băm SHA256 chống trùng lặp, chia chunk 500 tokens |
-| `TROLY-305` | RAG ViewModel & UI Integration | `feat` | @DevOptAgent | 3 SP | ⚪ TODO | Kết nối `RAGSettingsModal.qml` hiển thị tiến độ quét, danh sách collections và test truy vấn |
-| `TROLY-306` | CTest Unit Tests for Hybrid Search | `test` | @DevOptAgent | 3 SP | ⚪ TODO | Viết `tests/test_rag.cpp` kiểm thử tính toàn vẹn DDL và độ chính xác RRF |
-| `TROLY-307` | Flake & NixOS Verification | `chore` | @DevOptAgent | 2 SP | ⚪ TODO | Đóng gói derivation và chạy thử nghiệm cập nhật `bam dry` |
+| `TROLY-301` | SQLite DDL & Migration Engine | `feat` | @DevOptAgent | 5 SP | 🟢 DONE | Hoàn thành schema DDL chuẩn: `collections`, `documents`, `doc_chunks`, `chunks_fts` |
+| `TROLY-302` | sqlite-vec Extension Loader | `feat` | @DevOptAgent, @RdAgent | 5 SP | 🟢 DONE | Nạp `libvec0.so`, tạo virtual table `vec_chunks (chunk_id INT, embedding FLOAT[384])` |
+| `TROLY-303` | Hybrid RRF Scoring Algorithm | `feat` | @RdAgent, @DevOptAgent | 5 SP | 🟢 DONE | Thuật toán Reciprocal Rank Fusion ($k=60$) kết hợp điểm FTS5 BM25 và khoảng cách Cosine |
+| `TROLY-304` | Asynchronous Document Ingestion | `feat` | @DevOptAgent | 5 SP | 🟢 DONE | Quét thư mục nền `std::jthread`, băm SHA256 chống trùng lặp, chia chunk 500 ký tự |
+| `TROLY-305` | RAG ViewModel & UI Integration | `feat` | @DevOptAgent | 3 SP | 🟢 DONE | Kết nối `RAGSettingsModal.qml` hiển thị tiến độ quét, danh sách collections và test truy vấn |
+| `TROLY-306` | CTest Unit Tests for Hybrid Search | `test` | @DevOptAgent | 3 SP | 🟢 DONE | `tests/test_rag.cpp` vượt qua 100% CTest tự động (khởi tạo, embedding mock, RRF query) |
+| `TROLY-307` | Flake & NixOS Verification | `chore` | @DevOptAgent | 2 SP | 🟢 DONE | Đóng gói derivation và kiểm tra dry-run flake toplevel NixOS thành công 100% |
 
 ---
 

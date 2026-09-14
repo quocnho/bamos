@@ -13,6 +13,7 @@
 #include "presentation/ChatViewModel.hpp"
 #include "presentation/SystemMonitorViewModel.hpp"
 #include "presentation/EyeLeoViewModel.hpp"
+#include "presentation/RAGViewModel.hpp"
 
 int main(int argc, char *argv[]) {
     // Tối ưu hỗ trợ Wayland / XWayland
@@ -44,11 +45,13 @@ int main(int argc, char *argv[]) {
     auto chatVM = std::make_unique<troly::presentation::ChatViewModel>(inferenceEngine, ragRepo);
     auto systemMonitorVM = std::make_unique<troly::presentation::SystemMonitorViewModel>();
     auto eyeLeoVM = std::make_unique<troly::presentation::EyeLeoViewModel>(eyeLeoService);
+    auto ragVM = std::make_unique<troly::presentation::RAGViewModel>(ragRepo);
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("chatVM", chatVM.get());
     engine.rootContext()->setContextProperty("systemMonitorVM", systemMonitorVM.get());
     engine.rootContext()->setContextProperty("eyeLeoVM", eyeLeoVM.get());
+    engine.rootContext()->setContextProperty("ragVM", ragVM.get());
 
     const QUrl url(QStringLiteral("qrc:/ui/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

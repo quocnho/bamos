@@ -20,6 +20,7 @@ set(SOURCES
     src/presentation/ChatViewModel.cpp
     src/presentation/SystemMonitorViewModel.cpp
     src/presentation/EyeLeoViewModel.cpp
+    src/presentation/RAGViewModel.cpp
 )
 
 set(HEADERS
@@ -37,9 +38,11 @@ set(HEADERS
     src/infrastructure/LlamaInferenceEngine.hpp
     src/infrastructure/LinuxActionDispatcher.hpp
     src/infrastructure/EyeLeoService.hpp
+    src/infrastructure/DocumentIngestionWorker.hpp
     src/presentation/ChatViewModel.hpp
     src/presentation/SystemMonitorViewModel.hpp
     src/presentation/EyeLeoViewModel.hpp
+    src/presentation/RAGViewModel.hpp
 )
 
 qt_add_executable(troly
@@ -68,5 +71,16 @@ target_link_libraries(test_eyeleo PRIVATE
     Qt6::Core
 )
 add_test(NAME EyeLeoTests COMMAND test_eyeleo)
+
+add_executable(test_rag
+    tests/test_rag.cpp
+    src/infrastructure/SqliteRAGRepository.cpp
+)
+target_include_directories(test_rag PRIVATE src)
+target_link_libraries(test_rag PRIVATE
+    SQLite3::SQLite3
+    Threads::Threads
+)
+add_test(NAME RAGTests COMMAND test_rag)
 
 install(TARGETS troly DESTINATION bin)
