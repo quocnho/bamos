@@ -58,6 +58,9 @@ plan/troly/
 | **Sprint 09 (Desktop Pet & Downloader)**| [sprint-09/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-09/PLAN.md) | Standalone 3D Mascot Pet & GGUF Model Downloader (`v01.09.00`) | 🟢 COMPLETED |
 | **Sprint 09 Review** | [sprint-09/REVIEW.md](file:///etc/nixos/plan/troly/sprints/sprint-09/REVIEW.md) | Nghiệm thu 5/5 Tasks, 8/8 CTest Suites passed & Nix build | 🟢 PASSED |
 | **Sprint 09 Retro** | [sprint-09/RETRO.md](file:///etc/nixos/plan/troly/sprints/sprint-09/RETRO.md) | Bài học kinh nghiệm & Định hướng tương lai Sprint 09 | 🟢 COMPLETED |
+| **Sprint 10 (3D Assets & Disney Anim)**| [sprint-10/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-10/PLAN.md) | Professional 3D Pet Library & Frameless Floating Companion (`v01.10.00`) | 🟢 COMPLETED |
+| **Sprint 10 Review** | [sprint-10/REVIEW.md](file:///etc/nixos/plan/troly/sprints/sprint-10/REVIEW.md) | Nghiệm thu 4/4 Tasks, 8/8 CTest Suites passed & Nix build | 🟢 PASSED |
+| **Sprint 10 Retro** | [sprint-10/RETRO.md](file:///etc/nixos/plan/troly/sprints/sprint-10/RETRO.md) | Bài học kinh nghiệm & Đề xuất cải tiến Sprint 10 | 🟢 COMPLETED |
 | **Daily Scrum** | [DAILY_SCRUM.md](file:///etc/nixos/plan/troly/scrum/DAILY_SCRUM.md) | Nhật ký hàng ngày của các AI Agent | 🟢 ACTIVE |
 
 ---

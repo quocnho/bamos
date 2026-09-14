@@ -84,26 +84,24 @@ ApplicationWindow {
             }
         }
 
-        // Chú cún 3D Stylized không có viền hộp bao quanh
-        Mascot3DPOC {
+        // 🐾 Chú cún 3D Toon Render cao cấp với diễn hoạt 12 nguyên tắc Disney
+        PetMascotPetView {
             id: floating3dPet
             anchors.bottom: parent.bottom
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottomMargin: 8
-            width: 120
-            height: 120
+            width: 130
+            height: 130
 
-            // Hoạt cảnh nhảy tung tăng khi xuất hiện
-            SequentialAnimation {
-                id: initialJumpAnim
-                running: root.peekActive
-                ParallelAnimation {
-                    PropertyAnimation { target: floating3dPet; property: "y"; to: -16; duration: 250; easing.type: Easing.OutQuad }
-                    PropertyAnimation { target: floating3dPet; property: "scale"; to: 1.15; duration: 250; easing.type: Easing.OutBack }
+            onPetClicked: {
+                if (typeof chatVM !== "undefined") {
+                    chatVM.playSound("bark");
                 }
-                ParallelAnimation {
-                    PropertyAnimation { target: floating3dPet; property: "y"; to: 0; duration: 250; easing.type: Easing.InQuad }
-                    PropertyAnimation { target: floating3dPet; property: "scale"; to: 1.0; duration: 250; easing.type: Easing.OutBounce }
+            }
+
+            onPetDoubleClicked: {
+                if (typeof chatVM !== "undefined") {
+                    chatVM.wakeFromPeek();
                 }
             }
         }
@@ -281,105 +279,11 @@ ApplicationWindow {
                 border.width: 1
                 clip: true
 
-                Item {
+                PetMascotPetView {
                     id: petActor
                     anchors.centerIn: parent
-                    width: 100
-                    height: 100
-                    transformOrigin: Item.Bottom
-
-                    Image {
-                        id: petImage
-                        anchors.fill: parent
-                        fillMode: Image.PreserveAspectFit
-                        smooth: true
-                        source: {
-                            var state = typeof chatVM !== "undefined" ? chatVM.mascotState : "idle";
-                            if (state === "excited" || state === "playful_jump") return "../../../assets/pet/cho nhay.png";
-                            if (state === "sleep") return "../../../assets/pet/cho ngu.png";
-                            if (state === "greeting") return "../../../assets/pet/cho chao.png";
-                            return "../../../assets/pet/cho dung.png";
-                        }
-                    }
-
-                    // 12 Nguyên tắc hoạt hình Disney: Squash & Stretch nhịp thở tự nhiên (Idle Breathing)
-                    SequentialAnimation {
-                        id: idleAnim
-                        running: (typeof chatVM !== "undefined" ? chatVM.mascotState : "idle") === "idle"
-                        loops: Animation.Infinite
-                        PropertyAnimation {
-                            target: petActor
-                            property: "scale"
-                            from: 1.0
-                            to: 1.04
-                            duration: 1800
-                            easing.type: Easing.InOutQuad
-                        }
-                        PropertyAnimation {
-                            target: petActor
-                            property: "scale"
-                            from: 1.04
-                            to: 1.0
-                            duration: 1800
-                            easing.type: Easing.InOutQuad
-                        }
-                    }
-
-                    // Playful Jump & Excited Bounce khi cún đón trỏ chuột hoặc AI suy nghĩ
-                    SequentialAnimation {
-                        id: excitedAnim
-                        running: typeof chatVM !== "undefined" && (chatVM.mascotState === "excited" || chatVM.mascotState === "playful_jump")
-                        loops: (typeof chatVM !== "undefined" && chatVM.mascotState === "playful_jump") ? 2 : Animation.Infinite
-                        onFinished: {
-                            if (typeof chatVM !== "undefined" && chatVM.mascotState === "playful_jump") {
-                                chatVM.setMascotState("idle");
-                            }
-                        }
-                        ParallelAnimation {
-                            PropertyAnimation {
-                                target: petActor
-                                property: "y"
-                                to: -14
-                                duration: 280
-                                easing.type: Easing.OutQuad
-                            }
-                            PropertyAnimation {
-                                target: petActor
-                                property: "scale"
-                                to: 1.12
-                                duration: 280
-                                easing.type: Easing.OutBack
-                            }
-                        }
-                        ParallelAnimation {
-                            PropertyAnimation {
-                                target: petActor
-                                property: "y"
-                                to: 0
-                                duration: 260
-                                easing.type: Easing.InQuad
-                            }
-                            PropertyAnimation {
-                                target: petActor
-                                property: "scale"
-                                to: 1.0
-                                duration: 260
-                                easing.type: Easing.OutBounce
-                            }
-                        }
-                    }
-
-                    // Tương tác chạm chuột (Pet Poke Interaction)
-                    MouseArea {
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            if (typeof chatVM !== "undefined") {
-                                chatVM.setMascotState(chatVM.mascotState === "greeting" ? "idle" : "greeting");
-                            }
-                        }
-                    }
+                    width: 110
+                    height: 110
                 }
 
                 // Bong bóng thoại chào mừng
