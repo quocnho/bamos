@@ -21,15 +21,16 @@ Item {
         anchors.fill: parent
         transformOrigin: Item.Bottom
 
-        // 1. Hình ảnh: Chú cún chào (Greeting)
+        // 1. Hình ảnh: Chú cún chào (Greeting - Mặc định khi chào hoặc peek)
         Image {
             id: imgGreeting
             anchors.fill: parent
             fillMode: Image.PreserveAspectFit
             smooth: true
             mipmap: true
-            source: Qt.resolvedUrl("../../../assets/pet/cho chao.png")
-            opacity: petRoot.mascotState === "greeting" ? 1.0 : 0.0
+            source: Qt.resolvedUrl("../../../assets/pet/cho_chao.png")
+            opacity: (petRoot.mascotState === "greeting" || petRoot.mascotState === "peek_tail") ? 1.0 : 0.0
+            visible: opacity > 0.01
             Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.InOutQuad } }
         }
 
@@ -40,8 +41,9 @@ Item {
             fillMode: Image.PreserveAspectFit
             smooth: true
             mipmap: true
-            source: Qt.resolvedUrl("../../../assets/pet/cho dung.png")
-            opacity: petRoot.mascotState === "idle" ? 1.0 : 0.0
+            source: Qt.resolvedUrl("../../../assets/pet/cho_dung.png")
+            opacity: (petRoot.mascotState === "idle" || (petRoot.mascotState !== "greeting" && petRoot.mascotState !== "peek_tail" && petRoot.mascotState !== "excited" && petRoot.mascotState !== "playful_jump" && petRoot.mascotState !== "sleep")) ? 1.0 : 0.0
+            visible: opacity > 0.01
             Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.InOutQuad } }
         }
 
@@ -52,8 +54,9 @@ Item {
             fillMode: Image.PreserveAspectFit
             smooth: true
             mipmap: true
-            source: Qt.resolvedUrl("../../../assets/pet/cho nhay.png")
+            source: Qt.resolvedUrl("../../../assets/pet/cho_nhay.png")
             opacity: (petRoot.mascotState === "excited" || petRoot.mascotState === "playful_jump") ? 1.0 : 0.0
+            visible: opacity > 0.01
             Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.InOutQuad } }
         }
 
@@ -64,8 +67,9 @@ Item {
             fillMode: Image.PreserveAspectFit
             smooth: true
             mipmap: true
-            source: Qt.resolvedUrl("../../../assets/pet/cho ngu.png")
+            source: Qt.resolvedUrl("../../../assets/pet/cho_ngu.png")
             opacity: petRoot.mascotState === "sleep" ? 1.0 : 0.0
+            visible: opacity > 0.01
             Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.InOutQuad } }
         }
 

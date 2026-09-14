@@ -38,7 +38,7 @@ void ChatViewModel::setPeekMode(bool peek) {
         m_isPeekMode = peek;
         emit peekModeChanged();
         if (m_isPeekMode) {
-            setMascotState("peek_tail");
+            setMascotState("greeting");
         } else {
             setMascotState("idle");
         }

@@ -2,6 +2,8 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QFile>
+#include <QDir>
+#include <QProcessEnvironment>
 #include <iostream>
 #include <memory>
 
@@ -72,6 +74,20 @@ int main(int argc, char *argv[]) {
     auto selfEvolvingVM = std::make_unique<troly::presentation::SelfEvolvingViewModel>(selfEvolvingService);
 
     QQmlApplicationEngine engine;
+
+    // Tự động cấu hình đường dẫn import QML cho môi trường NixOS nếu chạy trực tiếp ngoài wrapper
+    QString nixQmlEnv = qEnvironmentVariable("NIXPKGS_QT6_QML_IMPORT_PATH");
+    if (!nixQmlEnv.isEmpty()) {
+        const auto paths = nixQmlEnv.split(QDir::listSeparator());
+        for (const auto& p : paths) {
+            engine.addImportPath(p);
+        }
+    }
+    // Fallback quét trong /nix/store nếu chưa có import path của QtQuick.Controls
+    if (QDir("/nix/store/fx21gyydnjdcy7r3ricmsq1iijdivdwl-qtdeclarative-6.11.2/lib/qt-6/qml").exists()) {
+        engine.addImportPath("/nix/store/fx21gyydnjdcy7r3ricmsq1iijdivdwl-qtdeclarative-6.11.2/lib/qt-6/qml");
+    }
+
     engine.rootContext()->setContextProperty("chatVM", chatVM.get());
     engine.rootContext()->setContextProperty("systemMonitorVM", systemMonitorVM.get());
     engine.rootContext()->setContextProperty("eyeLeoVM", eyeLeoVM.get());
