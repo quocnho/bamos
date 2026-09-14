@@ -6,7 +6,8 @@ ApplicationWindow {
     id: root
     visible: true
     title: "Trợ Lý BamOS (C++20 Native Edge AI)"
-    flags: Qt.Window | Qt.FramelessWindowHint
+    property bool alwaysOnTop: true
+    flags: Qt.Window | Qt.FramelessWindowHint | (alwaysOnTop ? Qt.WindowStaysOnTopHint : Qt.Widget)
     color: "transparent"
 
     readonly property bool peekActive: typeof chatVM !== "undefined" ? chatVM.isPeekMode : true
@@ -110,26 +111,88 @@ ApplicationWindow {
         MouseArea {
             id: petDragArea
             anchors.fill: parent
-            cursorShape: Qt.SizeAllCursor
+            cursorShape: isDragging ? Qt.SizeAllCursor : Qt.PointingHandCursor
+            hoverEnabled: true
+
             property point clickPos: "0,0"
+            property bool isDragging: false
+            readonly property int dragThreshold: 6
+
+            // Timer tự động ngủ sau 60s không tương tác (như pet.js trong assistant)
+            Timer {
+                id: petInactivitySleepTimer
+                interval: 60000
+                repeat: false
+                running: root.peekActive && typeof chatVM !== "undefined" && chatVM.mascotState !== "sleep"
+                onTriggered: {
+                    if (typeof chatVM !== "undefined") {
+                        chatVM.setMascotState("sleep");
+                    }
+                }
+            }
+
+            function resetInactivity() {
+                petInactivitySleepTimer.restart();
+            }
+
+            onEntered: {
+                floating3dPet.isHovered = true;
+                resetInactivity();
+            }
+
+            onExited: {
+                floating3dPet.isHovered = false;
+            }
 
             onPressed: function(mouse) {
                 clickPos = Qt.point(mouse.x, mouse.y);
+                isDragging = false;
+                resetInactivity();
             }
 
             onPositionChanged: function(mouse) {
-                var delta = Qt.point(mouse.x - clickPos.x, mouse.y - clickPos.y);
-                root.x += delta.x;
-                root.y += delta.y;
+                var dx = mouse.x - clickPos.x;
+                var dy = mouse.y - clickPos.y;
+                if (!isDragging && (Math.abs(dx) > dragThreshold || Math.abs(dy) > dragThreshold)) {
+                    isDragging = true;
+                }
+                if (isDragging) {
+                    root.x += dx;
+                    root.y += dy;
+                }
             }
 
             onReleased: {
-                if (typeof chatVM !== "undefined") {
-                    chatVM.saveMascotPosition(root.x, root.y);
+                resetInactivity();
+                if (isDragging) {
+                    isDragging = false;
+                    if (typeof chatVM !== "undefined") {
+                        chatVM.saveMascotPosition(root.x, root.y);
+                    }
+                }
+            }
+
+            onClicked: {
+                resetInactivity();
+                if (!isDragging) {
+                    if (typeof chatVM !== "undefined") {
+                        chatVM.playSound("bark");
+                        if (chatVM.mascotState === "sleep") {
+                            chatVM.setMascotState("greeting");
+                        } else if (chatVM.mascotState === "greeting") {
+                            chatVM.setMascotState("excited");
+                        } else if (chatVM.mascotState === "excited") {
+                            chatVM.setMascotState("playful_jump");
+                        } else {
+                            chatVM.setMascotState("greeting");
+                        }
+                    }
+                    floating3dPet.petClicked();
                 }
             }
 
             onDoubleClicked: {
+                resetInactivity();
                 // Nhấp đúp vào cún để mở rộng Full Chat
                 if (typeof chatVM !== "undefined") {
                     chatVM.wakeFromPeek();
@@ -216,6 +279,17 @@ ApplicationWindow {
                     text: "RAM: " + (typeof systemMonitorVM !== "undefined" ? systemMonitorVM.ramUsage.toFixed(1) : "38.5") + "%"
                     font.pixelSize: 11
                     color: "#A6ADC8"
+                }
+
+                Button {
+                    id: btnAlwaysOnTop
+                    text: root.alwaysOnTop ? "📌" : "📍"
+                    flat: true
+                    ToolTip.visible: hovered
+                    ToolTip.text: root.alwaysOnTop ? "Bỏ ghim trên cùng (Unpin)" : "Ghim trên cùng màn hình (Always on Top)"
+                    onClicked: {
+                        root.alwaysOnTop = !root.alwaysOnTop;
+                    }
                 }
 
                 Button {

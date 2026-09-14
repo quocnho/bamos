@@ -35,6 +35,11 @@ stdenv.mkDerivation rec {
     sqlite-vec
   ];
 
+  postInstall = ''
+    install -Dm644 ${./org.bamos.troly.desktop} $out/share/applications/org.bamos.troly.desktop
+    install -Dm644 ${../../assets/icons/bamai.svg} $out/share/icons/hicolor/scalable/apps/troly.svg
+  '';
+
   meta = with lib; {
     description = "Troly - Native Edge AI Desktop Companion (C++20, Qt6, Hybrid RAG)";
     homepage = "https://bamos.info";
