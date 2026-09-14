@@ -6,6 +6,10 @@
 #include <memory>
 #include "../infrastructure/DynamicMoERouter.hpp"
 
+namespace troly::infrastructure {
+class GGUFDownloaderService;
+}
+
 namespace troly::presentation {
 
 class LLMViewModel : public QObject {
@@ -19,10 +23,13 @@ class LLMViewModel : public QObject {
     Q_PROPERTY(QStringList availableModels READ availableModels NOTIFY availableModelsChanged)
     Q_PROPERTY(bool isConnected READ isConnected NOTIFY isConnectedChanged)
     Q_PROPERTY(QString connectionStatus READ connectionStatus NOTIFY connectionStatusChanged)
+    Q_PROPERTY(bool isDownloading READ isDownloading NOTIFY isDownloadingChanged)
+    Q_PROPERTY(double downloadProgress READ downloadProgress NOTIFY downloadProgressChanged)
+    Q_PROPERTY(QString downloadStatus READ downloadStatus NOTIFY downloadStatusChanged)
 
 public:
     explicit LLMViewModel(std::shared_ptr<infrastructure::DynamicMoERouter> router, QObject* parent = nullptr);
-    ~LLMViewModel() override = default;
+    ~LLMViewModel() override;
 
     [[nodiscard]] QString serverUrl() const { return m_serverUrl; }
     [[nodiscard]] QString activeModelName() const { return m_activeModelName; }
@@ -33,6 +40,9 @@ public:
     [[nodiscard]] QStringList availableModels() const { return m_availableModels; }
     [[nodiscard]] bool isConnected() const { return m_isConnected; }
     [[nodiscard]] QString connectionStatus() const { return m_connectionStatus; }
+    [[nodiscard]] bool isDownloading() const { return m_isDownloading; }
+    [[nodiscard]] double downloadProgress() const { return m_downloadProgress; }
+    [[nodiscard]] QString downloadStatus() const { return m_downloadStatus; }
 
     void setServerUrl(const QString& url);
     void setTemperature(float temp);
@@ -42,6 +52,8 @@ public:
     Q_INVOKABLE void testConnection();
     Q_INVOKABLE void selectModel(int index);
     Q_INVOKABLE void evaluateQueryIntent(const QString& query);
+    Q_INVOKABLE void downloadGGUFModel(const QString& url, const QString& customName = "");
+    Q_INVOKABLE void cancelGGUFDownload();
 
 signals:
     void serverUrlChanged();
@@ -53,9 +65,13 @@ signals:
     void availableModelsChanged();
     void isConnectedChanged();
     void connectionStatusChanged();
+    void isDownloadingChanged();
+    void downloadProgressChanged();
+    void downloadStatusChanged();
 
 private:
     std::shared_ptr<infrastructure::DynamicMoERouter> m_router;
+    std::unique_ptr<infrastructure::GGUFDownloaderService> m_downloader;
     QString m_serverUrl{"http://127.0.0.1:9090"};
     QString m_activeModelName{"Qwen2.5-3B-Instruct (General)"};
     QString m_activeIntent{"GeneralChat"};
@@ -65,6 +81,9 @@ private:
     QStringList m_availableModels;
     bool m_isConnected{true};
     QString m_connectionStatus{"Sẵn sàng (Local SSE)"};
+    bool m_isDownloading{false};
+    double m_downloadProgress{0.0};
+    QString m_downloadStatus{"Sẵn sàng tải mô hình GGUF"};
 };
 
 } // namespace troly::presentation

@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick QuickControls2)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick QuickControls2 Network)
 qt_standard_project_setup()
 
 find_package(SQLite3 REQUIRED)
@@ -17,6 +17,7 @@ set(SOURCES
     src/infrastructure/LlamaInferenceEngine.cpp
     src/infrastructure/LinuxActionDispatcher.cpp
     src/infrastructure/EyeLeoService.cpp
+    src/infrastructure/GGUFDownloaderService.cpp
     src/presentation/ChatViewModel.cpp
     src/presentation/SystemMonitorViewModel.cpp
     src/presentation/EyeLeoViewModel.cpp
@@ -54,6 +55,7 @@ set(HEADERS
     src/infrastructure/WakaTrackerService.hpp
     src/infrastructure/SelfEvolvingService.hpp
     src/infrastructure/AudioFeedbackService.hpp
+    src/infrastructure/GGUFDownloaderService.hpp
     src/presentation/ChatViewModel.hpp
     src/presentation/SystemMonitorViewModel.hpp
     src/presentation/EyeLeoViewModel.hpp
@@ -75,6 +77,7 @@ target_link_libraries(troly PRIVATE
     Qt6::Gui
     Qt6::Quick
     Qt6::QuickControls2
+    Qt6::Network
     SQLite3::SQLite3
     Threads::Threads
 )
@@ -144,5 +147,16 @@ target_link_libraries(test_agent_tools PRIVATE
     Threads::Threads
 )
 add_test(NAME AgentToolsTests COMMAND test_agent_tools)
+
+add_executable(test_gguf_downloader
+    tests/test_gguf_downloader.cpp
+    src/infrastructure/GGUFDownloaderService.cpp
+)
+target_include_directories(test_gguf_downloader PRIVATE src)
+target_link_libraries(test_gguf_downloader PRIVATE
+    Qt6::Core
+    Qt6::Network
+)
+add_test(NAME GGUFDownloaderTests COMMAND test_gguf_downloader)
 
 install(TARGETS troly DESTINATION bin)

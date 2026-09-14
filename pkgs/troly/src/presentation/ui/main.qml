@@ -9,11 +9,11 @@ ApplicationWindow {
     flags: Qt.Window | Qt.FramelessWindowHint
     color: "transparent"
 
-    readonly property bool peekActive: typeof chatVM !== "undefined" ? chatVM.isPeekMode : false
+    readonly property bool peekActive: typeof chatVM !== "undefined" ? chatVM.isPeekMode : true
 
-    // Kích thước co giãn linh hoạt (Morphing) giữa Full Chat và Peek Tail
-    width: peekActive ? 84 : 480
-    height: peekActive ? 120 : 680
+    // Khởi tạo kích thước: Khi ở chế độ Mascot Pet thì nhỏ gọn 140x160 không viền hộp vuông
+    width: peekActive ? 140 : 480
+    height: peekActive ? 170 : 680
 
     Behavior on width {
         NumberAnimation { duration: 320; easing.type: Easing.OutBack }
@@ -22,74 +22,121 @@ ApplicationWindow {
         NumberAnimation { duration: 320; easing.type: Easing.OutBack }
     }
 
-    // 🐾 VÙNG 1: PEEK TAIL WIDGET (Chế độ Núp Lùm Thò Đuôi Mép Màn Hình)
-    Rectangle {
+    // 📍 ĐỊNH VỊ TỌA ĐỘ BAN ĐẦU & KHÔI PHỤC VỊ TRÍ ĐÃ LƯU
+    Component.onCompleted: {
+        var screenW = Screen.desktopAvailableWidth;
+        var screenH = Screen.desktopAvailableHeight;
+        var defaultX = screenW - 160;
+        var defaultY = screenH - 220;
+
+        if (typeof chatVM !== "undefined") {
+            var pos = chatVM.getSavedMascotPosition(defaultX, defaultY);
+            root.x = pos.x;
+            root.y = pos.y;
+            // Tự động chào mừng nhí nhảnh khi khởi chạy
+            chatVM.setPeekMode(true);
+            chatVM.playSound("bark");
+        } else {
+            root.x = defaultX;
+            root.y = defaultY;
+        }
+    }
+
+    // 🐾 VÙNG 1: FLOATING 3D MASCOT PET (Không viền hộp vuông, nền trong suốt hoàn toàn)
+    Item {
         id: peekContainer
         anchors.fill: parent
         visible: root.peekActive
-        radius: 20
-        color: "#E6181825"
-        border.color: "#89B4FA"
-        border.width: 1.5
 
-        Item {
-            id: tailActor
-            anchors.centerIn: parent
-            width: 70
-            height: 70
-            transformOrigin: Item.BottomRight
+        // Bong bóng thoại chào hỏi trên đầu chú cún
+        Rectangle {
+            id: mascotBubble
+            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: Math.min(200, bubbleText.implicitWidth + 20)
+            height: bubbleText.implicitHeight + 14
+            radius: 12
+            color: "#E6181825"
+            border.color: "#89B4FA"
+            border.width: 1.5
+            visible: bubbleOpacityAnim.running || bubbleText.text !== ""
+            opacity: 1.0
 
-            Image {
-                anchors.fill: parent
-                fillMode: Image.PreserveAspectFit
-                source: "../../../assets/pet/cho chao.png"
-                smooth: true
+            Text {
+                id: bubbleText
+                anchors.centerIn: parent
+                text: {
+                    var honorific = typeof userProfileVM !== "undefined" ? userProfileVM.addressing : "Chủ nhân";
+                    return "Xin chào " + honorific + ",\nchúc một ngày vui! Gâu gâu! 🐾";
+                }
+                font.bold: true
+                font.pixelSize: 11
+                color: "#A6E3A1"
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.Wrap
             }
 
-            // Disney Easing: Đuôi vẫy đung đưa nhịp nhàng liên tục
             SequentialAnimation {
+                id: bubbleOpacityAnim
                 running: root.peekActive
-                loops: Animation.Infinite
-                PropertyAnimation {
-                    target: tailActor
-                    property: "rotation"
-                    from: -12
-                    to: 16
-                    duration: 480
-                    easing.type: Easing.InOutQuad
-                }
-                PropertyAnimation {
-                    target: tailActor
-                    property: "rotation"
-                    from: 16
-                    to: -12
-                    duration: 480
-                    easing.type: Easing.InOutQuad
-                }
+                PauseAnimation { duration: 6000 }
+                NumberAnimation { target: mascotBubble; property: "opacity"; to: 0.0; duration: 800 }
             }
+        }
 
-            // Tương tác chuột: Click đuôi cún ➔ Thức giấc, vồ chuột & bung mở cửa sổ
-            MouseArea {
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    if (typeof chatVM !== "undefined") {
-                        chatVM.wakeFromPeek();
-                    }
+        // Chú cún 3D Stylized không có viền hộp bao quanh
+        Mascot3DPOC {
+            id: floating3dPet
+            anchors.bottom: parent.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottomMargin: 8
+            width: 120
+            height: 120
+
+            // Hoạt cảnh nhảy tung tăng khi xuất hiện
+            SequentialAnimation {
+                id: initialJumpAnim
+                running: root.peekActive
+                ParallelAnimation {
+                    PropertyAnimation { target: floating3dPet; property: "y"; to: -16; duration: 250; easing.type: Easing.OutQuad }
+                    PropertyAnimation { target: floating3dPet; property: "scale"; to: 1.15; duration: 250; easing.type: Easing.OutBack }
+                }
+                ParallelAnimation {
+                    PropertyAnimation { target: floating3dPet; property: "y"; to: 0; duration: 250; easing.type: Easing.InQuad }
+                    PropertyAnimation { target: floating3dPet; property: "scale"; to: 1.0; duration: 250; easing.type: Easing.OutBounce }
                 }
             }
         }
 
-        // Nhãn nhỏ mời gọi click
-        Text {
-            anchors.bottom: parent.bottom
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottomMargin: 6
-            text: "Gâu! 🐾"
-            font.bold: true
-            font.pixelSize: 11
-            color: "#A6E3A1"
+        // Kéo thả tự do chú chó đến bất kỳ vị trí nào trên màn hình & Lưu tọa độ
+        MouseArea {
+            id: petDragArea
+            anchors.fill: parent
+            cursorShape: Qt.SizeAllCursor
+            property point clickPos: "0,0"
+
+            onPressed: function(mouse) {
+                clickPos = Qt.point(mouse.x, mouse.y);
+            }
+
+            onPositionChanged: function(mouse) {
+                var delta = Qt.point(mouse.x - clickPos.x, mouse.y - clickPos.y);
+                root.x += delta.x;
+                root.y += delta.y;
+            }
+
+            onReleased: {
+                if (typeof chatVM !== "undefined") {
+                    chatVM.saveMascotPosition(root.x, root.y);
+                }
+            }
+
+            onDoubleClicked: {
+                // Nhấp đúp vào cún để mở rộng Full Chat
+                if (typeof chatVM !== "undefined") {
+                    chatVM.wakeFromPeek();
+                }
+            }
         }
     }
 

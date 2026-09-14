@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QString>
 #include <QVariantList>
+#include <QPoint>
 #include <memory>
 #include "../usecases/IInferenceEngine.hpp"
 #include "../usecases/IRAGService.hpp"
@@ -45,6 +46,8 @@ public:
     Q_INVOKABLE void togglePeekMode();
     Q_INVOKABLE void wakeFromPeek();
     Q_INVOKABLE void playSound(const QString& soundType);
+    Q_INVOKABLE void saveMascotPosition(int x, int y);
+    Q_INVOKABLE QPoint getSavedMascotPosition(int defaultX, int defaultY);
 
 signals:
     void isGeneratingChanged();

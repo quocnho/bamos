@@ -1,4 +1,6 @@
 #include "LLMViewModel.hpp"
+#include "../infrastructure/GGUFDownloaderService.hpp"
+#include <QFileInfo>
 
 namespace troly::presentation {
 
@@ -15,6 +17,8 @@ LLMViewModel::LLMViewModel(std::shared_ptr<infrastructure::DynamicMoERouter> rou
         m_gpuLayers = active.gpuLayers;
     }
 }
+
+LLMViewModel::~LLMViewModel() = default;
 
 void LLMViewModel::setServerUrl(const QString& url) {
     if (m_serverUrl != url) {
@@ -75,6 +79,51 @@ void LLMViewModel::evaluateQueryIntent(const QString& query) {
     m_activeIntent = QString::fromStdString(std::string(domain::userIntentToString(chosen.targetIntent)));
     emit activeModelNameChanged();
     emit activeIntentChanged();
+}
+
+void LLMViewModel::downloadGGUFModel(const QString& url, const QString& customName) {
+    if (!m_downloader) {
+        m_downloader = std::make_unique<infrastructure::GGUFDownloaderService>(this);
+        connect(m_downloader.get(), &infrastructure::GGUFDownloaderService::progressChanged, this, [this](double p) {
+            m_downloadProgress = p;
+            emit downloadProgressChanged();
+        });
+        connect(m_downloader.get(), &infrastructure::GGUFDownloaderService::statusChanged, this, [this](const QString& s) {
+            m_downloadStatus = s;
+            emit downloadStatusChanged();
+        });
+        connect(m_downloader.get(), &infrastructure::GGUFDownloaderService::downloadCompleted, this, [this](const QString& filePath) {
+            m_isDownloading = false;
+            m_downloadStatus = "Đã lưu vào: " + filePath;
+            m_availableModels.append(QFileInfo(filePath).fileName());
+            emit isDownloadingChanged();
+            emit downloadStatusChanged();
+            emit availableModelsChanged();
+        });
+        connect(m_downloader.get(), &infrastructure::GGUFDownloaderService::downloadFailed, this, [this](const QString& err) {
+            m_isDownloading = false;
+            m_downloadStatus = err;
+            emit isDownloadingChanged();
+            emit downloadStatusChanged();
+        });
+    }
+
+    m_isDownloading = true;
+    m_downloadProgress = 0.0;
+    m_downloadStatus = "Bắt đầu tải...";
+    emit isDownloadingChanged();
+    emit downloadProgressChanged();
+    emit downloadStatusChanged();
+
+    m_downloader->startDownload(url, customName);
+}
+
+void LLMViewModel::cancelGGUFDownload() {
+    if (m_downloader) {
+        m_downloader->cancelDownload();
+    }
+    m_isDownloading = false;
+    emit isDownloadingChanged();
 }
 
 } // namespace troly::presentation

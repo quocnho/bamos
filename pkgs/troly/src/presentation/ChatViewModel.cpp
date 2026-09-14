@@ -2,6 +2,8 @@
 #include "../infrastructure/AudioFeedbackService.hpp"
 #include <QVariantMap>
 #include <QMetaObject>
+#include <QSettings>
+#include <QPoint>
 
 namespace troly::presentation {
 
@@ -70,6 +72,20 @@ void ChatViewModel::playSound(const QString& soundType) {
         infrastructure::AudioFeedbackService::playSound(infrastructure::SoundEffectType::BarkFriendly);
     }
 }
+
+void ChatViewModel::saveMascotPosition(int x, int y) {
+    QSettings settings("BamOS", "troly");
+    settings.setValue("mascot/x", x);
+    settings.setValue("mascot/y", y);
+}
+
+QPoint ChatViewModel::getSavedMascotPosition(int defaultX, int defaultY) {
+    QSettings settings("BamOS", "troly");
+    int x = settings.value("mascot/x", defaultX).toInt();
+    int y = settings.value("mascot/y", defaultY).toInt();
+    return QPoint(x, y);
+}
+
 
 
 void ChatViewModel::appendStreamingToken(const QString& token) {

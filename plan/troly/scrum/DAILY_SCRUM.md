@@ -235,3 +235,36 @@ Tài liệu ghi nhận nhịp độ làm việc, tiến độ hàng ngày và th
   - Tích hợp hiệu ứng vuốt ve trỏ chuột (MouseArea hover/petting) kèm hoạt ảnh Squash & Stretch chuẩn 12 nguyên tắc Disney trên `Mascot3DPOC.qml`.
 - **Vướng mắc (Blockers):** Không có.
 
+---
+
+## [2026-09-14] (Sprint 09: Hoàn Thành Nghiệm Thu Standalone 3D Mascot Desktop Pet & GGUF Model Downloader - `v01.09.00`)
+
+### 📌 @PlanAgent (Project Manager & Documentation)
+- **Hôm nay:**
+  - Điều phối và theo dõi hoàn tất 5/5 user stories Sprint 09 (`TROLY-901` đến `TROLY-905`).
+  - Lập hồ sơ tài liệu đầy đủ: [PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-09/PLAN.md), [REVIEW.md](file:///etc/nixos/plan/troly/sprints/sprint-09/REVIEW.md), cập nhật [README.md](file:///etc/nixos/plan/troly/README.md) và [BACKLOG.md](file:///etc/nixos/plan/troly/backlog/BACKLOG.md).
+- **Vướng mắc (Blockers):** Không có. Tiến độ hoàn hảo.
+
+### 🔬 @RdAgent (R&D Specialist)
+- **Hôm nay:**
+  - Đánh giá trade-off giải pháp tải GGUF qua mạng: Lựa chọn Phương án A (Qt Native `QNetworkAccessManager`) để đạt tính độc lập cao nhất, không phụ thuộc curl/wget ngoài hệ thống.
+  - Thiết kế kiến trúc lưu trữ tệp mô hình an toàn tại `~/.local/share/troly/models/`.
+- **Vướng mắc (Blockers):** Không có.
+
+### 💻 @DevOptAgent (Execution & CI/CD)
+- **Hôm nay:**
+  - Hiện thực `saveMascotPosition` / `getSavedMascotPosition` trong `ChatViewModel` với `QSettings`.
+  - Xây dựng `GGUFDownloaderService` (header & cpp) với `QNetworkAccessManager`, cập nhật tiến trình %, hủy tải mượt mà.
+  - Tích hợp vào `LLMViewModel` và giao diện `LLMSettingsModal.qml`.
+  - Cấu hình cửa sổ không viền trong suốt `main.qml`, cơ chế kéo thả lưu tọa độ và bong bóng thoại chào hỏi xưng hô `UserProfile.addressing`.
+  - Thêm test suite `tests/test_gguf_downloader.cpp`, bảo đảm **8/8 CTest suites passed 100%**.
+  - Đóng gói derivation NixOS thành công 100%.
+- **Vướng mắc (Blockers):** Không có.
+
+### 🎨 @AnimAgent (Lead 3D & Animation Director)
+- **Hôm nay:**
+  - Thiết kế cún con 3D Desktop Pet hoàn toàn tự do không viền hộp chữ nhật bao quanh (`color: transparent`).
+  - Dựng hoạt cảnh xuất hiện: Cún nhảy tung tăng vẫy đuôi (12 nguyên tắc Disney), âm thanh gâu gâu thân thiện và bong bóng chat dạng mây hoạt hình nhí nhảnh.
+- **Vướng mắc (Blockers):** Không có.
+
+

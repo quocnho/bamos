@@ -112,6 +112,74 @@ ModalDialog {
             }
         }
 
+        Rectangle {
+            Layout.fillWidth: true
+            height: 1
+            color: "#313244"
+        }
+
+        // 📥 Tính năng tải xuống file GGUF lưu trữ vào hệ thống
+        Text {
+            text: "📥 Tải xuống mô hình GGUF mới:"
+            color: "#CDD6F4"
+            font.bold: true
+            font.pixelSize: 12
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 6
+            TextField {
+                id: ggufUrlField
+                placeholderText: "Nhập URL file .gguf (HuggingFace / Direct link)..."
+                color: "#CDD6F4"
+                background: Rectangle { color: "#313244"; radius: 6 }
+                Layout.fillWidth: true
+            }
+            Button {
+                text: (typeof llmVM !== "undefined" && llmVM.isDownloading) ? "Hủy" : "Tải xuống"
+                highlighted: true
+                onClicked: {
+                    if (typeof llmVM !== "undefined") {
+                        if (llmVM.isDownloading) {
+                            llmVM.cancelGGUFDownload();
+                        } else if (ggufUrlField.text.trim() !== "") {
+                            llmVM.downloadGGUFModel(ggufUrlField.text.trim());
+                        }
+                    }
+                }
+            }
+        }
+
+        // Thanh tiến trình tải xuống
+        ColumnLayout {
+            Layout.fillWidth: true
+            visible: typeof llmVM !== "undefined" && (llmVM.isDownloading || llmVM.downloadProgress > 0)
+            spacing: 4
+
+            ProgressBar {
+                Layout.fillWidth: true
+                value: typeof llmVM !== "undefined" ? llmVM.downloadProgress : 0.0
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                Text {
+                    text: typeof llmVM !== "undefined" ? llmVM.downloadStatus : ""
+                    color: "#A6ADC8"
+                    font.pixelSize: 11
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
+                }
+                Text {
+                    text: typeof llmVM !== "undefined" ? Math.round(llmVM.downloadProgress * 100) + "%" : "0%"
+                    color: "#A6E3A1"
+                    font.bold: true
+                    font.pixelSize: 11
+                }
+            }
+        }
+
         Item { Layout.fillHeight: true }
 
         RowLayout {
