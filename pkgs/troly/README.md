@@ -132,6 +132,8 @@ cmake --build build -j$(nproc)
 
 Dự án `troly` là một **package con** của cấu hình NixOS bằng Flake tại `/etc/nixos/` (tương tự `/etc/nixos/pkgs/assistant/` và `/etc/nixos/pkgs/bam/`).
 
+> 💡 **Khả Năng Độc Lập & Đường Dẫn Tương Đối (Standalone Portability):** Dự án con được thiết kế để có thể chạy và hoạt động độc lập hoàn toàn hoặc tách riêng thành repo độc lập. Do đó, tất cả đường dẫn tài nguyên, tệp tin cấu hình và scripts phải luôn sử dụng **đường dẫn tương đối**, tránh phụ thuộc vào đường dẫn tuyệt đối của hệ điều hành.
+
 - **Đóng gói độc lập (Derivation cục bộ):**
   ```bash
   nix-build -E 'with import <nixpkgs> {}; callPackage ./default.nix {}'
@@ -156,7 +158,7 @@ Dự án được đồng phát triển bởi lập trình viên và 4 AI Agent 
 
 | Vai trò | Agent Handle | Nhiệm vụ cốt lõi |
 | :--- | :--- | :--- |
-| **Project Director** | `@PlanAgent` | Quản trị cây thư mục [plan/](file:///etc/nixos/pkgs/troly/plan), lập kế hoạch Sprint, điều phối Review, Retro và Daily Standup. |
+| **Project Director** | `@PlanAgent` | Quản trị cây thư mục [plan/troly/](file:///etc/nixos/plan/troly), lập kế hoạch Sprint, điều phối Review, Retro và Daily Standup. |
 | **R&D Specialist** | `@RdAgent` | Nghiên cứu kiến trúc, POC giải pháp, đánh giá trade-off (VRAM, CPU, latency) trước khi code. |
 | **Software Engineer** | `@DevOptAgent` | Hiện thực hóa mã nguồn C++20, quản lý RAII, viết test, commit chuẩn Git, đóng gói Nix derivation và kiểm thử toàn hệ thống với `bam switch`. |
 | **Lead 3D & Animation Director** | `@AnimAgent` | Chỉ đạo mỹ thuật nhân vật, chuyển động hoạt hình 12 nguyên tắc Disney, State Machine Mascot FSM, tối ưu Scene Graph 60fps và pipeline 3D Realtime. |
@@ -166,25 +168,25 @@ Mỗi ngày khi bắt đầu làm việc, bạn chỉ cần ra một câu lệnh
 ```text
 @PlanAgent và @DevOptAgent kiểm tra kế hoạch và thực hiện công việc hôm nay.
 ```
-Hệ thống sẽ tự động quét [plan/sprints/sprint-01/PLAN.md](file:///etc/nixos/pkgs/troly/plan/sprints/sprint-01/PLAN.md), rà soát nhật ký hôm trước tại [plan/scrum/DAILY_SCRUM.md](file:///etc/nixos/pkgs/troly/plan/scrum/DAILY_SCRUM.md), xuất báo cáo buổi sáng và đề xuất phương án kỹ thuật triển khai ngay lập tức.
+Hệ thống sẽ tự động quét [plan/troly/sprints/sprint-01/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-01/PLAN.md), rà soát nhật ký hôm trước tại [plan/troly/scrum/DAILY_SCRUM.md](file:///etc/nixos/plan/troly/scrum/DAILY_SCRUM.md), xuất báo cáo buổi sáng và đề xuất phương án kỹ thuật triển khai ngay lập tức.
 
 ---
 
 ## 📚 Hệ Thống Tài Liệu Kỹ Thuật (`/docs/`)
 
-- 🏗️ **Kiến trúc hệ thống chi tiết:** [docs/ARCHITECTURE.md](file:///etc/nixos/pkgs/troly/docs/ARCHITECTURE.md) *(SAD, ERD, DDL, DFD, ReAct, FSM, MoE Router)*
-- 🌿 **Quy chuẩn Git & Versioning:** [docs/GIT_WORKFLOW.md](file:///etc/nixos/pkgs/troly/docs/GIT_WORKFLOW.md) *(vAA.BB.CC, Branching, Commit Why-What-Test, DoD)*
-- ⚙️ **Thiết lập Antigravity IDE & Tối ưu Token:** [docs/ANTIGRAVITY_SETUP.md](file:///etc/nixos/pkgs/troly/docs/ANTIGRAVITY_SETUP.md) *(Rules vs Skills, Context Injection, Atomic Granularity)*
-- 🗂️ **Chỉ mục tài liệu tổng thể:** [docs/README.md](file:///etc/nixos/pkgs/troly/docs/README.md)
+- 🏗️ **Kiến trúc hệ thống chi tiết:** [docs/troly/ARCHITECTURE.md](file:///etc/nixos/docs/troly/ARCHITECTURE.md) *(SAD, ERD, DDL, DFD, ReAct, FSM, MoE Router)*
+- 🌿 **Quy chuẩn Git & Versioning:** [docs/troly/GIT_WORKFLOW.md](file:///etc/nixos/docs/troly/GIT_WORKFLOW.md) *(vAA.BB.CC, Branching, Commit Why-What-Test, DoD)*
+- ⚙️ **Thiết lập Antigravity IDE & Tối ưu Token:** [docs/troly/ANTIGRAVITY_SETUP.md](file:///etc/nixos/docs/troly/ANTIGRAVITY_SETUP.md) *(Rules vs Skills, Context Injection, Atomic Granularity)*
+- 🗂️ **Chỉ mục tài liệu tổng thể:** [docs/troly/README.md](file:///etc/nixos/docs/troly/README.md)
 
 ---
 
 ## 📋 Quản Lý Dự Án (Agile Scrum Artifacts - `/plan/`)
 
-- 🗺️ **Bản đồ kế hoạch:** [plan/README.md](file:///etc/nixos/pkgs/troly/plan/README.md)
-- 📌 **Product Backlog (F1 - F7):** [plan/backlog/BACKLOG.md](file:///etc/nixos/pkgs/troly/plan/backlog/BACKLOG.md)
-- 🏃 **Sprint 01 Hiện Tại:** [plan/sprints/sprint-01/PLAN.md](file:///etc/nixos/pkgs/troly/plan/sprints/sprint-01/PLAN.md)
-- 📝 **Nhật ký Daily Standup:** [plan/scrum/DAILY_SCRUM.md](file:///etc/nixos/pkgs/troly/plan/scrum/DAILY_SCRUM.md)
+- 🗺️ **Bản đồ kế hoạch:** [plan/troly/README.md](file:///etc/nixos/plan/troly/README.md)
+- 📌 **Product Backlog (F1 - F7):** [plan/troly/backlog/BACKLOG.md](file:///etc/nixos/plan/troly/backlog/BACKLOG.md)
+- 🏃 **Sprint 01 Hiện Tại:** [plan/troly/sprints/sprint-01/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-01/PLAN.md)
+- 📝 **Nhật ký Daily Standup:** [plan/troly/scrum/DAILY_SCRUM.md](file:///etc/nixos/plan/troly/scrum/DAILY_SCRUM.md)
 
 ---
 

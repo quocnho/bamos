@@ -147,3 +147,8 @@ Agent được cấu hình để chỉ đưa ra khối mã nguồn cần chỉnh
 - **Tách nhỏ theo trách nhiệm:** Mỗi tệp C++/QML chỉ đảm nhiệm một entity, value object, interface hoặc component duy nhất.
 - **Dễ tìm kiếm & tra cứu:** Tên thư mục và tên file được chuẩn hóa theo danh từ / động từ rõ ràng, phản ánh chính xác nội dung bên trong.
 - **Tiết kiệm token tối đa:** Khi cần sửa đổi một chức năng, AI chỉ nạp đúng một tệp vi mô (vài chục dòng), tiết kiệm tới 80-90% dung lượng Context Window so với các file nguyên khối.
+
+### 4.6. Thiết Lập Đường Dẫn Tương Đối & Tính Độc Lập Dự Án Con (Standalone Portability)
+- **Khả năng chạy độc lập:** Các dự án con (`troly`, `assistant`, `bam`) được thiết kế để có thể chạy độc lập hoặc tách thành repo độc lập trong tương lai mà không bị đứt gãy.
+- **Bắt buộc đường dẫn tương đối:** Mọi đường dẫn trong mã nguồn (C++, QML), file cấu hình, scripts và tài liệu hướng dẫn bắt buộc phải dùng đường dẫn tương đối (`./`, `../`, `src/...`, `qrc:/`), tuyệt đối không hardcode đường dẫn hệ thống tuyệt đối như `/etc/nixos/pkgs/...`.
+- **Đảm bảo tính tương thích:** Khi tách thư mục dự án sang vị trí khác hoặc đóng gói package phân tán, toàn bộ hệ thống vẫn vận hành chính xác và ổn định.

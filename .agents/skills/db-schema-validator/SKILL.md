@@ -4,7 +4,7 @@ description: Hướng dẫn khởi tạo, di trú và kiểm thử cơ sở dữ
 ---
 
 # Mục Tiêu
-Quản lý cơ sở dữ liệu SQLite cục bộ cho dự án `troly` đảm bảo tính toàn vẹn, tuân thủ lược đồ ERD & DDL chuẩn tại [docs/ARCHITECTURE.md](file:///etc/nixos/pkgs/troly/docs/ARCHITECTURE.md), hỗ trợ Hybrid Search (FTS5 + `sqlite-vec`), lưu vết ReAct Tool Calling và dữ liệu tự tiến hóa (Self-Evolving Hub).
+Quản lý cơ sở dữ liệu SQLite cục bộ cho dự án `troly` đảm bảo tính toàn vẹn, tuân thủ lược đồ ERD & DDL chuẩn tại [docs/troly/ARCHITECTURE.md](file:///etc/nixos/docs/troly/ARCHITECTURE.md), hỗ trợ Hybrid Search (FTS5 + `sqlite-vec`), lưu vết ReAct Tool Calling và dữ liệu tự tiến hóa (Self-Evolving Hub).
 
 > 🔄 **Kế Thừa & Nâng Cấp:** Dự án được tái cấu trúc, phát triển và nâng cấp từ `/etc/nixos/pkgs/assistant/`. Kế thừa toàn bộ cấu trúc dữ liệu lưu trữ từ hệ thống RAG cũ (tài liệu, phân đoạn, cấu hình settings, lịch sử phiên chat) sang mô hình SQLite WAL hiện đại.
 
@@ -22,7 +22,7 @@ Quản lý cơ sở dữ liệu SQLite cục bộ cho dự án `troly` đảm b�
    sqlite3_auto_extension(reinterpret_cast<void(*)()>(sqlite3_vec_init));
    ```
 
-# Các Bảng Cốt Lõi (Theo Lược Đồ DDL Chuẩn Trong `docs/ARCHITECTURE.md`)
+# Các Bảng Cốt Lõi (Theo Lược Đồ DDL Chuẩn Trong `docs/troly/ARCHITECTURE.md`)
 - **Quản trị tài liệu RAG:** `collections`, `documents`, `doc_chunks`.
 - **Bảng ảo tìm kiếm:**
   - Full-Text Search BM25: `chunks_fts USING fts5(content, content='doc_chunks', content_rowid='id')`.

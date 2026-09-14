@@ -4,7 +4,7 @@ description: Phân tích ý định (Intent Classification <30ms) và điều ph
 ---
 
 # Mục Tiêu
-Đảm bảo định tuyến prompt chính xác vào đúng model chuyên trách (Text, Code, Vision) với độ trễ <30ms và quản lý nạp động (Dynamic Loading) để tối ưu VRAM (<6GB) trên môi trường Edge theo đặc tả tại [docs/ARCHITECTURE.md](file:///etc/nixos/pkgs/troly/docs/ARCHITECTURE.md).
+Đảm bảo định tuyến prompt chính xác vào đúng model chuyên trách (Text, Code, Vision) với độ trễ <30ms và quản lý nạp động (Dynamic Loading) để tối ưu VRAM (<6GB) trên môi trường Edge theo đặc tả tại [docs/troly/ARCHITECTURE.md](file:///etc/nixos/docs/troly/ARCHITECTURE.md).
 
 > 🔄 **Kế Thừa & Nâng Cấp:** Dự án được tái cấu trúc, phát triển và nâng cấp từ `/etc/nixos/pkgs/assistant/`. Nâng cấp cơ chế quản lý model từ `settings.go` và `llm-settings.js` của dự án cũ (danh sách GGUF, chọn provider, tải model) thành Dynamic MoE Router C++ tự động phân loại intent.
 

@@ -22,6 +22,8 @@
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
+      supportedSystems = [ "x86_64-linux" "aarch64-linux" ];
+      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
     in
     {
       # Module dùng chung (aggregator modules/default.nix) — khớp mẫu website
@@ -73,16 +75,82 @@
         };
       };
 
-      packages.${system} = {
-        # Troly - Native Edge AI Desktop Companion (C++20, Qt6)
-        troly = nixpkgs.legacyPackages.${system}.callPackage ./pkgs/troly { };
-        # BamOS CLI — cài qua environment.systemPackages (modules/packages.nix),
-        # hoặc build độc lập: nix build .#bam
-        bam = nixpkgs.legacyPackages.${system}.callPackage ./pkgs/bam { };
-        # ISO cài đặt cho người dùng khác
-        iso = self.nixosConfigurations.installer.config.system.build.isoImage;
-        # toplevel máy chính (nix build .)
-        default = self.nixosConfigurations.lg.config.system.build.toplevel;
-      };
+      # Packages hỗ trợ đa nền tảng
+      packages = forAllSystems (sys:
+        let
+          pkgs = nixpkgs.legacyPackages.${sys};
+        in
+        {
+          # Troly - Native Edge AI Desktop Companion (C++20, Qt6)
+          troly = pkgs.callPackage ./pkgs/troly { };
+
+          # BamOS Assistant - Legacy Go/GTK3 Assistant
+          assistant = pkgs.callPackage ./pkgs/assistant { };
+
+          # BamOS CLI — quản lý hệ thống
+          bam = pkgs.callPackage ./pkgs/bam { };
+
+          # ISO cài đặt (chỉ build trên x86_64-linux)
+          iso = if sys == "x86_64-linux" then self.nixosConfigurations.installer.config.system.build.isoImage else null;
+
+          # toplevel máy chính
+          default = if sys == "x86_64-linux" then self.nixosConfigurations.lg.config.system.build.toplevel else null;
+        }
+      );
+
+      # DevShells độc lập cho từng subproject & quản trị OS mẹ
+      devShells = forAllSystems (sys:
+        let
+          pkgs = nixpkgs.legacyPackages.${sys};
+        in
+        {
+          # Shell quản trị toàn hệ thống BamOS Flake
+          default = pkgs.mkShell {
+            name = "bamos-distro-dev";
+            nativeBuildInputs = with pkgs; [
+              git
+              nixfmt-rfc-style
+              statix
+              nix-diff
+            ];
+            shellHook = ''
+              echo "🚀 BamOS Linux Distro Root DevShell Ready"
+            '';
+          };
+
+          # Shell chuyên biệt cho Troly (C++20, Qt6, CMake, Ninja)
+          # Kế thừa tự động từ derivation pkgs/troly/default.nix
+          troly = pkgs.mkShell {
+            name = "troly-dev-shell";
+            inputsFrom = [ self.packages.${sys}.troly ];
+            nativeBuildInputs = with pkgs; [
+              gdb
+              clang-tools
+            ];
+            shellHook = ''
+              export QT_QPA_PLATFORM="wayland;xcb"
+              export CMAKE_BUILD_PARALLEL_LEVEL="$(nproc)"
+              echo "🐾 Troly C++20/Qt6 DevShell Active (Zero-Drift inputsFrom)"
+            '';
+          };
+
+          # Shell chuyên biệt cho Assistant (Go 1.22+, GTK3, WebKitGTK)
+          # Kế thừa tự động từ derivation pkgs/assistant/default.nix
+          assistant = pkgs.mkShell {
+            name = "assistant-dev-shell";
+            inputsFrom = [ self.packages.${sys}.assistant ];
+            nativeBuildInputs = with pkgs; [
+              go
+              gopls
+              golangci-lint
+            ];
+            shellHook = ''
+              export CGO_ENABLED=1
+              echo "🤖 BamOS Assistant Go/GTK DevShell Active (Zero-Drift inputsFrom)"
+            '';
+          };
+        }
+      );
     };
+
 }

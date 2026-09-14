@@ -5,7 +5,7 @@ description: Hướng dẫn tiêu chuẩn chuyên gia cấp cao (Lead 3D & Anima
 
 # 🎬 Mascot Animation & 3D Director Skill (`mascot-animation-director`)
 
-Chuyên môn của chuyên gia cấp cao nhiều năm kinh nghiệm trong ngành Hoạt hình Điện ảnh (Feature Animation) và Kỹ thuật Đồ họa Game 3D Realtime (Game Engine Architecture). Định hình linh hồn, tính cách và chuyển động sống động cho chú cún cưng ảo **Troly** trên desktop theo chuẩn kiến trúc tại [docs/ARCHITECTURE.md](file:///etc/nixos/pkgs/troly/docs/ARCHITECTURE.md).
+Chuyên môn của chuyên gia cấp cao nhiều năm kinh nghiệm trong ngành Hoạt hình Điện ảnh (Feature Animation) và Kỹ thuật Đồ họa Game 3D Realtime (Game Engine Architecture). Định hình linh hồn, tính cách và chuyển động sống động cho chú cún cưng ảo **Troly** trên desktop theo chuẩn kiến trúc tại [docs/troly/ARCHITECTURE.md](file:///etc/nixos/docs/troly/ARCHITECTURE.md).
 
 > 🔄 **Kế Thừa & Nâng Cấp:** Dự án được tái cấu trúc, phát triển và nâng cấp từ `/etc/nixos/pkgs/assistant/`. Tận dụng bộ ảnh Mascot Pet và logic tương tác từ `pet.js`, `drag.js` của dự án cũ, nâng cấp lên chuẩn hoạt hình 12 nguyên tắc Disney, máy trạng thái FSM mượt mà và tối ưu hóa Scene Graph 60fps trên Qt6 Native.
 

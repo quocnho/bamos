@@ -24,10 +24,10 @@ Thiết lập toàn bộ khung nền tảng cho package `troly`:
 ---
 
 ## Liên Kết Hồ Sơ Agile Scrum Sprint 01
-- **Chỉ mục tổng quan:** [README.md](file:///etc/nixos/pkgs/troly/plan/README.md)
-- **Kế hoạch & Backlog:** [BACKLOG.md](file:///etc/nixos/pkgs/troly/plan/backlog/BACKLOG.md)
-- **Đánh giá bàn giao:** [REVIEW.md](file:///etc/nixos/pkgs/troly/plan/sprints/sprint-01/REVIEW.md)
-- **Cải tiến quy trình:** [RETRO.md](file:///etc/nixos/pkgs/troly/plan/sprints/sprint-01/RETRO.md)
-- **Nhật ký hàng ngày:** [DAILY_SCRUM.md](file:///etc/nixos/pkgs/troly/plan/scrum/DAILY_SCRUM.md)
+- **Chỉ mục tổng quan:** [README.md](file:///etc/nixos/plan/troly/README.md)
+- **Kế hoạch & Backlog:** [BACKLOG.md](file:///etc/nixos/plan/troly/backlog/BACKLOG.md)
+- **Đánh giá bàn giao:** [REVIEW.md](file:///etc/nixos/plan/troly/sprints/sprint-01/REVIEW.md)
+- **Cải tiến quy trình:** [RETRO.md](file:///etc/nixos/plan/troly/sprints/sprint-01/RETRO.md)
+- **Nhật ký hàng ngày:** [DAILY_SCRUM.md](file:///etc/nixos/plan/troly/scrum/DAILY_SCRUM.md)
 
 

@@ -80,6 +80,28 @@
       fu = "bam lock";
       chk = "nix flake check /etc/nixos";
       ngc = "bam gc";
+
+      # ==== Điều phối Monorepo (Troly C++20 / Qt6) ====
+      troly-build = "devenv shell troly-build";
+      troly-run = "devenv shell troly-run";
+      troly-preview = "devenv shell troly-preview";
+      tb = "devenv shell troly-build";
+      tr = "devenv shell troly-run";
+      tp = "devenv shell troly-preview";
+
+      # ==== Điều phối Monorepo (Assistant Go / GTK) ====
+      assistant-build = "devenv shell assistant-build";
+      assistant-run = "devenv shell assistant-run";
+      ab = "devenv shell assistant-build";
+      ar = "devenv shell assistant-run";
+
+      # ==== Điều phối Monorepo (BamOS Distro) ====
+      distro-dry = "devenv shell distro-dry";
+      distro-build = "devenv shell distro-build";
+      distro-iso = "devenv shell distro-iso";
+      dd = "devenv shell distro-dry";
+      db = "devenv shell distro-build";
+      di = "devenv shell distro-iso";
     };
 
     initContent = ''

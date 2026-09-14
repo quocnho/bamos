@@ -289,3 +289,14 @@ CREATE TABLE IF NOT EXISTS lora_checkpoints (
 - **Interface Isolation:** Thư mục `usecases/` chỉ chứa các file header `.hpp` thuần ảo ngắn gọn (~50 tokens). Khi Agent làm việc, chỉ nạp interface thay vì toàn bộ code thực thi hàng nghìn dòng.
 - **Ngăn chặn God Classes:** Không gom chung logic DB và logic AI vào một file nguyên khối.
 - **Dễ tìm kiếm & định vị:** Tên thư mục và tệp tin biểu đạt chính xác miền nghiệp vụ, hỗ trợ AI grep/định vị trực tiếp mà không cần đọc rà soát toàn bộ dự án.
+
+---
+
+## 8. Nguyên Tắc Đường Dẫn Tương Đối & Khả Năng Chạy Độc Lập (Standalone Portability)
+
+- **Mục tiêu kiến trúc:** Mọi dự án/package con (như `pkgs/troly`, `pkgs/assistant`, `pkgs/bam`) đều có khả năng chạy độc lập hoặc sẵn sàng tách thành kho lưu trữ (repository) riêng biệt mà không phụ thuộc vào cấu trúc thư mục cha của hệ điều hành NixOS (`/etc/nixos/`).
+- **Quy tắc vàng về đường dẫn:**
+  - **Mã nguồn (C++, QML, Go, Rust):** Tuyệt đối không hardcode đường dẫn tuyệt đối như `/etc/nixos/pkgs/...`.
+  - **Tài nguyên giao diện & Assets:** Phải tham chiếu thông qua Qt Resource System (`qrc:/`) hoặc đường dẫn tương đối tính từ thư mục gốc của nhị phân thực thi (`QCoreApplication::applicationDirPath()`).
+  - **Build Systems (CMakeLists.txt, default.nix, shell.nix):** Sử dụng các biến vị trí tương đối (`${CMAKE_CURRENT_SOURCE_DIR}`, `./`) để đảm bảo biên dịch độc lập (standalone build) trên mọi môi trường.
+  - **Tài liệu & Kế hoạch (Markdown):** Mọi liên kết chéo nội bộ package phải sử dụng đường dẫn tương đối chuẩn.

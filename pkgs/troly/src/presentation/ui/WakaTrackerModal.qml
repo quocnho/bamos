@@ -44,7 +44,7 @@ ModalDialog {
             RowLayout {
                 anchors.fill: parent
                 anchors.margins: 8
-                Text { text: "/etc/nixos/pkgs/troly"; color: "#89B4FA"; font.pixelSize: 12; Layout.fillWidth: true }
+                Text { text: "troly (current project)"; color: "#89B4FA"; font.pixelSize: 12; Layout.fillWidth: true }
                 Text { text: "3h 10m"; color: "#A6ADC8"; font.pixelSize: 11 }
             }
         }

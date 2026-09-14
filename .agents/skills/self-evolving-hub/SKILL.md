@@ -4,7 +4,7 @@ description: Quy trình 4 bước thu hoạch dữ liệu chất lượng cao t�
 ---
 
 # Mục Tiêu
-Hiện thực hóa khả năng tự tiến hóa (Self-Evolving) của Edge AI Desktop mà không gửi dữ liệu ra môi trường ngoài (Air-gapped 100%) theo quy chuẩn tại [docs/ARCHITECTURE.md](file:///etc/nixos/pkgs/troly/docs/ARCHITECTURE.md).
+Hiện thực hóa khả năng tự tiến hóa (Self-Evolving) của Edge AI Desktop mà không gửi dữ liệu ra môi trường ngoài (Air-gapped 100%) theo quy chuẩn tại [docs/troly/ARCHITECTURE.md](file:///etc/nixos/docs/troly/ARCHITECTURE.md).
 
 > 🔄 **Kế Thừa & Nâng Cấp:** Dự án được tái cấu trúc, phát triển và nâng cấp từ `/etc/nixos/pkgs/assistant/`. Thu hoạch tương tác vàng từ các phiên hội thoại và thực thi của trợ lý cũ để tinh chỉnh mô hình thích ứng chuyên sâu cho hệ điều hành NixOS.
 

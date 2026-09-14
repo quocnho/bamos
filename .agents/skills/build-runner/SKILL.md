@@ -4,12 +4,14 @@ description: Hướng dẫn quản lý môi trường NixOS devenv, cấu hình 
 ---
 
 # Mục Tiêu
-Cung cấp quy trình biên dịch cục bộ, xem trước QML, kiểm thử mã nguồn, đóng gói Nix derivation và tích hợp kiểm thử cập nhật toàn hệ thống NixOS thông qua lệnh `bam switch` theo kiến trúc tại [docs/ARCHITECTURE.md](file:///etc/nixos/pkgs/troly/docs/ARCHITECTURE.md).
+Cung cấp quy trình biên dịch cục bộ, xem trước QML, kiểm thử mã nguồn, đóng gói Nix derivation và tích hợp kiểm thử cập nhật toàn hệ thống NixOS thông qua lệnh `bam switch` theo kiến trúc tại [docs/troly/ARCHITECTURE.md](file:///etc/nixos/docs/troly/ARCHITECTURE.md).
 
 > 📦 **Bối Cảnh Flake Cha & Package Con:** 
 > Dự án `troly` là một **package con** nằm trong hệ thống cấu hình NixOS bằng Flake tổng thể tại `/etc/nixos/` (tương tự như `/etc/nixos/pkgs/assistant/` và `/etc/nixos/pkgs/bam/`). Khi flake `/etc/nixos/` chạy `nix build`, hệ thống sẽ đóng gói và xây dựng các packages.
 > 
 > 🔄 **Kế Thừa & Nâng Cấp:** Thay thế hoàn toàn Go/WebKitGTK từ `/etc/nixos/pkgs/assistant/` sang hệ thống C++20/Qt6 Native, sử dụng CMake và Ninja.
+> 
+> 📍 **Tính Khả Chuyển & Đường Dẫn Tương Đối (Standalone Portability):** Vì các dự án con có thể chạy độc lập hoặc tách ra repository riêng, mọi thiết lập đường dẫn trong build scripts, mã nguồn, preview QML và assets phải luôn dùng **đường dẫn tương đối** (tính từ thư mục gốc của package con), tránh hardcode đường dẫn tuyệt đối của hệ thống.
 
 # Lệnh Build & Preview Nền Tảng
 

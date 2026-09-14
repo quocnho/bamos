@@ -7,7 +7,7 @@ Tài liệu ghi nhận nhịp độ làm việc, tiến độ hàng ngày và th
 ## [2026-09-14] (Khởi Động Dự Án & Chuẩn Hóa Hạ Tầng Agent)
 
 ### 📌 @PlanAgent (Project Manager & Documentation)
-- **Hôm qua:** Hoàn tất nghiên cứu tài liệu [docs/ARCHITECTURE.md](file:///etc/nixos/pkgs/troly/docs/ARCHITECTURE.md) và cấu trúc Backlog F1-F7.
+- **Hôm qua:** Hoàn tất nghiên cứu tài liệu [docs/troly/ARCHITECTURE.md](file:///etc/nixos/docs/troly/ARCHITECTURE.md) và cấu trúc Backlog F1-F7.
 - **Hôm nay:** 
   - Khởi tạo cấu trúc hồ sơ Agile Scrum toàn diện trong `/plan/` (`BACKLOG.md`, `SPRINT_01.md`, `SPRINT_01_REVIEW.md`, `SPRINT_01_RETRO.md`, `DAILY_SCRUM.md`).
   - Thiết lập và đồng bộ các skills cho Antigravity IDE (`.agents/skills/` và `.antigravity/skills/`).
@@ -54,7 +54,7 @@ Tài liệu ghi nhận nhịp độ làm việc, tiến độ hàng ngày và th
 ### 📌 @PlanAgent (Project Manager & Documentation)
 - **Hôm nay:**
   - Di chuyển và quản lý tập trung toàn bộ 9 Skills của hệ thống lên `/etc/nixos/.agents/skills/`, loại bỏ trùng lặp trong `pkgs/troly/`.
-  - Cập nhật tài liệu kiến trúc [docs/ANTIGRAVITY_SETUP.md](file:///etc/nixos/pkgs/troly/docs/ANTIGRAVITY_SETUP.md), [sprint-01/REVIEW.md](file:///etc/nixos/pkgs/troly/plan/sprints/sprint-01/REVIEW.md).
+  - Cập nhật tài liệu kiến trúc [docs/ANTIGRAVITY_SETUP.md](file:///etc/nixos/docs/troly/ANTIGRAVITY_SETUP.md), [sprint-01/REVIEW.md](file:///etc/nixos/plan/troly/sprints/sprint-01/REVIEW.md).
   - Nghiệm thu 100% các tiêu chí của Sprint 01 (`TROLY-101` đến `TROLY-106`).
 - **Vướng mắc (Blockers):** Không có.
 
@@ -64,4 +64,5 @@ Tài liệu ghi nhận nhịp độ làm việc, tiến độ hàng ngày và th
   - Khai báo và tích hợp `troly` vào `packages.${system}.troly` trong file Flake mẹ `/etc/nixos/flake.nix`.
   - Kiểm thử `nix build .#troly --dry-run` từ thư mục mẹ `/etc/nixos/` đảm bảo tính tương thích hệ thống tuyệt đối.
   - Bổ sung nút tương tác nhanh cho bài tập mắt trong modal EyeLeo.
+  - Chuẩn hóa toàn diện nguyên tắc **Đường dẫn tương đối & Khả năng chạy độc lập (Standalone Portability)** cho toàn bộ dự án con (`pkgs/troly/`,...), loại bỏ hardcode đường dẫn tuyệt đối để dự án hoạt động độc lập mọi nơi khi tách repo.
 - **Vướng mắc (Blockers):** Hệ thống sẵn sàng cho Sprint 02.

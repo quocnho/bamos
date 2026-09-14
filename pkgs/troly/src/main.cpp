@@ -1,6 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QFile>
 #include <iostream>
 #include <memory>
 
@@ -47,8 +48,15 @@ int main(int argc, char *argv[]) {
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
 
-    // Load file QML trực tiếp hoặc qua tài nguyên
-    engine.load(QStringLiteral("/etc/nixos/pkgs/troly/src/presentation/ui/main.qml"));
+    // Load file QML: ưu tiên file tương đối từ thư mục nhị phân hoặc thư mục làm việc, hỗ trợ chạy độc lập
+    QString qmlPath = QCoreApplication::applicationDirPath() + "/../src/presentation/ui/main.qml";
+    if (!QFile::exists(qmlPath)) {
+        qmlPath = "src/presentation/ui/main.qml";
+    }
+    if (!QFile::exists(qmlPath)) {
+        qmlPath = QStringLiteral("qrc:/ui/main.qml");
+    }
+    engine.load(QUrl::fromLocalFile(qmlPath));
 
     return app.exec();
 }
