@@ -6,6 +6,7 @@
 #include <memory>
 #include "../infrastructure/SystemInspectorService.hpp"
 #include "../infrastructure/WakaTrackerService.hpp"
+#include "../infrastructure/SelfEvolvingService.hpp"
 #include "../domain/UserProfile.hpp"
 
 namespace troly::presentation {
@@ -92,6 +93,40 @@ signals:
 
 private:
     domain::UserProfile m_profile;
+};
+
+class SelfEvolvingViewModel : public QObject {
+    Q_OBJECT
+    Q_PROPERTY(int totalSamples READ totalSamples NOTIFY dataChanged)
+    Q_PROPERTY(int trainedSamples READ trainedSamples NOTIFY dataChanged)
+    Q_PROPERTY(int pendingSamples READ pendingSamples NOTIFY dataChanged)
+    Q_PROPERTY(QString statusText READ statusText NOTIFY dataChanged)
+    Q_PROPERTY(QString lastTrainedDate READ lastTrainedDate NOTIFY dataChanged)
+    Q_PROPERTY(double currentLoss READ currentLoss NOTIFY dataChanged)
+    Q_PROPERTY(bool isTrainingActive READ isTrainingActive NOTIFY dataChanged)
+
+public:
+    explicit SelfEvolvingViewModel(std::shared_ptr<infrastructure::SelfEvolvingService> service, QObject* parent = nullptr);
+    ~SelfEvolvingViewModel() override = default;
+
+    [[nodiscard]] int totalSamples() const { return m_status.totalGoldenSamples; }
+    [[nodiscard]] int trainedSamples() const { return m_status.trainedSamples; }
+    [[nodiscard]] int pendingSamples() const { return m_status.pendingSamples; }
+    [[nodiscard]] QString statusText() const { return QString::fromStdString(m_status.currentStatus); }
+    [[nodiscard]] QString lastTrainedDate() const { return QString::fromStdString(m_status.lastTrainedDate); }
+    [[nodiscard]] double currentLoss() const { return m_status.currentLoss; }
+    [[nodiscard]] bool isTrainingActive() const { return m_status.isTrainingActive; }
+
+    Q_INVOKABLE void exportDataset(const QString& path);
+    Q_INVOKABLE void triggerOfflineTraining();
+
+signals:
+    void dataChanged();
+    void datasetExported(const QString& message);
+
+private:
+    std::shared_ptr<infrastructure::SelfEvolvingService> m_service;
+    infrastructure::TrainingStatus m_status;
 };
 
 } // namespace troly::presentation

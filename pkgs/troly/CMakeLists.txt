@@ -35,6 +35,7 @@ set(HEADERS
     src/domain/Intent.hpp
     src/domain/ModelSlot.hpp
     src/domain/UserProfile.hpp
+    src/domain/GoldenInteraction.hpp
     src/usecases/IRAGService.hpp
     src/usecases/IInferenceEngine.hpp
     src/usecases/IIntentClassifier.hpp
@@ -51,6 +52,7 @@ set(HEADERS
     src/infrastructure/DefaultSafetyGuard.hpp
     src/infrastructure/SystemInspectorService.hpp
     src/infrastructure/WakaTrackerService.hpp
+    src/infrastructure/SelfEvolvingService.hpp
     src/presentation/ChatViewModel.hpp
     src/presentation/SystemMonitorViewModel.hpp
     src/presentation/EyeLeoViewModel.hpp
@@ -124,5 +126,11 @@ add_executable(test_system_inspector
 )
 target_include_directories(test_system_inspector PRIVATE src)
 add_test(NAME SystemInspectorTests COMMAND test_system_inspector)
+
+add_executable(test_self_evolving
+    tests/test_self_evolving.cpp
+)
+target_include_directories(test_self_evolving PRIVATE src)
+add_test(NAME SelfEvolvingTests COMMAND test_self_evolving)
 
 install(TARGETS troly DESTINATION bin)

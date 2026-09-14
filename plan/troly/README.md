@@ -50,6 +50,8 @@ plan/troly/
 | **Sprint 05 (Action & Safety)**| [sprint-05/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-05/PLAN.md) | Dispatcher, Safety Guard 4 cấp độ, Human-in-the-Loop (`v01.05.00`) | 🟢 COMPLETED |
 | **Sprint 06 (System & Persona)**| [sprint-06/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-06/PLAN.md) | System Inspector, WakaTracker & Adaptive Persona (`v01.06.00`) | 🟢 COMPLETED |
 | **Sprint 06 Review** | [sprint-06/REVIEW.md](file:///etc/nixos/plan/troly/sprints/sprint-06/REVIEW.md) | Nghiệm thu 7/7 Tasks hoàn tất 100% CTest (5/5) & Nix build | 🟢 PASSED |
+| **Sprint 07 (Self-Evolving & 3D)**| [sprint-07/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-07/PLAN.md) | Self-Evolving Hub, LoRA Pipeline & 3D Mascot POC (`v01.07.00`) | 🟢 COMPLETED |
+| **Sprint 07 Review (Final)** | [sprint-07/REVIEW.md](file:///etc/nixos/plan/troly/sprints/sprint-07/REVIEW.md) | Nghiệm thu 100% Product Backlog (F1-F8), 6/6 CTest Suites | 🟢 PASSED |
 | **Daily Scrum** | [DAILY_SCRUM.md](file:///etc/nixos/plan/troly/scrum/DAILY_SCRUM.md) | Nhật ký hàng ngày của các AI Agent | 🟢 ACTIVE |
 
 ---

@@ -26,6 +26,7 @@ Item {
                 model: [
                     { id: "rag", label: "📚 Thiết lập Tri thức (RAG)" },
                     { id: "llm", label: "📓 Thiết lập LLM / SLM" },
+                    { id: "evolving", label: "🧬 Trung Tâm Tự Tiến Hóa" },
                     { id: "eyeleo", label: "⏰ Nghỉ mắt EyeLeo (20-20-20)" },
                     { id: "system", label: "🛡️ Giám sát Hệ thống" },
                     { id: "waka", label: "📊 WakaTracker Thống kê" },

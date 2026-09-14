@@ -58,6 +58,7 @@ int main(int argc, char *argv[]) {
     auto safetyGuard = std::make_shared<troly::infrastructure::DefaultSafetyGuard>();
     auto inspectorService = std::make_shared<troly::infrastructure::SystemInspectorService>();
     auto wakaService = std::make_shared<troly::infrastructure::WakaTrackerService>();
+    auto selfEvolvingService = std::make_shared<troly::infrastructure::SelfEvolvingService>();
 
     auto chatVM = std::make_unique<troly::presentation::ChatViewModel>(inferenceEngine, ragRepo, moeRouter);
     auto systemMonitorVM = std::make_unique<troly::presentation::SystemMonitorViewModel>();
@@ -68,6 +69,7 @@ int main(int argc, char *argv[]) {
     auto systemInspectorVM = std::make_unique<troly::presentation::SystemInspectorViewModel>(inspectorService);
     auto wakaTrackerVM = std::make_unique<troly::presentation::WakaTrackerViewModel>(wakaService);
     auto userProfileVM = std::make_unique<troly::presentation::UserProfileViewModel>();
+    auto selfEvolvingVM = std::make_unique<troly::presentation::SelfEvolvingViewModel>(selfEvolvingService);
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("chatVM", chatVM.get());
@@ -79,6 +81,7 @@ int main(int argc, char *argv[]) {
     engine.rootContext()->setContextProperty("systemInspectorVM", systemInspectorVM.get());
     engine.rootContext()->setContextProperty("wakaTrackerVM", wakaTrackerVM.get());
     engine.rootContext()->setContextProperty("userProfileVM", userProfileVM.get());
+    engine.rootContext()->setContextProperty("selfEvolvingVM", selfEvolvingVM.get());
 
     const QUrl url(QStringLiteral("qrc:/ui/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

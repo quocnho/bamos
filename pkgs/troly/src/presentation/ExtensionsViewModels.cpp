@@ -76,4 +76,44 @@ void UserProfileViewModel::saveProfile() {
     emit profileChanged();
 }
 
+// --- SelfEvolvingViewModel ---
+SelfEvolvingViewModel::SelfEvolvingViewModel(
+    std::shared_ptr<infrastructure::SelfEvolvingService> service,
+    QObject* parent
+)
+    : QObject(parent), m_service(std::move(service)) {
+    if (m_service) {
+        m_status = m_service->getStatus();
+    }
+}
+
+void SelfEvolvingViewModel::exportDataset(const QString& path) {
+    if (m_service) {
+        std::string exportPath = path.isEmpty() ? "/tmp/troly_train_data.txt" : path.toStdString();
+        bool ok = m_service->exportChatMLDataset(exportPath);
+        if (ok) {
+            emit datasetExported(QString("Đã xuất %1 mẫu vàng ChatML sang %2")
+                                 .arg(m_status.totalGoldenSamples)
+                                 .arg(QString::fromStdString(exportPath)));
+        } else {
+            emit datasetExported("Lỗi: Không thể xuất tệp dữ liệu.");
+        }
+        m_status = m_service->getStatus();
+        emit dataChanged();
+    }
+}
+
+void SelfEvolvingViewModel::triggerOfflineTraining() {
+    if (m_service) {
+        m_service->simulateTrainingStep();
+        m_status = m_service->getStatus();
+        emit dataChanged();
+
+        // Hoàn tất giả lập huấn luyện adapter cục bộ
+        m_service->completeTraining();
+        m_status = m_service->getStatus();
+        emit dataChanged();
+    }
+}
+
 } // namespace troly::presentation

@@ -357,12 +357,12 @@ ApplicationWindow {
                     }
                 }
 
-                // Trạng thái cún con nhỏ gọn bên góc
+                // Trạng thái cún con nhỏ gọn bên góc & Nút chuyển chế độ 3D POC
                 RowLayout {
                     anchors.bottom: parent.bottom
                     anchors.right: parent.right
                     anchors.margins: 8
-                    spacing: 4
+                    spacing: 6
 
                     Rectangle {
                         width: 8
@@ -383,6 +383,23 @@ ApplicationWindow {
                         font.pixelSize: 10
                         color: "#A6ADC8"
                     }
+
+                    Button {
+                        text: mascot3dView.visible ? "2D" : "3D"
+                        flat: true
+                        font.pixelSize: 10
+                        onClicked: {
+                            mascot3dView.visible = !mascot3dView.visible;
+                            petActor.visible = !mascot3dView.visible;
+                        }
+                    }
+                }
+
+                // Mascot 3D Stylized Mesh POC
+                Mascot3DPOC {
+                    id: mascot3dView
+                    anchors.centerIn: parent
+                    visible: false
                 }
             }
 
@@ -521,6 +538,7 @@ ApplicationWindow {
                 if (panel === "eyeleo") eyeleoModal.open();
                 else if (panel === "rag") ragModal.open();
                 else if (panel === "llm") llmModal.open();
+                else if (panel === "evolving") evolvingModal.open();
                 else if (panel === "system") systemModal.open();
                 else if (panel === "waka") wakaModal.open();
                 else if (panel === "profile") profileModal.open();
@@ -532,6 +550,7 @@ ApplicationWindow {
         EyeLeoSettingsModal { id: eyeleoModal }
         RAGSettingsModal { id: ragModal }
         LLMSettingsModal { id: llmModal }
+        SelfEvolvingModal { id: evolvingModal }
         SystemInspectorModal { id: systemModal }
         WakaTrackerModal { id: wakaModal }
         ProfileModal { id: profileModal }
