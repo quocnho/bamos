@@ -5,8 +5,6 @@ import QtQuick.Layouts
 ModalDialog {
     id: evolvingModal
     title: "🧬 Trung Tâm Tự Tiến Hóa (Self-Evolving Hub)"
-    dialogWidth: 460
-    dialogHeight: 500
 
     property var vm: typeof selfEvolvingVM !== "undefined" ? selfEvolvingVM : null
 
