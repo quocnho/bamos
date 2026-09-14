@@ -1,9 +1,9 @@
-# SPRINT 09 REVIEW & RETROSPECTIVE: Standalone 3D Mascot Desktop Pet & GGUF Model Downloader
-**Thời gian:** 10/01/2027 | **Phiên bản:** `v01.09.00` | **Trạng thái:** 🟢 COMPLETED (100% Passed)
+# SPRINT 09 REVIEW: Standalone 3D Mascot Desktop Pet & GGUF Model Downloader
+**Thời gian họp:** 10/01/2027 | **Phiên bản:** `v01.09.00` | **Trạng thái:** 🟢 ACCEPTED (Nghiệm thu toàn bộ Sprint 09)
 
 ---
 
-## 1. Tổng Kết Kết Quả Nghiệm Thu Sprint 09
+## 🎯 1. Tổng Kết Kết Quả Nghiệm Thu Sprint 09
 
 | STT | Hạng Mục / Yêu Cầu Người Dùng | Giải Pháp Kỹ Thuật Triển Khai | Kết Quả Nghiệm Thu |
 |---|---|---|---|
@@ -14,7 +14,7 @@
 
 ---
 
-## 2. Kết Quả Kiểm Thử Tự Động (Definition of Done)
+## 🧪 2. Kết Quả Kiểm Thử Tự Động (Definition of Done)
 
 ```text
 Test project /etc/nixos/pkgs/troly/build
@@ -41,9 +41,8 @@ Total Test time (real) = 1.47 sec
 
 ---
 
-## 3. Retrospective (Bài Học Kinh Nghiệm)
-- **Điểm sáng:** 
-  - Trải nghiệm Desktop Pet thực thụ: Người dùng khởi động ứng dụng là có ngay người bạn đồng hành 3D nhí nhảnh góc màn hình không hề có cảm giác vướng víu của một cửa sổ ứng dụng desktop truyền thống.
-  - Khả năng quản lý mô hình LLM độc lập: Tính năng tải tệp GGUF qua mạng giúp ứng dụng hoàn toàn tự chủ mà không cần phụ thuộc công cụ dòng lệnh ngoài như `curl` hay `wget`.
-- **Cải tiến kỹ thuật:**
-  - Tách bạch hoàn toàn giữa `GGUFDownloaderService.hpp` và `GGUFDownloaderService.cpp` giúp CMake Automoc hoạt động trơn tru trong các test targets biệt lập.
+## ✍️ Chữ Ký Nghiệm Thu
+- **Product Owner / Lead Architect:** @quocnho
+- **Scrum Master:** @PlanAgent
+- **Lead Developer:** @DevOptAgent
+- **Lead 3D & Animation Director:** @AnimAgent
