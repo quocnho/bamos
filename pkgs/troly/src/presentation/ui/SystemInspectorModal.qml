@@ -107,6 +107,19 @@ ModalDialog {
             }
         }
 
+        RowLayout {
+            Layout.fillWidth: true
+            Text { text: "Kiểm tra cấu hình NixOS:"; color: "#CDD6F4"; Layout.fillWidth: true }
+            Button {
+                text: "Kiểm tra ngay ⚙️"
+                onClicked: {
+                    if (typeof actionVM !== "undefined") {
+                        actionVM.validateNix("/etc/nixos");
+                    }
+                }
+            }
+        }
+
         Item { Layout.fillHeight: true }
 
         Button {

@@ -1,4 +1,5 @@
 #include "ChatViewModel.hpp"
+#include "../infrastructure/AudioFeedbackService.hpp"
 #include <QVariantMap>
 #include <QMetaObject>
 
@@ -50,12 +51,26 @@ void ChatViewModel::wakeFromPeek() {
     if (m_isPeekMode) {
         m_isPeekMode = false;
         emit peekModeChanged();
-        // Hiệu ứng cún vồ chuột vui mừng & chào hỏi
+        // Hiệu ứng cún vồ chuột vui mừng & chào hỏi kèm âm thanh gâu gâu
         setMascotState("playful_jump");
         m_mascotGreeting = "Gâu gâu! Em đây ạ! Chúc chủ nhân một ngày làm việc tràn đầy năng lượng! 🐾";
         emit mascotGreetingChanged();
+        infrastructure::AudioFeedbackService::playSound(infrastructure::SoundEffectType::BarkFriendly);
     }
 }
+
+void ChatViewModel::playSound(const QString& soundType) {
+    if (soundType == "bark") {
+        infrastructure::AudioFeedbackService::playSound(infrastructure::SoundEffectType::BarkFriendly);
+    } else if (soundType == "complete") {
+        infrastructure::AudioFeedbackService::playSound(infrastructure::SoundEffectType::TaskCompleted);
+    } else if (soundType == "caution") {
+        infrastructure::AudioFeedbackService::playSound(infrastructure::SoundEffectType::AlertCaution);
+    } else {
+        infrastructure::AudioFeedbackService::playSound(infrastructure::SoundEffectType::BarkFriendly);
+    }
+}
+
 
 void ChatViewModel::appendStreamingToken(const QString& token) {
     m_currentStreamingText += token;

@@ -204,3 +204,34 @@ Tài liệu ghi nhận nhịp độ làm việc, tiến độ hàng ngày và th
 - **Hôm nay:**
   - Hoàn thiện thành phần `Mascot3DPOC.qml` với hiệu ứng xoay 3D trực quan, ánh xạ Toon shading và chiếc đuôi lò xo (Spring Bone wagging).
 - **Vướng mắc (Blockers):** Không có.
+
+---
+
+## [2026-09-14] (Sprint 08: Hoàn Thành Nghiệm Thu Hybrid Expansion - `v01.08.00`)
+
+### 📌 @PlanAgent (Project Manager & Documentation)
+- **Hôm nay:**
+  - Điều phối và theo dõi hoàn tất 5/5 user stories Sprint 08 (`TROLY-801` đến `TROLY-805`).
+  - Lập hồ sơ tài liệu đầy đủ: [PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-08/PLAN.md), [REVIEW.md](file:///etc/nixos/plan/troly/sprints/sprint-08/REVIEW.md), cập nhật [README.md](file:///etc/nixos/plan/troly/README.md) và [BACKLOG.md](file:///etc/nixos/plan/troly/backlog/BACKLOG.md).
+- **Vướng mắc (Blockers):** Không có. Tiến độ vượt chỉ tiêu.
+
+### 🔬 @RdAgent (R&D Specialist)
+- **Hôm nay:**
+  - Thiết kế tích hợp mở rộng Tool Calling cho Agent (File system traversal, content search, Nix validation).
+  - Phân tích kiến trúc Zero Overhead Audio Feedback Native.
+- **Vướng mắc (Blockers):** Không có.
+
+### 💻 @DevOptAgent (Execution & CI/CD)
+- **Hôm nay:**
+  - Mở rộng `IActionDispatcher` và hiện thực `LinuxActionDispatcher` (`listDirectory`, `searchInFiles`, `validateNixConfig`).
+  - Xây dựng `AudioFeedbackService.hpp`, tích hợp âm thanh gâu gâu vào `ChatViewModel` khi cún thức giấc và xoa đầu.
+  - Cập nhật `ActionViewModel` và giao diện `SystemInspectorModal.qml` bổ sung nút kiểm tra cấu hình NixOS.
+  - Viết bộ test `tests/test_agent_tools.cpp`, biên dịch và đạt 100% CTest (**7/7 suites passed**).
+  - Đóng gói derivation thành công qua `nix-build` ra `/nix/store/xsqmwm3yc8xhd8am12cwaqvra2gggvc1-troly-0.1.0`.
+- **Vướng mắc (Blockers):** Không có.
+
+### 🎨 @AnimAgent (Lead 3D & Animation Director)
+- **Hôm nay:**
+  - Tích hợp hiệu ứng vuốt ve trỏ chuột (MouseArea hover/petting) kèm hoạt ảnh Squash & Stretch chuẩn 12 nguyên tắc Disney trên `Mascot3DPOC.qml`.
+- **Vướng mắc (Blockers):** Không có.
+

@@ -53,6 +53,7 @@ set(HEADERS
     src/infrastructure/SystemInspectorService.hpp
     src/infrastructure/WakaTrackerService.hpp
     src/infrastructure/SelfEvolvingService.hpp
+    src/infrastructure/AudioFeedbackService.hpp
     src/presentation/ChatViewModel.hpp
     src/presentation/SystemMonitorViewModel.hpp
     src/presentation/EyeLeoViewModel.hpp
@@ -132,5 +133,16 @@ add_executable(test_self_evolving
 )
 target_include_directories(test_self_evolving PRIVATE src)
 add_test(NAME SelfEvolvingTests COMMAND test_self_evolving)
+
+add_executable(test_agent_tools
+    tests/test_agent_tools.cpp
+    src/infrastructure/LinuxActionDispatcher.cpp
+)
+target_include_directories(test_agent_tools PRIVATE src)
+target_link_libraries(test_agent_tools PRIVATE
+    Qt6::Core
+    Threads::Threads
+)
+add_test(NAME AgentToolsTests COMMAND test_agent_tools)
 
 install(TARGETS troly DESTINATION bin)

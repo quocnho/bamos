@@ -116,4 +116,48 @@ void ActionViewModel::abortCurrentAction() {
     emit isRunningChanged();
 }
 
+QStringList ActionViewModel::listDirectory(const QString& path) {
+    QStringList result;
+    if (m_dispatcher) {
+        auto items = m_dispatcher->listDirectory(path.toStdString());
+        for (const auto& it : items) {
+            result.append(QString::fromStdString(it));
+        }
+    }
+    return result;
+}
+
+QStringList ActionViewModel::searchFiles(const QString& dir, const QString& query) {
+    QStringList result;
+    if (m_dispatcher) {
+        auto matches = m_dispatcher->searchInFiles(dir.toStdString(), query.toStdString());
+        for (const auto& m : matches) {
+            result.append(QString::fromStdString(m));
+        }
+    }
+    return result;
+}
+
+void ActionViewModel::validateNix(const QString& path) {
+    if (m_isRunning || !m_dispatcher) return;
+    m_isRunning = true;
+    emit isRunningChanged();
+
+    std::thread([this, path]() {
+        domain::CommandResult res = m_dispatcher->validateNixConfig(path.toStdString());
+        QMetaObject::invokeMethod(this, [this, res]() {
+            m_isRunning = false;
+            m_lastExitCode = res.exitCode;
+            m_lastOutput = QString::fromStdString(res.output);
+            if (m_lastExitCode == 0 && m_lastOutput.isEmpty()) {
+                m_lastOutput = "[Nix Config Check]: Cú pháp hợp lệ! ✅";
+            }
+            emit isRunningChanged();
+            emit lastExitCodeChanged();
+            emit lastOutputChanged();
+            emit actionFinished(res.exitCode, m_lastOutput);
+        });
+    }).detach();
+}
+
 } // namespace troly::presentation

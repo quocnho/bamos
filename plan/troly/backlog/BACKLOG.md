@@ -61,8 +61,9 @@
 | **Sprint 03** | `v01.03.00` | **F1: Vector RAG & SQLite WAL Engine** | Triển khai SQLite WAL, nạp `sqlite-vec`, Hybrid search BM25 + Cosine RRF, Background chunking | ⚪ PLANNED |
 | **Sprint 04** | `v01.04.00` | **F2: Local Inference & Dynamic MoE** | Tích hợp llama.cpp RAII / SSE Client, Intent Classifier <30ms, Hot-swap model không giật GUI | ⚪ PLANNED |
 | **Sprint 05** | `v01.05.00` | **F3 & F4: Action ReAct & Safety Guard** | ReAct loop tự sửa lỗi, Linux command dispatcher, popup phê duyệt Human-in-the-Loop, Audit Log | ⚪ PLANNED |
-| **Sprint 06** | `v01.06.00` | **System Inspector, WakaTracker & Profile** | Cửa sổ giám sát hệ thống (journalctl, nixos), WakaTracker năng suất, User Profile cá nhân hóa | ⚪ PLANNED |
-| **Sprint 07** | `v01.07.00` | **F7: Self-Evolving Hub & Realtime 3D** | Tự động hóa harvesting ChatML vàng, pipeline train LoRA/merge GGUF, POC Qt Quick 3D mesh | ⚪ PLANNED |
+| **Sprint 06** | `v01.06.00` | **System Inspector, WakaTracker & Profile** | Cửa sổ giám sát hệ thống (journalctl, nixos), WakaTracker năng suất, User Profile cá nhân hóa | 🟢 DONE |
+| **Sprint 07** | `v01.07.00` | **F7: Self-Evolving Hub & Realtime 3D** | Tự động hóa harvesting ChatML vàng, pipeline train LoRA/merge GGUF, POC Qt Quick 3D mesh | 🟢 DONE |
+| **Sprint 08** | `v01.08.00` | **Hybrid Expansion: Agent Tools & Pet Polish** | Mở rộng FS Tools, âm thanh phản hồi Native, vuốt ve 3D Mascot và nghiệm thu toàn hệ thống | 🟢 DONE |
 
 ---
 

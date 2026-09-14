@@ -38,6 +38,9 @@ public:
     Q_INVOKABLE void confirmPendingCommand();
     Q_INVOKABLE void rejectPendingCommand();
     Q_INVOKABLE void abortCurrentAction();
+    Q_INVOKABLE QStringList listDirectory(const QString& path);
+    Q_INVOKABLE QStringList searchFiles(const QString& dir, const QString& query);
+    Q_INVOKABLE void validateNix(const QString& path);
 
 signals:
     void isRunningChanged();

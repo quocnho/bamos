@@ -2,6 +2,7 @@
 
 #include "../domain/CommandResult.hpp"
 #include <string>
+#include <vector>
 #include <functional>
 #include <stop_token>
 
@@ -23,6 +24,9 @@ public:
 
     virtual bool readFile(const std::string& path, std::string& outContent) = 0;
     virtual bool writeFile(const std::string& path, const std::string& content) = 0;
+    virtual std::vector<std::string> listDirectory(const std::string& path) = 0;
+    virtual std::vector<std::string> searchInFiles(const std::string& directory, const std::string& query) = 0;
+    virtual domain::CommandResult validateNixConfig(const std::string& configPath) = 0;
 };
 
 } // namespace troly::usecases

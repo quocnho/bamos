@@ -44,6 +44,7 @@ public:
     Q_INVOKABLE void setPeekMode(bool peek);
     Q_INVOKABLE void togglePeekMode();
     Q_INVOKABLE void wakeFromPeek();
+    Q_INVOKABLE void playSound(const QString& soundType);
 
 signals:
     void isGeneratingChanged();

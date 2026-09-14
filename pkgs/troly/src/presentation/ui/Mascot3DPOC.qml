@@ -105,12 +105,46 @@ Item {
             transformOrigin: Item.TopRight
             rotation: mascot3dRoot.isWagging ? (mascot3dRoot.rotationAngle * 2.5) : 0
         }
+
+        // Vùng tương tác vuốt ve trỏ chuột (Interactive Petting & Squash)
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onEntered: {
+                meshBase.scale = 1.08;
+                if (typeof chatVM !== "undefined") {
+                    chatVM.playSound("bark");
+                }
+            }
+            onExited: {
+                meshBase.scale = 1.0;
+            }
+            onClicked: {
+                // Hiệu ứng Squash & Stretch khi xoa đầu
+                squashAnim.restart();
+                if (typeof chatVM !== "undefined") {
+                    chatVM.playSound("bark");
+                }
+            }
+        }
+
+        Behavior on scale {
+            NumberAnimation { duration: 180; easing.type: Easing.OutBack }
+        }
+
+        SequentialAnimation {
+            id: squashAnim
+            PropertyAnimation { target: meshBase; property: "scale"; to: 0.92; duration: 80; easing.type: Easing.InOutQuad }
+            PropertyAnimation { target: meshBase; property: "scale"; to: 1.12; duration: 120; easing.type: Easing.OutBack }
+            PropertyAnimation { target: meshBase; property: "scale"; to: 1.0; duration: 100; easing.type: Easing.OutBounce }
+        }
     }
 
     Text {
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        text: "🐾 3D Stylized POC"
+        text: "🐾 3D Stylized (Vuốt ve em đi!)"
         font.pixelSize: 10
         font.bold: true
         color: "#B4BEFE"
