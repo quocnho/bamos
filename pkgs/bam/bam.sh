@@ -530,12 +530,15 @@ cmd_ai() {
         info "Đang tự động tải model Qwen2.5-1.5B..."
         cmd_ai pull
       fi
+      if curl -s http://127.0.0.1:9090/health >/dev/null 2>&1; then
+        ok "BamAI (llama-server) đã đang hoạt động trên cổng 9090."
+        cmd_ai status
+        return 0
+      fi
       info "Khởi động bamos-ai (llama-server)..."
       if [ -n "$SUDO" ] && [ "$(id -u)" -ne 0 ]; then
         # Khởi chạy user background process không cần quyền root/sudo nếu người dùng không muốn gõ pass
-        if ! curl -s http://127.0.0.1:9090/health >/dev/null 2>&1; then
-          nohup bamos-ai-server >/dev/null 2>&1 &
-        fi
+        nohup bamos-ai-server >/dev/null 2>&1 &
       else
         $SUDO systemctl start bamos-ai.service
       fi
@@ -544,18 +547,22 @@ cmd_ai() {
       cmd_ai status
       ;;
     stop)
-      info "Dừng bamos-ai service..."
-      $SUDO systemctl stop bamos-ai.service
+      info "Dừng bamos-ai (llama-server)..."
+      if systemctl is-active --quiet bamos-ai.service 2>/dev/null; then
+        $SUDO systemctl stop bamos-ai.service
+      fi
+      pkill -f llama-server 2>/dev/null || true
+      pkill -f bamos-ai-server 2>/dev/null || true
       ok "Đã dừng dịch vụ BamAI (llama-server)."
       ;;
     restart)
       info "Khởi động lại bamos-ai..."
-      $SUDO systemctl restart bamos-ai.service
-      sleep 2
-      cmd_ai status
+      cmd_ai stop
+      sleep 1
+      cmd_ai start
       ;;
     status)
-      if systemctl is-active --quiet bamos-ai.service 2>/dev/null; then
+      if curl -s http://127.0.0.1:9090/health >/dev/null 2>&1 || systemctl is-active --quiet bamos-ai.service 2>/dev/null; then
         ok "BamAI (llama-server) đang ${C_GREEN}CHẠY${C_RESET} (http://127.0.0.1:9090)"
       else
         say "${C_YELLOW}[!]${C_RESET} BamAI (llama-server) đang ${C_RED}DỪNG${C_RESET}."
@@ -566,10 +573,10 @@ cmd_ai() {
       bamos-ai-server
       ;;
     chat)
-      if ! systemctl is-active --quiet bamos-ai.service 2>/dev/null; then
+      if ! curl -s http://127.0.0.1:9090/health >/dev/null 2>&1 && ! systemctl is-active --quiet bamos-ai.service 2>/dev/null; then
         warn "BamAI chưa chạy! Đang tự động khởi động..."
         cmd_ai start
-        if ! systemctl is-active --quiet bamos-ai.service 2>/dev/null; then
+        if ! curl -s http://127.0.0.1:9090/health >/dev/null 2>&1; then
           die "Không thể khởi động BamAI. Hãy kiểm tra: journalctl -u bamos-ai.service -n 20"
         fi
       fi
@@ -614,7 +621,7 @@ cmd_ai() {
       done
       ;;
     app|ui)
-      if ! systemctl is-active --quiet bamos-ai.service 2>/dev/null; then
+      if ! curl -s http://127.0.0.1:9090/health >/dev/null 2>&1 && ! systemctl is-active --quiet bamos-ai.service 2>/dev/null; then
         warn "BamAI Local Server (llama-server) hiện chưa chạy."
         info "Nếu bạn dùng Cloud (DeepSeek/OpenAI/Gemini), ứng dụng vẫn hoạt động bình thường."
         info "Nếu muốn dùng Local AI, hãy bật qua: 'sudo systemctl start bamos-ai' hoặc 'sudo bam ai start'."

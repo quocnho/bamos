@@ -61,6 +61,10 @@ let
       --port "$PORT" \
       -ngl "$NGL" \
       -c "$CTX" \
+      -t 4 \
+      -tb 8 \
+      --cache-prompt \
+      --cache-reuse 256 \
       --embedding \
       --pooling cls \
       --ui-config-file "$UI_CONFIG" \

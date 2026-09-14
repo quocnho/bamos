@@ -480,40 +480,36 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 		}
 	}
 
-	// Ghép System Prompt + Hồ sơ cá nhân + Hoạt động WakaTime + Cấu hình hệ thống + Thói quen + Thư mục bối cảnh + Tài liệu + RAG
+	// Ghép System Prompt: Giữ phần tĩnh ổn định để llama-server tận dụng KV Prefix Cache (--cache-prompt)
 	systemContent := PuppySystemPrompt
-	systemContent += addressingRule(s.cfg.Addressing)
+	systemContent += addressingRule(userAddr)
 
-	// Tiêm hồ sơ cá nhân của Chủ nhân
+	// Tiêm hồ sơ cá nhân (dùng bản Concise gọn gàng để tránh nạp hàng trăm token bảng trắc nghiệm/lộ trình)
 	if s.profile != nil {
-		profileCtx := s.profile.GetPromptContext()
+		profileCtx := s.profile.GetConcisePromptContext()
 		if profileCtx != "" {
 			systemContent += "\n\n" + profileCtx
 		}
 	}
 
-	// Tiêm hoạt động & năng suất làm việc WakaTime
-	if s.waka != nil {
+	// Chỉ tiêm hoạt động WakaTime khi câu hỏi liên quan đến năng suất/lịch trình/thời gian làm việc
+	if s.waka != nil && (strings.Contains(lower, "waka") || strings.Contains(lower, "làm việc") || strings.Contains(lower, "năng suất") || strings.Contains(lower, "thời gian")) {
 		wakaCtx := s.waka.GetSummaryContext()
 		if wakaCtx != "" {
 			systemContent += "\n\n" + wakaCtx
 		}
 	}
 
-	// Tiêm thông tin phần cứng & hệ điều hành hiện tại
-	sysCtx := GetSystemPromptContext()
-	if sysCtx != "" {
-		systemContent += "\n\n" + sysCtx
+	// Chỉ tiêm thông số phần cứng khi câu hỏi liên quan đến phần cứng/máy móc/hệ thống
+	if strings.Contains(lower, "phần cứng") || strings.Contains(lower, "cấu hình") || strings.Contains(lower, "ram") || strings.Contains(lower, "cpu") || strings.Contains(lower, "ổ đĩa") || strings.Contains(lower, "hệ thống") {
+		sysCtx := GetSystemPromptContext()
+		if sysCtx != "" {
+			systemContent += "\n\n" + sysCtx
+		}
 	}
 
 	if activeDir != "" {
-		systemContent += fmt.Sprintf("\n\n=== BỐI CẢNH THƯ MỤC HIỆN TẠI (TỪ CỤC XƯƠNG FILE MANAGER) ===\nChủ nhân đang mở và làm việc trong thư mục: `%s`\nMọi yêu cầu thống kê, tìm kiếm, đọc tệp hoặc chạy lệnh của Chủ nhân hãy ưu tiên thực hiện trong thư mục này.\n=============================================================", activeDir)
-	}
-	if s.mem != nil {
-		habit := s.mem.GetHabitContext()
-		if habit != "" {
-			systemContent += "\n\n" + habit
-		}
+		systemContent += fmt.Sprintf("\n\n=== BỐI CẢNH THƯ MỤC HIỆN TẠI ===\nThư mục đang mở: `%s`", activeDir)
 	}
 	if attachedDocContext != "" {
 		systemContent += "\n\n" + attachedDocContext

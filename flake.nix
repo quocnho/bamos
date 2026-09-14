@@ -74,6 +74,8 @@
       };
 
       packages.${system} = {
+        # Troly - Native Edge AI Desktop Companion (C++20, Qt6)
+        troly = nixpkgs.legacyPackages.${system}.callPackage ./pkgs/troly { };
         # BamOS CLI — cài qua environment.systemPackages (modules/packages.nix),
         # hoặc build độc lập: nix build .#bam
         bam = nixpkgs.legacyPackages.${system}.callPackage ./pkgs/bam { };

@@ -1,0 +1,31 @@
+# Dependencies & Package Managers
+build/
+.devenv/
+.direnv/
+compile_commands.json
+CMakeCache.txt
+CMakeFiles/
+
+# LLM Models & Datasets
+models/
+*.gguf
+*.bin
+*.pt
+*.safetensors
+*.onnx
+
+# Data & SQLite local runtime
+data/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# Logs & Temporary files
+*.log
+tmp/
+.cache/
+tags
+.vscode/
+.idea/

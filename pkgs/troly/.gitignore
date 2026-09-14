@@ -1,0 +1,6 @@
+package troly
+/build
+build
+result
+.envrc.cache
+*.log

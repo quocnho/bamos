@@ -1,0 +1,54 @@
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <QQmlContext>
+#include <iostream>
+#include <memory>
+
+#include "domain/Config.hpp"
+#include "infrastructure/SqliteRAGRepository.hpp"
+#include "infrastructure/LlamaInferenceEngine.hpp"
+#include "infrastructure/LinuxActionDispatcher.hpp"
+#include "presentation/ChatViewModel.hpp"
+#include "presentation/SystemMonitorViewModel.hpp"
+
+int main(int argc, char *argv[]) {
+    // Tối ưu hỗ trợ Wayland / XWayland
+    qputenv("QT_QPA_PLATFORM", "wayland;xcb");
+
+    QGuiApplication app(argc, argv);
+    app.setApplicationName("troly");
+    app.setOrganizationName("BamOS");
+
+    std::cout << "==================================================\n";
+    std::cout << "🚀 Troly - Native Edge AI Desktop (C++20 + Qt6)\n";
+    std::cout << "   - Clean Architecture Skeleton\n";
+    std::cout << "   - Hybrid RAG (FTS5 + SQLite-vec)\n";
+    std::cout << "   - Zero Web Overhead\n";
+    std::cout << "==================================================\n";
+
+    // Khởi tạo Dependency Injection (Infrastructure -> Usecases -> Presentation)
+    auto ragRepo = std::make_shared<troly::infrastructure::SqliteRAGRepository>();
+    ragRepo->initialize("/tmp/troly_knowledge.db");
+
+    auto inferenceEngine = std::make_shared<troly::infrastructure::LlamaInferenceEngine>("http://127.0.0.1:9090");
+    auto actionDispatcher = std::make_shared<troly::infrastructure::LinuxActionDispatcher>();
+
+    auto chatVM = std::make_unique<troly::presentation::ChatViewModel>(inferenceEngine, ragRepo);
+    auto systemMonitorVM = std::make_unique<troly::presentation::SystemMonitorViewModel>();
+
+    QQmlApplicationEngine engine;
+    engine.rootContext()->setContextProperty("chatVM", chatVM.get());
+    engine.rootContext()->setContextProperty("systemMonitorVM", systemMonitorVM.get());
+
+    const QUrl url(QStringLiteral("qrc:/ui/main.qml"));
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
+                     &app, [url](QObject *obj, const QUrl &objUrl) {
+        if (!obj && url == objUrl)
+            QCoreApplication::exit(-1);
+    }, Qt::QueuedConnection);
+
+    // Load file QML trực tiếp hoặc qua tài nguyên
+    engine.load(QStringLiteral("/etc/nixos/pkgs/troly/src/presentation/ui/main.qml"));
+
+    return app.exec();
+}

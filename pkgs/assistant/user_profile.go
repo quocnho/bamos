@@ -302,6 +302,28 @@ func (upm *UserProfileManager) UpdateProfile(p UserProfileData) {
 	upm.SyncToRAG(context.Background())
 }
 
+// GetConcisePromptContext trả về phiên bản siêu gọn nhẹ của hồ sơ người dùng để tối ưu token & tốc độ xử lý SLM cục bộ
+func (upm *UserProfileManager) GetConcisePromptContext() string {
+	upm.mu.RLock()
+	defer upm.mu.RUnlock()
+
+	p := upm.Profile
+	userTitle, botTitle := GetAddressingPronouns(p.Addressing)
+
+	var sb strings.Builder
+	sb.WriteString("=== HỒ SƠ NGƯỜI DÙNG ===\n")
+	if p.FullName != "" {
+		sb.WriteString(fmt.Sprintf("- Tên: %s\n", p.FullName))
+	}
+	sb.WriteString(fmt.Sprintf("- Danh xưng người dùng: %s | Ngôi xưng của Trợ lý: %s\n", userTitle, botTitle))
+	if p.CurrentLevel != "" {
+		sb.WriteString(fmt.Sprintf("- Chuyên môn: %s\n", p.CurrentLevel))
+	}
+	sb.WriteString(fmt.Sprintf("- QUY TẮC BẮT BUỘC: Bạn BẮT BUỘC gọi người dùng là \"%s\" (hoặc \"%s ơi\"), tự xưng là \"%s\".\n", userTitle, userTitle, botTitle))
+	sb.WriteString("========================")
+	return sb.String()
+}
+
 // GetPromptContext trả về chuỗi thông tin định danh và hồ sơ để nạp vào System Prompt
 func (upm *UserProfileManager) GetPromptContext() string {
 	upm.mu.RLock()
