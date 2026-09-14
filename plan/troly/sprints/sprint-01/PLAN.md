@@ -1,5 +1,5 @@
 # SPRINT 01: Core Architecture & Setup
-**Thời gian:** 14/09/2026 - 28/09/2026 | **Trạng thái:** 🟡 IN_PROGRESS | **Phiên bản:** `v01.01.00`
+**Thời gian:** 14/09/2026 - 28/09/2026 | **Trạng thái:** 🟢 COMPLETED | **Phiên bản:** `v01.01.00`
 
 ## Mục Tiêu Sprint
 Thiết lập toàn bộ khung nền tảng cho package `troly`:

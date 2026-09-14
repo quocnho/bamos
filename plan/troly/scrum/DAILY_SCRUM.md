@@ -1,6 +1,6 @@
 # NHẬT KÝ DAILY SCRUM: DỰ ÁN TROLY
 
-Tài liệu ghi nhận nhịp độ làm việc, tiến độ hàng ngày và tháo gỡ điểm nghẽn (blockers) của hệ sinh thái Multi-Agent (@PlanAgent, @RdAgent, @DevOptAgent).
+Tài liệu ghi nhận nhịp độ làm việc, tiến độ hàng ngày và tháo gỡ điểm nghẽn (blockers) của hệ sinh thái Multi-Agent (@PlanAgent, @RdAgent, @DevOptAgent, @AnimAgent).
 
 ---
 
@@ -49,20 +49,14 @@ Tài liệu ghi nhận nhịp độ làm việc, tiến độ hàng ngày và th
 
 ---
 
-## [2026-09-14 Buổi Chiều] (Rà Soát, Đồng Bộ Flake Cha & Tối Ưu Hóa Giao Diện)
+## [2026-09-14 Buổi Tối] (Nghiệm Thu Sprint 01 & Kích Hoạt Master Roadmap Sprint 02)
 
 ### 📌 @PlanAgent (Project Manager & Documentation)
 - **Hôm nay:**
-  - Di chuyển và quản lý tập trung toàn bộ 9 Skills của hệ thống lên `/etc/nixos/.agents/skills/`, loại bỏ trùng lặp trong `pkgs/troly/`.
-  - Cập nhật tài liệu kiến trúc [docs/ANTIGRAVITY_SETUP.md](file:///etc/nixos/docs/troly/ANTIGRAVITY_SETUP.md), [sprint-01/REVIEW.md](file:///etc/nixos/plan/troly/sprints/sprint-01/REVIEW.md).
-  - Nghiệm thu 100% các tiêu chí của Sprint 01 (`TROLY-101` đến `TROLY-106`).
-- **Vướng mắc (Blockers):** Không có.
-
-### 💻 @DevOptAgent (Execution & CI/CD)
-- **Hôm nay:**
-  - Kiểm tra tính toàn vẹn của build cục bộ: `ninja -C build` và `nix-build -E 'with import <nixpkgs> {}; callPackage ./default.nix {}'` biên dịch thành công hoàn hảo.
-  - Khai báo và tích hợp `troly` vào `packages.${system}.troly` trong file Flake mẹ `/etc/nixos/flake.nix`.
-  - Kiểm thử `nix build .#troly --dry-run` từ thư mục mẹ `/etc/nixos/` đảm bảo tính tương thích hệ thống tuyệt đối.
-  - Bổ sung nút tương tác nhanh cho bài tập mắt trong modal EyeLeo.
-  - Chuẩn hóa toàn diện nguyên tắc **Đường dẫn tương đối & Khả năng chạy độc lập (Standalone Portability)** cho toàn bộ dự án con (`pkgs/troly/`,...), loại bỏ hardcode đường dẫn tuyệt đối để dự án hoạt động độc lập mọi nơi khi tách repo.
-- **Vướng mắc (Blockers):** Hệ thống sẵn sàng cho Sprint 02.
+  - Hoàn tất rà soát toàn bộ tài liệu dự án `troly` và mã nguồn kế thừa `assistant`.
+  - Phác thảo hoàn chỉnh **Bức Tranh Sản Phẩm Hoàn Chỉnh (Target Product Blueprint)**: Desktop Pet Mascot tương tác chuột "Núp lùm thò đuôi", Clean Arch C++20, Quick Menu ⚙️, Settings Modals, EyeLeo Native 3 cấp độ, Local Inference llama.cpp RAII, ReAct Loop, Safety Guard, Dynamic MoE Router và Self-Evolving Hub.
+  - Nâng cấp [plan/troly/backlog/BACKLOG.md](file:///etc/nixos/plan/troly/backlog/BACKLOG.md) thành Master Product Roadmap phân kỳ 7 Milestones tương ứng chuỗi Sprints tương lai.
+  - Đóng gói và nghiệm thu chính thức Sprint 01 (`v01.01.00`) tại [sprint-01/REVIEW.md](file:///etc/nixos/plan/troly/sprints/sprint-01/REVIEW.md) và [sprint-01/RETRO.md](file:///etc/nixos/plan/troly/sprints/sprint-01/RETRO.md).
+  - Kích hoạt kế hoạch chi tiết **Sprint 02 (`v01.02.00`)** tại [sprint-02/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-02/PLAN.md) tập trung vào giao diện tương tác Mascot UI & EyeLeo Native.
+  - Cập nhật bản đồ kế hoạch tổng quan [plan/troly/README.md](file:///etc/nixos/plan/troly/README.md).
+- **Vướng mắc (Blockers):** Không có. Đã sẵn sàng bước vào pha triển khai kỹ thuật của Sprint 02.

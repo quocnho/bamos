@@ -26,12 +26,16 @@ Phân rã thành các bước cụ thể:
 3. **Bước 3: Kiểm thử & Nghiệm thu (Verification & Test):** Lệnh build, ctest, `bam dry`/`bam switch`, hoặc kịch bản test thủ công.
 4. **Bước 4: Đồng bộ & Bàn giao (Sync & Commit):** Cập nhật docs, backlog/sprint, commit theo chuẩn Why-What-Test.
 
-### ❓ 4. Điểm Cần Làm Rõ / Xác Nhận (Clarifications / Open Questions)
-- Nếu có điểm chưa rõ ràng hoặc có nhiều phương án kỹ thuật khác nhau, nêu rõ câu hỏi và phương án đề xuất tối ưu.
-- Nếu yêu cầu đã đầy đủ và rõ ràng, xác nhận sẵn sàng bắt tay vào thực thi.
+### ❓ 4. Xác Nhận Ý Định & Tham Vấn Lựa Chọn Phương Án (Bắt Buộc Xác Nhận)
+- **Hỏi xác nhận đúng ý định:** Đặt câu hỏi trực tiếp để người dùng xác nhận xem việc tái định hình và bóc tách bài toán đã đúng ý định/vấn đề cần xử lý chưa.
+- **Phân tích & Lựa chọn phương án (nếu có nhiều hướng tiếp cận):**
+  - Trình bày rõ các phương án khả thi (Phương án A, Phương án B, ...).
+  - So sánh ngắn gọn ưu / nhược điểm, trade-off (hiệu năng, VRAM/CPU, độ phức tạp, tính mở rộng).
+  - Đưa ra đề xuất tối ưu (Recommended) và hỏi người dùng xác nhận chọn phương án nào trước khi thực thi.
+- **Nguyên tắc Chờ Đồng Thuận (Stop & Wait):** Tuyệt đối **KHÔNG tự ý sửa code hoặc chạy lệnh tác động hệ thống** trong lượt phản hồi này. Dừng lại chờ người dùng phản hồi xác nhận rồi mới tiến hành.
 
 ---
 
 ## 2. Nguyên Tắc Ứng Xử Kèm Theo
 - **Hành văn chuyên nghiệp:** Sử dụng thuật ngữ kỹ thuật chính xác, tone giọng kỹ sư hệ thống/kiến trúc sư phần mềm, mạch lạc, tôn trọng tiêu chuẩn dự án.
-- **Không vội vàng hành động ngầm:** Tránh trường hợp sửa code hoặc chạy lệnh làm thay đổi hệ thống trước khi người dùng hiểu rõ phạm vi công việc dự kiến.
+- **Không vội vàng hành động ngầm:** Tránh trường hợp sửa code hoặc chạy lệnh làm thay đổi hệ thống trước khi người dùng hiểu rõ phạm vi công việc dự kiến và đồng thuận phương án.

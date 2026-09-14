@@ -121,10 +121,10 @@ ApplicationWindow {
                         smooth: true
                         source: {
                             var state = chatVM.mascotState;
-                            if (state === "excited") return "../../../assets/pet/cho nhay.svg";
-                            if (state === "sleep") return "../../../assets/pet/cho ngu.svg";
-                            if (state === "greeting") return "../../../assets/pet/cho chao.svg";
-                            return "../../../assets/pet/cho dung.svg";
+                            if (state === "excited") return "../../../assets/pet/cho nhay.png";
+                            if (state === "sleep") return "../../../assets/pet/cho ngu.png";
+                            if (state === "greeting") return "../../../assets/pet/cho chao.png";
+                            return "../../../assets/pet/cho dung.png";
                         }
                     }
 

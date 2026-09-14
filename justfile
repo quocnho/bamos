@@ -30,7 +30,7 @@ alias tr := troly-run
 # Xem trước giao diện QML của troly
 [group('troly')]
 troly-preview:
-    qml6 pkgs/troly/src/presentation/ui/main.qml
+    qml pkgs/troly/src/presentation/ui/main.qml
 
 alias tp := troly-preview
 

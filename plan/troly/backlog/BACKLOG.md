@@ -1,74 +1,145 @@
-# BACKLOG DỰ ÁN TROLY (NATIVE EDGE AI DESKTOP)
+# PRODUCT BACKLOG & MASTER ROADMAP: DỰ ÁN TROLY (NATIVE EDGE AI DESKTOP)
 
-Tài liệu quản lý toàn bộ yêu cầu tính năng (Feature Decomposition) cho dự án `troly`, chuyển đổi và nâng cấp từ `pkgs/assistant` sang C++20/Qt6 Native, tuân thủ Clean Architecture và 100% Air-gapped Edge AI.
-
-> 🔄 **Tuyên Bố Kế Thừa & Nâng Cấp Từ `/etc/nixos/pkgs/assistant/`:**
-> Dự án `troly` tái cấu trúc và phát triển kế thừa toàn bộ tri thức, luồng nghiệp vụ từ dự án `assistant`. Toàn bộ thông tin từ dự án cũ được đọc và tích hợp, trong đó đặc biệt tận dụng và tái hiện lại trên nền C++20/Qt6:
-> 1. **Hệ thống Menu thả nhanh & điều hướng:** Menu thiết lập sổ xuống (RAG, LLM, EyeLeo, System, WakaTracker, Profile, About).
-> 2. **Các cửa sổ thiết lập (Settings Windows/Modals):** Thiết lập RAG (FTS5 + vec0 hybrid, chọn file), Thiết lập LLM (cục bộ/cloud, tham số ngữ cảnh), Giám sát hệ thống (System Inspector quét journalctl, /etc/nixos), WakaTracker (nhịp sinh hoạt, thời gian làm việc), Hồ sơ người dùng (User Profile, trắc nghiệm đánh giá năng lực).
-> 3. **Cơ chế bảo vệ mắt EyeLeo:** 3 cấp độ nhắc nhở (cảnh báo trước 30s, nghỉ ngắn 8-20s với bài tập mắt và animation cún cưng, nghỉ dài 5 phút overlay glassmorphism kèm strict mode, tự động nhận diện idle qua D-Bus Mutter).
-> 4. **Thanh bối cảnh thư mục (Bone Context Bar) & Đính kèm đa phương tiện.**
+> **Tầm Nhìn Sản Phẩm (Product Vision):**  
+> **Troly (Trợ Lý)** là người bạn đồng hành ảo thông minh, nhí nhảnh và an toàn trên Desktop Linux Wayland/NixOS.  
+> Được xây dựng với triết lý **100% Air-gapped Cục Bộ**, **Zero Web Overhead (C++20 & Qt6 Native)**, tích hợp trí tuệ nhân tạo biên siêu nhẹ (**llama.cpp**, **Dynamic MoE Router**, **Hybrid Vector RAG**), vòng lặp tự động hóa tác vụ hệ thống **ReAct Actionable Agent**, cơ chế bảo vệ sức khỏe **EyeLeo** và **chú cún ảo Desktop Pet (Mascot)** mang đậm phong cách hoạt hình 12 nguyên tắc Disney.
 
 ---
 
-## 0. Quy Chuẩn Cấu Trúc Hệ Thống Tập Tin (Clean Architecture & Atomic Granularity)
-- **Xây dựng hệ thống tập tin phân nhỏ nhất có thể:** Mọi chức năng F1 - F7 khi triển khai đều phải phân rã thành các thư mục và tập tin con phù hợp, chuyên nghiệp theo nguyên tắc Single Responsibility.
-- **Dễ tìm kiếm thư mục, tập tin:** Tên gọi chuẩn xác, module hóa theo tầng (`domain/models/`, `domain/ports/`, `usecases/<feature>/`, `infrastructure/<adapter>/`, `presentation/viewmodels/`, `presentation/ui/components/`).
-- **Nội dung nhỏ nhất khi đọc:** Đảm bảo mỗi file có kích thước tinh gọn tối đa, giúp AI Agent chỉ cần đọc đúng tập tin liên quan để tiết kiệm token tối đa trong quá trình dev.
+## 🐶 I. BỨC TRANH SẢN PHẨM HOÀN CHỈNH (TARGET PRODUCT BLUEPRINT)
+
+```text
++========================================================================================+
+|                             DESKTOP PET & MASCOT COMPANION                             |
+|  [Núp Lùm / Thò Đuôi] ──(Click Đuôi)──► [Vồ Chuột & Sủa Gâu Gâu] ──► [Quick Input Box]  |
+|  [Squash & Stretch (Disney)] ◄──► [Mascot FSM: GREETING, IDLE, JUMP, DEEP_SLEEP]        |
++========================================================================================+
+|                                    NATIVE QT6 UI LAYER                                 |
+|  • Floating Glassmorphism Window (Frameless, Translucent, Wayland Client-Side 60fps)    |
+|  • Quick Action Menu (⚙️): RAG, LLM, System Inspector, WakaTracker, Profile, EyeLeo    |
+|  • Bone Context Bar: Đính kèm file/folder ngữ cảnh tức thì từ Nautilus                 |
+|  • Streaming Markdown View: Hiển thị Live Token, Code Highlighting, Copy Button        |
+|  • EyeLeo Health Modals: Cảnh báo 30s, Nghỉ ngắn 20s bài tập mắt, Nghỉ dài 5m Strict   |
++========================================================================================+
+|                                BUSINESS & USECASES LAYER                               |
+|  • Dynamic MoE Router: Phân loại ý định <30ms ➔ Hot-swap model (Text, Code, Vision)   |
+|  • Hybrid RAG Engine: FTS5 BM25 + sqlite-vec Cosine Distance (Thuật toán RRF)          |
+|  • Action Dispatcher & ReAct Loop: Chạy lệnh shell, đọc ghi tệp, tự phân tích sửa lỗi  |
+|  • Safety Guard: Phân loại rủi ro (Low/High), Popup phê duyệt Human-in-the-Loop       |
+|  • EyeLeo & WakaTracker Service: Đo nhịp sinh học, nhận diện idle qua D-Bus Mutter    |
++========================================================================================+
+|                                INFRASTRUCTURE & ENGINE                                 |
+|  • llama.cpp Embedded C++ RAII / Local Server SSE Client (Context Length 4k-8k)        |
+|  • SQLite 3.45+ WAL Mode + sqlite-vec Extension (libvec0.so)                          |
+|  • Linux QProcess / std::filesystem Sandboxing                                         |
+|  • Self-Evolving Hub: Harvesting ChatML ➔ llama-finetune LoRA ➔ Merge & GGUF Quantize |
++========================================================================================+
+```
 
 ---
 
-## 1. Bảng Phân Rã Chức Năng Nghiệp Vụ (Functional Decomposition - FD)
+## 🏛️ II. NGUYÊN TẮC KIẾN TRÚC & QUY CHUẨN KỸ THUẬT BẮT BUỘC
 
-### F1: Quản Trị Tri Thức & Vector RAG (Hybrid Search FTS5 + sqlite-vec)
-- **Mô tả:** Động cơ tìm kiếm tri thức cục bộ không phụ thuộc đám mây.
-- **Tasks:**
-  - `TROLY-F1-01`: Thiết kế schema SQLite WAL (`collections`, `documents`, `doc_chunks`) + FTS5 + virtual table `vec_chunks` (`vec0` sqlite-vec).
-  - `TROLY-F1-02`: Viết Interface `IRAGService.hpp` và triển khai `SqliteRAGRepository.cpp`.
-  - `TROLY-F1-03`: Thuật toán Hybrid Scoring kết hợp BM25 (FTS5) và Cosine Distance (`vec_chunks`) qua công thức Reciprocal Rank Fusion (RRF) hoặc Alpha weighting.
-  - `TROLY-F1-04`: Bộ nạp tài liệu nền đa luồng với `std::jthread` (Document Parser & Chunking).
+1. **Phân rã hạt nhỏ nhất (Atomic Granularity):**
+   - Mọi thư mục và file được chia tách theo Single Responsibility Principle (Domain Entities, Ports, Usecases, Adapters, QML Components).
+   - Nội dung tệp tin luôn giữ ngắn gọn, súc tích để tiết kiệm tối đa AI Context Token.
+2. **Đường dẫn tương đối & Khả năng chạy độc lập (Standalone Portability):**
+   - Không hardcode đường dẫn tuyệt đối `/etc/nixos/...` vào code C++, QML hay tài liệu nội bộ.
+   - Sẵn sàng đóng gói riêng biệt (`default.nix`) hoặc tích hợp vào Flake toplevel (`bam switch`).
+3. **Quy chuẩn Git & Versioning (Why - What - Test):**
+   - Đánh số phiên bản 3 cấp `vAA.BB.CC`.
+   - Mỗi commit bắt buộc cấu trúc: `[WHY / BUSINESS CONTEXT]`, `[WHAT / SCOPE OF CHANGE]`, `[TEST / DEFINITION OF DONE]`.
 
-### F2: Suy Luận Cục Bộ (Local Inference Engine: llama.cpp Native RAII)
-- **Mô tả:** Động cơ suy luận mô hình ngôn ngữ nhỏ (SLM) trực tiếp trên máy qua llama.cpp nhúng tĩnh.
-- **Tasks:**
-  - `TROLY-F2-01`: Thiết kế Interface `IInferenceEngine.hpp` với cơ chế Token Streaming và `std::stop_token`.
-  - `TROLY-F2-02`: Lớp bọc RAII smart pointers với custom deleters cho `llama_model` và `llama_context`.
-  - `TROLY-F2-03`: Context Window Manager và bộ lọc ngữ pháp GBNF Grammar parser đảm bảo output JSON cấu trúc cho Tool Calling.
+---
 
-### F3: Điều Phối Tác Vụ (Action Dispatcher & ReAct Loop)
-- **Mô tả:** Tự động hóa tác vụ hệ điều hành NixOS (chạy lệnh shell, đọc ghi tệp, kiểm tra hệ thống).
-- **Tasks:**
-  - `TROLY-F3-01`: Thiết kế Interface `IActionDispatcher.hpp`.
-  - `TROLY-F3-02`: Linux Command Dispatcher an toàn với `QProcess`, hỗ trợ timeout và non-blocking.
-  - `TROLY-F3-03`: Vòng lặp ReAct (Reasoning + Acting) tự sửa lỗi: lấy output thực thi phản hồi ngược lại context của AI nếu câu lệnh bị lỗi.
+## 🗺️ III. PHÂN KỲ MILESTONE & LỘ TRÌNH SPRINTS (ROADMAP)
 
-### F4: Cơ Chế An Toàn (Safety Guard & Audit Trail)
-- **Mô tả:** Bảo vệ an toàn cho người dùng khi Agent đề xuất lệnh nhạy cảm (sudo, rm, nixos-rebuild).
-- **Tasks:**
-  - `TROLY-F4-01`: Interface `ISafetyGuard.hpp` kiểm duyệt command regex, blacklist và phân cấp mức độ rủi ro (Low / High).
-  - `TROLY-F4-02`: UI Modal phê duyệt Human-in-the-Loop trên QML trước khi thực thi lệnh rủi ro cao.
-  - `TROLY-F4-03`: Ghi log kiểm toán (Audit Trail) cục bộ vào bảng SQLite `action_logs`.
+| Sprint | Phiên bản | Nhóm tính năng | Mục tiêu trọng tâm | Trạng thái |
+|---|---|---|---|---|
+| **Sprint 01** | `v01.01.00` | **Core Architecture & Setup** | Dựng khung Clean Arch C++20, DevEnv, Qt6 Skeleton, Flake integration, Antigravity harness | 🟢 DONE |
+| **Sprint 02** | `v01.02.00` | **F5: Modern Mascot UI & EyeLeo Native** | Hoàn thiện Desktop Pet tương tác chuột (Peek Tail, Disney FSM), Quick Menu ⚙️, Bộ bảo vệ mắt EyeLeo | 🟡 IN_PROGRESS |
+| **Sprint 03** | `v01.03.00` | **F1: Vector RAG & SQLite WAL Engine** | Triển khai SQLite WAL, nạp `sqlite-vec`, Hybrid search BM25 + Cosine RRF, Background chunking | ⚪ PLANNED |
+| **Sprint 04** | `v01.04.00` | **F2: Local Inference & Dynamic MoE** | Tích hợp llama.cpp RAII / SSE Client, Intent Classifier <30ms, Hot-swap model không giật GUI | ⚪ PLANNED |
+| **Sprint 05** | `v01.05.00` | **F3 & F4: Action ReAct & Safety Guard** | ReAct loop tự sửa lỗi, Linux command dispatcher, popup phê duyệt Human-in-the-Loop, Audit Log | ⚪ PLANNED |
+| **Sprint 06** | `v01.06.00` | **System Inspector, WakaTracker & Profile** | Cửa sổ giám sát hệ thống (journalctl, nixos), WakaTracker năng suất, User Profile cá nhân hóa | ⚪ PLANNED |
+| **Sprint 07** | `v01.07.00` | **F7: Self-Evolving Hub & Realtime 3D** | Tự động hóa harvesting ChatML vàng, pipeline train LoRA/merge GGUF, POC Qt Quick 3D mesh | ⚪ PLANNED |
 
-### F5: Giao Diện Bản Địa & Desktop Mascot (Qt6 Quick/QML)
-- **Mô tả:** Giao diện Desktop Pet trong suốt, tăng tốc phần cứng Wayland native Scene Graph, thay thế WebKitGTK.
-- **Tasks:**
-  - `TROLY-F5-01`: ViewModel nền tảng (`ChatViewModel`, `SystemMonitorViewModel`, `SettingsViewModel`).
-  - `TROLY-F5-02`: Cửa sổ QML trong suốt hỗ trợ XWayland và Wayland native (`Qt.FramelessWindowHint`, `WA_TranslucentBackground`).
-  - `TROLY-F5-03`: Tích hợp Mascot Pet Sprite & Animations từ `assets/pet/` (`cho chao.svg`, `cho dung.svg`, `cho nhay.svg`, `cho ngu.svg`).
-  - `TROLY-F5-04`: Tích hợp EyeLeo Companion (nhắc nghỉ mắt 20-20-20 & nghỉ dài có animation Mascot).
-  - `TROLY-F5-05`: Markdown Live Rendering tốc độ 60fps trên QML với syntax highlighting.
+---
 
-### F6: Bộ Định Tuyến Động (Dynamic MoE Router)
-- **Mô tả:** Phân loại ý định siêu nhanh (<30ms) để điều phối sang model chuyên biệt (Text, Code, Vision).
-- **Tasks:**
-  - `TROLY-F6-01`: Interface `IRouterEngine.hpp` và bảng quản lý `models_registry`.
-  - `TROLY-F6-02`: Intent Classifier siêu nhẹ (<30ms) nhận diện kiểu tệp (PNG/JPG ➔ Vision; Shell/Nix/C++ ➔ Coder; Text ➔ Worker Qwen2.5).
-  - `TROLY-F6-03`: Cơ chế Hot-Swap giải phóng VRAM model cũ và nạp context mới trên worker thread mà không làm treo GUI.
+## 📋 IV. CHI TIẾT PRODUCT BACKLOG (F1 - F7 & EXPANSION)
 
-### F7: Trung Tâm Tự Tiến Hóa (Self-Evolving Hub - Air-gapped)
-- **Mô tả:** Thu hoạch dữ liệu chất lượng cao từ phiên làm việc và tự động fine-tune LoRA cục bộ.
-- **Tasks:**
-  - `TROLY-F7-01`: Schema thu thập bản ghi vàng `training_datasets` có `quality_score >= 1.0`.
-  - `TROLY-F7-02`: Pipeline 4 bước: Xuất ChatML `train_data.txt` ➔ `llama-finetune` LoRA ➔ `llama-export-lora` merge ➔ `llama-quantize` Q4_K_M.
-  - `TROLY-F7-03`: Tự động đăng ký model GGUF mới vào `models_registry`.
+### 🐕 F5: Modern Mascot UI & EyeLeo Native (Sprint 02 Focus)
+- `TROLY-F5-01`: **Mascot Interaction Controller & Peek Tail:**
+  - Cơ chế cún con ẩn mép màn hình, chỉ thò đuôi vẫy (`STATE_PEEK_TAIL`).
+  - Xử lý tương tác chuột: click đuôi ➔ cún vồ trỏ chuột (`STATE_PLAYFUL_JUMP`) kèm âm thanh/bong bóng thoại chào hỏi ➔ mở Quick Input Box.
+- `TROLY-F5-02`: **Disney 12 Principles & Animation Refining:**
+  - Cải tiến squash & stretch khi thở/nhảy, chuyển động tai đuôi có độ trễ quán tính (Secondary Action), 100% Bezier easing (`OutBack`, `InOutQuad`).
+- `TROLY-F5-03`: **Quick Navigation Menu & Settings Modals:**
+  - Nút bánh răng ⚙️ mở Menu danh mục: RAG, LLM, EyeLeo, System, WakaTracker, Profile, About.
+  - Khung giao diện Fluent Glassmorphism cho từng modal cài đặt.
+- `TROLY-F5-04`: **Native EyeLeo Health Companion:**
+  - `EyeLeoService` đếm chu kỳ: Cảnh báo trước 30s ➔ Nghỉ ngắn 20s (bài tập đảo mắt cùng cún cưng) ➔ Nghỉ dài 5 phút (Overlay toàn màn hình, Strict Mode đếm ngược).
+  - Tích hợp theo dõi người dùng không hoạt động (idle detection) qua D-Bus Mutter/XWayland.
+- `TROLY-F5-05`: **Bone Context Bar & Live Markdown Stream:**
+  - Thanh bối cảnh thư mục ghim dưới input box, hỗ trợ kéo thả tệp/thư mục từ Nautilus.
+  - Bộ hiển thị Markdown trực tiếp hỗ trợ code syntax highlight, copy code block, stream từng token mượt mà 60fps.
 
+### 🔍 F1: Quản Trị Tri Thức & Vector RAG (Hybrid Search FTS5 + sqlite-vec)
+- `TROLY-F1-01`: **Database DDL & SQLite WAL Migration:**
+  - Khởi tạo đầy đủ bảng: `collections`, `documents`, `doc_chunks`, `chunks_fts`, `vec_chunks`, `chat_sessions`, `chat_messages`.
+- `TROLY-F1-02`: **sqlite-vec Dynamic Extension Loader:**
+  - Nạp an toàn `libvec0.so` trong môi trường NixOS vào kết nối SQLite C++.
+- `TROLY-F1-03`: **Hybrid Search Engine & Reciprocal Rank Fusion (RRF):**
+  - Thực thi truy vấn song song BM25 (FTS5) và Cosine Distance (`vec0`), trộn điểm theo thuật toán RRF với tham số `k = 60`.
+- `TROLY-F1-04`: **Asynchronous Document Ingestion Worker:**
+  - Quét thư mục chạy ngầm bằng `std::jthread`, trích xuất text, băm SHA256 chống trùng lặp, chia chunk (500 tokens, overlap 50 tokens).
+
+### 🧠 F2: Suy Luận Cục Bộ (Local Inference Engine: llama.cpp Native RAII)
+- `TROLY-F2-01`: **RAII Wrapper cho llama.cpp:**
+  - Quản lý bộ nhớ an toàn với `std::unique_ptr` kèm custom deleters cho `llama_model`, `llama_context`.
+- `TROLY-F2-02`: **Streaming Inference & Abort Token:**
+  - Stream token qua Qt Signal theo cơ chế bất đồng bộ, hỗ trợ `std::stop_token` hủy tác vụ ngay lập tức khi bấm Stop trên UI.
+- `TROLY-F2-03`: **GBNF Grammar Constraints:**
+  - Ép cấu trúc đầu ra của mô hình tuân thủ tuyệt đối JSON Schema định nghĩa cho các công cụ (Tool Calling).
+
+### ⚡ F3: Điều Phối Tác Vụ (Action Dispatcher & ReAct Loop)
+- `TROLY-F3-01`: **Linux Subprocess Execution (`QProcess`):**
+  - Điều phối lệnh shell, kiểm tra trạng thái tiến trình, giới hạn timeout và thu thập stdout/stderr.
+- `TROLY-F3-02`: **ReAct Self-Correction Cycle:**
+  - Vòng lặp Suy luận ➔ Hành động ➔ Quan sát (Reasoning ➔ Acting ➔ Observation). Nếu lệnh shell trả về mã lỗi, nạp lại context để AI tự động phân tích và đưa ra câu lệnh sửa lỗi.
+- `TROLY-F3-03`: **NixOS System Integration:**
+  - Tích hợp các lệnh đặc thù: `nixos-rebuild dry-build`, `bam dry`, `nix search`, đọc cấu hình flake `/etc/nixos`.
+
+### 🛡️ F4: Cơ Chế An Toàn (Safety Guard & Audit Trail)
+- `TROLY-F4-01`: **Risk Analyzer Engine:**
+  - Phân tích rủi ro lệnh qua blacklist/regex: lệnh an toàn (đọc tệp, `ls`, `cat`) ➔ tự động duyệt; lệnh nhạy cảm (`rm`, `sudo`, `systemctl`, `nixos-rebuild`) ➔ xếp loại `HIGH_RISK`.
+- `TROLY-F4-02`: **Human-in-the-Loop Confirmation Dialog:**
+  - Modal QML hiển thị cảnh báo đỏ, hiển thị chính xác câu lệnh sắp chạy và yêu cầu người dùng bấm "Chấp thuận" hoặc "Từ chối".
+- `TROLY-F4-03`: **SQLite Audit Log:**
+  - Lưu trữ toàn bộ lịch sử thực thi vào bảng `action_logs` để truy vết bảo mật.
+
+### 🔀 F6: Bộ Định Tuyến Động (Dynamic MoE Router)
+- `TROLY-F6-01`: **Ultra-fast Intent Classifier (<30ms):**
+  - Phân loại ngữ cảnh dựa trên embedding câu hỏi hoặc rule heuristic để xác định domain: Lập trình (Code), Hội thoại (General Text), Thị giác máy tính (Vision/Image).
+- `TROLY-F6-02`: **Zero-Latency Model Hot-Swap:**
+  - Giải phóng VRAM model cũ và nạp model mới trên worker thread mà không gây đứng hình (freeze) luồng đồ họa Qt Quick.
+- `TROLY-F6-03`: **VRAM Budget Supervisor:**
+  - Luôn giám sát và đảm bảo tổng mức chiếm dụng VRAM không vượt quá 6GB trên máy người dùng.
+
+### 📊 F8: Tiện Ích Mở Rộng Hệ Thống (System Inspector & WakaTracker)
+- `TROLY-F8-01`: **System Inspector (Health Diagnostic):**
+  - Đọc và phân tích `journalctl -p err..emerg`, `systemctl --failed`, kiểm tra dung lượng ổ đĩa `/nix/store` và RAM.
+- `TROLY-F8-02`: **WakaTracker Productivity Sync:**
+  - Đọc nhịp độ lập trình từ WakaTime API / local log, hiển thị biểu đồ thời gian tập trung và năng suất trong ngày.
+- `TROLY-F8-03`: **User Profile & Adaptive Persona:**
+  - Lưu trữ sở thích cá nhân, phong cách xưng hô của cún cưng và khảo sát trình độ lập trình để AI tinh chỉnh câu trả lời phù hợp.
+
+### 🧬 F7: Trung Tâm Tự Tiến Hóa (Self-Evolving Hub - Air-gapped)
+- `TROLY-F7-01`: **Dataset Golden Harvesting:**
+  - Bộ lọc tự động trích xuất các phiên chat có kết quả thực thi hoàn hảo (`quality_score >= 1.0`) lưu vào `training_datasets`.
+- `TROLY-F7-02`: **Automated LoRA Fine-Tuning Pipeline:**
+  - Kịch bản xuất dữ liệu ChatML ➔ gọi `llama-finetune` tối ưu trọng số LoRA trên card đồ họa rời khi máy tính rảnh rỗi ban đêm.
+- `TROLY-F7-03`: **Adapter Merge & Quantization:**
+  - Tự động dùng `llama-export-lora` ghép LoRA vào base model Qwen2.5 và nén GGUF Q4_K_M, ghi nhận phiên bản mới vào `models_registry`.
+- `TROLY-F7-04`: **Qt Quick 3D Stylized Mesh POC:**
+  - Thử nghiệm nạp mô hình 3D glTF của cún cưng với Toon Shading và Spring Bone Rigging thay thế dần SVG 2D.

@@ -126,10 +126,14 @@
             nativeBuildInputs = with pkgs; [
               gdb
               clang-tools
+              qt6.qtdeclarative
             ];
             shellHook = ''
               export QT_QPA_PLATFORM="wayland;xcb"
               export CMAKE_BUILD_PARALLEL_LEVEL="$(nproc)"
+              export QML2_IMPORT_PATH="${pkgs.qt6.qtdeclarative}/lib/qt-6/qml"
+              export QT_PLUGIN_PATH="${pkgs.qt6.qtsvg}/lib/qt-6/plugins:$QT_PLUGIN_PATH"
+              export SQLITE_VEC_PATH="${pkgs.sqlite-vec}/lib/vec0.so"
               echo "🐾 Troly C++20/Qt6 DevShell Active (Zero-Drift inputsFrom)"
             '';
           };

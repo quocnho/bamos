@@ -1,6 +1,7 @@
 #include "SqliteRAGRepository.hpp"
 #include <iostream>
 #include <sstream>
+#include <cstdlib>
 
 namespace troly::infrastructure {
 
@@ -18,15 +19,27 @@ bool SqliteRAGRepository::loadVecExtension() {
     if (!m_db) return false;
     sqlite3_enable_load_extension(m_db, 1);
     char* errMsg = nullptr;
-    // Cố gắng tải vec0 từ standard paths hoặc nix store
-    int rc = sqlite3_load_extension(m_db, "vec0", "sqlite3_vec_init", &errMsg);
+    
+    // Ưu tiên đường dẫn từ biến môi trường SQLITE_VEC_PATH (NixOS)
+    const char* envPath = std::getenv("SQLITE_VEC_PATH");
+    const char* vecLibPath = (envPath && envPath[0] != '\0') ? envPath : "vec0";
+
+    int rc = sqlite3_load_extension(m_db, vecLibPath, "sqlite3_vec_init", &errMsg);
     if (rc != SQLITE_OK) {
-        // Dự phòng đường dẫn trên NixOS nếu có
-        std::cerr << "[SqliteRAG] Warning: Could not load vec0 extension directly (" 
+        // Nếu load bằng đường dẫn cụ thể thất bại, thử lại với "vec0" mặc định
+        if (envPath) {
+            if (errMsg) { sqlite3_free(errMsg); errMsg = nullptr; }
+            rc = sqlite3_load_extension(m_db, "vec0", "sqlite3_vec_init", &errMsg);
+        }
+    }
+
+    if (rc != SQLITE_OK) {
+        std::cerr << "[SqliteRAG] Warning: Could not load vec0 extension (" 
                   << (errMsg ? errMsg : "unknown") << "). Falling back to FTS5.\n";
         if (errMsg) sqlite3_free(errMsg);
         return false;
     }
+    std::cout << "[SqliteRAG] Successfully loaded sqlite-vec extension from: " << vecLibPath << "\n";
     return true;
 }
 

@@ -1,5 +1,5 @@
 # SPRINT REVIEW: Sprint 01 - Core Architecture & Setup
-**Thời gian:** 28/09/2026 | **Người chủ trì:** @PlanAgent | **Trạng thái:** 🟡 DRAFT / IN_PROGRESS
+**Thời gian:** 14/09/2026 - 28/09/2026 | **Người chủ trì:** @PlanAgent | **Trạng thái:** 🟢 COMPLETED | **Phiên bản nghiệm thu:** `v01.01.00`
 
 > 🔄 **Kế thừa & Nâng cấp từ `/etc/nixos/pkgs/assistant/`:** Dự án được tái cấu trúc từ `pkgs/assistant`. Đã nghiên cứu toàn diện hệ thống mã nguồn cũ, xác định các module cần tái hiện trong C++/Qt6: Menu tùy chọn nhanh, các cửa sổ thiết lập, EyeLeo bảo vệ mắt, Bone Context bar.
 
@@ -28,12 +28,10 @@ Tổng hợp các hạng mục hoàn thành dựa trên Definition of Done (DoD)
 
 ---
 
-## 3. Các Hạng Mục Chuẩn Bị Cho Sprint Kế Tiếp (Next Steps - Sprint 02)
-- Tích hợp gọi HTTP API SSE trực tiếp tới `llama-server` (http://127.0.0.1:9090) trong `LlamaInferenceEngine.cpp`.
-- Nạp thư viện vector extension `libvec0.so` vào `SqliteRAGRepository.cpp`.
-- Tích hợp kiểm thử cập nhật hệ thống với lệnh `bam switch` khi đưa troly vào profile desktop người dùng.
+## 3. Chuyển Giao Sang Sprint 02 (`v01.02.00`)
+Sprint 01 đã hoàn thành xuất sắc toàn bộ mục tiêu nền tảng. Chuyển giao toàn bộ các hạng mục F5 và EyeLeo sang Sprint 02 để tập trung hoàn thiện trải nghiệm Desktop Mascot tương tác trực quan người dùng.
 
 ---
 
 ## 4. Ý Kiến Đóng Góp Từ Stakeholder / User
-- Hệ thống cần đảm bảo tính air-gapped 100% cục bộ, không gửi bất kỳ dữ liệu telemetry nào ra ngoài.
+- Người dùng đã nghiệm thu và đồng thuận 100% với bức tranh sản phẩm hoàn chỉnh và Master Roadmap phân kỳ theo Phương án B.

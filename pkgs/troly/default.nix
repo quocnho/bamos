@@ -30,6 +30,7 @@ stdenv.mkDerivation rec {
   buildInputs = [
     qt6.qtbase
     qt6.qtdeclarative
+    qt6.qtsvg
     sqlite
     sqlite-vec
   ];

@@ -49,5 +49,8 @@ Khi người dùng đưa ra một yêu cầu mới, Agent **bắt buộc tuân t
 - **Tái định hình & xác nhận yêu cầu (Reframe & Scope):** Diễn đạt lại yêu cầu bằng ngôn ngữ kỹ thuật chuẩn xác, nêu rõ phạm vi tác động.
 - **Phân tích cấu trúc:** Bóc tách rõ **Ý chính** (Core Requirements), **Ý phụ / Ràng buộc** (Sub-requirements / Constraints), và **Ý liên quan** (Related Context / Dependencies).
 - **Kế hoạch thực hiện:** Vạch rõ các bước hành động cụ thể (Khảo sát -> Triển khai -> Kiểm thử -> Bàn giao/Commit Why-What-Test).
-- **Làm rõ / Xác nhận:** Nêu câu hỏi nếu có điểm mơ hồ hoặc xác nhận trước khi can thiệp vào mã nguồn/hệ thống.
+- **Hỏi xác nhận ý định & lựa chọn phương án (Stop & Wait):** 
+  - Bắt buộc hỏi lại người dùng để xác nhận đã hiểu đúng ý định, đúng vấn đề cần xử lý chưa trước khi làm.
+  - Nếu có nhiều phương án tiếp cận: phân tích trade-off (ưu/nhược điểm), đưa ra khuyến nghị và chờ người dùng xác nhận lựa chọn phương án trước khi tiến hành thực hiện.
+
 
