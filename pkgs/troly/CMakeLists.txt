@@ -22,6 +22,7 @@ set(SOURCES
     src/presentation/EyeLeoViewModel.cpp
     src/presentation/RAGViewModel.cpp
     src/presentation/LLMViewModel.cpp
+    src/presentation/ActionViewModel.cpp
 )
 
 set(HEADERS
@@ -45,11 +46,13 @@ set(HEADERS
     src/infrastructure/DocumentIngestionWorker.hpp
     src/infrastructure/FastHeuristicIntentClassifier.hpp
     src/infrastructure/DynamicMoERouter.hpp
+    src/infrastructure/DefaultSafetyGuard.hpp
     src/presentation/ChatViewModel.hpp
     src/presentation/SystemMonitorViewModel.hpp
     src/presentation/EyeLeoViewModel.hpp
     src/presentation/RAGViewModel.hpp
     src/presentation/LLMViewModel.hpp
+    src/presentation/ActionViewModel.hpp
 )
 
 qt_add_executable(troly
@@ -99,5 +102,16 @@ target_link_libraries(test_inference PRIVATE
     Threads::Threads
 )
 add_test(NAME InferenceTests COMMAND test_inference)
+
+add_executable(test_action
+    tests/test_action.cpp
+    src/infrastructure/LinuxActionDispatcher.cpp
+)
+target_include_directories(test_action PRIVATE src)
+target_link_libraries(test_action PRIVATE
+    Qt6::Core
+    Threads::Threads
+)
+add_test(NAME ActionTests COMMAND test_action)
 
 install(TARGETS troly DESTINATION bin)

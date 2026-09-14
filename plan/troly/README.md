@@ -27,7 +27,11 @@ plan/troly/
 │   │   ├── PLAN.md             # Kế hoạch & Bảng công việc Sprint 04
 │   │   ├── REVIEW.md           # Đánh giá kết quả bàn giao Sprint 04
 │   │   └── RETRO.md            # Bài học cải tiến quy trình Sprint 04
-│   └── ...                     # Các Sprint tiếp theo (sprint-05 ➔ sprint-07)
+│   ├── sprint-05/              # Sprint 05: Action Dispatcher & Safety Guard (🟢 COMPLETED - v01.05.00)
+│   │   ├── PLAN.md             # Kế hoạch & Bảng công việc Sprint 05
+│   │   ├── REVIEW.md           # Đánh giá kết quả bàn giao Sprint 05
+│   │   └── RETRO.md            # Bài học cải tiến quy trình Sprint 05
+│   └── ...                     # Các Sprint tiếp theo (sprint-06 ➔ sprint-07)
 └── scrum/                      # Hoạt động phối hợp liên Agent
     └── DAILY_SCRUM.md          # Nhật ký làm việc hàng ngày (Standup Log)
 ```
@@ -43,7 +47,8 @@ plan/troly/
 | **Sprint 02 (Mascot & EyeLeo)** | [sprint-02/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-02/PLAN.md) | Mascot Peek Tail & EyeLeo Native C++ (`v01.02.00`) | 🟢 COMPLETED |
 | **Sprint 03 (Vector RAG)** | [sprint-03/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-03/PLAN.md) | Động cơ tri thức SQLite WAL & sqlite-vec RRF (`v01.03.00`) | 🟢 COMPLETED |
 | **Sprint 04 (MoE & Inference)**| [sprint-04/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-04/PLAN.md) | Suy luận SSE, Intent Classifier <30ms, MoE Router (`v01.04.00`) | 🟢 COMPLETED |
-| **Sprint 04 Review** | [sprint-04/REVIEW.md](file:///etc/nixos/plan/troly/sprints/sprint-04/REVIEW.md) | Nghiệm thu 7/7 Tasks hoàn tất 100% CTest & Nix build | 🟢 PASSED |
+| **Sprint 05 (Action & Safety)**| [sprint-05/PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-05/PLAN.md) | Dispatcher, Safety Guard 4 cấp độ, Human-in-the-Loop (`v01.05.00`) | 🟢 COMPLETED |
+| **Sprint 05 Review** | [sprint-05/REVIEW.md](file:///etc/nixos/plan/troly/sprints/sprint-05/REVIEW.md) | Nghiệm thu 7/7 Tasks hoàn tất 100% CTest & Nix build | 🟢 PASSED |
 | **Daily Scrum** | [DAILY_SCRUM.md](file:///etc/nixos/plan/troly/scrum/DAILY_SCRUM.md) | Nhật ký hàng ngày của các AI Agent | 🟢 ACTIVE |
 
 ---

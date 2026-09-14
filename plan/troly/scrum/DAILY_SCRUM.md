@@ -112,4 +112,36 @@ Tài liệu ghi nhận nhịp độ làm việc, tiến độ hàng ngày và th
   - Đồng bộ trạng thái cún cưng phấn khích/suy nghĩ (`excited` / `playful_jump`) tương thích với luồng stream tokens từ Dynamic MoE Router.
 - **Vướng mắc (Blockers):** Không có.
 
+---
+
+## [2026-09-14] (Sprint 05: Hoàn Thành Nghiệm Thu Action Dispatcher & Safety Guard - `v01.05.00`)
+
+### 📌 @PlanAgent (Project Manager & Documentation)
+- **Hôm nay:**
+  - Điều phối và hoàn tất nghiệm thu 7/7 user stories Sprint 05 (`TROLY-501` đến `TROLY-507`).
+  - Cập nhật tài liệu: [PLAN.md](file:///etc/nixos/plan/troly/sprints/sprint-05/PLAN.md), [REVIEW.md](file:///etc/nixos/plan/troly/sprints/sprint-05/REVIEW.md), [RETRO.md](file:///etc/nixos/plan/troly/sprints/sprint-05/RETRO.md) và [README.md](file:///etc/nixos/plan/troly/README.md).
+  - Chuẩn bị sẵn sàng cấu trúc cho Sprint 06 (System Inspector, WakaTracker & Adaptive Persona).
+- **Vướng mắc (Blockers):** Không có.
+
+### 🔬 @RdAgent (R&D Specialist)
+- **Hôm nay:**
+  - Thiết kế tập luật Regex Blacklist & Caution cho `DefaultSafetyGuard`, phân loại chính xác 4 cấp độ: `Safe`, `Caution`, `Dangerous`, `Blocked`.
+  - Nghiên cứu cơ chế bắt luồng stdout/stderr theo chunk thời gian thực để cấp dữ liệu cho ReAct cycle.
+- **Vướng mắc (Blockers):** Không có.
+
+### 💻 @DevOptAgent (Execution & CI/CD)
+- **Hôm nay:**
+  - Hiện thực `DefaultSafetyGuard.hpp` kiểm duyệt nghiêm ngặt các lệnh nguy hiểm (`rm -rf /`, `mkfs`, `dd`, `fork bomb`).
+  - Xây dựng `ActionViewModel.hpp/.cpp` quản lý vòng đời lệnh shell và kết nối trực tiếp với modal cảnh báo đỏ `SafetyConfirmationModal.qml`.
+  - Nâng cấp `LinuxActionDispatcher` C++20 điều phối lệnh ngầm và hủy luồng qua `std::stop_token`.
+  - Viết bộ kiểm thử tự động `tests/test_action.cpp`, đạt 100% CTest (4/4 test suites passed: `EyeLeoTests`, `RAGTests`, `InferenceTests`, `ActionTests`).
+  - Đóng gói derivation thành công qua `nix-build default.nix` ra `/nix/store/5vw3ibgsa0pji43icxkw430zh384lr4m-troly-0.1.0` và kiểm tra `nix build .#troly --dry-run` hoàn tất không lỗi.
+- **Vướng mắc (Blockers):** Không có.
+
+### 🎨 @AnimAgent (Lead 3D & Animation Director)
+- **Hôm nay:**
+  - Thiết kế giao diện modal xác nhận `SafetyConfirmationModal.qml` cảnh báo đỏ nổi bật, trực quan cho người dùng.
+- **Vướng mắc (Blockers):** Không có.
+
+
 

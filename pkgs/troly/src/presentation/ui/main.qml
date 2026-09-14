@@ -536,6 +536,10 @@ ApplicationWindow {
         WakaTrackerModal { id: wakaModal }
         ProfileModal { id: profileModal }
         AboutModal { id: aboutModal }
+        SafetyConfirmationModal {
+            id: safetyConfirmationModal
+            visible: typeof actionVM !== "undefined" && actionVM.confirmationRequired
+        }
 
         // Lớp phủ thông báo & bài tập mắt EyeLeo
         EyeLeoBreakOverlay { id: eyeleoOverlay }

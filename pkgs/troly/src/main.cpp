@@ -17,7 +17,9 @@
 
 #include "infrastructure/DynamicMoERouter.hpp"
 #include "infrastructure/FastHeuristicIntentClassifier.hpp"
+#include "infrastructure/DefaultSafetyGuard.hpp"
 #include "presentation/LLMViewModel.hpp"
+#include "presentation/ActionViewModel.hpp"
 
 int main(int argc, char *argv[]) {
     // Tối ưu hỗ trợ Wayland / XWayland
@@ -50,11 +52,14 @@ int main(int argc, char *argv[]) {
     auto eyeLeoService = std::make_shared<troly::infrastructure::EyeLeoService>();
     eyeLeoService->start();
 
+    auto safetyGuard = std::make_shared<troly::infrastructure::DefaultSafetyGuard>();
+
     auto chatVM = std::make_unique<troly::presentation::ChatViewModel>(inferenceEngine, ragRepo, moeRouter);
     auto systemMonitorVM = std::make_unique<troly::presentation::SystemMonitorViewModel>();
     auto eyeLeoVM = std::make_unique<troly::presentation::EyeLeoViewModel>(eyeLeoService);
     auto ragVM = std::make_unique<troly::presentation::RAGViewModel>(ragRepo);
     auto llmVM = std::make_unique<troly::presentation::LLMViewModel>(moeRouter);
+    auto actionVM = std::make_unique<troly::presentation::ActionViewModel>(actionDispatcher, safetyGuard);
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("chatVM", chatVM.get());
@@ -62,6 +67,7 @@ int main(int argc, char *argv[]) {
     engine.rootContext()->setContextProperty("eyeLeoVM", eyeLeoVM.get());
     engine.rootContext()->setContextProperty("ragVM", ragVM.get());
     engine.rootContext()->setContextProperty("llmVM", llmVM.get());
+    engine.rootContext()->setContextProperty("actionVM", actionVM.get());
 
     const QUrl url(QStringLiteral("qrc:/ui/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
