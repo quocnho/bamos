@@ -1,0 +1,85 @@
+# ==============================================================================
+# Antigravity Workspace Ignore Patterns (.antigravityignore)
+# Workspace Root: /etc/nixos
+# Mục tiêu: Chặn index các file nhị phân, build artifact, mô hình và dữ liệu rác
+#           nhằm bảo vệ Context Window và tiết kiệm tối đa AI Tokens.
+# ==============================================================================
+
+# --- NixOS & Flake Artifacts ---
+/result
+/result*
+.direnv/
+.devenv/
+
+# --- C++ / Qt6 / CMake Build Systems (pkgs/troly & tools) ---
+build/
+build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+*.ninja
+*.ninja_log
+.ninja_*
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.mod
+*.qmlc
+*.jsc
+*.moc
+moc_*.cpp
+*.autogen/
+
+# --- Go Build Artifacts (pkgs/assistant) ---
+bin/
+dist/
+vendor/
+
+# --- Rust Build Artifacts (pkgs/bam) ---
+target/
+Cargo.lock
+
+# --- Local AI Models, Weights & Embeddings (GGUF / PyTorch / ONNX) ---
+models/
+*.gguf
+*.bin
+*.pt
+*.pth
+*.safetensors
+*.onnx
+*.weights
+*.engine
+
+# --- SQLite & Local Runtime Databases ---
+data/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# --- Logs, Temporary & Cache Files ---
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+tmp/
+.cache/
+tags
+.DS_Store
+
+# --- IDE & Editor Metadata ---
+.vscode/
+.idea/
+.fleet/
+
+# --- Media & Binary Assets (Tránh quét vào context tìm kiếm text) ---
+assets/wallpapers/
+*.iso
+*.tar.gz
+*.zip
+*.7z
