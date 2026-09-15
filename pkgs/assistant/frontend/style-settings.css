@@ -1341,3 +1341,48 @@ input[type="range"] {
     font-size: 12.5px;
     font-style: italic;
 }
+
+/* ---------------------------------------------------------------------------
+ * Chip hiển thị địa chỉ IP / Tên máy mạng
+ * ------------------------------------------------------------------------- */
+.network-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 11px;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.network-chip:hover {
+    background: #e2e8f0;
+    border-color: #94a3b8;
+}
+
+.network-chip.active {
+    background: #eff6ff;
+    border-color: #3b82f6;
+    color: #1d4ed8;
+    font-weight: 700;
+}
+
+.network-chip .chip-ip {
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-weight: 600;
+}
+
+.network-chip .chip-name {
+    font-size: 10px;
+    color: #64748b;
+}
+
+.network-chip.active .chip-name {
+    color: #2563eb;
+}
+

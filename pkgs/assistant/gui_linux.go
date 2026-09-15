@@ -1044,6 +1044,10 @@ func handleScriptMessage(cMessage *C.char) {
 		go handleGetQuiz()
 	case "submit_quiz":
 		go handleSubmitQuiz(msg.Payload)
+
+	// ---- Quét địa chỉ IP & Tên miền mạng máy tính ----
+	case "get_network_addresses":
+		go handleGetNetworkAddresses()
 	}
 }
 
@@ -1213,6 +1217,68 @@ func StartUI(ai *AIService, startupPanel string) {
 			"bot_name": botName,
 			"model":    modelName,
 			"version":  "1.0.0",
+		})
+	})
+
+	// API quét danh sách địa chỉ IP và tên máy phục vụ sinh mã nhúng Web Widget
+	mux.HandleFunc("/api/system/network-addresses", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		list := make([]NetworkAddressInfo, 0)
+		list = append(list, NetworkAddressInfo{
+			Name: "Localhost (Nội bộ máy)",
+			IP:   "127.0.0.1",
+			Type: "loopback",
+		})
+
+		if host, err := os.Hostname(); err == nil && host != "" {
+			list = append(list, NetworkAddressInfo{
+				Name: "Tên máy (Hostname)",
+				IP:   host,
+				Type: "hostname",
+			})
+			if !strings.Contains(host, ".") {
+				list = append(list, NetworkAddressInfo{
+					Name: "Tên miền mDNS",
+					IP:   host + ".local",
+					Type: "hostname",
+				})
+			}
+		}
+
+		if ifaces, err := net.Interfaces(); err == nil {
+			for _, iface := range ifaces {
+				if (iface.Flags&net.FlagUp) == 0 || (iface.Flags&net.FlagLoopback) != 0 {
+					continue
+				}
+				addrs, err := iface.Addrs()
+				if err != nil {
+					continue
+				}
+				for _, addr := range addrs {
+					var ip net.IP
+					switch v := addr.(type) {
+					case *net.IPNet:
+						ip = v.IP
+					case *net.IPAddr:
+						ip = v.IP
+					}
+					if ip == nil || ip.IsLoopback() {
+						continue
+					}
+					if ip4 := ip.To4(); ip4 != nil {
+						list = append(list, NetworkAddressInfo{
+							Name: fmt.Sprintf("%s (%s)", iface.Name, ip4.String()),
+							IP:   ip4.String(),
+							Type: "lan",
+						})
+					}
+				}
+			}
+		}
+
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"status":    "ok",
+			"addresses": list,
 		})
 	})
 

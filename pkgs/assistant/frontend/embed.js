@@ -12,8 +12,12 @@
     if (window.__BAMOS_ASSISTANT_EMBEDDED__) return;
     window.__BAMOS_ASSISTANT_EMBEDDED__ = true;
 
-    // 1. Xác định base URL của máy chủ Assistant (mặc định http://127.0.0.1:9195)
-    let baseUrl = "http://127.0.0.1:9195";
+    // 1. Xác định base URL của máy chủ Assistant linh hoạt & tương đối:
+    //    - Ưu tiên 1: Cấu hình trực tiếp trên thẻ script qua data-base-url="..."
+    //    - Ưu tiên 2: Biến toàn cục window.__BAMOS_ASSISTANT_BASE_URL__
+    //    - Ưu tiên 3: Tự động trích xuất origin từ chính đường dẫn script src
+    //    - Ưu tiên 4: Cùng origin với trang web (window.location.origin) nếu cùng chạy trên server
+    //    - Fallback: Hostname hiện tại kèm cổng mặc định 9195
     const currentScript = document.currentScript || (function () {
         const scripts = document.getElementsByTagName("script");
         return scripts[scripts.length - 1];
@@ -21,11 +25,19 @@
 
     let customPos = "";
     let customColor = "";
+    let baseUrl = "";
+
+    if (window.__BAMOS_ASSISTANT_BASE_URL__) {
+        baseUrl = String(window.__BAMOS_ASSISTANT_BASE_URL__).replace(/\/+$/, "");
+    }
 
     if (currentScript) {
-        if (currentScript.src) {
+        const attrBase = currentScript.getAttribute("data-base-url");
+        if (attrBase) {
+            baseUrl = String(attrBase).replace(/\/+$/, "");
+        } else if (!baseUrl && currentScript.src) {
             try {
-                const parsed = new URL(currentScript.src);
+                const parsed = new URL(currentScript.src, window.location.href);
                 baseUrl = parsed.origin;
             } catch (e) {
                 // fallback
@@ -33,6 +45,14 @@
         }
         customPos = currentScript.getAttribute("data-position") || "";
         customColor = currentScript.getAttribute("data-color") || "";
+    }
+
+    if (!baseUrl) {
+        if (window.location && window.location.origin && window.location.origin !== "null") {
+            baseUrl = window.location.origin;
+        } else {
+            baseUrl = "http://" + (window.location.hostname || "127.0.0.1") + ":9195";
+        }
     }
 
     // 2. Tạo CSS cách ly cho Widget Host container

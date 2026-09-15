@@ -20,6 +20,7 @@ export function openEmbedSettings() {
     if (native.getSettings) {
         native.getSettings();
     }
+    scanNetworkAddresses();
 }
 
 export function closeEmbedSettings() {
@@ -113,10 +114,75 @@ function updateStudioPreviewAndCode() {
     }
 
     // Sinh mã script nhúng
-    const hostTarget = host === "0.0.0.0" ? window.location.hostname || "127.0.0.1" : host;
+    let hostTarget = host === "0.0.0.0" ? window.location.hostname || "127.0.0.1" : host;
+    if (selectedNetworkHost) {
+        hostTarget = selectedNetworkHost;
+    }
     const scriptSrc = `http://${hostTarget}:${port}/embed.js`;
     const code = `<script src="${scriptSrc}" async defer></script>`;
     els.generatedEmbedCode.textContent = code;
+}
+
+let selectedNetworkHost = "";
+let discoveredAddresses = [];
+
+export function handleNetworkAddressesDiscovered(result) {
+    if (!result || !result.ok) {
+        if (els.networkScanStatus) els.networkScanStatus.textContent = "⚠️ Lỗi quét mạng";
+        return;
+    }
+    discoveredAddresses = result.addresses || [];
+    renderNetworkAddressChips();
+    if (els.networkScanStatus) {
+        els.networkScanStatus.textContent = `✓ Tìm thấy ${discoveredAddresses.length} địa chỉ`;
+        setTimeout(() => {
+            if (els.networkScanStatus) els.networkScanStatus.textContent = "";
+        }, 3000);
+    }
+}
+
+function renderNetworkAddressChips() {
+    if (!els.networkAddressesChips) return;
+    els.networkAddressesChips.innerHTML = "";
+
+    discoveredAddresses.forEach((item) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "network-chip";
+        if (selectedNetworkHost === item.ip) {
+            btn.classList.add("active");
+        }
+        btn.innerHTML = `
+            <span class="chip-type">${item.type === "lan" ? "📶" : item.type === "hostname" ? "🏷️" : "💻"}</span>
+            <span class="chip-ip">${item.ip}</span>
+            <span class="chip-name">(${item.name})</span>
+        `;
+        btn.addEventListener("click", () => {
+            selectedNetworkHost = item.ip;
+            // Nếu chọn IP LAN / hostname mà Host đang là 127.0.0.1 thì tự động chuyển host sang 0.0.0.0 để máy khác kết nối được
+            if (item.type !== "loopback" && els.cfgEmbedHost.value === "127.0.0.1") {
+                els.cfgEmbedHost.value = "0.0.0.0";
+            }
+            renderNetworkAddressChips();
+            updateStudioPreviewAndCode();
+        });
+        els.networkAddressesChips.appendChild(btn);
+    });
+}
+
+function scanNetworkAddresses() {
+    if (els.networkScanStatus) els.networkScanStatus.textContent = "Đang quét...";
+    if (native.getNetworkAddresses) {
+        native.getNetworkAddresses();
+    } else {
+        // Fallback gọi fetch HTTP nếu chạy qua web thường
+        fetch("/api/system/network-addresses")
+            .then((r) => r.json())
+            .then((data) => handleNetworkAddressesDiscovered(data))
+            .catch(() => {
+                if (els.networkScanStatus) els.networkScanStatus.textContent = "Không quét được";
+            });
+    }
 }
 
 function saveEmbedConfig() {
@@ -362,5 +428,8 @@ export function initEmbedSettings() {
     }
     if (els.btnSaveDomainItem) {
         els.btnSaveDomainItem.addEventListener("click", saveDomainItem);
+    }
+    if (els.btnScanNetwork) {
+        els.btnScanNetwork.addEventListener("click", scanNetworkAddresses);
     }
 }

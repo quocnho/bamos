@@ -19,15 +19,25 @@
                     <!-- Cột cấu hình -->
                     <div class="embed-studio-form">
                         <div class="setting-item">
-                            <label for="cfg-embed-port">Cổng HTTP Server:</label>
-                            <input type="text" id="cfg-embed-port" class="text-input" placeholder="9195" value="9195" />
+                            <label for="cfg-embed-port">Cổng HTTP Server (Port):</label>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <input type="text" id="cfg-embed-port" class="text-input" placeholder="9195" value="9195" style="flex: 1;" />
+                                <button type="button" id="btn-scan-network" class="modal-btn secondary" style="padding: 7px 12px; font-size: 11.5px; white-space: nowrap;" title="Quét IP các card mạng và tên máy để chèn nhanh">
+                                    🔍 Quét IP / Tên miền
+                                </button>
+                            </div>
                         </div>
                         <div class="setting-item">
-                            <label for="cfg-embed-host">Địa chỉ Lắng nghe (Binding Host):</label>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                <label for="cfg-embed-host" style="margin-bottom: 0;">Địa chỉ Lắng nghe (Binding Host):</label>
+                                <span id="network-scan-status" style="font-size: 11px; color: #64748b;"></span>
+                            </div>
                             <select id="cfg-embed-host" class="text-input">
                                 <option value="127.0.0.1">127.0.0.1 (Nội bộ máy tính - An toàn nhất)</option>
                                 <option value="0.0.0.0">0.0.0.0 (Mở toàn mạng LAN / Mạng nội bộ)</option>
                             </select>
+                            <!-- Danh sách chip gợi ý địa chỉ IP / Tên máy quét được -->
+                            <div id="network-addresses-chips" style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px;"></div>
                         </div>
                         <div class="setting-item">
                             <label for="cfg-embed-position">Vị trí nút nổi trên Website:</label>

@@ -14,6 +14,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -686,3 +687,76 @@ func percentOf(part, total int64) int {
 	}
 	return int(part * 100 / total)
 }
+
+// ---------------------------------------------------------------------------
+// Quét địa chỉ IP & Tên miền mạng máy tính
+// ---------------------------------------------------------------------------
+
+type NetworkAddressInfo struct {
+	Name string `json:"name"`
+	IP   string `json:"ip"`
+	Type string `json:"type"` // "loopback", "lan", "hostname"
+}
+
+func handleGetNetworkAddresses() {
+	list := make([]NetworkAddressInfo, 0)
+	list = append(list, NetworkAddressInfo{
+		Name: "Localhost (Nội bộ máy)",
+		IP:   "127.0.0.1",
+		Type: "loopback",
+	})
+
+	if host, err := os.Hostname(); err == nil && host != "" {
+		list = append(list, NetworkAddressInfo{
+			Name: "Tên máy (Hostname)",
+			IP:   host,
+			Type: "hostname",
+		})
+		if !strings.Contains(host, ".") {
+			list = append(list, NetworkAddressInfo{
+				Name: "Tên miền mDNS",
+				IP:   host + ".local",
+				Type: "hostname",
+			})
+		}
+	}
+
+	if ifaces, err := net.Interfaces(); err == nil {
+		for _, iface := range ifaces {
+			// Bỏ qua interface tắt hoặc loopback
+			if (iface.Flags&net.FlagUp) == 0 || (iface.Flags&net.FlagLoopback) != 0 {
+				continue
+			}
+			addrs, err := iface.Addrs()
+			if err != nil {
+				continue
+			}
+			for _, addr := range addrs {
+				var ip net.IP
+				switch v := addr.(type) {
+				case *net.IPNet:
+					ip = v.IP
+				case *net.IPAddr:
+					ip = v.IP
+				}
+				// Ưu tiên IPv4 và không phải loopback
+				if ip == nil || ip.IsLoopback() {
+					continue
+				}
+				if ip4 := ip.To4(); ip4 != nil {
+					list = append(list, NetworkAddressInfo{
+						Name: fmt.Sprintf("%s (%s)", iface.Name, ip4.String()),
+						IP:   ip4.String(),
+						Type: "lan",
+					})
+				}
+			}
+		}
+	}
+
+	pushJSON("onNetworkAddressesDiscovered", map[string]any{
+		"ok":        true,
+		"addresses": list,
+	})
+}
+

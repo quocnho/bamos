@@ -84,4 +84,7 @@ export const native = {
     updateProfile: (profile) => call("updateProfile", profile),
     getQuiz: () => call("getQuiz"),
     submitQuiz: (answers) => call("submitQuiz", answers),
+
+    // Quét địa chỉ IP & Tên miền mạng máy tính
+    getNetworkAddresses: () => call("getNetworkAddresses"),
 };

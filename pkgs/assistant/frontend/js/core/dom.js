@@ -206,7 +206,10 @@ export function initDOM() {
     els.panelEmbedStudio = $("panel-embed-studio");
     els.panelEmbedWhitelist = $("panel-embed-whitelist");
     els.cfgEmbedPort = $("cfg-embed-port");
+    els.btnScanNetwork = $("btn-scan-network");
     els.cfgEmbedHost = $("cfg-embed-host");
+    els.networkAddressesChips = $("network-addresses-chips");
+    els.networkScanStatus = $("network-scan-status");
     els.cfgEmbedPosition = $("cfg-embed-position");
     els.cfgEmbedColor = $("cfg-embed-color");
     els.cfgEmbedTitle = $("cfg-embed-title");

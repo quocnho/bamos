@@ -83,6 +83,7 @@ import {
     initEmbedSettings,
     handleSettingsLoaded as embedSettingsLoaded,
     handleSettingsSaved as embedSettingsSaved,
+    handleNetworkAddressesDiscovered,
 } from "./features/settings/embed-settings.js";
 
 // Callback do Go backend gọi trực tiếp trên window.
@@ -137,6 +138,9 @@ function bindNativeCallbacks() {
     window.onProfileLoaded = handleProfileLoaded;
     window.onQuizQuestions = handleQuizQuestions;
     window.onQuizSubmitted = handleQuizSubmitted;
+
+    // Quét địa chỉ IP / Tên máy mạng
+    window.onNetworkAddressesDiscovered = handleNetworkAddressesDiscovered;
 }
 
 /**
