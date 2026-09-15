@@ -1,0 +1,107 @@
+<!-- ===== Modal Thiết Lập LLM ===== -->
+<div id="llm-settings-modal" class="modal-backdrop hidden">
+    <div class="modal-card settings-modal">
+        <div class="modal-header">
+            <div class="modal-title">📓 Thiết Lập LLM</div>
+            <button id="btn-close-llm-settings" class="icon-btn close-btn">×</button>
+        </div>
+        <div class="modal-body settings-form">
+            <div class="panel-note">
+                <span class="note-icon">💡</span>
+                <div>
+                    Chọn nơi xử lý câu trả lời: <b>cục bộ</b> (riêng tư, không cần Internet) hoặc <b>đám mây</b> (nhanh, cần API key).
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <label for="set-llm-provider">Nhà cung cấp:</label>
+                <select id="set-llm-provider">
+                    <option value="local">Local — llama-server (offline)</option>
+                    <option value="deepseek">DeepSeek API</option>
+                    <option value="openai">OpenAI API</option>
+                    <option value="gemini">Google Gemini</option>
+                </select>
+            </div>
+
+            <div class="setting-item cloud-key hidden" id="llm-key-deepseek">
+                <label for="set-deepseek-key">DeepSeek API key:</label>
+                <input type="password" id="set-deepseek-key" class="text-input" placeholder="sk-…" autocomplete="off" />
+            </div>
+            <div class="setting-item cloud-key hidden" id="llm-key-openai">
+                <label for="set-openai-key">OpenAI API key:</label>
+                <input type="password" id="set-openai-key" class="text-input" placeholder="sk-…" autocomplete="off" />
+            </div>
+            <div class="setting-item cloud-key hidden" id="llm-key-gemini">
+                <label for="set-gemini-key">Google Gemini API key:</label>
+                <input type="password" id="set-gemini-key" class="text-input" placeholder="AIza…" autocomplete="off" />
+            </div>
+
+            <div class="setting-section" id="llm-local-section">
+                <div class="section-title">🗂️ Model cục bộ (GGUF)</div>
+                <div class="model-toolbar">
+                    <input type="text" id="set-model-dir" class="text-input" readonly />
+                    <button id="btn-llm-refresh-models" class="modal-btn ghost">🔄 Làm mới</button>
+                </div>
+                <div id="llm-model-list" class="model-list"></div>
+                <div class="model-toolbar">
+                    <input type="text" id="set-model-url" class="text-input" placeholder="Dán URL file .gguf để tải về…" />
+                    <button id="btn-llm-download" class="modal-btn ghost">⬇️ Tải</button>
+                </div>
+                <div id="llm-download-progress" class="settings-status"></div>
+            </div>
+
+            <div class="setting-item">
+                <label for="set-temperature">
+                    Độ sáng tạo (temperature):
+                    <b id="set-temp-value">0.7</b>
+                </label>
+                <input type="range" id="set-temperature" min="0" max="1.5" step="0.1" value="0.7" />
+            </div>
+
+            <div class="setting-item">
+                <label for="set-context-size">Kích thước ngữ cảnh (tokens):</label>
+                <select id="set-context-size">
+                    <option value="2048">2048</option>
+                    <option value="4096" selected>4096</option>
+                    <option value="8192">8192</option>
+                    <option value="16384">16384</option>
+                </select>
+            </div>
+
+            <div class="setting-item">
+                <label for="set-gpu-layers">Số layer offload GPU (-ngl):</label>
+                <input type="number" id="set-gpu-layers" class="text-input" min="0" max="999" value="99" />
+            </div>
+
+            <div class="tips-block">
+                <div class="tips-title">✨ Gợi ý thiết lập</div>
+                <ul class="tips-list">
+                    <li>Máy <b>8GB RAM</b>: dùng Qwen2.5-1.5B (Q4) — nhẹ và tiếng Việt tốt.</li>
+                    <li>Có GPU NVIDIA: đặt <b>-ngl = 99</b> để đẩy toàn bộ layer lên GPU; không có GPU thì để <b>0</b>.</li>
+                    <li><b>Temperature 0.7</b> cân bằng; giảm về 0.3–0.5 khi cần câu trả lời chính xác, ít sáng tạo.</li>
+                    <li><b>Context 4096</b> đủ cho hội thoại thường; tăng lên nếu bạn dán tài liệu dài.</li>
+                    <li>Đám mây (DeepSeek / OpenAI / Gemini) không cần tải model nhưng cần API key và Internet.</li>
+                </ul>
+            </div>
+
+            <div class="links-row">
+                <button class="link-btn" data-url="https://huggingface.co/models?search=gguf">📥 Tải model GGUF</button>
+                <button class="link-btn" data-url="https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF">🤖 Qwen2.5-1.5B-Instruct</button>
+                <button class="link-btn" data-url="https://github.com/ggml-org/llama.cpp">🦙 llama.cpp</button>
+                <button class="link-btn" data-url="https://platform.deepseek.com/">🔑 API key DeepSeek</button>
+                <button class="link-btn" data-url="https://platform.openai.com/api-keys">🔑 API key OpenAI</button>
+                <button class="link-btn" data-url="https://aistudio.google.com/app/apikey">🔑 API key Gemini</button>
+            </div>
+
+            <div id="llm-status" class="settings-status"></div>
+
+            <div class="modal-actions-row">
+                <button id="btn-llm-test" class="modal-btn ghost">🔌 Kiểm tra kết nối</button>
+                <button id="btn-llm-restart" class="modal-btn ghost">♻️ Khởi động lại AI</button>
+            </div>
+            <div class="modal-actions-row">
+                <button id="btn-save-llm-settings" class="modal-btn primary">Lưu Cài Đặt</button>
+            </div>
+        </div>
+    </div>
+</div>

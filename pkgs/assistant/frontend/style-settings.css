@@ -1049,3 +1049,295 @@ input[type="range"] {
     font-weight: 800;
     margin-right: 4px;
 }
+
+/* ============================================================================
+ * 9. Embed Studio & Domain Whitelist Styles (Live Helper Chat Style)
+ * ========================================================================== */
+.embed-studio-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: start;
+}
+
+@media (max-width: 600px) {
+    .embed-studio-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.embed-studio-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.embed-studio-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #0f172a;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.preview-header-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mini-preview-stage {
+    position: relative;
+    height: 180px;
+    background: radial-gradient(circle at bottom right, rgba(238, 82, 83, 0.15), rgba(15, 23, 42, 0.95));
+    border-radius: 10px;
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    padding: 12px;
+}
+
+.mini-chat-card {
+    position: absolute;
+    bottom: 50px;
+    right: 12px;
+    width: 170px;
+    background: rgba(30, 41, 59, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+    font-size: 10.5px;
+}
+
+.mini-chat-header {
+    background: #1e293b;
+    padding: 6px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #f8fafc;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mini-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #10b981;
+}
+
+.mini-chat-body {
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mini-msg {
+    padding: 4px 6px;
+    border-radius: 6px;
+    max-width: 85%;
+    line-height: 1.3;
+}
+
+.mini-msg.bot {
+    background: rgba(255, 255, 255, 0.1);
+    color: #cbd5e1;
+    align-self: flex-start;
+}
+
+.mini-msg.user {
+    background: #2563eb;
+    color: white;
+    align-self: flex-end;
+}
+
+.mini-floating-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FF9F43 0%, #EE5253 100%);
+    border: 2px solid #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+/* Code Generator Box */
+.code-generator-box {
+    margin-top: 6px;
+}
+
+.code-gen-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+.btn-copy-code {
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-copy-code:hover {
+    background: #1d4ed8;
+}
+
+.code-gen-pre {
+    background: #090d16;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 10px;
+    overflow-x: auto;
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 11px;
+    color: #38bdf8;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+/* Whitelist Manager Styles */
+.whitelist-toolbar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.whitelist-search-box {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.whitelist-search-box .search-icon {
+    position: absolute;
+    left: 10px;
+    font-size: 13px;
+    color: #94a3b8;
+    pointer-events: none;
+}
+
+.whitelist-search-box input {
+    width: 100%;
+    padding: 7px 10px 7px 32px;
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 12.5px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.whitelist-search-box input:focus {
+    border-color: #2563eb;
+}
+
+.whitelist-sort-box select {
+    padding: 7px 10px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 12px;
+    background: #ffffff;
+    outline: none;
+    cursor: pointer;
+}
+
+.whitelist-table-container {
+    max-height: 240px;
+    overflow-y: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #ffffff;
+}
+
+.whitelist-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    text-align: left;
+}
+
+.whitelist-table th {
+    background: #f8fafc;
+    padding: 8px 10px;
+    font-weight: 700;
+    color: #475569;
+    border-bottom: 1px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.whitelist-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+    vertical-align: middle;
+}
+
+.whitelist-table tr:hover td {
+    background: #f8fafc;
+}
+
+.wl-domain-text {
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.wl-note-text {
+    color: #64748b;
+    font-size: 11px;
+}
+
+.wl-actions-cell {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+}
+
+.btn-wl-action {
+    background: transparent;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 2px 5px;
+    border-radius: 4px;
+    transition: background 0.15s;
+}
+
+.btn-wl-action:hover {
+    background: #e2e8f0;
+}
+
+.whitelist-empty {
+    padding: 30px 10px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 12.5px;
+    font-style: italic;
+}

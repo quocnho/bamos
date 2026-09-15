@@ -1,0 +1,36 @@
+<!-- Modal con: Thêm / Sửa Domain Whitelist Item -->
+<div id="domain-editor-modal" class="modal-backdrop hidden" style="z-index: 10001;">
+    <div class="modal-card" style="max-width: 420px;">
+        <div class="modal-header">
+            <div class="modal-title" id="domain-editor-title">➕ Thêm Domain Mới</div>
+            <button id="btn-close-domain-editor" class="icon-btn close-btn">×</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="edit-domain-id" value="" />
+            <div class="setting-item">
+                <label for="edit-domain-input">Địa chỉ Domain / Origin:</label>
+                <input type="text" id="edit-domain-input" class="text-input" placeholder="Ví dụ: http://localhost:3000 hoặc https://myblog.com" />
+                <small style="color: #64748b; font-size: 11px; margin-top: 4px; display: block;">
+                    Hỗ trợ: protocol đầy đủ (<code>https://tenmien.vn</code>), wildcard (<code>*.dev.local</code>), hoặc <code>*</code> để cho phép tất cả.
+                </small>
+            </div>
+            <div class="setting-item">
+                <label for="edit-domain-note">Ghi chú dự án:</label>
+                <input type="text" id="edit-domain-note" class="text-input" placeholder="Ví dụ: Website bán hàng, Blog cá nhân..." />
+            </div>
+            <div class="setting-item switch-item">
+                <div>
+                    <div class="setting-name">Kích hoạt ngay</div>
+                    <div class="setting-desc">Cho phép domain này kết nối ngay sau khi lưu</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="edit-domain-enabled" checked />
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="modal-actions-row" style="margin-top: 14px;">
+                <button id="btn-save-domain-item" class="modal-btn primary">Xác Nhận Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>

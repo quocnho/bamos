@@ -29,9 +29,6 @@ static AppWidgets g_app;
 // ---------------------------------------------------------------------------
 // Trạng thái cửa sổ (vị trí + ghim trên cùng)
 // ---------------------------------------------------------------------------
-// Chiều cao tối đa của cửa sổ khít. Nội dung dài hơn sẽ CUỘN trong khung chat.
-#define MAX_FIT_HEIGHT 864
-
 static char g_state_path[4096] = {0};
 static gboolean g_keep_above = TRUE;
 static gboolean g_has_saved_position = FALSE;
@@ -232,7 +229,6 @@ static gboolean do_window_fit(gpointer user_data) {
     // và không vượt quá chiều cao tối đa cho phép (phần dư sẽ cuộn trong khung chat).
     GdkRectangle area;
     get_workarea(&area);
-    if (h > MAX_FIT_HEIGHT) h = MAX_FIT_HEIGHT;
     if (h > area.height - 8) h = area.height - 8;
     if (w > area.width - 8) w = area.width - 8;
 
@@ -831,6 +827,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"unsafe"
 )
@@ -1158,6 +1155,37 @@ func StartUI(ai *AIService, startupPanel string) {
 		fmt.Fprintln(w, `{"status":"ok"}`)
 	})
 
+	// CORS middleware bọc handler để các trang web nhúng có thể gọi API kèm kiểm tra Whitelist
+	withCORS := func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			origin := r.Header.Get("Origin")
+			allowed := true
+			if globalAI != nil {
+				allowed = globalAI.cfg.Widget.IsOriginAllowed(origin)
+			}
+
+			if !allowed {
+				http.Error(w, "Origin Not Allowed By Domain Whitelist", http.StatusForbidden)
+				return
+			}
+
+			if origin != "" {
+				w.Header().Set("Access-Control-Allow-Origin", origin)
+			} else {
+				w.Header().Set("Access-Control-Allow-Origin", "*")
+			}
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
+
+			if r.Method == "OPTIONS" {
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+			h.ServeHTTP(w, r)
+		})
+	}
+
 	// API tắt ứng dụng: dừng AI/RAG rồi đóng cửa sổ (tiến trình thoát)
 	mux.HandleFunc("/api/quit", func(w http.ResponseWriter, r *http.Request) {
 		if globalAI != nil {
@@ -1168,19 +1196,91 @@ func StartUI(ai *AIService, startupPanel string) {
 		fmt.Fprintln(w, `{"status":"ok"}`)
 	})
 
+	// API trả về thông tin trợ lý cho Web Widget
+	mux.HandleFunc("/api/info", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		botName := "BamOS Assistant"
+		modelName := "Local SLM"
+		if globalAI != nil {
+			if globalAI.cfg.ModelPath != "" {
+				modelName = filepath.Base(globalAI.cfg.ModelPath)
+			} else if globalAI.cfg.Provider != "" {
+				modelName = globalAI.cfg.Provider
+			}
+		}
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"status":   "ok",
+			"bot_name": botName,
+			"model":    modelName,
+			"version":  "1.0.0",
+		})
+	})
+
+	// API Chat Streaming chuẩn Server-Sent Events (SSE) cho Web Widget
+	mux.HandleFunc("/api/chat/stream", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Chỉ chấp nhận POST", http.StatusMethodNotAllowed)
+			return
+		}
+
+		var req struct {
+			Question string        `json:"question"`
+			UseRAG   bool          `json:"use_rag"`
+			History  []ChatMessage `json:"history"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "JSON không hợp lệ: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		flusher, ok := w.(http.Flusher)
+		if !ok {
+			http.Error(w, "Streaming không được hỗ trợ", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.Header().Set("Cache-Control", "no-cache")
+		w.Header().Set("Connection", "keep-alive")
+
+		ctx := r.Context()
+		if globalAI == nil {
+			fmt.Fprintf(w, "event: error\ndata: %s\n\n", "Dịch vụ AI chưa sẵn sàng")
+			flusher.Flush()
+			return
+		}
+
+		globalAI.AskStream(ctx, req.Question, req.UseRAG, req.History,
+			func(chunk string) {
+				payload, _ := json.Marshal(map[string]string{"chunk": chunk})
+				fmt.Fprintf(w, "data: %s\n\n", string(payload))
+				flusher.Flush()
+			},
+			func() {
+				fmt.Fprintf(w, "event: done\ndata: {}\n\n")
+				flusher.Flush()
+			},
+			func(errStr string) {
+				payload, _ := json.Marshal(map[string]string{"error": errStr})
+				fmt.Fprintf(w, "event: error\ndata: %s\n\n", string(payload))
+				flusher.Flush()
+			},
+		)
+	})
+
 	// Khởi tạo HTTP server nội bộ trên cổng cố định (hoặc random nếu bận)
 	address := "127.0.0.1:" + assistantPort()
 	listener, err := net.Listen("tcp", address)
 	var serverURL string
 	if err == nil {
-		server := &http.Server{Handler: mux}
+		server := &http.Server{Handler: withCORS(mux)}
 		go func() {
 			_ = server.Serve(listener)
 		}()
 		serverURL = "http://" + address
 	} else {
 		// Nếu 9195 bận thì fallback httptest
-		fallbackServer := httptest.NewServer(mux)
+		fallbackServer := httptest.NewServer(withCORS(mux))
 		defer fallbackServer.Close()
 		serverURL = fallbackServer.URL
 	}

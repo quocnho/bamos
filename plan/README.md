@@ -11,7 +11,7 @@ Mọi dự án và package con quan trọng đều được tổ chức kế ho�
 | Gói Phần Mềm | Thư Mục Kế Hoạch | Trọng Tâm Phát Triển | Trạng Thái Sprint Hiện Tại |
 | :--- | :--- | :--- | :--- |
 | **🐶 `troly`** | [plan/troly/README.md](file:///etc/nixos/plan/troly/README.md) | Trợ lý ảo Native Edge AI Desktop (C++20, Qt6, SQLite Vector RAG, Disney Mascot) | 🟡 **Sprint 01: Core Architecture & Setup** |
-| **🎋 `assistant`** | `/etc/nixos/pkgs/assistant/` | Bản tiền nhiệm (Go + WebKitGTK). Đang được di chuyển và kế thừa tính năng sang `troly`. | 🟢 Bảo trì / Chuyển giao |
+| **🎋 `assistant`** | [plan/assistant/README.md](file:///etc/nixos/plan/assistant/README.md) | Desktop AI Copilot & System Inspector (Go 1.22+, GTK3/WebKitGTK, SQLite RAG, RTD3) | 🟡 **Sprint 01: Hardening & Documentation** |
 | **⚡ `bam`** | `/etc/nixos/pkgs/bam/` | Bộ công cụ CLI quản trị hệ thống (`bam switch`, `bam update`, `bam backup`). | 🟢 Hoạt động ổn định |
 
 ---

@@ -1,0 +1,128 @@
+<!-- 4. Modal Bảng Cài Đặt EyeLeo Chuyên Nghiệp -->
+<div id="eyeleo-settings-modal" class="modal-backdrop hidden">
+    <div class="modal-card">
+        <div class="modal-header">
+            <div class="modal-title">⏰ Quản lý nghỉ ngơi (EyeLeo)</div>
+            <button id="btn-close-eyeleo-settings" class="icon-btn close-btn">×</button>
+        </div>
+        <div class="modal-body settings-form">
+            <div class="panel-note">
+                <span class="note-icon">💡</span>
+                <div>
+                    Nhắc bạn nghỉ mắt theo <b>quy tắc 20-20-20</b> và nghỉ dài để vận động — giảm mỏi mắt, khô mắt và đau lưng.
+                </div>
+            </div>
+
+            <div class="setting-item switch-item">
+                <div>
+                    <div class="setting-name">Bật nhắc nhở EyeLeo</div>
+                    <div class="setting-desc">Tự động nhắc nghỉ ngắn và nghỉ dài theo công thái học</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-eyeleo-active" checked />
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="setting-item">
+                <label for="set-short-interval">Chu kỳ Nghỉ Ngắn (Short Break):</label>
+                <div class="setting-row">
+                    <select id="set-short-interval">
+                        <option value="5">Mỗi 5 phút</option>
+                        <option value="10" selected>Mỗi 10 phút (Khuyên dùng)</option>
+                        <option value="15">Mỗi 15 phút</option>
+                        <option value="20">Mỗi 20 phút</option>
+                    </select>
+                    <span class="unit-label">Thời lượng:</span>
+                    <select id="set-short-duration">
+                        <option value="5">5 giây</option>
+                        <option value="8" selected>8 giây</option>
+                        <option value="12">12 giây</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <label for="set-long-interval">Chu kỳ Nghỉ Dài (Long Break):</label>
+                <div class="setting-row">
+                    <select id="set-long-interval">
+                        <option value="30">Mỗi 30 phút</option>
+                        <option value="45">Mỗi 45 phút</option>
+                        <option value="50" selected>Mỗi 50 phút (Khuyên dùng)</option>
+                        <option value="60">Mỗi 60 phút</option>
+                        <option value="90">Mỗi 90 phút</option>
+                    </select>
+                    <span class="unit-label">Thời lượng:</span>
+                    <select id="set-long-duration">
+                        <option value="2">2 phút</option>
+                        <option value="3">3 phút</option>
+                        <option value="5" selected>5 phút</option>
+                        <option value="7">7 phút</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="setting-item switch-item">
+                <div>
+                    <div class="setting-name">Chế độ nghiêm ngặt (Strict Mode)</div>
+                    <div class="setting-desc">Vô hiệu hóa nút Bỏ qua khi nghỉ dài, bắt buộc rời máy tính</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-strict-mode" />
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="setting-item switch-item">
+                <div>
+                    <div class="setting-name">Thông báo trước 30 giây</div>
+                    <div class="setting-desc">Hiện thông báo nhắc lưu code/tài liệu trước đợt nghỉ dài</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-prebreak-notify" checked />
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="setting-item switch-item">
+                <div>
+                    <div class="setting-name">Tự động nhận diện không hoạt động</div>
+                    <div class="setting-desc">Reset bộ đếm nếu rời máy tính quá 3 phút (D-Bus Mutter)</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-auto-idle" checked />
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="setting-item switch-item">
+                <div>
+                    <div class="setting-name">Âm thanh chuông thư giãn (Chime)</div>
+                    <div class="setting-desc">Phát tiếng chuông êm dịu khi đến giờ và khi hết giờ nghỉ</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-sound-enabled" checked />
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="tips-block">
+                <div class="tips-title">✨ Gợi ý thiết lập</div>
+                <ul class="tips-list">
+                    <li><b>Nghỉ ngắn:</b> 20 phút một lần, 20 giây — nhìn ra xa khoảng 6m để mắt điều tiết lại.</li>
+                    <li><b>Nghỉ dài:</b> 50 phút một lần, 5 phút — đứng dậy, uống nước, vươn vai.</li>
+                    <li>Bật <b>“Thông báo trước 30 giây”</b> để kịp lưu công việc và dòng code.</li>
+                    <li>Bật <b>“Chế độ nghiêm ngặt”</b> nếu hay bỏ qua — khi đó không thể tắt nghỉ dài.</li>
+                </ul>
+            </div>
+
+            <div class="links-row">
+                <button class="link-btn" data-url="https://en.wikipedia.org/wiki/Computer_vision_syndrome">👁️ Hội chứng thị giác máy tính</button>
+                <button class="link-btn" data-url="https://nixos.org/manual/nixos/stable/">📘 NixOS Manual</button>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="btn-save-settings" class="modal-btn primary">Lưu Cài Đặt</button>
+        </div>
+    </div>
+</div>

@@ -19,6 +19,7 @@ import { openEyeleoSettings } from "../eyeleo/controller.js";
 import { openSystemInspectModal } from "../system-inspect.js";
 import { openWakaModal } from "../wakatracker-ui.js";
 import { openProfileModal } from "../profile-ui.js";
+import { openEmbedSettings } from "./embed-settings.js";
 
 const PANELS = {
     rag: openRagSettings,
@@ -27,6 +28,7 @@ const PANELS = {
     system: openSystemInspectModal,
     waka: openWakaModal,
     profile: openProfileModal,
+    embed: openEmbedSettings,
     about: () => show(els.aboutModal),
 };
 

@@ -546,6 +546,16 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 		authHeader = "Bearer " + s.cfg.GeminiKey
 	}
 
+	// Nếu sử dụng mô hình local và llama-server đang offline, tự động đánh thức dịch vụ
+	if (s.cfg.Provider == "local" || s.cfg.Provider == "") && s.IsAIOffline() {
+		onChunk("🐶 <i>Em đang khởi động động cơ AI cục bộ (llama-server), Chủ nhân đợi em vài giây nhé...</i>\n\n")
+		_ = s.startAIServer()
+		if !s.waitAIReady(25 * time.Second) {
+			onError(fmt.Sprintf("Không thể kết nối SLM (%s). Hãy thử kiểm tra mô hình hoặc bấm nút Đánh thức AI!", endpoint))
+			return
+		}
+	}
+
 	reqBody, err := json.Marshal(ChatCompletionReq{
 		Model:       modelName,
 		Messages:    messages,
@@ -567,7 +577,7 @@ func (s *AIService) AskStream(ctx context.Context, question string, useRAG bool,
 		req.Header.Set("Authorization", authHeader)
 	}
 
-	client := &http.Client{Timeout: 60 * time.Second}
+	client := &http.Client{Timeout: 90 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
 		onError(fmt.Sprintf("Không thể kết nối SLM (%s). Hãy bấm vào cún để đánh thức AI hoặc chạy `bam ai start`!", endpoint))
@@ -640,9 +650,21 @@ func (s *AIService) IsAIOffline() bool {
 // Cố ý KHÔNG gọi `bam ai start` để tránh hỏi sudo (sẽ treo GUI). RAG là
 // chromem-go nhúng trong tiến trình này (rag.go) nên không cần dịch vụ ngoài.
 func (s *AIService) startAIServer() error {
+	// Dọn các tiến trình bamos-ai-server / llama-server cũ đang treo hoặc defunct
+	_ = exec.Command("pkill", "-9", "-f", "bamos-ai-server").Run()
+	_ = exec.Command("pkill", "-9", "-f", "llama-server").Run()
+	time.Sleep(100 * time.Millisecond)
+
 	server := exec.Command("bamos-ai-server")
 	server.Env = s.aiServerEnv(s.cfg.ModelPath)
-	return server.Start()
+	if err := server.Start(); err != nil {
+		return err
+	}
+	// Thu hồi exit code của tiến trình con trong background để không biến thành Zombie (<defunct>)
+	go func() {
+		_ = server.Wait()
+	}()
+	return nil
 }
 
 // aiServerEnv dựng môi trường cho `bamos-ai-server`.

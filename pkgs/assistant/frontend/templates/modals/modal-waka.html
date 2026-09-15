@@ -1,0 +1,43 @@
+<!-- ===== Modal WakaTracker & Năng Suất ===== -->
+<div id="waka-modal" class="modal-backdrop hidden">
+    <div class="modal-card settings-modal">
+        <div class="modal-header">
+            <div class="modal-title">📊 WakaTracker & Nhịp Sinh Hoạt</div>
+            <button id="btn-close-waka" class="icon-btn close-btn">×</button>
+        </div>
+        <div class="modal-body settings-form">
+            <div class="panel-note">
+                Theo dõi thời gian làm việc, thống kê danh mục ứng dụng và quản lý lịch nhắc việc.
+            </div>
+
+            <!-- Thống kê tổng quan -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                <div style="background: rgba(42, 157, 143, 0.1); border: 1px solid rgba(42, 157, 143, 0.3); border-radius: 10px; padding: 10px; text-align: center;">
+                    <div style="font-size: 11.5px; color: #2a9d8f; font-weight: 700;">HÔM NAY</div>
+                    <div id="waka-today-hours" style="font-size: 20px; font-weight: 800; color: #1e293b;">0.0 giờ</div>
+                </div>
+                <div style="background: rgba(244, 162, 97, 0.12); border: 1px solid rgba(244, 162, 97, 0.3); border-radius: 10px; padding: 10px; text-align: center;">
+                    <div style="font-size: 11.5px; color: #e76f51; font-weight: 700;">7 NGÀY QUA</div>
+                    <div id="waka-7days-hours" style="font-size: 20px; font-weight: 800; color: #1e293b;">0.0 giờ</div>
+                </div>
+            </div>
+
+            <div class="setting-section">
+                <div class="section-title">⏱️ Phân bổ thời gian theo Danh mục</div>
+                <div id="waka-categories-list" style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px;"></div>
+            </div>
+
+            <div class="setting-section">
+                <div class="section-title">📅 Lịch hẹn & Nhắc việc cá nhân</div>
+                <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+                    <input type="text" id="waka-new-reminder-title" class="text-input" placeholder="Nội dung nhắc việc (ví dụ: Họp team, Học NixOS...)" style="flex: 1;" />
+                    <input type="text" id="waka-new-reminder-time" class="text-input" placeholder="15:30" style="width: 70px;" />
+                    <button id="btn-waka-add-reminder" class="modal-btn primary" style="padding: 4px 10px; font-size: 12px;">＋ Thêm</button>
+                </div>
+                <div id="waka-reminders-list" style="display: flex; flex-direction: column; gap: 5px; max-height: 120px; overflow-y: auto;">
+                    <div class="model-empty">Chưa có lời nhắc nào.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

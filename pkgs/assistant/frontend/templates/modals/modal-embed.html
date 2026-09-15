@@ -1,0 +1,155 @@
+<!-- 8. Modal Thiết lập Nhúng Web Widget & Quản lý Danh sách trắng Domain (Live Helper Chat Style) -->
+<div id="embed-settings-modal" class="modal-backdrop hidden">
+    <div class="modal-card modal-card-wide" style="max-width: 680px;">
+        <div class="modal-header">
+            <div class="modal-title">🌐 Nhúng Web Widget & Whitelist Studio</div>
+            <button id="btn-close-embed-settings" class="icon-btn close-btn">×</button>
+        </div>
+
+        <!-- Thanh điều hướng Tab: Studio Thiết Lập vs Danh Sách Trắng -->
+        <div class="modal-tabs">
+            <button class="modal-tab active" id="tab-embed-studio">🎨 Thiết lập Giao diện & Mã Nhúng</button>
+            <button class="modal-tab" id="tab-embed-whitelist">🛡️ Danh Sách Trắng Domain (Whitelist)</button>
+        </div>
+
+        <div class="modal-body">
+            <!-- TAB 1: EMBED STUDIO & LIVE PREVIEW -->
+            <div id="panel-embed-studio">
+                <div class="embed-studio-grid">
+                    <!-- Cột cấu hình -->
+                    <div class="embed-studio-form">
+                        <div class="setting-item">
+                            <label for="cfg-embed-port">Cổng HTTP Server:</label>
+                            <input type="text" id="cfg-embed-port" class="text-input" placeholder="9195" value="9195" />
+                        </div>
+                        <div class="setting-item">
+                            <label for="cfg-embed-host">Địa chỉ Lắng nghe (Binding Host):</label>
+                            <select id="cfg-embed-host" class="text-input">
+                                <option value="127.0.0.1">127.0.0.1 (Nội bộ máy tính - An toàn nhất)</option>
+                                <option value="0.0.0.0">0.0.0.0 (Mở toàn mạng LAN / Mạng nội bộ)</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label for="cfg-embed-position">Vị trí nút nổi trên Website:</label>
+                            <select id="cfg-embed-position" class="text-input">
+                                <option value="bottom-right">Góc dưới bên phải (Mặc định)</option>
+                                <option value="bottom-left">Góc dưới bên trái</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label for="cfg-embed-color">Màu sắc chủ đạo (Theme & Button):</label>
+                            <select id="cfg-embed-color" class="text-input">
+                                <option value="linear-gradient(135deg, #FF9F43 0%, #EE5253 100%)">Cam - Hồng San Hô (Mascot Độc Quyền)</option>
+                                <option value="linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)">Xanh Dương Đậm (Doanh Nghiệp / Tech)</option>
+                                <option value="linear-gradient(135deg, #059669 0%, #10B981 100%)">Xanh Ngọc BamOS Emerald</option>
+                                <option value="linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)">Tím Hoàng Gia Cyberpunk</option>
+                                <option value="#0F172A">Tối giản Đen Nhám (OLED Dark)</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label for="cfg-embed-title">Tiêu đề Bot trên Widget:</label>
+                            <input type="text" id="cfg-embed-title" class="text-input" placeholder="BamOS Copilot" value="BamOS Copilot" />
+                        </div>
+                        <div class="setting-item switch-item">
+                            <div>
+                                <div class="setting-name">Mặc định bật Tri thức RAG</div>
+                                <div class="setting-desc">Tự động kích hoạt tra cứu tài liệu khi khách chat</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="cfg-embed-rag" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Cột Xem trước & Mã nhúng -->
+                    <div class="embed-studio-preview">
+                        <div class="preview-header-label">👁️ Xem trước Nút & Khung Chat</div>
+                        <div class="mini-preview-stage" id="mini-preview-stage">
+                            <div class="mini-chat-card">
+                                <div class="mini-chat-header" id="mini-chat-header">
+                                    <span>🐶 <b id="mini-preview-title">BamOS Copilot</b></span>
+                                    <span class="mini-status-dot"></span>
+                                </div>
+                                <div class="mini-chat-body">
+                                    <div class="mini-msg bot">Gâu gâu! Em là trợ lý BamOS đây ạ 🐾</div>
+                                    <div class="mini-msg user">Chào bạn!</div>
+                                </div>
+                            </div>
+                            <div class="mini-floating-btn" id="mini-floating-btn">🐶</div>
+                        </div>
+
+                        <div class="code-generator-box">
+                            <div class="code-gen-header">
+                                <span>📋 Đoạn mã nhúng (Paste trước &lt;/body&gt;)</span>
+                                <button id="btn-copy-embed-code" class="btn-copy-code" title="Sao chép mã nhúng">
+                                    <span id="copy-code-text">Sao chép mã</span>
+                                </button>
+                            </div>
+                            <pre class="code-gen-pre"><code id="generated-embed-code">&lt;script src="http://127.0.0.1:9195/embed.js" async defer&gt;&lt;/script&gt;</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-actions-row" style="margin-top: 16px;">
+                    <button id="btn-save-embed-config" class="modal-btn primary">💾 Lưu Cấu Hình Nhúng</button>
+                    <span id="embed-save-status" style="font-size: 12px; margin-left: 10px; color: #10B981;"></span>
+                </div>
+            </div>
+
+            <!-- TAB 2: DOMAIN WHITELIST MANAGER -->
+            <div id="panel-embed-whitelist" class="hidden">
+                <div class="whitelist-toolbar">
+                    <div class="whitelist-search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="whitelist-search-input" placeholder="Tìm kiếm domain hoặc ghi chú..." />
+                    </div>
+                    <div class="whitelist-sort-box">
+                        <select id="whitelist-sort-select">
+                            <option value="domain-asc">Sắp xếp: Tên domain (A-Z)</option>
+                            <option value="domain-desc">Sắp xếp: Tên domain (Z-A)</option>
+                            <option value="newest" selected>Mới nhất</option>
+                            <option value="oldest">Cũ nhất</option>
+                        </select>
+                    </div>
+                    <button id="btn-open-add-domain" class="modal-btn primary" style="padding: 6px 12px; font-size: 12.5px;">
+                        ➕ Thêm Domain
+                    </button>
+                </div>
+
+                <!-- Công tắc kích hoạt Whitelist toàn cục -->
+                <div class="setting-item switch-item" style="margin: 12px 0; background: rgba(239, 68, 68, 0.08); border-radius: 8px; padding: 10px;">
+                    <div>
+                        <div class="setting-name" style="color: #EF4444; font-weight: 700;">🛡️ Bắt buộc kiểm tra Danh sách trắng (Whitelist Guard)</div>
+                        <div class="setting-desc">Nếu bật: Chỉ những domain có trong danh sách bên dưới mới được phép tải widget và gửi request chat. Các website khác sẽ bị từ chối truy cập (403).</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="cfg-enforce-whitelist" />
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <!-- Bảng danh sách Whitelist -->
+                <div class="whitelist-table-container">
+                    <table class="whitelist-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;">Bật</th>
+                                <th>Tên Miền / Origin Cho Phép</th>
+                                <th>Ghi Chú</th>
+                                <th style="width: 90px;">Ngày Tạo</th>
+                                <th style="width: 80px; text-align: center;">Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="whitelist-table-body">
+                            <!-- Render động qua JS -->
+                        </tbody>
+                    </table>
+                    <div id="whitelist-empty-state" class="whitelist-empty hidden">
+                        Không tìm thấy domain nào phù hợp với bộ lọc tìm kiếm.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

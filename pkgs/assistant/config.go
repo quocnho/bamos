@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 )
 
 // Config là cấu hình runtime của BamAI, được lưu tại
@@ -39,6 +41,97 @@ type Config struct {
 	NightLightSync    bool   `json:"night_light_sync"`   // Đồng bộ theo chế độ dịu mắt GNOME Wayland
 	WakaTrackerActive bool   `json:"wakatracker_active"` // Theo dõi thời gian làm việc & năng suất
 	SystemWatchActive bool   `json:"system_watch_active"` // Tự động quét log & cảnh báo ứng dụng ngầm
+
+	// Thiết lập nhúng Web Widget & Danh sách trắng Domain
+	Widget WidgetConfig `json:"widget"`
+}
+
+type WhitelistItem struct {
+	ID        string `json:"id"`
+	Domain    string `json:"domain"`    // Ví dụ: "http://localhost:3000", "https://myblog.com", "*.mycompany.local"
+	Note      string `json:"note"`      // Ghi chú dự án
+	Enabled   bool   `json:"enabled"`   // Bật/tắt kích hoạt
+	CreatedAt string `json:"created_at"`
+}
+
+type WidgetConfig struct {
+	Port             string          `json:"port"`               // Mặc định: "9195"
+	Host             string          `json:"host"`               // "127.0.0.1" hoặc "0.0.0.0"
+	Position         string          `json:"position"`           // "bottom-right" | "bottom-left"
+	PrimaryColor     string          `json:"primary_color"`      // Hex hoặc CSS Gradient
+	Title            string          `json:"title"`              // Tiêu đề bot
+	WelcomeMsg       string          `json:"welcome_msg"`        // Lời chào mở đầu
+	DefaultRAG       bool            `json:"default_rag"`        // Bật/tắt RAG mặc định
+	SoundEnabled     bool            `json:"sound_enabled"`      // Chuông âm thanh
+	EnforceWhitelist bool            `json:"enforce_whitelist"`  // Bắt buộc kiểm tra Whitelist (true/false)
+	Whitelist        []WhitelistItem `json:"whitelist"`          // Danh sách các domain được cấp phép
+}
+
+// IsOriginAllowed kiểm tra xem Origin từ request có được phép truy cập theo Whitelist hay không.
+func (w *WidgetConfig) IsOriginAllowed(origin string) bool {
+	if !w.EnforceWhitelist || len(w.Whitelist) == 0 {
+		return true // Nếu không bắt buộc hoặc danh sách rỗng thì cho phép tất cả
+	}
+	if origin == "" {
+		return true // Request không có origin (ví dụ gọi cùng domain hoặc curl)
+	}
+
+	trimmedOrigin := strings.TrimSpace(strings.ToLower(origin))
+
+	for _, item := range w.Whitelist {
+		if !item.Enabled {
+			continue
+		}
+		target := strings.TrimSpace(strings.ToLower(item.Domain))
+		if target == "*" || target == trimmedOrigin {
+			return true
+		}
+
+		// Xử lý wildcard dạng *.domain.com hoặc *domain.com
+		if strings.HasPrefix(target, "*.") {
+			rootDomain := strings.TrimPrefix(target, "*.")
+			// Kiểm tra domain gốc hoặc subdomain
+			if strings.HasSuffix(trimmedOrigin, "."+rootDomain) || strings.HasSuffix(trimmedOrigin, "://"+rootDomain) {
+				return true
+			}
+		} else if strings.Contains(target, "*") {
+			pattern := "^" + strings.ReplaceAll(regexp.QuoteMeta(target), "\\*", ".*") + "$"
+			if matched, _ := regexp.MatchString(pattern, trimmedOrigin); matched {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func defaultWidgetConfig() WidgetConfig {
+	return WidgetConfig{
+		Port:             "9195",
+		Host:             "127.0.0.1",
+		Position:         "bottom-right",
+		PrimaryColor:     "linear-gradient(135deg, #FF9F43 0%, #EE5253 100%)",
+		Title:            "BamOS Copilot",
+		WelcomeMsg:       "Gâu gâu! Em là BamOS Mascot Copilot đây ạ 🐾. Em có thể giải đáp thắc mắc, tra cứu tài liệu hệ thống và hỗ trợ bạn trực tiếp ngay trên trang web này!",
+		DefaultRAG:       true,
+		SoundEnabled:     true,
+		EnforceWhitelist: false,
+		Whitelist: []WhitelistItem{
+			{
+				ID:        "wl-local-1",
+				Domain:    "http://localhost:3000",
+				Note:      "Môi trường phát triển Next.js / Vite cục bộ",
+				Enabled:   true,
+				CreatedAt: "2026-09-15",
+			},
+			{
+				ID:        "wl-local-2",
+				Domain:    "http://127.0.0.1:8080",
+				Note:      "Trang thử nghiệm nội bộ",
+				Enabled:   true,
+				CreatedAt: "2026-09-15",
+			},
+		},
+	}
 }
 
 const (
@@ -67,6 +160,7 @@ func defaultConfig() Config {
 		NightLightSync:    true,
 		WakaTrackerActive: true,
 		SystemWatchActive: true,
+		Widget:            defaultWidgetConfig(),
 	}
 }
 
@@ -146,6 +240,24 @@ func (c *Config) normalize() {
 	}
 	if c.GpuLayers < 0 {
 		c.GpuLayers = 0
+	}
+	if c.Widget.Port == "" {
+		c.Widget.Port = "9195"
+	}
+	if c.Widget.Host == "" {
+		c.Widget.Host = "127.0.0.1"
+	}
+	if c.Widget.Position == "" {
+		c.Widget.Position = "bottom-right"
+	}
+	if c.Widget.PrimaryColor == "" {
+		c.Widget.PrimaryColor = "linear-gradient(135deg, #FF9F43 0%, #EE5253 100%)"
+	}
+	if c.Widget.Title == "" {
+		c.Widget.Title = "BamOS Copilot"
+	}
+	if c.Widget.WelcomeMsg == "" {
+		c.Widget.WelcomeMsg = "Gâu gâu! Em là BamOS Mascot Copilot đây ạ 🐾. Em có thể giải đáp thắc mắc, tra cứu tài liệu hệ thống và hỗ trợ bạn trực tiếp ngay trên trang web này!"
 	}
 }
 

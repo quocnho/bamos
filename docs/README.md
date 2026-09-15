@@ -29,6 +29,16 @@ Mỗi package độc lập sở hữu một thư mục tài liệu chuyên sâu 
 
 ---
 
+### 🎋 Dự Án Assistant (`/docs/assistant/`)
+*Desktop AI Copilot & System Inspector (Go 1.22+, GTK3/WebKitGTK, SQLite FTS5 + Vector RAG, NVIDIA RTD3 0W).*
+
+- 🗂️ **Chỉ mục tổng quan Assistant:** [docs/assistant/README.md](file:///etc/nixos/docs/assistant/README.md)
+- 🏗️ **Kiến trúc hệ thống chi tiết:** [docs/assistant/ARCHITECTURE.md](file:///etc/nixos/docs/assistant/ARCHITECTURE.md) *(Kiến trúc Go-WebKit, DFD luồng IPC, RAG Engine, Quản trị điện năng GPU)*
+- 🌿 **Quy chuẩn Git & Versioning:** [docs/assistant/GIT_WORKFLOW.md](file:///etc/nixos/docs/assistant/GIT_WORKFLOW.md) *(Semantic versioning v0.3.x, Ticket AST-xxx, Commit Why-What-Test)*
+
+---
+
 ## 🔗 Liên Kết Hệ Thống Kế Hoạch & Lộ Trình (`/plan/`)
 - 🗺️ **Bản đồ kế hoạch hệ thống tổng thể:** [plan/README.md](file:///etc/nixos/plan/README.md)
 - 🎯 **Kế hoạch Agile Scrum Troly:** [plan/troly/README.md](file:///etc/nixos/plan/troly/README.md)
+- 🎋 **Kế hoạch Agile Scrum Assistant:** [plan/assistant/README.md](file:///etc/nixos/plan/assistant/README.md)

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Website Nhúng BamOS Assistant Widget</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0F172A;
+            color: #E2E8F0;
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #1E293B;
+            padding: 36px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        h1 {
+            color: #F8FAFC;
+            margin-top: 0;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .tag {
+            background: linear-gradient(135deg, #FF9F43 0%, #EE5253 100%);
+            color: white;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        pre {
+            background: #090D16;
+            padding: 16px;
+            border-radius: 10px;
+            overflow-x: auto;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #38BDF8;
+            font-size: 14px;
+        }
+        .btn-trigger {
+            background: #2563EB;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-trigger:hover {
+            background: #1D4ED8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 Trang Web Mẫu <span class="tag">Live Helper Chat Architecture</span></h1>
+        <p>
+            Trang web này mô phỏng bất kỳ trang web nào (ví dụ Blog cá nhân, CMS, Hệ thống CRM, Web App nội bộ) đang tích hợp trợ lý thông minh của <b>BamOS Assistant</b> bằng một đoạn mã script duy nhất.
+        </p>
+
+        <h3>Cách thức tích hợp vào website:</h3>
+        <p>Chỉ cần dán thẻ sau vào trước thẻ <code>&lt;/body&gt;</code> của trang web:</p>
+        <pre>&lt;script src="http://127.0.0.1:9195/embed.js" async defer&gt;&lt;/script&gt;</pre>
+
+        <h3>Điều khiển bằng JavaScript API trên trang chủ:</h3>
+        <p>Bạn có thể mở hoặc đóng khung chat thông qua biến toàn cục <code>window.BamOSWidget</code>:</p>
+        <button class="btn-trigger" onclick="window.BamOSWidget && window.BamOSWidget.toggle()">Bật / Tắt Chat Widget</button>
+
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 30px 0;">
+        <p style="color: #94A3B8; font-size: 14px;">
+            🐾 <i>Góc dưới bên phải màn hình của bạn đang có biểu tượng chú cún mascot nổi. Nhấp vào để bắt đầu cuộc trò chuyện tương tác trực tiếp với mô hình AI & cơ sở tri thức RAG trên máy!</i>
+        </p>
+    </div>
+
+    <!-- ĐOẠN MÃ NHÚNG DUY NHẤT (CHUẨN LIVE HELPER CHAT) -->
+    <script src="embed.js" async defer></script>
+</body>
+</html>

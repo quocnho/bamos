@@ -19,185 +19,224 @@ export const $$ = (selector, root = document) =>
 // ---------------------------------------------------------------------------
 // Cache element dùng chung
 // ---------------------------------------------------------------------------
-export const els = {
+export const els = {};
+
+export function initDOM() {
     // Chú cún + bong bóng chat
-    petWrapper: $("pet-wrapper"),
-    speechBubble: $("speech-bubble"),
+    els.petWrapper = $("pet-wrapper");
+    els.speechBubble = $("speech-bubble");
     // PHẢI chỉ định trong #speech-bubble: trang có nhiều .bubble-header (bong bóng
     // nghỉ ngắn EyeLeo đứng trước trong DOM) nên querySelector đơn thuần sẽ bắt nhầm.
-    bubbleHeader: document.querySelector("#speech-bubble .bubble-header"),
-    chatStream: $("chat-stream"),
-    chatInput: $("chat-input"),
-    btnSend: $("btn-send"),
-    statusLabel: $("status-label"),
-    heartBurst: $("heart-burst"),
+    els.bubbleHeader = document.querySelector("#speech-bubble .bubble-header");
+    els.chatStream = $("chat-stream");
+    els.chatInput = $("chat-input");
+    els.btnSend = $("btn-send");
+    els.statusLabel = $("status-label");
+    els.heartBurst = $("heart-burst");
 
     // Thanh điều khiển cửa sổ
-    btnMinimize: $("btn-minimize"),
-    btnClose: $("btn-close"),
-    btnAlwaysOnTop: $("btn-always-on-top"),
-    btnStopStream: $("btn-stop-stream"),
+    els.btnMinimize = $("btn-minimize");
+    els.btnClose = $("btn-close");
+    els.btnAlwaysOnTop = $("btn-always-on-top");
+    els.btnStopStream = $("btn-stop-stream");
 
     // Phiên hội thoại
-    btnNewChat: $("btn-new-chat"),
-    btnRecentChat: $("btn-recent-chat"),
-    recentSessionsModal: $("recent-sessions-modal"),
-    recentList: $("recent-sessions-list"),
-    btnCloseRecent: $("btn-close-recent"),
+    els.btnNewChat = $("btn-new-chat");
+    els.btnRecentChat = $("btn-recent-chat");
+    els.recentSessionsModal = $("recent-sessions-modal");
+    els.recentList = $("recent-sessions-list");
+    els.btnCloseRecent = $("btn-close-recent");
 
     // Menu Thiết lập (nút ⚙ ở header)
-    btnSettings: $("btn-settings"),
-    settingsMenu: $("settings-menu"),
+    els.btnSettings = $("btn-settings");
+    els.settingsMenu = $("settings-menu");
 
     // Giới thiệu BamAI
-    aboutModal: $("about-modal"),
-    btnCloseAbout: $("btn-close-about"),
-    btnAboutClose: $("btn-about-close"),
+    els.aboutModal = $("about-modal");
+    els.btnCloseAbout = $("btn-close-about");
+    els.btnAboutClose = $("btn-about-close");
 
     // Chip gợi ý + tooltip
-    smartChips: $("smart-chips"),
-    chipTooltip: $("chip-tooltip"),
+    els.smartChips = $("smart-chips");
+    els.chipTooltip = $("chip-tooltip");
 
     // Cục Xương — bối cảnh thư mục
-    boneContextBar: $("bone-context-bar"),
-    boneDirText: $("bone-dir-text"),
-    btnClearBone: $("btn-clear-bone"),
-    mouthBone: $("mouth-bone"),
+    els.boneContextBar = $("bone-context-bar");
+    els.boneDirText = $("bone-dir-text");
+    els.btnClearBone = $("btn-clear-bone");
+    els.mouthBone = $("mouth-bone");
 
     // Đính kèm tệp/hình ảnh
-    btnAttach: $("btn-attach"),
-    fileUploadInput: $("file-upload-input"),
-    attachedPreviewBar: $("attached-preview-bar"),
-    attachedFilename: $("attached-filename"),
-    attachedIcon: $("attached-icon"),
-    btnRemoveAttachment: $("btn-remove-attachment"),
+    els.btnAttach = $("btn-attach");
+    els.fileUploadInput = $("file-upload-input");
+    els.attachedPreviewBar = $("attached-preview-bar");
+    els.attachedFilename = $("attached-filename");
+    els.attachedIcon = $("attached-icon");
+    els.btnRemoveAttachment = $("btn-remove-attachment");
 
     // EyeLeo — thông báo trước giờ nghỉ
-    eyeleoPrebreakToast: $("eyeleo-prebreak-toast"),
-    prebreakSeconds: $("prebreak-seconds"),
-    btnPrebreakDismiss: $("btn-prebreak-dismiss"),
+    els.eyeleoPrebreakToast = $("eyeleo-prebreak-toast");
+    els.prebreakSeconds = $("prebreak-seconds");
+    els.btnPrebreakDismiss = $("btn-prebreak-dismiss");
 
     // EyeLeo — nghỉ ngắn
-    eyeleoShortbreakBubble: $("eyeleo-shortbreak-bubble"),
-    shortbreakExerciseName: $("shortbreak-exercise-name"),
-    shortbreakIcon: $("shortbreak-icon"),
-    shortbreakInstruction: $("shortbreak-instruction"),
-    shortbreakProgress: $("shortbreak-progress"),
-    shortbreakCountdown: $("shortbreak-countdown"),
-    btnShortbreakSkip: $("btn-shortbreak-skip"),
+    els.eyeleoShortbreakBubble = $("eyeleo-shortbreak-bubble");
+    els.shortbreakExerciseName = $("shortbreak-exercise-name");
+    els.shortbreakIcon = $("shortbreak-icon");
+    els.shortbreakInstruction = $("shortbreak-instruction");
+    els.shortbreakProgress = $("shortbreak-progress");
+    els.shortbreakCountdown = $("shortbreak-countdown");
+    els.btnShortbreakSkip = $("btn-shortbreak-skip");
 
     // EyeLeo — nghỉ dài
-    eyeleoLongbreakOverlay: $("eyeleo-longbreak-overlay"),
-    longbreakClock: $("longbreak-clock"),
-    strictModeIndicator: $("strict-mode-indicator"),
-    btnLongbreakPostpone: $("btn-longbreak-postpone"),
-    btnLongbreakSkip: $("btn-longbreak-skip"),
+    els.eyeleoLongbreakOverlay = $("eyeleo-longbreak-overlay");
+    els.longbreakClock = $("longbreak-clock");
+    els.strictModeIndicator = $("strict-mode-indicator");
+    els.btnLongbreakPostpone = $("btn-longbreak-postpone");
+    els.btnLongbreakSkip = $("btn-longbreak-skip");
 
     // EyeLeo — modal cài đặt
-    eyeleoSettingsModal: $("eyeleo-settings-modal"),
-    btnCloseEyeleoSettings: $("btn-close-eyeleo-settings"),
-    btnSaveSettings: $("btn-save-settings"),
-    setEyeleoActive: $("set-eyeleo-active"),
-    setShortInterval: $("set-short-interval"),
-    setShortDuration: $("set-short-duration"),
-    setLongInterval: $("set-long-interval"),
-    setLongDuration: $("set-long-duration"),
-    setStrictMode: $("set-strict-mode"),
-    setPrebreakNotify: $("set-prebreak-notify"),
-    setAutoIdle: $("set-auto-idle"),
-    setSoundEnabled: $("set-sound-enabled"),
+    els.eyeleoSettingsModal = $("eyeleo-settings-modal");
+    els.btnCloseEyeleoSettings = $("btn-close-eyeleo-settings");
+    els.btnSaveSettings = $("btn-save-settings");
+    els.setEyeleoActive = $("set-eyeleo-active");
+    els.setShortInterval = $("set-short-interval");
+    els.setShortDuration = $("set-short-duration");
+    els.setLongInterval = $("set-long-interval");
+    els.setLongDuration = $("set-long-duration");
+    els.setStrictMode = $("set-strict-mode");
+    els.setPrebreakNotify = $("set-prebreak-notify");
+    els.setAutoIdle = $("set-auto-idle");
+    els.setSoundEnabled = $("set-sound-enabled");
 
-    // Bảng thiết lập RAG
-    ragSettingsModal: $("rag-settings-modal"),
-    btnCloseRagSettings: $("btn-close-rag-settings"),
-    setRagEnabled: $("set-rag-enabled"),
-    setAddressing: $("set-addressing"),
-    setAddressingCustom: $("set-addressing-custom"),
-    setRagTopk: $("set-rag-topk"),
-    setRagTopkValue: $("set-rag-topk-value"),
-    ragCountBadge: $("rag-count-badge"),
-    ragDropzone: $("rag-dropzone"),
-    ragFileInput: $("rag-file-input"),
-    ragPendingList: $("rag-pending-list"),
-    btnRagIndex: $("btn-rag-index"),
-    btnRagClear: $("btn-rag-clear"),
-    ragStatus: $("rag-status"),
-    btnSaveRagSettings: $("btn-save-rag-settings"),
-    setRagAlpha: $("set-rag-alpha"),
-    setRagAlphaValue: $("set-rag-alpha-value"),
-    btnRefreshRagDocs: $("btn-refresh-rag-docs"),
-    ragDocsContainer: $("rag-docs-container"),
+    // Thiết lập RAG
+    els.ragSettingsModal = $("rag-settings-modal");
+    els.btnCloseRagSettings = $("btn-close-rag-settings");
+    els.setRagEnabled = $("set-rag-enabled");
+    els.setRagTopK = $("set-rag-topk");
+    els.setRagTopKValue = $("set-rag-topk-value");
+    els.setRagAlpha = $("set-rag-alpha");
+    els.setRagAlphaValue = $("set-rag-alpha-value");
+    els.ragDropzone = $("rag-dropzone");
+    els.ragFileInput = $("rag-file-input");
+    els.ragPendingList = $("rag-pending-list");
+    els.btnRagIndex = $("btn-rag-index");
+    els.btnRagClear = $("btn-rag-clear");
+    els.ragStatus = $("rag-status");
+    els.ragCountBadge = $("rag-count-badge");
+    els.btnRefreshRagDocs = $("btn-refresh-rag-docs");
+    els.ragDocsContainer = $("rag-docs-container");
+    els.btnSaveRagSettings = $("btn-save-rag-settings");
 
-    // Bảng thiết lập LLM
-    llmSettingsModal: $("llm-settings-modal"),
-    btnCloseLlmSettings: $("btn-close-llm-settings"),
-    setLlmProvider: $("set-llm-provider"),
-    llmKeyDeepseek: $("llm-key-deepseek"),
-    llmKeyOpenai: $("llm-key-openai"),
-    llmKeyGemini: $("llm-key-gemini"),
-    setDeepseekKey: $("set-deepseek-key"),
-    setOpenaiKey: $("set-openai-key"),
-    setGeminiKey: $("set-gemini-key"),
-    llmLocalSection: $("llm-local-section"),
-    setModelDir: $("set-model-dir"),
-    btnLlmRefreshModels: $("btn-llm-refresh-models"),
-    llmModelList: $("llm-model-list"),
-    setModelUrl: $("set-model-url"),
-    btnLlmDownload: $("btn-llm-download"),
-    llmDownloadProgress: $("llm-download-progress"),
-    setTemperature: $("set-temperature"),
-    setTempValue: $("set-temp-value"),
-    setContextSize: $("set-context-size"),
-    setGpuLayers: $("set-gpu-layers"),
-    llmStatus: $("llm-status"),
-    btnLlmTest: $("btn-llm-test"),
-    btnLlmRestart: $("btn-llm-restart"),
-    btnSaveLlmSettings: $("btn-save-llm-settings"),
+    // Thiết lập LLM
+    els.llmSettingsModal = $("llm-settings-modal");
+    els.btnCloseLlmSettings = $("btn-close-llm-settings");
+    els.setLlmProvider = $("set-llm-provider");
+    els.llmKeyDeepseek = $("llm-key-deepseek");
+    els.llmKeyOpenai = $("llm-key-openai");
+    els.llmKeyGemini = $("llm-key-gemini");
+    els.setDeepseekKey = $("set-deepseek-key");
+    els.setOpenaiKey = $("set-openai-key");
+    els.setGeminiKey = $("set-gemini-key");
+    els.llmLocalSection = $("llm-local-section");
+    els.setModelDir = $("set-model-dir");
+    els.btnLlmRefreshModels = $("btn-llm-refresh-models");
+    els.llmModelList = $("llm-model-list");
+    els.setModelUrl = $("set-model-url");
+    els.btnLlmDownload = $("btn-llm-download");
+    els.llmDownloadProgress = $("llm-download-progress");
+    els.setTemperature = $("set-temperature");
+    els.setTempValue = $("set-temp-value");
+    els.setContextSize = $("set-context-size");
+    els.setGpuLayers = $("set-gpu-layers");
+    els.llmStatus = $("llm-status");
+    els.btnLlmTest = $("btn-llm-test");
+    els.btnLlmRestart = $("btn-llm-restart");
+    els.btnSaveLlmSettings = $("btn-save-llm-settings");
 
-    // Giám sát Hệ thống & NixOS
-    systemInspectModal: $("system-inspect-modal"),
-    btnCloseSystemInspect: $("btn-close-system-inspect"),
-    btnRunSystemInspect: $("btn-run-system-inspect"),
-    systemInspectStatus: $("system-inspect-status"),
-    systemIssuesList: $("system-issues-list"),
-    systemIdleAppsList: $("system-idle-apps-list"),
+    // Giám sát hệ thống
+    els.systemInspectModal = $("system-inspect-modal");
+    els.btnCloseSystemInspect = $("btn-close-system-inspect");
+    els.btnRunSystemInspect = $("btn-run-system-inspect");
+    els.systemInspectStatus = $("system-inspect-status");
+    els.systemIssuesList = $("system-issues-list");
+    els.systemIdleAppsList = $("system-idle-apps-list");
 
     // WakaTracker
-    wakaModal: $("waka-modal"),
-    btnCloseWaka: $("btn-close-waka"),
-    wakaTodayHours: $("waka-today-hours"),
-    waka7daysHours: $("waka-7days-hours"),
-    wakaCategoriesList: $("waka-categories-list"),
-    wakaNewReminderTitle: $("waka-new-reminder-title"),
-    wakaNewReminderTime: $("waka-new-reminder-time"),
-    btnWakaAddReminder: $("btn-waka-add-reminder"),
-    wakaRemindersList: $("waka-reminders-list"),
+    els.wakaModal = $("waka-modal");
+    els.btnCloseWaka = $("btn-close-waka");
+    els.wakaTodayHours = $("waka-today-hours");
+    els.waka7DaysHours = $("waka-7days-hours");
+    els.wakaCategoriesList = $("waka-categories-list");
+    els.wakaNewReminderTitle = $("waka-new-reminder-title");
+    els.wakaNewReminderTime = $("waka-new-reminder-time");
+    els.btnWakaAddReminder = $("btn-waka-add-reminder");
+    els.wakaRemindersList = $("waka-reminders-list");
 
-    // Hồ sơ người dùng & Onboarding Quiz
-    profileModal: $("profile-modal"),
-    btnCloseProfile: $("btn-close-profile"),
-    tabProfileInfo: $("tab-profile-info"),
-    tabProfileQuiz: $("tab-profile-quiz"),
-    tabProfileRoadmap: $("tab-profile-roadmap"),
-    panelProfileInfo: $("panel-profile-info"),
-    panelProfileQuiz: $("panel-profile-quiz"),
-    panelProfileRoadmap: $("panel-profile-roadmap"),
-    profFullname: $("prof-fullname"),
-    profAge: $("prof-age"),
-    profPhone: $("prof-phone"),
-    profEmail: $("prof-email"),
-    profAddressing: $("prof-addressing"),
-    profAddressingCustom: $("prof-addressing-custom"),
-    profThemeColor: $("prof-theme-color"),
-    profDomainsContainer: $("prof-domains-container"),
-    profDomainsCounter: $("prof-domains-counter"),
-    btnSaveProfile: $("btn-save-profile"),
-    profileStatus: $("profile-status"),
-    quizContainer: $("quiz-container"),
-    btnSubmitQuiz: $("btn-submit-quiz"),
-    profCurrentLevel: $("prof-current-level"),
-    roadmapStepsList: $("roadmap-steps-list"),
-};
+    // Hồ sơ người dùng
+    els.profileModal = $("profile-modal");
+    els.btnCloseProfile = $("btn-close-profile");
+    els.tabProfileInfo = $("tab-profile-info");
+    els.tabProfileQuiz = $("tab-profile-quiz");
+    els.tabProfileRoadmap = $("tab-profile-roadmap");
+    els.panelProfileInfo = $("panel-profile-info");
+    els.panelProfileQuiz = $("panel-profile-quiz");
+    els.panelProfileRoadmap = $("panel-profile-roadmap");
+    els.profFullname = $("prof-fullname");
+    els.profAge = $("prof-age");
+    els.profPhone = $("prof-phone");
+    els.profEmail = $("prof-email");
+    els.profAddressing = $("prof-addressing");
+    els.profAddressingCustom = $("prof-addressing-custom");
+    els.profThemeColor = $("prof-theme-color");
+    els.profDomainsContainer = $("prof-domains-container");
+    els.profDomainsCounter = $("prof-domains-counter");
+    els.btnSaveProfile = $("btn-save-profile");
+    els.profileStatus = $("profile-status");
+    els.quizContainer = $("quiz-container");
+    els.btnSubmitQuiz = $("btn-submit-quiz");
+    els.profCurrentLevel = $("prof-current-level");
+    els.roadmapStepsList = $("roadmap-steps-list");
+
+    // Nhúng Web Widget & Whitelist Studio
+    els.embedSettingsModal = $("embed-settings-modal");
+    els.btnCloseEmbedSettings = $("btn-close-embed-settings");
+    els.tabEmbedStudio = $("tab-embed-studio");
+    els.tabEmbedWhitelist = $("tab-embed-whitelist");
+    els.panelEmbedStudio = $("panel-embed-studio");
+    els.panelEmbedWhitelist = $("panel-embed-whitelist");
+    els.cfgEmbedPort = $("cfg-embed-port");
+    els.cfgEmbedHost = $("cfg-embed-host");
+    els.cfgEmbedPosition = $("cfg-embed-position");
+    els.cfgEmbedColor = $("cfg-embed-color");
+    els.cfgEmbedTitle = $("cfg-embed-title");
+    els.cfgEmbedRAG = $("cfg-embed-rag");
+    els.btnSaveEmbedConfig = $("btn-save-embed-config");
+    els.embedSaveStatus = $("embed-save-status");
+    els.miniPreviewTitle = $("mini-preview-title");
+    els.miniChatHeader = $("mini-chat-header");
+    els.miniFloatingBtn = $("mini-floating-btn");
+    els.miniPreviewStage = $("mini-preview-stage");
+    els.generatedEmbedCode = $("generated-embed-code");
+    els.btnCopyEmbedCode = $("btn-copy-embed-code");
+    els.copyCodeText = $("copy-code-text");
+    els.whitelistSearchInput = $("whitelist-search-input");
+    els.whitelistSortSelect = $("whitelist-sort-select");
+    els.btnOpenAddDomain = $("btn-open-add-domain");
+    els.cfgEnforceWhitelist = $("cfg-enforce-whitelist");
+    els.whitelistTableBody = $("whitelist-table-body");
+    els.whitelistEmptyState = $("whitelist-empty-state");
+    els.domainEditorModal = $("domain-editor-modal");
+    els.domainEditorTitle = $("domain-editor-title");
+    els.btnCloseDomainEditor = $("btn-close-domain-editor");
+    els.editDomainId = $("edit-domain-id");
+    els.editDomainInput = $("edit-domain-input");
+    els.editDomainNote = $("edit-domain-note");
+    els.editDomainEnabled = $("edit-domain-enabled");
+    els.btnSaveDomainItem = $("btn-save-domain-item");
+}
+
+initDOM();
 
 // ---------------------------------------------------------------------------
 // Tiện ích bật/tắt lớp `hidden`

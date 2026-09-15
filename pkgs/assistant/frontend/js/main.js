@@ -14,7 +14,8 @@
 // ============================================================================
 
 import { setPetState, setAddressing } from "./core/state.js";
-import { els } from "./core/dom.js";
+import { els, initDOM } from "./core/dom.js";
+import { loadTemplates } from "./core/template-loader.js";
 import { native } from "./core/native.js";
 import { initWindowFit } from "./core/window-fit.js";
 import { initPet, scheduleStartupSleep, syncAlwaysOnTop } from "./pet/pet.js";
@@ -78,6 +79,11 @@ import {
     openSettingsPanel,
 } from "./features/settings/panels.js";
 import { initSettingsMenu } from "./features/settings/menu.js";
+import {
+    initEmbedSettings,
+    handleSettingsLoaded as embedSettingsLoaded,
+    handleSettingsSaved as embedSettingsSaved,
+} from "./features/settings/embed-settings.js";
 
 // Callback do Go backend gọi trực tiếp trên window.
 function bindNativeCallbacks() {
@@ -96,10 +102,12 @@ function bindNativeCallbacks() {
         }
         ragSettingsLoaded(result);
         llmSettingsLoaded(result);
+        embedSettingsLoaded(result);
     };
     window.onSettingsSaved = (result) => {
         ragSettingsSaved(result);
         llmSettingsSaved(result);
+        embedSettingsSaved(result);
     };
 
     // Thiết lập LLM
@@ -147,7 +155,15 @@ function openPanelFromHash() {
     setTimeout(() => openSettingsPanel(panel), 150);
 }
 
-function bootstrap() {
+async function bootstrap() {
+    // Nạp toàn bộ HTML templates dạng module vào #app-container trước khi dựng DOM
+    try {
+        await loadTemplates();
+        initDOM();
+    } catch (err) {
+        console.error("Failed to load templates:", err);
+    }
+
     // Thứ tự quan trọng: pet.js phải đăng ký listener bus trước khi chat.js phát sự kiện.
     initPet();
     initChat();
@@ -169,6 +185,7 @@ function bootstrap() {
     initProfileUI();
     initSettingsPanels();
     initSettingsMenu();
+    initEmbedSettings();
     initEyeLeo();
 
     // Cửa sổ khít đúng vùng chat + pet (và mở rộng khi có bảng thiết lập).

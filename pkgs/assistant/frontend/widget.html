@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BamOS Assistant Widget</title>
+    <link rel="stylesheet" href="css/widget.css">
+</head>
+<body>
+    <div id="widget-container">
+        <!-- Header -->
+        <div class="widget-header">
+            <div class="header-brand">
+                <div class="brand-avatar">🐶</div>
+                <div class="brand-info">
+                    <div class="brand-title">
+                        <span>BamOS Copilot</span>
+                        <span class="status-dot" id="status-indicator" title="Sẵn sàng"></span>
+                    </div>
+                    <span class="brand-subtitle" id="model-label">Khởi tạo kết nối...</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-icon" id="btn-clear" title="Xóa đoạn hội thoại">🗑️</button>
+                <button class="btn-icon" id="btn-close" title="Thu nhỏ">✕</button>
+            </div>
+        </div>
+
+        <!-- Tin nhắn -->
+        <div class="widget-messages" id="messages-container">
+            <div class="message-row bot">
+                <div class="msg-bubble">
+                    Gâu gâu! Chào bạn! Em là <b>BamOS Mascot Copilot</b> đây ạ 🐾. Em có thể giải đáp thắc mắc, tra cứu tài liệu hệ thống và hỗ trợ bạn trực tiếp ngay trên trang web này!
+                </div>
+            </div>
+        </div>
+
+        <!-- Tuỳ chọn (RAG Toggle) -->
+        <div class="widget-options">
+            <label class="rag-switch">
+                <input type="checkbox" id="toggle-rag" checked>
+                <span>Tri thức RAG (FTS5 + Vector)</span>
+            </label>
+            <span id="typing-status"></span>
+        </div>
+
+        <!-- Khung nhập liệu -->
+        <div class="widget-input-area">
+            <div class="input-wrapper">
+                <textarea id="chat-input" placeholder="Hỏi BamOS bất cứ điều gì... (Enter để gửi)" rows="1"></textarea>
+                <button id="btn-send" class="btn-send" title="Gửi tin nhắn">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/widget.js"></script>
+</body>
+</html>

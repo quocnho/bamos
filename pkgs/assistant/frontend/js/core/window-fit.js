@@ -25,8 +25,10 @@ const TOAST_TOP = 20; // khớp .eyeleo-prebreak-toast { top: 20px }
 const TOAST_GAP = 6;
 const MODAL_CHROME = 140; // thẻ bảng: tiêu đề + lề dọc (ước lượng an toàn)
 
-// Các bảng thiết lập: đo `.modal-card` bên trong và coi như nội dung khít.
-const MODAL_IDS = [
+// Các bảng thiết lập và overlay: khi mở ra sẽ mở rộng cửa sổ ra toàn vùng làm việc (toàn màn hình trong suốt)
+// để không bị giới hạn kích thước, nội dung hiển thị thoải mái và ghim cố định góc dưới bên phải.
+const FULL_UI_IDS = [
+    "eyeleo-longbreak-overlay",
     "rag-settings-modal",
     "llm-settings-modal",
     "recent-sessions-modal",
@@ -35,10 +37,11 @@ const MODAL_IDS = [
     "system-inspect-modal",
     "waka-modal",
     "profile-modal",
+    "embed-settings-modal",
+    "domain-editor-modal",
 ];
 
-// Overlay toàn màn hình thật sự (nghỉ dài) — vẫn mở rộng ra vùng làm việc.
-const FULL_UI_IDS = ["eyeleo-longbreak-overlay"];
+const MODAL_IDS = [];
 
 let scheduled = false;
 let fullActive = false;
@@ -216,12 +219,7 @@ export function initWindowFit() {
     // sổ, vì cửa sổ co giãn theo nội dung sẽ gây vòng lặp).
     const maxBubble = Math.max(
         180,
-        Math.floor(
-            Math.min(
-                rawAvail - petArea - pad * 2 - 40,
-                MAX_WINDOW_HEIGHT - petArea - pad * 2,
-            ),
-        ),
+        Math.floor(rawAvail - petArea - pad * 2 - 40),
     );
     document.documentElement.style.setProperty(
         "--bubble-max-height",
@@ -235,16 +233,11 @@ export function initWindowFit() {
         `${window.screen.availWidth}px`,
     );
 
-    // Chiều cao tối đa của THÂN bảng thiết lập: chọn sao cho cả thẻ (tiêu đề +
-    // thân) vẫn nằm trong giới hạn chiều cao cửa sổ, phần dư sẽ cuộn.
+    // Chiều cao tối đa của THÂN bảng thiết lập: mở rộng theo toàn bộ màn hình,
+    // trừ lề an toàn để người dùng cuộn xem thoải mái.
     const modalMax = Math.max(
-        200,
-        Math.floor(
-            Math.min(
-                rawAvail - petArea - pad * 2 - 40,
-                MAX_WINDOW_HEIGHT - MODAL_CHROME,
-            ),
-        ),
+        350,
+        Math.floor(rawAvail - MODAL_CHROME - 60),
     );
     document.documentElement.style.setProperty(
         "--modal-max-height",
