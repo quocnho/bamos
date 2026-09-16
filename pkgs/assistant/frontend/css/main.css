@@ -1,0 +1,26 @@
+/* ============================================================================
+ * BamOS Assistant & EyeLeo Companion — Modular CSS Architecture
+ * ============================================================================
+ * Cấu trúc phân tách chuyên nghiệp:
+ *   - base/         : Biến CSS (variables), Reset & Scrollbars, Keyframes (animations)
+ *   - components/   : Bubble, Header, Messages, Input, Menu, Mascot, EyeLeo
+ *   - modals/       : Modal Base & Forms, Modal Settings (RAG, LLM, Profile, Embed)
+ * ============================================================================ */
+
+/* --- 1. Base Layer --- */
+@import "base/variables.css";
+@import "base/reset.css";
+@import "base/animations.css";
+
+/* --- 2. Components Layer --- */
+@import "components/bubble.css";
+@import "components/header.css";
+@import "components/messages.css";
+@import "components/input.css";
+@import "components/menu.css";
+@import "components/mascot.css";
+@import "components/eyeleo.css";
+
+/* --- 3. Modals Layer --- */
+@import "modals/modal-base.css";
+@import "modals/modal-settings.css";

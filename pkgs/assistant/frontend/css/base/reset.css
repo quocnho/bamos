@@ -1,0 +1,58 @@
+/* ============================================================================
+ * css/base/reset.css — Reset CSS & Base Layout
+ * ========================================================================== */
+* {
+    box-sizing: border-box;
+    user-select: none;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    background: transparent !important;
+    overflow: hidden;
+    font-family: var(--font-main);
+    -webkit-font-smoothing: antialiased;
+}
+
+#app-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding: 0;
+}
+
+/* Ẩn triệt để input file upload của trình duyệt */
+.hidden-file-input,
+input[type="file"].hidden {
+    display: none !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+/* Scrollbar chung cho toàn ứng dụng */
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+}

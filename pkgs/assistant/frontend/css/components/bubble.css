@@ -1,0 +1,60 @@
+/* ============================================================================
+ * css/components/bubble.css — Khung bong bóng chat chính (Glassmorphism)
+ * ========================================================================== */
+.bubble {
+    position: absolute;
+    right: var(--fit-pad, 24px);
+    bottom: calc(var(--pet-area, 185px) + var(--fit-pad, 24px));
+    width: var(--app-window-width, 480px);
+    max-width: none;
+    max-height: var(--bubble-max-height, 460px);
+    background: var(--color-bg-glass, rgba(255, 255, 255, 0.94));
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 22px;
+    box-shadow:
+        0 16px 36px rgba(0, 0, 0, 0.22),
+        0 2px 6px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-origin: bottom right;
+    z-index: 100;
+    color: #2d3748;
+}
+
+.bubble.hidden {
+    opacity: 0;
+    transform: scale(0.65) translateY(24px);
+    pointer-events: none;
+}
+
+.bubble-tail {
+    position: absolute;
+    bottom: -10px;
+    right: 70px;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid rgba(255, 255, 255, 0.92);
+}
+
+.bubble-body {
+    flex: 1 1 auto;
+    padding: 12px 16px;
+    overflow-y: auto;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #2d3748;
+    word-break: break-word;
+    user-select: text;
+    min-height: 60px;
+}
+
+.bubble-footer {
+    flex-shrink: 0;
+    padding: 6px 12px 12px 12px;
+}
