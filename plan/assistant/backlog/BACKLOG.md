@@ -26,6 +26,9 @@ Tài liệu này quản lý toàn bộ các tính năng, cải tiến kỹ thu�
 | `AST-111` | `AST-F2` | Khắc phục lỗi treo LLM do tiến trình zombie `<defunct>` bằng Auto-Recovery và thu hồi child process | P0 | 🟢 **DONE** | Sprint 01 |
 | `AST-112` | `AST-F5` | Module hóa index.html thành cấu trúc thư mục templates/ chuyên nghiệp nạp qua template-loader.js | P1 | 🟢 **DONE** | Sprint 01 |
 | `AST-113` | `AST-F5` | Xây dựng Web Widget Studio, tương đối hóa baseUrl và quét tự động card mạng IP/Hostname máy tính | P0 | 🟢 **DONE** | Sprint 01 |
+| `AST-114` | `AST-F5` | Phân rã cấu trúc CSS thành các component nhỏ gọn: css/base, css/components, css/modals | P1 | 🟢 **DONE** | Sprint 02 |
+| `AST-115` | `AST-F1` | Nâng cấp backend Golang chuẩn Wails v3, loại bỏ kéo thả, cố định 4 góc màn hình (Screen Docking) | P0 | 🟢 **DONE** | Sprint 02 |
+| `AST-116` | `AST-F5` | Xây dựng modal Thiết lập Giao diện (Appearance) và Động cơ Đa Linh Vật (Mascot Engine: 4 thú cưng SVG) | P0 | 🟢 **DONE** | Sprint 02 |
 | `AST-104` | `AST-F3` | Nâng cấp cơ chế phân đoạn văn bản và tối ưu hybrid query (FTS5 + vector) | P1 | 🟡 **IN_PROGRESS** | Sprint 02 |
 | `AST-105` | `AST-F4` | Hoàn thiện cơ chế giám sát RTD3 GPU để không vô tình đánh thức card NVIDIA rời | P1 | 🟡 **IN_PROGRESS** | Sprint 02 |
 | `AST-106` | `AST-F2` | Cải thiện cơ chế Auto-start llama-server và xử lý timeout khi cold-boot | P2 | ⚪ **TODO** | Sprint 02 |

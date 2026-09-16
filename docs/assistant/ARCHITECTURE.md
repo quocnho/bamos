@@ -12,8 +12,10 @@
 ## 1. Triết Lý Thiết Kế & Bối Cảnh Hệ Thống
 
 `assistant` được thiết kế như một **Desktop Copilot siêu nhẹ, luôn sẵn sàng trên góc màn hình Linux**, đồng thời hoạt động như một **Web Copilot Server** cho phép nhúng vào mọi website:
-- **Tương tác trực quan tự nhiên & Neo chuẩn vị trí:** Cửa sổ trong suốt tự do mở rộng theo vùng làm việc màn hình, neo góc dưới bên phải (`g_fit_x = right - w; g_fit_y = bottom - h;`) để chú cún mascot không bao giờ bị xê dịch hoặc che khuất bảng thiết lập.
-- **Phân rã module siêu hạt nhỏ (Atomic Granularity):** Toàn bộ giao diện frontend được module hóa: file `index.html` chỉ giữ khung sườn 85 dòng, các thành phần (EyeLeo, Chat, Mascot, Modals) tách thành từng file HTML template trong `frontend/templates/` và nạp động qua `template-loader.js`.
+* **Giao tiếp Frontend-Backend chuẩn Wails v3 IPC:** Tích hợp `window.wails` bridge giả lập chuẩn Wails v3 với `Call(method, ...args)` và `Events.On(name, cb)` / `Emit(name, data)` cho phép điều khiển backend hai chiều mượt mà.
+- **Neo chuẩn 4 góc màn hình (4-Corner Screen Docking):** Loại bỏ hoàn toàn cơ chế kéo thả tự do gây xung đột Wayland/XWayland. Cửa sổ cố định vững chắc tại 4 góc (`bottom-right`, `bottom-left`, `top-right`, `top-left`) tính toán theo `get_workarea()`.
+- **Hệ thống Đa Linh Vật (Multi-Mascot Vector Engine):** Hỗ trợ chuyển đổi 4 thú cưng trong thời gian thực: Chó con (Puppy), Mèo con (Cat), Thỏ ngọc (Rabbit), và Ông Bụt / Phù thủy (Wizard) với bộ khung SVG đồng nhất lớp mắt và miệng cho animation.
+- **Phân rã module siêu hạt nhỏ (Atomic Granularity):** Toàn bộ giao diện frontend được module hóa: file `index.html` chỉ giữ khung sườn 85 dòng, CSS phân tầng trong `frontend/css/{base,components,modals}`, và các template HTML độc lập trong `frontend/templates/` nạp động qua `template-loader.js`.
 - **Hoạt động bảo mật, Offline-First & Auto-Recovery:** Tận dụng Local LLM chạy trên cổng nội bộ `localhost:9090`. Khi client gửi câu hỏi nếu `llama-server` bị gián đoạn hoặc zombie `<defunct>`, hệ thống tự động dọn dẹp tiến trình, kích hoạt lại AI server và khôi phục luồng stream mà không bị treo vô hạn.
 - **Web Widget Studio & Network IP Scanner:** Tích hợp HTTP Server nội bộ (mặc định cổng `9195`) phục vụ Web Widget qua SSE `/api/chat/stream`, hỗ trợ CORS, cơ chế quét card mạng tự động phát hiện IP/Hostname máy tính (`/api/system/network-addresses`) và quản lý danh sách trắng Domain (Domain Whitelist).
 
@@ -26,10 +28,11 @@ graph TD
     UserDesktop([Người dùng Linux Desktop]) -->|Tương tác chuột/phím| GUI[WebKitGTK Frontend Window]
     UserWeb([Khách truy cập Web / LAN]) -->|Iframe Widget| Widget[Web Widget Embed :9195]
     
-    GUI -->|Custom IPC / JS Message Handler| GoBridge[Go Runtime Engine - gui_linux.go]
+    GUI -->|Wails v3 IPC: window.wails.Call / Events| GoBridge[Go Runtime Engine - gui_linux.go]
     Widget -->|SSE /api/chat/stream & CORS| GoBridge
     
     subgraph "Go Application Core (pkgs/assistant)"
+        GoBridge --> DockEng[4-Corner Dock Engine: BR, BL, TR, TL]
         GoBridge --> AISvc[AI Service - ai.go (Auto-Recovery)]
         GoBridge --> Settings[Settings Manager - settings.go]
         GoBridge --> Waka[WakaTracker - wakatracker.go]
@@ -58,15 +61,15 @@ graph TD
 | Tập tin / Thư mục | Vai trò & Trách nhiệm chính |
 | :--- | :--- |
 | [`main.go`](file:///etc/nixos/pkgs/assistant/main.go) | Điểm vào chương trình, thiết lập cờ môi trường hiển thị X11/XWayland (`GDK_BACKEND`), tắt tăng tốc DMA-BUF tránh màn hình đen trên hybrid GPU NVIDIA, khởi động vòng lặp GTK main loop. |
-| [`gui_linux.go`](file:///etc/nixos/pkgs/assistant/gui_linux.go) | Cấu hình cửa sổ GTK3 trong suốt (RGBA visual), nạp WebKitGTK 4.1, thiết lập các JavaScript handler kết nối 2 chiều giữa Go và Webview, quản lý vị trí cửa sổ không giới hạn kích thước và neo góc dưới-phải cố định, HTTP mux server phục vụ API nội bộ & Web Widget. |
+| [`gui_linux.go`](file:///etc/nixos/pkgs/assistant/gui_linux.go) | Cấu hình cửa sổ GTK3 trong suốt (RGBA visual), nạp WebKitGTK 4.1/6.0, Wails v3 IPC runtime shim, quản lý neo 4 góc màn hình (`BR`, `BL`, `TR`, `TL`), HTTP mux server phục vụ API nội bộ & Web Widget. |
 | [`ai.go`](file:///etc/nixos/pkgs/assistant/ai.go) | Điều phối luồng xử lý AI: chuẩn hóa message context, dọn dẹp tiến trình zombie (`pkill` + reap child process qua goroutine `Wait`), cơ chế Auto-Recovery tự phát hiện và khởi động `llama-server` khi offline, SSE streaming response. |
 | [`settings.go`](file:///etc/nixos/pkgs/assistant/settings.go) | Lưu trữ và đồng bộ hóa cấu hình JSON tại `~/.config/bamos/assistant/config.json`; cung cấp bộ quét IP card mạng và tên miền máy tính (`handleGetNetworkAddresses`). |
-| [`config.go`](file:///etc/nixos/pkgs/assistant/config.go) | Cấu trúc dữ liệu cấu hình Runtime (`Config`), thiết lập nhúng Web Widget (`WidgetConfig`) và quản lý kiểm tra danh sách trắng domain (`IsOriginAllowed`). |
+| [`config.go`](file:///etc/nixos/pkgs/assistant/config.go) | Cấu trúc dữ liệu cấu hình Runtime (`Config`), thiết lập giao diện (`DockPosition`, `WindowScale`, `MascotType`), nhúng Web Widget (`WidgetConfig`) và quản lý kiểm tra danh sách trắng domain (`IsOriginAllowed`). |
 | [`rag.go`](file:///etc/nixos/pkgs/assistant/rag.go) | Cơ sở tri thức cục bộ: chỉ mục tài liệu Markdown/Text, tìm kiếm lai (Hybrid Search) kết hợp Full-Text Search (FTS5) và Vector Search (`sqlite-vec` / `chromem-go`). |
 | [`system_inspector.go`](file:///etc/nixos/pkgs/assistant/system_inspector.go) | Giám sát trạng thái tài nguyên hệ điều hành: CPU, RAM, nhiệt độ, trạng thái nguồn GPU NVIDIA (Active vs Suspended RTD3), phát hiện tiến trình nghẽn. |
 | [`cli_engine.go`](file:///etc/nixos/pkgs/assistant/cli_engine.go) | Động cơ thực thi lệnh CLI an toàn: phân tích câu lệnh, kiểm tra danh sách trắng an toàn (Safety Guard), thông báo kết quả trả về lời nhắc AI. |
-| [`frontend/`](file:///etc/nixos/pkgs/assistant/frontend/) | Mã nguồn giao diện WebKitGTK dạng module hóa: `index.html` (85 dòng khung sườn), `embed.js` (tự động phân giải tương đối `baseUrl`), `widget.html` (web chat iframe), `js/core/template-loader.js` (bộ nạp động template HTML). |
-| [`frontend/templates/`](file:///etc/nixos/pkgs/assistant/frontend/templates/) | Các thành phần giao diện tách rời: `mascot-puppy.html` (3D Vector SVG đa tầng), `chat-bubble.html`, thư mục `eyeleo/` (3 màn hình bảo vệ mắt), thư mục `modals/` (10 bảng thiết lập chuyên sâu). |
+| [`frontend/`](file:///etc/nixos/pkgs/assistant/frontend/) | Mã nguồn giao diện WebKitGTK module hóa: CSS phân tầng (`css/base/`, `css/components/`, `css/modals/`), JavaScript kiến trúc hướng module (`js/core/wails-bridge.js`, `js/mascot/`, `js/features/appearance/`). |
+| [`frontend/templates/`](file:///etc/nixos/pkgs/assistant/frontend/templates/) | Các thành phần giao diện tách rời: `mascot-puppy.html`, `chat-bubble.html`, thư mục `eyeleo/`, thư mục `modals/` (đã bổ sung `modal-appearance.html`). |
 
 ---
 
