@@ -1,0 +1,142 @@
+<!-- ===== Modal Thiết Lập Giao Diện, Docking & Thú Cưng ===== -->
+<div id="appearance-settings-modal" class="modal-backdrop hidden">
+    <div class="modal-card settings-modal appearance-modal-card">
+        <div class="modal-header">
+            <div class="modal-title">🎨 Thiết Lập Giao Diện & Thú Cưng</div>
+            <button id="btn-close-appearance-settings" class="icon-btn close-btn">×</button>
+        </div>
+        <div class="modal-body settings-form">
+            <div class="panel-note">
+                <span class="note-icon">✨</span>
+                <div>
+                    Tùy biến phong cách hiển thị: Màu sắc, Tỉ lệ kích thước, Neo màn hình (Docking 4 góc), và chọn Thú cưng linh vật đồng hành.
+                </div>
+            </div>
+
+            <!-- 1. CHỌN THÚ CƯNG (MASCOT PICKER) -->
+            <div class="setting-section">
+                <div class="section-title">🐾 Chọn Thú Cưng Linh Vật</div>
+                <div class="mascot-grid">
+                    <div class="mascot-card active" data-mascot="puppy">
+                        <div class="mascot-card-icon">🐶</div>
+                        <div class="mascot-card-info">
+                            <b>Cún con BamAI</b>
+                            <small>Trung thành, vui vẻ, thích gặm xương</small>
+                        </div>
+                    </div>
+                    <div class="mascot-card" data-mascot="cat">
+                        <div class="mascot-card-icon">🐱</div>
+                        <div class="mascot-card-info">
+                            <b>Mèo con Tinh Nghịch</b>
+                            <small>Đáng yêu, lanh lợi, mắt tròn xoe</small>
+                        </div>
+                    </div>
+                    <div class="mascot-card" data-mascot="rabbit">
+                        <div class="mascot-card-icon">🐰</div>
+                        <div class="mascot-card-info">
+                            <b>Thỏ Ngọc Trắng</b>
+                            <small>Tai dài rung rinh, hiền lành, dễ mến</small>
+                        </div>
+                    </div>
+                    <div class="mascot-card" data-mascot="wizard">
+                        <div class="mascot-card-icon">🧙‍♂️</div>
+                        <div class="mascot-card-info">
+                            <b>Ông Bụt Thông Thái</b>
+                            <small>Pháp sư thông thái, giải đáp mọi điều</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. BẢNG MÀU CHỦ ĐẠO (THEME PALETTE) -->
+            <div class="setting-section">
+                <div class="section-title">🎨 Bảng Màu Chủ Đạo (Theme)</div>
+                <div class="theme-palette-grid">
+                    <div class="theme-card active" data-theme="default">
+                        <div class="theme-swatch" style="background: linear-gradient(135deg, #2a9d8f 0%, #264653 100%);"></div>
+                        <div class="theme-info">
+                            <b>Teal Emerald</b>
+                            <small>Xanh ngọc trang nhã (Mặc định)</small>
+                        </div>
+                    </div>
+                    <div class="theme-card" data-theme="cyberpunk">
+                        <div class="theme-swatch" style="background: linear-gradient(135deg, #00f5d4 0%, #7b2cbf 100%);"></div>
+                        <div class="theme-info">
+                            <b>Cyberpunk Neon</b>
+                            <small>Ánh sáng tương lai hiện đại</small>
+                        </div>
+                    </div>
+                    <div class="theme-card" data-theme="warm">
+                        <div class="theme-swatch" style="background: linear-gradient(135deg, #f4a261 0%, #e76f51 100%);"></div>
+                        <div class="theme-info">
+                            <b>Warm Amber</b>
+                            <small>Hổ phách ấm áp, ấm cúng</small>
+                        </div>
+                    </div>
+                    <div class="theme-card" data-theme="nord">
+                        <div class="theme-swatch" style="background: linear-gradient(135deg, #88c0d0 0%, #5e81ac 100%);"></div>
+                        <div class="theme-info">
+                            <b>Nordic Frost</b>
+                            <small>Băng tuyết Bắc Âu dịu mắt</small>
+                        </div>
+                    </div>
+                    <div class="theme-card" data-theme="oled">
+                        <div class="theme-swatch" style="background: linear-gradient(135deg, #343a40 0%, #121212 100%);"></div>
+                        <div class="theme-info">
+                            <b>Dark OLED</b>
+                            <small>Tối sâu thẳm, tiết kiệm pin</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. VỊ TRÍ NEO MÀN HÌNH (SCREEN DOCKING 4 GÓC) -->
+            <div class="setting-section">
+                <div class="section-title">📍 Vị Trí Neo Cửa Sổ (Screen Docking)</div>
+                <div class="dock-grid">
+                    <div class="dock-cell" data-dock="top-left">
+                        <span class="dock-icon">↖</span>
+                        <b>Trên — Trái</b>
+                    </div>
+                    <div class="dock-cell" data-dock="top-right">
+                        <span class="dock-icon">↗</span>
+                        <b>Trên — Phải</b>
+                    </div>
+                    <div class="dock-cell" data-dock="bottom-left">
+                        <span class="dock-icon">↙</span>
+                        <b>Dưới — Trái</b>
+                    </div>
+                    <div class="dock-cell active" data-dock="bottom-right">
+                        <span class="dock-icon">↘</span>
+                        <b>Dưới — Phải (Chuẩn)</b>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. KÍCH THƯỚC GIAO DIỆN (SCALE FACTOR) -->
+            <div class="setting-section">
+                <div class="section-title">🔍 Kích Thước & Tỉ Lệ (Scale)</div>
+                <div class="scale-selector">
+                    <button type="button" class="scale-btn" data-scale="compact">
+                        <b>85%</b>
+                        <small>Nhỏ gọn</small>
+                    </button>
+                    <button type="button" class="scale-btn active" data-scale="normal">
+                        <b>100%</b>
+                        <small>Tiêu chuẩn</small>
+                    </button>
+                    <button type="button" class="scale-btn" data-scale="large">
+                        <b>115%</b>
+                        <small>Rộng rãi</small>
+                    </button>
+                </div>
+            </div>
+
+            <div id="appearance-save-status" class="settings-status"></div>
+        </div>
+
+        <div class="modal-footer">
+            <button id="btn-save-appearance" class="modal-btn primary">💾 Lưu & Áp Dụng Ngay</button>
+        </div>
+    </div>
+</div>

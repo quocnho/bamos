@@ -237,6 +237,12 @@ export function initDOM() {
     els.editDomainNote = $("edit-domain-note");
     els.editDomainEnabled = $("edit-domain-enabled");
     els.btnSaveDomainItem = $("btn-save-domain-item");
+
+    // Thiết lập Giao diện & Thú cưng (Appearance Settings)
+    els.appearanceSettingsModal = $("appearance-settings-modal");
+    els.btnCloseAppearanceSettings = $("btn-close-appearance-settings");
+    els.btnSaveAppearance = $("btn-save-appearance");
+    els.appearanceSaveStatus = $("appearance-save-status");
 }
 
 initDOM();

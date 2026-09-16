@@ -41,6 +41,7 @@ const FULL_UI_IDS = [
     "profile-modal",
     "embed-settings-modal",
     "domain-editor-modal",
+    "appearance-settings-modal",
 ];
 
 let scheduled = false;

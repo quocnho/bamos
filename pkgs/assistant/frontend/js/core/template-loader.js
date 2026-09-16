@@ -17,6 +17,7 @@ const TEMPLATES = [
     "templates/modals/modal-profile.html",
     "templates/modals/modal-embed.html",
     "templates/modals/modal-domain-editor.html",
+    "templates/modals/modal-appearance.html",
     "templates/mascot-puppy.html",
 ];
 

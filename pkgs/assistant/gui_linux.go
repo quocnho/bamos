@@ -32,10 +32,17 @@ static AppWidgets g_app;
 static char g_state_path[4096] = {0};
 static gboolean g_keep_above = TRUE;
 static gboolean g_has_saved_position = FALSE;
-// Khung "khít" được neo theo góc dưới-phải (toạ độ màn hình).
+// Khung "khít" được neo theo góc màn hình (mặc định dưới-phải: 'BR', dưới-trái: 'BL', trên-phải: 'TR', trên-trái: 'TL').
+static char g_dock_mode[8] = "BR";
 static gint g_saved_right = 0;
 static gint g_saved_bottom = 0;
 static guint g_save_timeout = 0;
+
+static void set_dock_mode(const char *mode) {
+    if (mode != NULL && mode[0] != '\0') {
+        g_strlcpy(g_dock_mode, mode, sizeof(g_dock_mode));
+    }
+}
 
 // Chế độ mở rộng (bảng thiết lập / nghỉ dài): ghi nhớ khung khít để khôi phục.
 static gboolean g_in_full = FALSE;
@@ -63,26 +70,37 @@ static void mark_geom_busy(void) {
     g_geom_busy_timeout = g_timeout_add(250, clear_geom_busy, NULL);
 }
 
-// Ghi nhận mốc neo (góc dưới-phải cửa sổ khít) từ hình học THỰC TẾ.
-static void capture_anchor(int x, int y, int w, int h) {
-    if (x < 0 || y < 0 || w <= 0 || h <= 0) return;
-    g_saved_right = x + w;
-    g_saved_bottom = y + h;
-    g_has_saved_position = TRUE;
-}
+static void get_workarea(GdkRectangle *area);
 
-// Mốc neo hiện hành: dùng giá trị đã biết; nếu chưa có thì suy ra từ hình học.
+// Mốc neo hiện hành: dùng giá trị đã biết; nếu chưa có thì tính từ góc màn hình theo dock mode.
 static void current_anchor(int *right, int *bottom) {
-    if (!g_has_saved_position) {
-        gint x = 0, y = 0, w = 0, h = 0;
-        if (g_app.window != NULL) {
-            gtk_window_get_position(GTK_WINDOW(g_app.window), &x, &y);
-            gtk_window_get_size(GTK_WINDOW(g_app.window), &w, &h);
-        }
-        capture_anchor(x, y, w, h);
+    GdkRectangle area;
+    get_workarea(&area);
+
+    if (g_has_saved_position && strcmp(g_dock_mode, "CUSTOM") == 0) {
+        *right = g_saved_right;
+        *bottom = g_saved_bottom;
+        return;
     }
-    *right = g_saved_right;
-    *bottom = g_saved_bottom;
+
+    // Neo tự động chuẩn xác theo 4 góc màn hình
+    if (strcmp(g_dock_mode, "BL") == 0) {
+        // Góc dưới - trái
+        *right = area.x; // Tầng fit sẽ lấy right làm mốc x gốc
+        *bottom = area.y + area.height;
+    } else if (strcmp(g_dock_mode, "TR") == 0) {
+        // Góc trên - phải
+        *right = area.x + area.width;
+        *bottom = area.y; // Tầng fit sẽ lấy bottom làm mốc y gốc
+    } else if (strcmp(g_dock_mode, "TL") == 0) {
+        // Góc trên - trái
+        *right = area.x;
+        *bottom = area.y;
+    } else {
+        // Mặc định: Góc dưới - phải ("BR")
+        *right = area.x + area.width;
+        *bottom = area.y + area.height;
+    }
 }
 
 // Vùng làm việc của màn hình chính (đã trừ panel).
@@ -117,11 +135,7 @@ static void current_workarea_and_scale(int *w, int *h, int *scale) {
     if (mon != NULL) *scale = gdk_monitor_get_scale_factor(mon);
 }
 
-// Khôi phục khung khít từ lần chạy trước (neo theo góc dưới-phải = vị trí pet).
-//
-// Hỗ trợ màn hình ĐỔI độ phân giải / tỉ lệ: mốc neo được lưu kèm kích thước vùng
-// làm việc + scale lúc ghi. Nếu hiện tại khác, bảo toàn KHOẢNG CÁCH TỚI GÓC
-// DƯỚI-PHẢI (nơi pet neo) rồi quy đổi — nhờ vậy pet vẫn nằm đúng chỗ.
+// Khôi phục khung khít từ lần chạy trước.
 static void set_initial_geometry(int right, int bottom, int saved_ww, int saved_wh, int saved_scale, gboolean keep_above) {
     GdkRectangle area;
     get_workarea(&area);
@@ -136,15 +150,10 @@ static void set_initial_geometry(int right, int bottom, int saved_ww, int saved_
         if (fy < 0) fy = 0;
         right = area.x + area.width - (int)(fx * area.width);
         bottom = area.y + area.height - (int)(fy * area.height);
-        g_print("[BamAI GUI] Đổi màn hình %dx%d/scale=%d -> %dx%d/scale=%d; mốc neo quy đổi: right=%d bottom=%d\n",
-                saved_ww, saved_wh, saved_scale, cur_ww, cur_wh, cur_scale, right, bottom);
     }
 
-    // Kẹp vào vùng làm việc để không "mất" cửa sổ sau khi đổi cấu hình.
     if (right > area.x + area.width) right = area.x + area.width;
     if (bottom > area.y + area.height) bottom = area.y + area.height;
-    if (right < area.x + 60) right = area.x + 60;
-    if (bottom < area.y + 60) bottom = area.y + 60;
 
     g_saved_right = right;
     g_saved_bottom = bottom;
@@ -152,32 +161,21 @@ static void set_initial_geometry(int right, int bottom, int saved_ww, int saved_
     g_keep_above = keep_above;
 }
 
-// Chỉ đặt trạng thái ghim mặc định (khi chưa có vị trí đã lưu).
+// Chỉ đặt trạng thái ghim mặc định.
 static void set_default_keep_above(gboolean keep_above) {
     g_keep_above = keep_above;
 }
 
-// Ghi mốc neo hiện tại xuống file (chỉ khi đang ở chế độ khít).
+// Ghi mốc neo hiện tại xuống file.
 static gboolean do_save_window_state(gpointer user_data) {
     g_save_timeout = 0;
     if (g_app.window == NULL || g_state_path[0] == '\0' || g_in_full) return G_SOURCE_REMOVE;
-
-    if (!g_has_saved_position) {
-        gint x = 0, y = 0, w = 0, h = 0;
-        gtk_window_get_position(GTK_WINDOW(g_app.window), &x, &y);
-        gtk_window_get_size(GTK_WINDOW(g_app.window), &w, &h);
-        capture_anchor(x, y, w, h);
-        if (!g_has_saved_position) return G_SOURCE_REMOVE;
-    }
 
     int ww = 0, wh = 0, sc = 1;
     current_workarea_and_scale(&ww, &wh, &sc);
 
     FILE *fp = fopen(g_state_path, "w");
     if (fp != NULL) {
-        // Lưu góc dưới-phải (mốc neo pet) + vùng làm việc & scale lúc ghi để lần
-        // sau đổi độ phân giải/tỉ lệ vẫn quy đổi đúng. Trạng thái ghim thuộc
-        // assistant_config.json để tránh hai nguồn sự thật.
         fprintf(fp, "{\"right\":%d,\"bottom\":%d,\"work_w\":%d,\"work_h\":%d,\"scale\":%d}\n",
                 g_saved_right, g_saved_bottom, ww, wh, sc);
         fclose(fp);
@@ -185,7 +183,6 @@ static gboolean do_save_window_state(gpointer user_data) {
     return G_SOURCE_REMOVE;
 }
 
-// Gộp nhiều sự kiện di chuyển liên tiếp thành một lần ghi duy nhất.
 static void schedule_save_window_state(void) {
     if (g_state_path[0] == '\0') return;
     if (g_save_timeout != 0) g_source_remove(g_save_timeout);
@@ -193,31 +190,10 @@ static void schedule_save_window_state(void) {
 }
 
 static gboolean on_window_configure(GtkWidget *widget, GdkEventConfigure *event, gpointer data) {
-    // Bỏ qua toạ độ tổng hợp (-1) mà một số compositor gửi.
-    if (event->x < 0 || event->y < 0) return FALSE;
-    // Bỏ qua thay đổi do chính ta gây ra (resize/move khít hoặc mở rộng).
-    if (g_in_full || g_geom_busy) return FALSE;
-    // Cửa sổ đang ẩn / thu nhỏ / chưa được map: toạ độ do WM báo là KHÔNG đáng
-    // tin (thường về 0,0 hoặc vị trí tạm thời). Nếu ghi vào mốc neo thì lần hiện
-    // lại chú cún và khung chat sẽ nhảy sang chỗ khác. Chỉ ghi nhận hình học khi
-    // cửa sổ đang hiển thị bình thường.
-    if (!gtk_widget_get_mapped(widget)) return FALSE;
-    GdkWindow *gdk_win = gtk_widget_get_window(widget);
-    if (gdk_win == NULL) return FALSE;
-    GdkWindowState gstate = gdk_window_get_state(gdk_win);
-    if (gstate & (GDK_WINDOW_STATE_ICONIFIED | GDK_WINDOW_STATE_WITHDRAWN)) return FALSE;
-    // Bỏ qua khung đúng bằng vùng làm việc (tàn dư của chế độ mở rộng).
-    GdkRectangle area;
-    get_workarea(&area);
-    if (event->width >= area.width - 2 && event->height >= area.height - 2) return FALSE;
-
-    // Chỉ tới đây mới là thao tác NGƯỜI DÙNG kéo cửa sổ → cập nhật mốc neo.
-    capture_anchor(event->x, event->y, event->width, event->height);
-    schedule_save_window_state();
     return FALSE;
 }
 
-// Áp dụng kích thước nội dung, neo CỐ ĐỊNH góc dưới-phải để nội dung không nhảy.
+// Áp dụng kích thước nội dung, định vị chính xác theo góc dock đã chọn
 static gboolean do_window_fit(gpointer user_data) {
     if (g_app.window == NULL) return G_SOURCE_REMOVE;
 
@@ -225,14 +201,11 @@ static gboolean do_window_fit(gpointer user_data) {
     if (w < 80) w = 80;
     if (h < 80) h = 80;
 
-    // Chốt an toàn: không để cửa sổ vượt quá vùng làm việc của màn hình,
-    // và không vượt quá chiều cao tối đa cho phép (phần dư sẽ cuộn trong khung chat).
     GdkRectangle area;
     get_workarea(&area);
     if (h > area.height - 8) h = area.height - 8;
     if (w > area.width - 8) w = area.width - 8;
 
-    // Mốc neo là nguồn sự thật duy nhất — KHÔNG suy ra từ hình học hiện tại vì
     // resize/move của X11 bất đồng bộ, đọc giữa chừng sẽ ra toạ độ sai.
     gint right = 0, bottom = 0;
     current_anchor(&right, &bottom);
@@ -759,6 +732,33 @@ static void setup_window_and_webview(const char *app_url) {
         "    updateProfile: function(p) { post({action: 'update_profile', payload: p}); },"
         "    getQuiz: function() { post({action: 'get_quiz'}); },"
         "    submitQuiz: function(ans) { post({action: 'submit_quiz', payload: {answers: ans}}); }"
+        "  };"
+        "})();"
+        "window.wails = (function() {"
+        "  const eventListeners = new Map();"
+        "  return {"
+        "    Call: function(method, ...args) {"
+        "      return new Promise((resolve, reject) => {"
+        "        try {"
+        "          if (window.assistantNative && typeof window.assistantNative[method] === 'function') {"
+        "            resolve(window.assistantNative[method](...args));"
+        "          } else {"
+        "            resolve(null);"
+        "          }"
+        "        } catch (e) { reject(e); }"
+        "      });"
+        "    },"
+        "    Events: {"
+        "      On: function(name, callback) {"
+        "        if (!eventListeners.has(name)) eventListeners.set(name, new Set());"
+        "        eventListeners.get(name).add(callback);"
+        "        return () => eventListeners.get(name).delete(callback);"
+        "      },"
+        "      Emit: function(name, data) {"
+        "        const set = eventListeners.get(name);"
+        "        if (set) set.forEach(fn => { try { fn(data); } catch (e) { console.error(e); } });"
+        "      }"
+        "    }"
         "  };"
         "})();";
 
@@ -1420,6 +1420,24 @@ func applySavedWindowState(ai *AIService) {
 		)
 		return
 	}
+
+	// Cập nhật dock mode sang tầng C
+	dockMode := "BR"
+	if ai != nil {
+		switch ai.cfg.DockPosition {
+		case "bottom-left":
+			dockMode = "BL"
+		case "top-right":
+			dockMode = "TR"
+		case "top-left":
+			dockMode = "TL"
+		default:
+			dockMode = "BR"
+		}
+	}
+	cDock := C.CString(dockMode)
+	C.set_dock_mode(cDock)
+	C.free(unsafe.Pointer(cDock))
 
 	// Chưa có khung đã lưu: dùng mặc định nhưng vẫn ghi lại sau này.
 	C.set_default_keep_above(cBool(keepAbove))

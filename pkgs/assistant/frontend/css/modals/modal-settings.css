@@ -971,3 +971,188 @@ input[type="range"] {
     color: #2563eb;
 }
 
+
+/* ---------------------------------------------------------------------------
+ * 8. Appearance Settings Styles (Mascot, Themes, Docking, Scale)
+ * ------------------------------------------------------------------------- */
+.mascot-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.mascot-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 9px 12px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mascot-card:hover {
+    border-color: var(--color-primary, #2a9d8f);
+    background: rgba(42, 157, 143, 0.04);
+    transform: translateY(-2px);
+}
+
+.mascot-card.active {
+    border-color: var(--color-primary, #2a9d8f);
+    background: rgba(42, 157, 143, 0.12);
+    box-shadow: 0 4px 12px rgba(42, 157, 143, 0.2);
+}
+
+.mascot-card-icon {
+    font-size: 26px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.mascot-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.mascot-card-info b {
+    font-size: 12px;
+    color: #1e293b;
+}
+
+.mascot-card-info small {
+    font-size: 10px;
+    color: #64748b;
+    line-height: 1.3;
+}
+
+/* Theme Palette Grid */
+.theme-palette-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.theme-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.theme-card:hover {
+    border-color: var(--color-accent, #f4a261);
+    transform: translateY(-1.5px);
+}
+
+.theme-card.active {
+    border-color: var(--color-primary, #2a9d8f);
+    background: rgba(42, 157, 143, 0.08);
+    box-shadow: 0 3px 10px rgba(42, 157, 143, 0.18);
+}
+
+.theme-swatch {
+    height: 32px;
+    border-radius: 6px;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.theme-info b {
+    font-size: 11.5px;
+    color: #1e293b;
+    display: block;
+}
+
+.theme-info small {
+    font-size: 9.5px;
+    color: #64748b;
+    display: block;
+}
+
+/* Docking 4 Góc Grid */
+.dock-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.dock-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.dock-cell:hover {
+    border-color: var(--color-primary, #2a9d8f);
+    background: rgba(42, 157, 143, 0.04);
+}
+
+.dock-cell.active {
+    border-color: var(--color-primary, #2a9d8f);
+    background: rgba(42, 157, 143, 0.15);
+    color: var(--color-primary-dark, #21867a);
+    font-weight: 700;
+}
+
+.dock-icon {
+    font-size: 18px;
+    font-weight: 900;
+}
+
+/* Scale Selector */
+.scale-selector {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.scale-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 8px 6px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.scale-btn:hover {
+    border-color: var(--color-primary, #2a9d8f);
+}
+
+.scale-btn.active {
+    border-color: var(--color-primary, #2a9d8f);
+    background: rgba(42, 157, 143, 0.14);
+}
+
+.scale-btn b {
+    font-size: 13px;
+    color: #1e293b;
+}
+
+.scale-btn small {
+    font-size: 10px;
+    color: #64748b;
+}

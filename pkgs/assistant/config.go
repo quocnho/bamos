@@ -38,6 +38,9 @@ type Config struct {
 	Addressing        string `json:"addressing"`
 	AlwaysOnTop       bool   `json:"always_on_top"`
 	ThemeStyle        string `json:"theme_style"`        // "default", "cyberpunk", "warm", "nord", "oled"
+	DockPosition      string `json:"dock_position"`      // "bottom-right", "bottom-left", "top-right", "top-left"
+	WindowScale       string `json:"window_scale"`       // "normal", "compact", "large"
+	MascotType        string `json:"mascot_type"`        // "puppy", "cat", "rabbit", "wizard"
 	NightLightSync    bool   `json:"night_light_sync"`   // Đồng bộ theo chế độ dịu mắt GNOME Wayland
 	WakaTrackerActive bool   `json:"wakatracker_active"` // Theo dõi thời gian làm việc & năng suất
 	SystemWatchActive bool   `json:"system_watch_active"` // Tự động quét log & cảnh báo ứng dụng ngầm
@@ -157,6 +160,9 @@ func defaultConfig() Config {
 		Addressing:        "Chủ nhân",
 		AlwaysOnTop:       true,
 		ThemeStyle:        "default",
+		DockPosition:      "bottom-right",
+		WindowScale:       "normal",
+		MascotType:        "puppy",
 		NightLightSync:    true,
 		WakaTrackerActive: true,
 		SystemWatchActive: true,
@@ -228,6 +234,15 @@ func (c *Config) normalize() {
 	}
 	if c.ThemeStyle == "" {
 		c.ThemeStyle = "default"
+	}
+	if c.DockPosition == "" {
+		c.DockPosition = "bottom-right"
+	}
+	if c.WindowScale == "" {
+		c.WindowScale = "normal"
+	}
+	if c.MascotType == "" {
+		c.MascotType = "puppy"
 	}
 	if c.Temperature < 0 {
 		c.Temperature = 0.7

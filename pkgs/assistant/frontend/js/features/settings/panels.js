@@ -20,8 +20,10 @@ import { openSystemInspectModal } from "../system-inspect.js";
 import { openWakaModal } from "../wakatracker-ui.js";
 import { openProfileModal } from "../profile-ui.js";
 import { openEmbedSettings } from "./embed-settings.js";
+import { openAppearanceSettings } from "../appearance/appearance-ui.js";
 
 const PANELS = {
+    appearance: openAppearanceSettings,
     rag: openRagSettings,
     llm: openLlmSettings,
     eyeleo: openEyeleoSettings,

@@ -85,6 +85,13 @@ import {
     handleSettingsSaved as embedSettingsSaved,
     handleNetworkAddressesDiscovered,
 } from "./features/settings/embed-settings.js";
+import {
+    initAppearanceUI,
+    handleSettingsLoaded as appearanceSettingsLoaded,
+    handleSettingsSaved as appearanceSettingsSaved,
+} from "./features/appearance/appearance-ui.js";
+
+import { initMascotEngine } from "./mascot/mascot-engine.js";
 
 // Callback do Go backend gọi trực tiếp trên window.
 function bindNativeCallbacks() {
@@ -101,11 +108,13 @@ function bindNativeCallbacks() {
             setAddressing(result.settings.addressing);
             syncAlwaysOnTop(result.settings.always_on_top);
         }
+        appearanceSettingsLoaded(result);
         ragSettingsLoaded(result);
         llmSettingsLoaded(result);
         embedSettingsLoaded(result);
     };
     window.onSettingsSaved = (result) => {
+        appearanceSettingsSaved(result);
         ragSettingsSaved(result);
         llmSettingsSaved(result);
         embedSettingsSaved(result);
@@ -169,6 +178,7 @@ async function bootstrap() {
     }
 
     // Thứ tự quan trọng: pet.js phải đăng ký listener bus trước khi chat.js phát sự kiện.
+    initMascotEngine();
     initPet();
     initChat();
     initSessionUi();
@@ -182,6 +192,7 @@ async function bootstrap() {
     initFileDrop();
     initBoneContext();
     initSuggestions();
+    initAppearanceUI();
     initRagSettings();
     initLlmSettings();
     initSystemInspect();

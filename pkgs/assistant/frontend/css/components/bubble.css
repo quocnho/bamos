@@ -58,3 +58,64 @@
     flex-shrink: 0;
     padding: 6px 12px 12px 12px;
 }
+
+/* ---------------------------------------------------------------------------
+ * Screen Docking Layout Variants (4 Góc Màn Hình)
+ * ------------------------------------------------------------------------- */
+[data-dock="bottom-left"] .bubble {
+    right: auto;
+    left: var(--fit-pad, 24px);
+    transform-origin: bottom left;
+}
+
+[data-dock="bottom-left"] .bubble-tail {
+    right: auto;
+    left: 70px;
+}
+
+[data-dock="bottom-left"] #pet-wrapper {
+    right: auto;
+    left: var(--fit-pad, 24px);
+}
+
+[data-dock="top-right"] .bubble {
+    bottom: auto;
+    top: calc(var(--pet-area, 185px) + var(--fit-pad, 24px));
+    transform-origin: top right;
+}
+
+[data-dock="top-right"] .bubble-tail {
+    bottom: auto;
+    top: -10px;
+    border-top: none;
+    border-bottom: 10px solid rgba(255, 255, 255, 0.92);
+}
+
+[data-dock="top-right"] #pet-wrapper {
+    bottom: auto;
+    top: var(--fit-pad, 24px);
+}
+
+[data-dock="top-left"] .bubble {
+    right: auto;
+    left: var(--fit-pad, 24px);
+    bottom: auto;
+    top: calc(var(--pet-area, 185px) + var(--fit-pad, 24px));
+    transform-origin: top left;
+}
+
+[data-dock="top-left"] .bubble-tail {
+    right: auto;
+    left: 70px;
+    bottom: auto;
+    top: -10px;
+    border-top: none;
+    border-bottom: 10px solid rgba(255, 255, 255, 0.92);
+}
+
+[data-dock="top-left"] #pet-wrapper {
+    right: auto;
+    left: var(--fit-pad, 24px);
+    bottom: auto;
+    top: var(--fit-pad, 24px);
+}
