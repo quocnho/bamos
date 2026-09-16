@@ -619,12 +619,15 @@ cmd_ai() {
         info "Nếu bạn dùng Cloud (DeepSeek/OpenAI/Gemini), ứng dụng vẫn hoạt động bình thường."
         info "Nếu muốn dùng Local AI, hãy bật qua: 'sudo systemctl start bamos-ai' hoặc 'sudo bam ai start'."
       fi
-      info "Khởi chạy BamOS AI Assistant (Deepin floating window)..."
-      if command -v bamos-assistant >/dev/null 2>&1; then
+      info "Khởi chạy TroLy (Trợ lý) - BamOS AI Assistant..."
+      if command -v troly >/dev/null 2>&1; then
+        nohup troly >/dev/null 2>&1 &
+        ok "Đã mở TroLy (Trợ lý)!"
+      elif command -v bamos-assistant >/dev/null 2>&1; then
         nohup bamos-assistant >/dev/null 2>&1 &
-        ok "Đã mở BamAI Assistant!"
+        ok "Đã mở TroLy (Trợ lý)!"
       else
-        die "Ứng dụng bamos-assistant chưa được cài đặt vào hệ thống."
+        die "Ứng dụng troly chưa được cài đặt vào hệ thống."
       fi
       ;;
     *)

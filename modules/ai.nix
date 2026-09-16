@@ -14,7 +14,7 @@
 let
   cfg = config.my.ai;
 
-  bamosAssistantPkg = pkgs.callPackage ../pkgs/assistant { };
+  bamosAssistantPkg = pkgs.callPackage ../pkgs/troly { };
 
   # Script khởi chạy llama-server với các tham số tối ưu
   aiServerScript = pkgs.writeShellScriptBin "bamos-ai-server" ''

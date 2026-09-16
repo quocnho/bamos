@@ -9,7 +9,7 @@
 
 let
   # Cùng một package với cấp hệ thống (modules/ai.nix) → dùng chung store path.
-  bamosAssistant = pkgs.callPackage ../pkgs/assistant { };
+  trolyPkg = pkgs.callPackage ../pkgs/troly { };
 in
 {
   imports = [
@@ -17,12 +17,12 @@ in
     ./dev.nix # developer: nvim + tmux + gh + direnv (máy dev)
   ];
 
-  # ==== Tự khởi động BamAI cùng phiên GNOME ====
+  # ==== Tự khởi động TroLy (Trợ lý) cùng phiên GNOME ====
   # Khai báo tường minh ở cấp USER (~/.config/autostart) — ghi đè bản
   # /etc/xdg/autostart của gói, nên dù GNOME có vô hiệu hoá bản hệ thống thì
   # bản này vẫn chạy. Nội dung lấy trực tiếp từ package để luôn đồng bộ.
-  xdg.configFile."autostart/org.bamos.assistant.desktop".source =
-    "${bamosAssistant}/etc/xdg/autostart/org.bamos.assistant.desktop";
+  xdg.configFile."autostart/org.bamos.troly.desktop".source =
+    "${trolyPkg}/etc/xdg/autostart/org.bamos.troly.desktop";
 
   # ==== BamAI trên THANH TRÊN CÙNG của GNOME Shell ====
   # Extension nhỏ (ESM, GNOME 45+) hiện mục “🐶 BamAI” + menu Hiện/Ẩn/Tắt.
