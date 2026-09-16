@@ -503,8 +503,8 @@ static void move_window_by_bottom_right(GtkWindow *window, int right, int bottom
     if (window == NULL) return;
     gint w = 0, h = 0;
     gtk_window_get_size(window, &w, &h);
-    if (w <= 0) w = 390;
-    if (h <= 0) h = 560;
+    if (w <= 0) w = 530;
+    if (h <= 0) h = 680;
     gtk_window_move(window, right - w, bottom - h);
 }
 
@@ -646,7 +646,7 @@ static void setup_window_and_webview(const char *app_url) {
     g_app.window = window;
 
     gtk_window_set_title(GTK_WINDOW(window), "BamOS Mascot Assistant");
-    gtk_window_set_default_size(GTK_WINDOW(window), 390, 560);
+    gtk_window_set_default_size(GTK_WINDOW(window), 530, 680);
     // Cửa sổ PHẢI resizable để tầng C có thể co giãn khít nội dung (JS yêu cầu).
     gtk_window_set_resizable(GTK_WINDOW(window), TRUE);
     gtk_window_set_decorated(GTK_WINDOW(window), FALSE);

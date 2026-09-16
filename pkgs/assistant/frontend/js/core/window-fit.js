@@ -3,7 +3,8 @@
 // ----------------------------------------------------------------------------
 // Cửa sổ GTK trong suốt nhưng KHÔNG được chiếm một vùng lớn vô ích. Module đo
 // vùng bao (bounding box) của:
-//   • khung chat + chú cún (neo góc dưới-phải), và
+//   • khung chat + chú cún (neo góc dưới-phải),
+//   • menu sổ xuống thiết lập (khi mở), và
 //   • THẺ của mọi bảng thiết lập đang mở (cũng neo góc dưới-phải),
 // rồi yêu cầu tầng C co giãn vừa khít. Vì mọi phần tử cùng neo một góc, kết quả
 // đo KHÔNG phụ thuộc kích thước cửa sổ ⇒ không vòng lặp và không nhảy vị trí.
@@ -11,8 +12,9 @@
 // Tầng C giữ cố định góc dưới-phải (mốc neo đã lưu khi người dùng kéo thả), nên
 // mở/đóng bảng thiết lập chỉ làm cửa sổ LỚN/NHỎ ra mà chú cún đứng yên.
 //
-// Chỉ overlay THỰC SỰ toàn màn hình (màn hình nghỉ dài) mới mở rộng ra vùng làm
-// việc; các bảng thiết lập thì "bám dính" trong cửa sổ chính.
+// Khi bất kỳ bảng thiết lập hoặc overlay toàn màn hình nào mở ra, cửa sổ GTK
+// lập tức mở rộng ra toàn vùng làm việc (toàn màn hình trong suốt) để hiển thị
+// đầy đủ 100% nội dung, không bao giờ bị cắt/che lấp.
 // ============================================================================
 
 import { els, isHidden } from "./dom.js";
@@ -41,8 +43,6 @@ const FULL_UI_IDS = [
     "domain-editor-modal",
 ];
 
-const MODAL_IDS = [];
-
 let scheduled = false;
 let fullActive = false;
 let lastKey = "";
@@ -59,7 +59,7 @@ function cssNumber(name, fallback) {
     return Number.isFinite(value) ? value : fallback;
 }
 
-/** Các phần tử tham gia vào vùng khít. */
+/** Các phần tử tham gia vào vùng khít khi ở chế độ thông thường. */
 function fitElements() {
     const nodes = [
         els.petWrapper,
@@ -67,55 +67,35 @@ function fitElements() {
         els.eyeleoShortbreakBubble,
     ];
 
-    // Thẻ của mọi bảng thiết lập đang mở (đo thẻ, KHÔNG đo lớp phủ nền vì lớp
-    // phủ phủ kín cửa sổ sẽ gây vòng lặp phụ thuộc kích thước).
-    for (const id of MODAL_IDS) {
-        const backdrop = document.getElementById(id);
-        if (!visible(backdrop)) continue;
-        const card = backdrop.querySelector(".modal-card");
-        if (card) nodes.push(card);
+    // Menu thiết lập ⚙ (khi mở sổ xuống)
+    const menu = els.settingsMenu || document.getElementById("settings-menu");
+    if (visible(menu)) {
+        nodes.push(menu);
     }
-
-    return nodes;
-}
-
-/** Các phần tử cần mở rộng cửa sổ (overlay toàn màn hình). */
-function fullUiElements() {
-    return FULL_UI_IDS.map((id) => document.getElementById(id));
-}
-
-/**
- * Mọi phần tử cần THEO DÕI thay đổi để đo lại — kể cả phần tử đang ẨN.
- * Quan trọng: phải theo dõi lớp phủ (backdrop) của các bảng ngay từ đầu, nếu chỉ
- * theo dõi phần tử đang hiển thị thì lúc mở bảng sẽ không ai kích hoạt đo lại.
- */
-function observeElements() {
-    const nodes = [
-        els.petWrapper,
-        els.speechBubble,
-        els.eyeleoShortbreakBubble,
-        els.eyeleoPrebreakToast,
-        els.chatStream,
-    ];
-
-    for (const id of MODAL_IDS) {
-        const backdrop = document.getElementById(id);
-        if (!backdrop) continue;
-        nodes.push(backdrop);
-        const card = backdrop.querySelector(".modal-card");
-        if (card) nodes.push(card);
-    }
-
-    for (const id of FULL_UI_IDS) nodes.push(document.getElementById(id));
 
     return nodes.filter(Boolean);
 }
 
-function anyFullUi() {
-    return fullUiElements().some(visible);
+/** Các phần tử cần mở rộng cửa sổ (overlay toàn màn hình hoặc bảng thiết lập). */
+function fullUiElements() {
+    return FULL_UI_IDS.map((id) => document.getElementById(id)).filter(Boolean);
 }
 
-/** Id các overlay toàn màn hình đang hiển thị (nhật ký chẩn đoán). */
+/** Kiểm tra xem có bất kỳ bảng thiết lập hoặc overlay nào đang mở hay không. */
+function anyFullUi() {
+    // 1. Kiểm tra danh sách id đã biết
+    for (const id of FULL_UI_IDS) {
+        const el = document.getElementById(id);
+        if (visible(el)) return true;
+    }
+    // 2. Dự phòng an toàn: kiểm tra bất kỳ modal-backdrop nào không có class hidden
+    const openModals = document.querySelectorAll(".modal-backdrop:not(.hidden)");
+    if (openModals.length > 0) return true;
+
+    return false;
+}
+
+/** Id các overlay / modal đang hiển thị (nhật ký chẩn đoán). */
 function visibleFullIds() {
     return FULL_UI_IDS.filter((id) => visible(document.getElementById(id)));
 }
@@ -134,7 +114,7 @@ function describeFitElements() {
 }
 
 function measure() {
-    const pad = cssNumber("--fit-pad", 20);
+    const pad = cssNumber("--fit-pad", 24);
 
     let left = Infinity;
     let top = Infinity;
@@ -202,21 +182,19 @@ function apply() {
     native.setContentSize(size.width, size.height);
 }
 
-// Gộp các thay đổi liên tiếp (streaming làm khung chat cao dần) thành một lần
-// co giãn duy nhất mỗi ~90ms để cửa sổ giãn mượt, không rung.
+// Gộp các thay đổi liên tiếp thành một lần co giãn duy nhất mỗi ~60ms
 function schedule() {
     if (scheduled) return;
     scheduled = true;
-    setTimeout(() => requestAnimationFrame(apply), 90);
+    setTimeout(() => requestAnimationFrame(apply), 60);
 }
 
 export function initWindowFit() {
-    const pad = cssNumber("--fit-pad", 20);
+    const pad = cssNumber("--fit-pad", 24);
     const petArea = cssNumber("--pet-area", 185);
     const rawAvail = (window.screen && window.screen.availHeight) || 800;
 
-    // Chiều cao tối đa của khung chat tính từ MÀN HÌNH (không dùng vh của cửa
-    // sổ, vì cửa sổ co giãn theo nội dung sẽ gây vòng lặp).
+    // Chiều cao tối đa của khung chat tính từ MÀN HÌNH
     const maxBubble = Math.max(
         180,
         Math.floor(rawAvail - petArea - pad * 2 - 40),
@@ -226,15 +204,13 @@ export function initWindowFit() {
         `${maxBubble}px`,
     );
 
-    // Bề rộng màn hình (không phụ thuộc kích thước cửa sổ) để giới hạn bề rộng
-    // thẻ bảng — dùng 100vw sẽ khiến thẻ co theo cửa sổ và phải co giãn nhiều bước.
+    // Bề rộng màn hình
     document.documentElement.style.setProperty(
         "--screen-width",
         `${window.screen.availWidth}px`,
     );
 
-    // Chiều cao tối đa của THÂN bảng thiết lập: mở rộng theo toàn bộ màn hình,
-    // trừ lề an toàn để người dùng cuộn xem thoải mái.
+    // Chiều cao tối đa của THÂN bảng thiết lập
     const modalMax = Math.max(
         350,
         Math.floor(rawAvail - MODAL_CHROME - 60),
@@ -248,28 +224,33 @@ export function initWindowFit() {
         `screen avail=${window.screen.availWidth}x${window.screen.availHeight} => maxBubble=${maxBubble} modalMax=${modalMax}`,
     );
 
-    const observed = observeElements();
+    // 1. ResizeObserver trên các khối cơ bản
+    const baseNodes = [
+        els.petWrapper,
+        els.speechBubble,
+        els.eyeleoShortbreakBubble,
+        els.settingsMenu,
+        els.eyeleoPrebreakToast,
+    ].filter(Boolean);
 
     if (window.ResizeObserver) {
-        const observer = new ResizeObserver(schedule);
-        for (const el of observed) observer.observe(el);
+        const resizeObserver = new ResizeObserver(schedule);
+        for (const el of baseNodes) resizeObserver.observe(el);
     }
 
+    // 2. MutationObserver theo dõi toàn diện trên toàn cây DOM #app-container
+    // (Bắt trọn mọi hành động đóng/mở class 'hidden' của modal, menu, bubble)
+    const container = document.getElementById("app-container") || document.body;
     if (window.MutationObserver) {
-        const observer = new MutationObserver(schedule);
-        for (const el of observed) {
-            observer.observe(el, {
-                attributes: true,
-                attributeFilter: ["class", "style"],
-            });
-        }
-        // Nội dung chat lớn dần trong lúc streaming cũng làm khung chat đổi kích thước.
-        if (els.chatStream) {
-            new MutationObserver(schedule).observe(els.chatStream, {
-                childList: true,
-                subtree: true,
-            });
-        }
+        const domObserver = new MutationObserver((mutations) => {
+            schedule();
+        });
+        domObserver.observe(container, {
+            attributes: true,
+            attributeFilter: ["class", "style"],
+            subtree: true,
+            childList: true,
+        });
     }
 
     window.addEventListener("resize", schedule);
@@ -280,3 +261,4 @@ export function initWindowFit() {
 
     schedule();
 }
+
