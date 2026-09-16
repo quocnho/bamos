@@ -17,6 +17,8 @@ buildGoModule rec {
 
   vendorHash = null;
 
+  subPackages = [ "backend/cmd/assistant" ];
+
   nativeBuildInputs = [
     pkg-config
     wrapGAppsHook3

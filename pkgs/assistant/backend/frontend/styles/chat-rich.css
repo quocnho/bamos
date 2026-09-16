@@ -1,0 +1,337 @@
+/* ============================================================================
+ * style-settings.css — Giao diện bổ sung cho BamAI
+ * ----------------------------------------------------------------------------
+ * Tách riêng khỏi style.css để dễ bảo trì:
+ *   1. Header mới (ghim ngoài cùng, nút RAG/LLM icon-only, tiêu đề BamAI)
+ *   2. Khung hỏi đáp có nút sao chép (copy) cho câu hỏi và câu trả lời
+ *   3. Tooltip cho chip từ khóa
+ *   4. Hai bảng thiết lập: RAG và LLM
+ * ========================================================================== */
+
+/* ---------------------------------------------------------------------------
+ * 1. Header
+ * ------------------------------------------------------------------------- */
+.bubble-header {
+    gap: 6px;
+    align-items: center;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.header-title-block {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.15;
+    margin-left: 2px;
+}
+
+.app-title {
+    font-size: 12.5px;
+    font-weight: 800;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.app-title-sub {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #2a9d8f;
+    letter-spacing: 0.3px;
+}
+
+.header-title-block .status-text {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+}
+
+.icon-btn.active {
+    background: rgba(42, 157, 143, 0.16);
+    color: #2a9d8f;
+}
+
+/* ---------------------------------------------------------------------------
+ * 2. Khung hỏi đáp: tách câu hỏi / câu trả lời + nút sao chép
+ * ------------------------------------------------------------------------- */
+.msg {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 12px;
+}
+
+.msg-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.msg-role {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.msg-user .msg-role {
+    color: #b23b18;
+}
+
+.msg-ai .msg-role {
+    color: #2a9d8f;
+}
+
+.msg-copy {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-size: 11px;
+    line-height: 1;
+    padding: 3px 5px;
+    cursor: pointer;
+    color: #94a3b8;
+    opacity: 0.75;
+    transition: all 0.15s;
+}
+
+.msg-copy:hover {
+    opacity: 1;
+    color: #2a9d8f;
+    border-color: rgba(42, 157, 143, 0.35);
+    background: rgba(42, 157, 143, 0.08);
+}
+
+.msg-copy.copied {
+    color: #2a9d8f;
+    border-color: rgba(42, 157, 143, 0.5);
+    background: rgba(42, 157, 143, 0.14);
+}
+
+.msg-body {
+    user-select: text;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 13px;
+    line-height: 1.6;
+    word-break: break-word;
+}
+
+.msg-user .msg-body {
+    background: linear-gradient(
+        135deg,
+        rgba(244, 162, 97, 0.16),
+        rgba(231, 111, 81, 0.12)
+    );
+    border: 1px solid rgba(244, 162, 97, 0.35);
+    color: #7c2d12;
+    font-weight: 500;
+}
+
+.msg-ai .msg-body {
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    color: #1e293b;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.msg-ai .msg-body > i:only-child {
+    color: #64748b;
+}
+
+/* Typography phân cấp trong câu trả lời AI */
+.msg-ai .msg-body h1,
+.msg-ai .msg-body h2,
+.msg-ai .msg-body h3,
+.msg-ai .msg-body h4 {
+    color: #0f172a;
+    font-weight: 800;
+    margin: 10px 0 6px 0;
+    line-height: 1.35;
+}
+.msg-ai .msg-body h1 { font-size: 15.5px; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 4px; }
+.msg-ai .msg-body h2 { font-size: 14.5px; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; }
+.msg-ai .msg-body h3 { font-size: 13.5px; color: #1e3a5f; }
+.msg-ai .msg-body h4 { font-size: 12.5px; color: #334155; }
+
+/* Bảng Markdown cuộn ngang mượt mà trong khung chat 480px */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.table-container::-webkit-scrollbar {
+    height: 4px;
+}
+.table-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.markdown-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.markdown-table th {
+    background: #f1f5f9;
+    color: #1e293b;
+    font-weight: 700;
+    padding: 7px 10px;
+    border-bottom: 1.5px solid #cbd5e1;
+}
+
+.markdown-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+}
+
+.markdown-table tr:last-child td {
+    border-bottom: none;
+}
+
+.markdown-table tr:hover td {
+    background: #f8fafc;
+}
+
+/* Khối Code Block hiện đại có thanh tiêu đề và nút sao chép */
+.code-block-wrapper {
+    margin: 8px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #334155;
+    background: #0f172a;
+}
+
+.code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1e293b;
+    padding: 4px 10px;
+    border-bottom: 1px solid #334155;
+}
+
+.code-lang {
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #38bdf8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.code-copy-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    color: #94a3b8;
+    font-size: 11px;
+    padding: 2px 7px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.code-copy-btn:hover {
+    background: rgba(42, 157, 143, 0.25);
+    color: #2dd4bf;
+    border-color: #2a9d8f;
+}
+
+.code-copy-btn.copied {
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+    border-color: #22c55e;
+}
+
+.code-block-wrapper pre {
+    margin: 0 !important;
+    padding: 8px 10px !important;
+    background: transparent !important;
+    border: none !important;
+    overflow-x: auto;
+}
+
+.code-block-wrapper pre code {
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.45;
+    color: #e2e8f0;
+}
+
+/* Danh sách có thứ tự và không thứ tự */
+.msg-ai .msg-body ul,
+.msg-ai .msg-body ol {
+    margin: 6px 0 8px 16px;
+    padding: 0;
+}
+
+.msg-ai .msg-body li {
+    margin-bottom: 4px;
+    line-height: 1.5;
+}
+
+/* Blockquote hiện đại */
+.msg-ai .msg-body blockquote {
+    border-left: 3.5px solid #2a9d8f;
+    background: rgba(42, 157, 143, 0.07);
+    margin: 8px 0;
+    padding: 6px 12px;
+    border-radius: 0 8px 8px 0;
+    color: #334155;
+    font-style: italic;
+}
+
+/* ---------------------------------------------------------------------------
+ * 3. Tooltip cho chip từ khóa
+ * ------------------------------------------------------------------------- */
+.chip-tooltip {
+    position: fixed;
+    z-index: 1600;
+    max-width: 260px;
+    background: #1e293b;
+    color: #f8fafc;
+    font-size: 11px;
+    line-height: 1.45;
+    padding: 7px 10px;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+    pointer-events: none;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.chip-tooltip.hidden {
+    display: none !important;
+}
+
+.chip-tooltip .tip-title {
+    font-weight: 800;
+    color: #f4a261;
+    margin-bottom: 2px;
+}
+

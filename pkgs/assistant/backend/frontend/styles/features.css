@@ -1,0 +1,86 @@
+/* ---------------------------------------------------------------------------
+ * 6. Style bổ sung cho System Inspector, WakaTracker & User Profile
+ * ------------------------------------------------------------------------- */
+.issue-card {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.issue-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.mini-btn {
+    transition: background 0.15s;
+}
+.mini-btn:hover {
+    background: #e2e8f0 !important;
+}
+
+.rag-docs-container::-webkit-scrollbar,
+.issues-list::-webkit-scrollbar {
+    width: 5px;
+}
+.rag-docs-container::-webkit-scrollbar-thumb,
+.issues-list::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+/* Lưới lĩnh vực & chuyên môn người dùng quan tâm (chọn tối đa 3) */
+.domain-chips-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    margin-top: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.domain-chips-grid::-webkit-scrollbar {
+    width: 4px;
+}
+
+.domain-chips-grid::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.domain-chip {
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+    line-height: 1.3;
+}
+
+.domain-chip:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #0f172a;
+    transform: translateY(-1px);
+}
+
+.domain-chip.active {
+    background: linear-gradient(135deg, rgba(42, 157, 143, 0.12), rgba(38, 70, 83, 0.08));
+    border-color: #2a9d8f;
+    color: #1b635a;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(42, 157, 143, 0.15);
+}
+
+.domain-chip.active::before {
+    content: "✓ ";
+    color: #2a9d8f;
+    font-weight: 800;
+    margin-right: 4px;
+}
