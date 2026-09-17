@@ -24,10 +24,20 @@ type VectorClient struct {
 	client    *http.Client
 }
 
+var sharedVectorTransport = &http.Transport{
+	MaxIdleConns:        50,
+	MaxIdleConnsPerHost: 20,
+	IdleConnTimeout:     90 * time.Second,
+	DisableCompression:  true,
+}
+
 func NewVectorClient(llamaHost string) *VectorClient {
 	return &VectorClient{
 		llamaHost: llamaHost,
-		client:    &http.Client{Timeout: 1200 * time.Millisecond},
+		client: &http.Client{
+			Transport: sharedVectorTransport,
+			Timeout:   2 * time.Second,
+		},
 	}
 }
 

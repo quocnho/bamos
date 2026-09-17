@@ -1,23 +1,16 @@
 // ============================================================================
-// chat/chat.js — Điều khiển hội thoại với AI
-// ----------------------------------------------------------------------------
-// • Hội thoại được NỐI TIẾP: mỗi câu hỏi/trả lời được THÊM vào khung chat,
-//   không xoá các lượt trước (trước đây mỗi lần gửi lại thay thế toàn bộ nội
-//   dung nên trông như "phiên mới" và mất mạch hội thoại).
-// • Ngữ cảnh gửi cho model suy ra từ transcript của phiên (chat/sessions.js).
-// • Mỗi khối có nút sao chép; khối chat cuộn được khi nội dung dài.
-//
-// Module này KHÔNG import pet.js; phát sự kiện qua bus để tránh import vòng.
+// chat/chat.js — Điều khiển hội thoại với AI (Clean & Modularized)
 // ============================================================================
 
 import { els, show, hide } from "../core/dom.js";
 import { bus } from "../core/bus.js";
 import { setPetState, isRagEnabled, getAddressing } from "../core/state.js";
 import { native } from "../core/native.js";
-import { escapeHtml, stripHtml } from "../core/utils.js";
-import { copyText } from "../core/clipboard.js";
+import { escapeHtml } from "../core/utils.js";
 import { renderVisualMarkdown } from "./markdown.js";
 import { createAttachmentManager } from "./attachments.js";
+import { welcomeBlock, userBlock, aiBlock } from "./chat-render.js";
+import { handleStreamClick } from "./chat-actions.js";
 import {
     appendTurn,
     currentHistory,
@@ -26,20 +19,13 @@ import {
 } from "./sessions.js";
 
 const attachments = createAttachmentManager();
-
 let fullAccumulatedReply = "";
-// Phiên đang nhận câu trả lời. Nếu người dùng đổi phiên giữa lúc stream thì
-// token/done đến sau sẽ bị bỏ qua để không rơi vào phiên mới.
 let streamSessionId = null;
 
-/** Dòng trả lời hiện tại có còn thuộc phiên đang mở không? */
 function streamBelongsToCurrentSession() {
     return !streamSessionId || getCurrentSession().id === streamSessionId;
 }
 
-// ---------------------------------------------------------------------------
-// Truy vấn nhanh các element động (được tạo lại mỗi lần đổi innerHTML)
-// ---------------------------------------------------------------------------
 function replyElement() {
     return document.getElementById("current-reply");
 }
@@ -54,11 +40,6 @@ function appendHtml(html) {
     scrollToBottom();
 }
 
-// ---------------------------------------------------------------------------
-// API công khai cho các module khác
-// ---------------------------------------------------------------------------
-
-/** Thêm một khối thông báo của hệ thống (không thuộc transcript). */
 export function showMessage(html) {
     appendHtml(html);
 }
@@ -75,69 +56,19 @@ export function setInputValue(text) {
     if (els.chatInput) els.chatInput.value = text;
 }
 
-// ---------------------------------------------------------------------------
-// Dựng khối câu hỏi / câu trả lời
-// ---------------------------------------------------------------------------
-
-function welcomeBlock() {
-    return `
-    <div class="welcome-msg">
-      🐶 <b>Xin chào ${escapeHtml(getAddressing())}!</b> Em đang ở đây, sẵn sàng hỗ trợ ạ! Hãy nhấp vào ô chat để bắt đầu nhé!
-    </div>`;
-}
-
-function userBlock(text, turnIndex) {
-    return `
-    <div class="msg msg-user" data-turn="${turnIndex}">
-      <div class="msg-head">
-        <span class="msg-role">🧑 ${escapeHtml(getAddressing())}</span>
-        <button class="msg-copy" title="Sao chép câu hỏi">📋</button>
-      </div>
-      <div class="msg-body">${escapeHtml(text)}</div>
-    </div>`;
-}
-
-function aiBlock(raw, turnIndex, { streaming = false } = {}) {
-    const body = raw
-        ? renderVisualMarkdown(raw)
-        : "<i>Em đang tra cứu và xử lý...</i>";
-    const id = streaming ? ' id="current-reply"' : "";
-    const copy = streaming
-        ? ""
-        : '<button class="msg-copy" title="Sao chép câu trả lời">📋</button>';
-    return `
-    <div class="msg msg-ai" data-turn="${turnIndex}">
-      <div class="msg-head">
-        <span class="msg-role">🐶 BamAI</span>
-        ${copy}
-      </div>
-      <div class="msg-body"${id}>${body}</div>
-    </div>`;
-}
-
-/**
- * Dựng lại toàn bộ khung chat từ transcript của phiên hiện tại.
- * Dùng khi mở lại một phiên cũ hoặc tạo phiên mới.
- */
 export function renderTranscript() {
     if (!els.chatStream) return;
-
-    // Vừa chuyển sang phiên khác khi đang trả lời: dừng backend và dọn trạng thái
-    // stream cũ để token còn lại không ghi vào phiên mới.
     if (streamSessionId && streamSessionId !== getCurrentSession().id) {
         native.stopGeneration();
         streamSessionId = null;
         fullAccumulatedReply = "";
         hide(els.btnStopStream);
     }
-
     const transcript = getCurrentSession().transcript;
-
     if (transcript.length === 0) {
         els.chatStream.innerHTML = welcomeBlock();
         return;
     }
-
     els.chatStream.innerHTML = transcript
         .map((turn, index) =>
             turn.role === "user"
@@ -148,14 +79,11 @@ export function renderTranscript() {
     scrollToBottom();
 }
 
-/** Gửi câu hỏi hiện tại trong ô nhập liệu. Trả về true nếu đã gửi. */
 export function send() {
     const attachment = attachments.peek();
     let question = els.chatInput ? els.chatInput.value.trim() : "";
-
     if (!question && !attachment) return false;
 
-    // Đảm bảo AI đã thức và làm mới bộ đếm nghỉ.
     bus.emit("session:ensure-awake");
     bus.emit("session:touch");
 
@@ -168,9 +96,7 @@ export function send() {
             question = `[${userTitle} gửi kèm tệp ảnh ${attachment.name}]\n${question}`;
         } else {
             displayUserMsg = `📄 [Đính kèm file: ${attachment.name}] ${question}`;
-            const intro =
-                question ||
-                `${userTitle} gửi tệp ${attachment.name}, hãy đọc và phân tích tóm tắt nội dung này nhé!`;
+            const intro = question || `${userTitle} gửi tệp ${attachment.name}, hãy đọc và phân tích tóm tắt nội dung này nhé!`;
             question = `=== NỘI DUNG TỆP ĐÍNH KÈM: ${attachment.name} ===\n${attachment.content}\n===================================\n${intro}`;
         }
     }
@@ -179,32 +105,21 @@ export function send() {
     fullAccumulatedReply = "";
     show(els.btnStopStream);
 
-    // Ngữ cảnh = các lượt TRƯỚC đó (chưa gồm câu hỏi này).
     const history = currentHistory();
-
-    // Thêm câu hỏi vào transcript + hiển thị, rồi tạo khối trả lời trống.
     const userIndex = appendTurn("user", displayUserMsg);
     const answerIndex = nextTurnIndex();
 
     appendHtml(userBlock(displayUserMsg, userIndex));
     appendHtml(aiBlock("", answerIndex, { streaming: true }));
 
-    els.statusLabel.textContent = isRagEnabled()
-        ? "Đang đọc tri thức..."
-        : "Đang suy nghĩ...";
+    els.statusLabel.textContent = isRagEnabled() ? "Đang đọc tri thức..." : "Đang suy nghĩ...";
     setPetState("thinking");
-
-    // Thống kê tần suất từ khóa (features/suggestions.js lắng nghe).
     bus.emit("chat:asked", displayUserMsg);
 
     streamSessionId = getCurrentSession().id;
     native.ask(question, isRagEnabled(), history);
     return true;
 }
-
-// ---------------------------------------------------------------------------
-// Callback streaming từ Go backend
-// ---------------------------------------------------------------------------
 
 export function handleWaking(progressMsg) {
     els.statusLabel.textContent = progressMsg;
@@ -214,16 +129,13 @@ export function handleWaking(progressMsg) {
 export function handleReady(started) {
     setPetState("idle");
     els.statusLabel.textContent = "Sẵn sàng phục vụ";
-    // Chỉ chào mừng khi VỪA khởi động lại dịch vụ; nếu AI vốn đã chạy (mở lại
-    // khung chat) thì im lặng để không spam thông báo.
     if (started) {
         showMessage(`
     <div class="msg msg-ai">
       <div class="msg-body">
         ✨ <b>Gâu gâu!</b> Toàn bộ dịch vụ AI và RAG đã sẵn sàng 100%! ${escapeHtml(getAddressing())} hãy hỏi em bất cứ điều gì nhé!
       </div>
-    </div>
-  `);
+    </div>`);
     }
     focusInput();
     bus.emit("session:touch");
@@ -231,7 +143,6 @@ export function handleReady(started) {
 
 export function handleChunk(chunkText, isFirst) {
     if (!streamBelongsToCurrentSession()) return;
-
     setPetState("talking");
     els.statusLabel.textContent = "Em đang trả lời...";
     show(els.btnStopStream);
@@ -250,7 +161,6 @@ export function handleChunk(chunkText, isFirst) {
 }
 
 export function handleDone() {
-    // Câu trả lời thuộc phiên đã bị đóng → bỏ qua, không ghi vào phiên mới.
     if (!streamBelongsToCurrentSession()) {
         streamSessionId = null;
         hide(els.btnStopStream);
@@ -266,7 +176,6 @@ export function handleDone() {
     if (target && fullAccumulatedReply) {
         target.innerHTML = renderVisualMarkdown(fullAccumulatedReply);
     }
-    // Lưu câu trả lời vào phiên (nguồn sự thật cho ngữ cảnh các lượt sau).
     if (fullAccumulatedReply.trim()) {
         appendTurn("assistant", fullAccumulatedReply);
     }
@@ -278,17 +187,12 @@ export function handleError(errMsg) {
     setPetState("idle");
     hide(els.btnStopStream);
     els.statusLabel.textContent = "Gặp lỗi rồi!";
-
     const target = replyElement();
     if (target) {
         target.innerHTML = `<span style="color: #E53E3E; font-weight: bold;">Lỗi: ${escapeHtml(errMsg)}</span>`;
     }
     bus.emit("session:touch");
 }
-
-// ---------------------------------------------------------------------------
-// Nút dừng và nút sao chép
-// ---------------------------------------------------------------------------
 
 function stopGeneration(e) {
     if (e) e.stopPropagation();
@@ -299,77 +203,23 @@ function stopGeneration(e) {
 
     const target = replyElement();
     if (target) {
-        target.innerHTML +=
-            '<div style="color: #E76F51; font-size: 11.5px; margin-top: 6px;"><i>⏹ (Đã dừng trả lời)</i></div>';
+        target.innerHTML += '<div style="color: #E76F51; font-size: 11.5px; margin-top: 6px;"><i>⏹ (Đã dừng trả lời)</i></div>';
     }
-    // Vẫn lưu phần đã trả lời được vào phiên để giữ mạch hội thoại.
-    if (fullAccumulatedReply.trim())
-        appendTurn("assistant", fullAccumulatedReply);
+    if (fullAccumulatedReply.trim()) appendTurn("assistant", fullAccumulatedReply);
     streamSessionId = null;
     bus.emit("session:touch");
 }
 
-function flashCopy(button, ok) {
-    button.classList.toggle("copied", ok);
-    button.textContent = ok ? "✅" : "⚠️";
-    setTimeout(() => {
-        button.classList.remove("copied");
-        button.textContent = "📋";
-    }, 1200);
-}
-
-function onStreamClick(e) {
-    // 1. Sao chép riêng khối code
-    const codeBtn = e.target && e.target.closest ? e.target.closest(".code-copy-btn") : null;
-    if (codeBtn) {
-        const wrapper = codeBtn.closest(".code-block-wrapper");
-        const codeEl = wrapper ? wrapper.querySelector("pre code") : null;
-        if (codeEl) {
-            copyText(codeEl.textContent || "").then((ok) => {
-                codeBtn.textContent = ok ? "✅ Đã chép" : "⚠️ Lỗi";
-                codeBtn.classList.add("copied");
-                setTimeout(() => {
-                    codeBtn.textContent = "📋 Sao chép";
-                    codeBtn.classList.remove("copied");
-                }, 1500);
-            });
-        }
-        return;
-    }
-
-    // 2. Sao chép toàn bộ tin nhắn
-    const button =
-        e.target && e.target.closest ? e.target.closest(".msg-copy") : null;
-    if (!button) return;
-
-    const msg = button.closest(".msg");
-    const index = msg && msg.dataset ? Number(msg.dataset.turn) : NaN;
-    const turn = Number.isInteger(index)
-        ? getCurrentSession().transcript[index]
-        : null;
-    const text = turn ? stripHtml(turn.text) : "";
-    if (!text) return;
-
-    copyText(text).then((ok) => flashCopy(button, ok));
-}
-
-// ---------------------------------------------------------------------------
-// Khởi tạo
-// ---------------------------------------------------------------------------
 export function initChat() {
     attachments.bind();
-
     els.btnSend.addEventListener("click", send);
-
     els.chatInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") send();
     });
-
     els.chatInput.addEventListener("focus", () => {
         bus.emit("session:ensure-awake");
         bus.emit("session:touch");
     });
-
     els.btnStopStream.addEventListener("click", stopGeneration);
-    els.chatStream.addEventListener("click", onStreamClick);
+    els.chatStream.addEventListener("click", handleStreamClick);
 }

@@ -26,13 +26,16 @@ type Config struct {
 	RAGTopK        int     `json:"rag_top_k"`
 	RAGHybridAlpha float64 `json:"rag_hybrid_alpha"` // Trọng số: 0.0 (FTS thuần) -> 1.0 (Vector thuần), mặc định 0.65
 
-	// Giao diện, Cá nhân hoá & Thói quen
-	Addressing        string `json:"addressing"`
-	AlwaysOnTop       bool   `json:"always_on_top"`
-	ThemeStyle        string `json:"theme_style"`         // "default", "cyberpunk", "warm", "nord", "oled"
-	NightLightSync    bool   `json:"night_light_sync"`    // Đồng bộ theo chế độ dịu mắt GNOME Wayland
-	WakaTrackerActive bool   `json:"wakatracker_active"`  // Theo dõi thời gian làm việc & năng suất
-	SystemWatchActive bool   `json:"system_watch_active"` // Tự động quét log & cảnh báo ứng dụng ngầm
+	// Giao diện, Cá nhân hoá & Thói quen (Wails v3 & 4-Corner Docking)
+	Addressing        string  `json:"addressing"`
+	AlwaysOnTop       bool    `json:"always_on_top"`
+	DockPosition      string  `json:"dock_position"`      // "BR", "BL", "TR", "TL"
+	WindowScale       float64 `json:"window_scale"`       // 0.8 -> 1.5, mặc định 1.0
+	MascotType        string  `json:"mascot_type"`        // "puppy", "cat", "rabbit", "wizard"
+	ThemeStyle        string  `json:"theme_style"`        // "default", "cyberpunk", "warm", "nord", "oled"
+	NightLightSync    bool    `json:"night_light_sync"`   // Đồng bộ theo chế độ dịu mắt GNOME Wayland
+	WakaTrackerActive bool    `json:"wakatracker_active"` // Theo dõi thời gian làm việc & năng suất
+	SystemWatchActive bool    `json:"system_watch_active"` // Tự động quét log & cảnh báo ứng dụng ngầm
 }
 
 const (
@@ -57,6 +60,9 @@ func DefaultConfig() Config {
 		GpuLayers:         99,
 		Addressing:        "Chủ nhân",
 		AlwaysOnTop:       true,
+		DockPosition:      "BR",
+		WindowScale:       1.0,
+		MascotType:        "puppy",
 		ThemeStyle:        "default",
 		NightLightSync:    true,
 		WakaTrackerActive: true,
@@ -86,6 +92,15 @@ func (c *Config) Normalize() {
 	}
 	if c.RAGHybridAlpha <= 0 || c.RAGHybridAlpha > 1.0 {
 		c.RAGHybridAlpha = 0.65
+	}
+	if c.DockPosition == "" {
+		c.DockPosition = "BR"
+	}
+	if c.WindowScale <= 0.1 || c.WindowScale > 3.0 {
+		c.WindowScale = 1.0
+	}
+	if c.MascotType == "" {
+		c.MascotType = "puppy"
 	}
 	if c.ThemeStyle == "" {
 		c.ThemeStyle = "default"

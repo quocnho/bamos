@@ -83,11 +83,16 @@ func OpenRAGDB(dbPath string) (*sql.DB, string, error) {
 		}
 	}
 
-	dsn := fmt.Sprintf("%s?_journal_mode=WAL", actualPath)
+	dsn := fmt.Sprintf("%s?_journal_mode=WAL&_busy_timeout=5000&_synchronous=NORMAL&_cache_size=-64000", actualPath)
 	db, err := sql.Open(driverName, dsn)
 	if err != nil {
 		return nil, vecExt, err
 	}
+
+	// Tối ưu pool cho SQLite: giới hạn 1 writer/connection để tránh database locked
+	db.SetMaxOpenConns(1)
+	db.SetMaxIdleConns(1)
+	db.SetConnMaxLifetime(0)
 
 	if err := db.Ping(); err != nil {
 		fmt.Printf("[RAG DB] Cảnh báo ping SQLite: %v\n", err)
@@ -122,7 +127,7 @@ func initSchema(db *sql.DB, vecExt string) {
 	if vecExt != "" {
 		_, _ = db.Exec(`
 			CREATE VIRTUAL TABLE IF NOT EXISTS documents_vec USING vec0(
-				doc_id text partition key,
+				id text partition key,
 				embedding float[1024] distance_metric=cosine
 			);
 		`)

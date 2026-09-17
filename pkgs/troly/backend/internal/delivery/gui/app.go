@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"os"
 
+	"troly/backend/internal/delivery/api"
 	"troly/backend/internal/platform/llm"
 	repoFS "troly/backend/internal/repository/fs"
 	"troly/backend/internal/repository/sqlite"
@@ -99,6 +100,12 @@ func (a *App) applySavedWindowState() {
 	keepAbove := cfg.AlwaysOnTop
 	statePath := repoFS.GetWindowStatePath()
 	SetWindowStatePath(statePath)
+	if cfg.DockPosition != "" {
+		SetDockPosition(cfg.DockPosition)
+	}
+	if cfg.WindowScale > 0 {
+		SetWindowScaleFactor(cfg.WindowScale)
+	}
 
 	paths := []string{statePath}
 	for _, p := range paths {
@@ -129,7 +136,16 @@ func (a *App) Run(startupPanel string) {
 	a.applySavedWindowState()
 
 	dynamicFS := NewDynamicFrontendFS(subFS)
-	mux := http.NewServeMux()
+	apiRouter := api.NewRouter(
+		a.chatUc,
+		a.cfgStore,
+		a.modelMgr,
+		a.ragRepo,
+		a.profileUc,
+		a.wakaUc,
+		a.inspectUc,
+	)
+	mux := apiRouter.ServeMux()
 	mux.Handle("/", http.FileServer(http.FS(dynamicFS)))
 
 	mux.HandleFunc("/api/context-dir", func(w http.ResponseWriter, r *http.Request) {

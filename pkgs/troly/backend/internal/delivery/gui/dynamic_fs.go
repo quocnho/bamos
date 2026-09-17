@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"path"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -14,7 +15,9 @@ import (
 // This allows developers to edit clean, modular component HTML files in frontend/components/
 // while serving a seamless single-page app without any build-step or WebKit DOM delay.
 type dynamicFrontendFS struct {
-	base fs.FS
+	base     fs.FS
+	cacheMu  sync.RWMutex
+	cached   []byte
 }
 
 func NewDynamicFrontendFS(base fs.FS) fs.FS {
@@ -23,9 +26,22 @@ func NewDynamicFrontendFS(base fs.FS) fs.FS {
 
 func (d *dynamicFrontendFS) Open(name string) (fs.File, error) {
 	cleanName := path.Clean(name)
-	if cleanName == "." || cleanName == "index.html" {
-		assembled, err := d.assembleIndexHTML()
-		if err == nil {
+	if cleanName == "index.html" {
+		d.cacheMu.RLock()
+		assembled := d.cached
+		d.cacheMu.RUnlock()
+
+		if assembled == nil {
+			var err error
+			assembled, err = d.assembleIndexHTML()
+			if err == nil {
+				d.cacheMu.Lock()
+				d.cached = assembled
+				d.cacheMu.Unlock()
+			}
+		}
+
+		if assembled != nil {
 			return &virtualFile{
 				Reader: bytes.NewReader(assembled),
 				name:   "index.html",

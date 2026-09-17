@@ -2,9 +2,9 @@
   lib,
   buildGoModule,
   pkg-config,
-  gtk3,
-  webkitgtk_4_1,
-  wrapGAppsHook3,
+  gtk4,
+  webkitgtk_6_0,
+  wrapGAppsHook4,
   sqlite,
   sqlite-vec,
 }:
@@ -21,12 +21,12 @@ buildGoModule rec {
 
   nativeBuildInputs = [
     pkg-config
-    wrapGAppsHook3
+    wrapGAppsHook4
   ];
 
   buildInputs = [
-    gtk3
-    webkitgtk_4_1
+    gtk4
+    webkitgtk_6_0
     sqlite
     sqlite-vec
   ];
@@ -41,7 +41,7 @@ buildGoModule rec {
   '';
 
   meta = with lib; {
-    description = "TroLy (Trợ lý) - BamOS Desktop AI Mascot Pet & Assistant";
+    description = "TroLy (Trợ lý) - BamOS Desktop AI Mascot Pet (Wails v3 + WebKitGTK 6.0 + sqlite-vec)";
     license = licenses.mit;
     mainProgram = "troly";
   };

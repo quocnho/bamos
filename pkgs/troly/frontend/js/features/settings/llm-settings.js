@@ -1,23 +1,10 @@
 // ============================================================================
-// features/settings/llm-settings.js — Bảng thiết lập LLM
-// ----------------------------------------------------------------------------
-// Chức năng:
-//   • Chọn nhà cung cấp: local (llama-server) / DeepSeek / OpenAI / Gemini.
-//   • Nhập API key cho từng nhà cung cấp đám mây (ẩn khi không dùng).
-//   • Quản lý model GGUF cục bộ: liệt kê, chọn model đang dùng, tải từ URL.
-//   • Tinh chỉnh temperature, context size, số layer offload GPU.
-//   • Kiểm tra kết nối và khởi động lại llama-server.
+// features/settings/llm-settings.js — Bảng thiết lập LLM (Slim)
 // ============================================================================
 
 import { els, hide, show, toggle } from "../../core/dom.js";
 import { native } from "../../core/native.js";
-
-/** Model đang được chọn trong danh sách. */
-let activePath = "";
-
-// ---------------------------------------------------------------------------
-// Tiện ích
-// ---------------------------------------------------------------------------
+import { renderModels, activePath, setActivePath } from "./llm-models-ui.js";
 
 function setStatus(message, kind = "") {
     const node = els.llmStatus;
@@ -49,118 +36,42 @@ function providerVisibility() {
     toggle(els.llmLocalSection, provider === "local");
 }
 
-function renderModels(result) {
-    const list = els.llmModelList;
-    if (!list) return;
-    list.textContent = "";
-
-    const models = (result && result.models) || [];
-    if (models.length === 0) {
-        const empty = document.createElement("div");
-        empty.className = "model-empty";
-        empty.textContent =
-            "Chưa có model .gguf nào. Hãy tải model hoặc chép tệp vào thư mục trên.";
-        list.appendChild(empty);
-        return;
-    }
-
-    for (const model of models) {
-        const row = document.createElement("div");
-        row.className = "model-item";
-        if (model.active || model.path === activePath) {
-            row.classList.add("active");
-        }
-        row.title = model.path;
-
-        const name = document.createElement("span");
-        name.className = "model-name";
-        name.textContent = `${model.active ? "✅ " : ""}${model.name}`;
-
-        const size = document.createElement("span");
-        size.className = "model-size";
-        size.textContent = model.size_text || "";
-
-        row.appendChild(name);
-        row.appendChild(size);
-
-        row.addEventListener("click", () => {
-            setStatus(`Đang chuyển sang model ${model.name}…`);
-            if (els.llmModelList) {
-                Array.from(els.llmModelList.children).forEach((child) =>
-                    child.classList.remove("active"),
-                );
-            }
-            row.classList.add("active");
-            activePath = model.path;
-            native.setActiveModel(model.path);
-        });
-
-        list.appendChild(row);
-    }
-}
-
-// ---------------------------------------------------------------------------
-// Callback từ Go
-// ---------------------------------------------------------------------------
-
 export function handleSettingsLoaded(result) {
     if (!result || !result.settings) return;
     const settings = result.settings;
-
-    if (els.setLlmProvider)
-        els.setLlmProvider.value = settings.provider || "local";
-    if (els.setDeepseekKey)
-        els.setDeepseekKey.value = settings.deepseek_key || "";
+    if (els.setLlmProvider) els.setLlmProvider.value = settings.provider || "local";
+    if (els.setDeepseekKey) els.setDeepseekKey.value = settings.deepseek_key || "";
     if (els.setOpenaiKey) els.setOpenaiKey.value = settings.openai_key || "";
     if (els.setGeminiKey) els.setGeminiKey.value = settings.gemini_key || "";
-
     if (els.setModelDir) els.setModelDir.value = settings.model_dir || "";
-    activePath = settings.model_path || "";
+    setActivePath(settings.model_path || "");
 
-    const temperature = Number(settings.temperature);
-    if (els.setTemperature) {
-        els.setTemperature.value = String(
-            Number.isFinite(temperature) ? temperature : 0.7,
-        );
-    }
-    if (els.setTempValue) {
-        els.setTempValue.textContent = els.setTemperature
-            ? els.setTemperature.value
-            : "0.7";
-    }
-
-    if (els.setContextSize && settings.context_size) {
-        els.setContextSize.value = String(settings.context_size);
-    }
-    if (els.setGpuLayers && settings.gpu_layers != null) {
-        els.setGpuLayers.value = String(settings.gpu_layers);
-    }
-
+    const temp = Number(settings.temperature);
+    if (els.setTemperature) els.setTemperature.value = String(Number.isFinite(temp) ? temp : 0.7);
+    if (els.setTempValue) els.setTempValue.textContent = els.setTemperature ? els.setTemperature.value : "0.7";
+    if (els.setContextSize && settings.context_size) els.setContextSize.value = String(settings.context_size);
+    if (els.setGpuLayers && settings.gpu_layers != null) els.setGpuLayers.value = String(settings.gpu_layers);
     providerVisibility();
 }
 
 export function handleSettingsSaved(result) {
     if (!result) return;
-    if (result.ok) {
-        setStatus(result.message || "Đã lưu thiết lập.", "ok");
-    } else {
-        setStatus(result.message || "Không lưu được thiết lập.", "error");
-    }
+    setStatus(result.ok ? (result.message || "Đã lưu thiết lập.") : (result.message || "Không lưu được."), result.ok ? "ok" : "error");
 }
 
 export function handleModelsListed(result) {
     if (!result) return;
     if (result.dir && els.setModelDir) els.setModelDir.value = result.dir;
-    if (result.active) activePath = result.active;
-    renderModels(result);
+    if (result.active) setActivePath(result.active);
+    renderModels(result, (m) => {
+        setStatus(`Đang chuyển sang model ${m.name}…`);
+        native.setActiveModel(m.path);
+    });
 }
 
 export function handleModelDownloadProgress(progress) {
     if (!progress) return;
-    setDownloadStatus(
-        `Đang tải ${progress.name}: ${progress.text} (${progress.percent}%)`,
-        progress.percent,
-    );
+    setDownloadStatus(`Đang tải ${progress.name}: ${progress.text} (${progress.percent}%)`, progress.percent);
 }
 
 export function handleModelDownloaded(result) {
@@ -178,29 +89,19 @@ export function handleModelDownloadError(result) {
 
 export function handleActiveModelSet(result) {
     if (!result) return;
-    if (result.ok) {
-        setStatus(result.message || "Đã chọn model.", "ok");
-    } else {
-        setStatus(result.message || "Không đổi được model.", "error");
-    }
+    setStatus(result.ok ? (result.message || "Đã chọn model.") : (result.message || "Không đổi được model."), result.ok ? "ok" : "error");
     native.listModels();
 }
 
 export function handleLLMTestResult(result) {
-    if (!result) return;
-    setStatus(result.message || "", result.ok ? "ok" : "error");
+    if (result) setStatus(result.message || "", result.ok ? "ok" : "error");
 }
 
 export function handleAIRestarted(result) {
-    if (!result) return;
-    setStatus(result.message || "", result.ok ? "ok" : "error");
+    if (result) setStatus(result.message || "", result.ok ? "ok" : "error");
 }
 
-// ---------------------------------------------------------------------------
-// Hành động
-// ---------------------------------------------------------------------------
-
-function openModal() {
+export function openLlmSettings() {
     setStatus("");
     setDownloadStatus("");
     show(els.llmSettingsModal);
@@ -214,7 +115,6 @@ function downloadModel() {
         setStatus("Hãy dán URL file .gguf cần tải.", "error");
         return;
     }
-
     const name = url.split("/").pop().split("?")[0] || "model.gguf";
     if (els.btnLlmDownload) els.btnLlmDownload.disabled = true;
     setDownloadStatus(`Bắt đầu tải ${name}…`, 0);
@@ -227,43 +127,21 @@ function saveSettings() {
         deepseek_key: els.setDeepseekKey.value.trim(),
         openai_key: els.setOpenaiKey.value.trim(),
         gemini_key: els.setGeminiKey.value.trim(),
-        temperature: parseFloat(els.setTemperature.value),
-        context_size: parseInt(els.setContextSize.value, 10),
-        gpu_layers: parseInt(els.setGpuLayers.value, 10),
+        temperature: parseFloat(els.setTemperature.value) || 0.7,
+        context_size: parseInt(els.setContextSize.value, 10) || 4096,
+        gpu_layers: parseInt(els.setGpuLayers.value, 10) || 99,
     };
-
-    if (Number.isNaN(payload.temperature)) payload.temperature = 0.7;
-    if (Number.isNaN(payload.context_size)) payload.context_size = 4096;
-    if (Number.isNaN(payload.gpu_layers)) payload.gpu_layers = 99;
-
     setStatus("Đang lưu thiết lập…");
     native.saveSettings(payload);
 }
 
-/** Mở bảng thiết lập LLM từ bên ngoài (menu GNOME Shell, IPC...). */
-export function openLlmSettings() {
-    openModal();
-}
-
-// ---------------------------------------------------------------------------
-// Khởi tạo
-// ---------------------------------------------------------------------------
-
 export function initLlmSettings() {
-    els.btnCloseLlmSettings.addEventListener("click", () => {
-        hide(els.llmSettingsModal);
-    });
-
+    els.btnCloseLlmSettings.addEventListener("click", () => hide(els.llmSettingsModal));
     els.setLlmProvider.addEventListener("change", providerVisibility);
-
     els.setTemperature.addEventListener("input", () => {
-        if (els.setTempValue)
-            els.setTempValue.textContent = els.setTemperature.value;
+        if (els.setTempValue) els.setTempValue.textContent = els.setTemperature.value;
     });
-
-    els.btnLlmRefreshModels.addEventListener("click", () =>
-        native.listModels(),
-    );
+    els.btnLlmRefreshModels.addEventListener("click", () => native.listModels());
     els.btnLlmDownload.addEventListener("click", downloadModel);
     els.btnSaveLlmSettings.addEventListener("click", saveSettings);
     els.btnLlmTest.addEventListener("click", () => {
@@ -274,6 +152,5 @@ export function initLlmSettings() {
         setStatus("Đang khởi động lại AI…");
         native.restartAI();
     });
-
     providerVisibility();
 }

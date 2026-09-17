@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"troly/backend"
+	"troly"
 	"troly/backend/internal/delivery/gui"
 	"troly/backend/internal/platform/linux"
 	"troly/backend/internal/platform/llm"
@@ -140,7 +140,7 @@ func main() {
 	}
 
 	app := gui.NewApp(
-		backend.FrontendFS,
+		troly.FrontendFS,
 		cfgStore,
 		ragRepo,
 		memRepo,

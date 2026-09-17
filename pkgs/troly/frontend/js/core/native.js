@@ -36,6 +36,8 @@ export const native = {
     // Kích thước cửa sổ (khít nội dung chat + pet)
     setContentSize: (width, height) => call("setContentSize", width, height),
     setWindowFull: (full) => call("setWindowFull", full),
+    setDockMode: (dock) => call("post", { action: "set_dock_mode", payload: { dock } }),
+    setWindowScale: (scale) => call("post", { action: "set_window_scale", payload: { scale } }),
 
     // Nhật ký chẩn đoán (hiện ra stdout của tiến trình Go)
     log: (message) => call("log", message),
