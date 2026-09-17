@@ -33,6 +33,7 @@ buildGoModule rec {
 
   postInstall = ''
     install -Dm644 org.bamos.troly.desktop $out/share/applications/org.bamos.troly.desktop
+    ln -s org.bamos.troly.desktop $out/share/applications/org.bamos.assistant.desktop
     install -Dm644 org.bamos.troly.desktop $out/etc/xdg/autostart/org.bamos.troly.desktop
     install -Dm644 ${../../assets/icons/bamai.svg} $out/share/icons/hicolor/scalable/apps/troly.svg
     install -Dm755 nautilus-bone-context.sh $out/bin/bam-bone-context
