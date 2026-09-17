@@ -189,6 +189,13 @@ function bootstrap() {
             "Sẵn sàng — bấm vào em hoặc ô nhập để bắt đầu";
     }
     scheduleStartupSleep();
+
+    // Tự động focus con trỏ văn bản vào ô input trên đầu pet sẵn sàng cho người dùng gõ
+    setTimeout(() => {
+        if (els.headChatInput) {
+            els.headChatInput.focus();
+        }
+    }, 150);
 }
 
 bootstrap();

@@ -66,6 +66,13 @@ export function createAttachmentManager() {
             });
         }
 
+        if (els.headBtnAttach) {
+            els.headBtnAttach.addEventListener("click", (e) => {
+                e.stopPropagation();
+                if (els.fileUploadInput) els.fileUploadInput.click();
+            });
+        }
+
         if (els.fileUploadInput) {
             els.fileUploadInput.addEventListener("change", (e) => {
                 if (e.target.files && e.target.files.length > 0) {

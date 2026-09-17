@@ -45,15 +45,21 @@ export function showMessage(html) {
 }
 
 export function focusInput() {
-    if (els.chatInput) els.chatInput.focus();
+    if (els.headChatInput) {
+        els.headChatInput.focus();
+    } else if (els.chatInput) {
+        els.chatInput.focus();
+    }
 }
 
 export function setPlaceholder(text) {
     if (els.chatInput) els.chatInput.placeholder = text;
+    if (els.headChatInput) els.headChatInput.placeholder = text;
 }
 
 export function setInputValue(text) {
     if (els.chatInput) els.chatInput.value = text;
+    if (els.headChatInput) els.headChatInput.value = text;
 }
 
 export function renderTranscript() {
@@ -79,10 +85,44 @@ export function renderTranscript() {
     scrollToBottom();
 }
 
+function setSendButtonState(isStreaming) {
+    if (els.headBtnSend) {
+        if (isStreaming) {
+            els.headBtnSend.classList.add("is-stop");
+            els.headBtnSend.textContent = "⏹";
+            els.headBtnSend.title = "Dừng câu trả lời (Stop)";
+        } else {
+            els.headBtnSend.classList.remove("is-stop");
+            els.headBtnSend.textContent = "➤";
+            els.headBtnSend.title = "Gửi yêu cầu";
+        }
+    }
+    if (els.btnStopStream) {
+        if (isStreaming) show(els.btnStopStream);
+        else hide(els.btnStopStream);
+    }
+}
+
 export function send() {
+    // Nếu đang sinh câu trả lời thì bấm nút sẽ dừng yêu cầu
+    if (streamSessionId) {
+        stopGeneration();
+        return false;
+    }
+
     const attachment = attachments.peek();
-    let question = els.chatInput ? els.chatInput.value.trim() : "";
+    let question = "";
+    if (els.headChatInput && els.headChatInput.value.trim()) {
+        question = els.headChatInput.value.trim();
+        els.headChatInput.value = "";
+    } else if (els.chatInput && els.chatInput.value.trim()) {
+        question = els.chatInput.value.trim();
+    }
+
     if (!question && !attachment) return false;
+
+    // Mở khung chat ra để hiển thị câu hỏi và lời đáp
+    show(els.speechBubble);
 
     bus.emit("session:ensure-awake");
     bus.emit("session:touch");
@@ -101,9 +141,10 @@ export function send() {
         }
     }
 
-    els.chatInput.value = "";
+    if (els.chatInput) els.chatInput.value = "";
+    if (els.headChatInput) els.headChatInput.value = "";
     fullAccumulatedReply = "";
-    show(els.btnStopStream);
+    setSendButtonState(true);
 
     const history = currentHistory();
     const userIndex = appendTurn("user", displayUserMsg);
@@ -145,7 +186,7 @@ export function handleChunk(chunkText, isFirst) {
     if (!streamBelongsToCurrentSession()) return;
     setPetState("talking");
     els.statusLabel.textContent = "Em đang trả lời...";
-    show(els.btnStopStream);
+    setSendButtonState(true);
 
     const target = replyElement();
     if (target) {
@@ -163,13 +204,13 @@ export function handleChunk(chunkText, isFirst) {
 export function handleDone() {
     if (!streamBelongsToCurrentSession()) {
         streamSessionId = null;
-        hide(els.btnStopStream);
+        setSendButtonState(false);
         setPetState("idle");
         return;
     }
     streamSessionId = null;
     setPetState("idle");
-    hide(els.btnStopStream);
+    setSendButtonState(false);
     els.statusLabel.textContent = "Sẵn sàng phục vụ";
 
     const target = replyElement();
@@ -185,7 +226,7 @@ export function handleDone() {
 export function handleError(errMsg) {
     streamSessionId = null;
     setPetState("idle");
-    hide(els.btnStopStream);
+    setSendButtonState(false);
     els.statusLabel.textContent = "Gặp lỗi rồi!";
     const target = replyElement();
     if (target) {
@@ -197,7 +238,7 @@ export function handleError(errMsg) {
 function stopGeneration(e) {
     if (e) e.stopPropagation();
     native.stopGeneration();
-    hide(els.btnStopStream);
+    setSendButtonState(false);
     setPetState("idle");
     els.statusLabel.textContent = "Đã dừng câu trả lời theo yêu cầu";
 
@@ -212,14 +253,28 @@ function stopGeneration(e) {
 
 export function initChat() {
     attachments.bind();
-    els.btnSend.addEventListener("click", send);
-    els.chatInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") send();
-    });
-    els.chatInput.addEventListener("focus", () => {
-        bus.emit("session:ensure-awake");
-        bus.emit("session:touch");
-    });
-    els.btnStopStream.addEventListener("click", stopGeneration);
-    els.chatStream.addEventListener("click", handleStreamClick);
+    if (els.btnSend) els.btnSend.addEventListener("click", send);
+    if (els.chatInput) {
+        els.chatInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") send();
+        });
+        els.chatInput.addEventListener("focus", () => {
+            bus.emit("session:ensure-awake");
+            bus.emit("session:touch");
+        });
+    }
+
+    if (els.headBtnSend) els.headBtnSend.addEventListener("click", send);
+    if (els.headChatInput) {
+        els.headChatInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") send();
+        });
+        els.headChatInput.addEventListener("focus", () => {
+            bus.emit("session:ensure-awake");
+            bus.emit("session:touch");
+        });
+    }
+
+    if (els.btnStopStream) els.btnStopStream.addEventListener("click", stopGeneration);
+    if (els.chatStream) els.chatStream.addEventListener("click", handleStreamClick);
 }

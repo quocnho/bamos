@@ -21,6 +21,8 @@ const CLOSE_DELAY_MS = 260;
 let closeTimer = null;
 let pinned = false;
 
+let activeTrigger = null;
+
 function cancelClose() {
     if (closeTimer !== null) {
         clearTimeout(closeTimer);
@@ -28,30 +30,39 @@ function cancelClose() {
     }
 }
 
-/** Đặt menu ngay dưới nút ⚙, canh phải theo nút, luôn nằm trong cửa sổ. */
+/** Đặt menu gần nút trigger (header ⚙ hoặc ngực cún ⚙), luôn nằm trong cửa sổ. */
 function position() {
     const menu = els.settingsMenu;
-    const button = els.btnSettings;
+    const button = activeTrigger || els.petChestSettingsBtn || els.btnSettings;
     if (!menu || !button) return;
 
     const rect = button.getBoundingClientRect();
     const width = menu.offsetWidth || 236;
+    const height = menu.offsetHeight || 180;
     const maxLeft = Math.max(
         EDGE_MARGIN,
         window.innerWidth - width - EDGE_MARGIN,
     );
     const left = Math.min(Math.max(EDGE_MARGIN, rect.right - width), maxLeft);
 
-    menu.style.left = `${Math.round(left)}px`;
-    menu.style.top = `${Math.round(rect.bottom + MENU_GAP)}px`;
+    // Nếu trigger là nút ngực cún (ở dưới), mở menu hướng lên trên để không tràn cửa sổ
+    if (button === els.petChestSettingsBtn) {
+        const top = Math.max(EDGE_MARGIN, rect.top - height - MENU_GAP);
+        menu.style.left = `${Math.round(left)}px`;
+        menu.style.top = `${Math.round(top)}px`;
+    } else {
+        menu.style.left = `${Math.round(left)}px`;
+        menu.style.top = `${Math.round(rect.bottom + MENU_GAP)}px`;
+    }
 }
 
-export function openSettingsMenu() {
+export function openSettingsMenu(trigger) {
     cancelClose();
+    if (trigger) activeTrigger = trigger;
     const menu = els.settingsMenu;
     if (!menu) return;
     show(menu);
-    if (els.btnSettings) els.btnSettings.classList.add("active");
+    if (activeTrigger) activeTrigger.classList.add("active");
     position();
 }
 
@@ -60,6 +71,8 @@ export function closeSettingsMenu() {
     pinned = false;
     hide(els.settingsMenu);
     if (els.btnSettings) els.btnSettings.classList.remove("active");
+    if (els.petChestSettingsBtn) els.petChestSettingsBtn.classList.remove("active");
+    activeTrigger = null;
 }
 
 function scheduleClose() {
@@ -73,27 +86,40 @@ function scheduleClose() {
 
 export function initSettingsMenu() {
     const button = els.btnSettings;
+    const chestButton = els.petChestSettingsBtn;
     const menu = els.settingsMenu;
-    if (!button || !menu) return;
+    if (!menu) return;
 
-    // Rê chuột tới là mở; rời chuột (nút hoặc menu) thì đóng sau một nhịp.
-    button.addEventListener("mouseenter", () => {
-        if (!pinned) openSettingsMenu();
-    });
-    button.addEventListener("mouseleave", scheduleClose);
+    if (button) {
+        button.addEventListener("mouseenter", () => {
+            if (!pinned) openSettingsMenu(button);
+        });
+        button.addEventListener("mouseleave", scheduleClose);
+        button.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (pinned && activeTrigger === button) {
+                closeSettingsMenu();
+            } else {
+                pinned = true;
+                openSettingsMenu(button);
+            }
+        });
+    }
+
+    if (chestButton) {
+        chestButton.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (pinned && activeTrigger === chestButton) {
+                closeSettingsMenu();
+            } else {
+                pinned = true;
+                openSettingsMenu(chestButton);
+            }
+        });
+    }
+
     menu.addEventListener("mouseenter", cancelClose);
     menu.addEventListener("mouseleave", scheduleClose);
-
-    // Bấm nút: ghim mở / bỏ ghim.
-    button.addEventListener("click", (e) => {
-        e.stopPropagation();
-        if (pinned) {
-            closeSettingsMenu();
-        } else {
-            pinned = true;
-            openSettingsMenu();
-        }
-    });
 
     // Bấm một mục: mở bảng tương ứng rồi đóng menu.
     menu.addEventListener("click", (e) => {
@@ -107,7 +133,7 @@ export function initSettingsMenu() {
     // Bấm ra ngoài hoặc Escape thì đóng.
     document.addEventListener("click", (e) => {
         if (isHidden(menu)) return;
-        if (button.contains(e.target) || menu.contains(e.target)) return;
+        if ((button && button.contains(e.target)) || (chestButton && chestButton.contains(e.target)) || menu.contains(e.target)) return;
         closeSettingsMenu();
     });
     document.addEventListener("keydown", (e) => {

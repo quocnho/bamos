@@ -1,15 +1,160 @@
 /* ===================================================
    CHÚ CÚN 3D CHIBI (ORIGINAL MASCOT ANIMATIONS)
    =================================================== */
+.pet-mascot-container,
 .pet-draggable {
     position: relative;
-    cursor: grab;
+    cursor: pointer;
     transform-origin: center bottom;
     transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    user-select: none;
+    -webkit-user-select: none;
 }
 
-.pet-draggable:active {
-    cursor: grabbing;
+/* Thanh input nhỏ gọn mờ trong suốt (translucent glassmorphism) trên đầu cún */
+.pet-head-input-bar {
+    position: absolute;
+    top: -46px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    border-radius: 24px;
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.12),
+        0 2px 6px rgba(0, 0, 0, 0.05);
+    z-index: 120;
+    width: 250px;
+    transition: all 0.25s ease;
+}
+
+.pet-head-input-bar:focus-within {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: #2A9D8F;
+    box-shadow:
+        0 10px 28px rgba(42, 157, 143, 0.25),
+        0 2px 8px rgba(0, 0, 0, 0.08);
+    width: 280px;
+}
+
+.head-bar-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 13px;
+    color: #4a5568;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.head-bar-btn:hover {
+    background: rgba(42, 157, 143, 0.15);
+    color: #2A9D8F;
+    transform: scale(1.08);
+}
+
+.head-bar-btn:active {
+    transform: scale(0.95);
+}
+
+.head-chat-input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 12.5px;
+    color: #2d3748;
+    padding: 4px 2px;
+    font-family: inherit;
+}
+
+.head-chat-input::placeholder {
+    color: #a0aec0;
+    font-size: 11.5px;
+}
+
+.head-bar-send {
+    background: #2A9D8F;
+    color: #ffffff !important;
+    font-size: 11px;
+    transition: all 0.2s ease;
+}
+
+.head-bar-send:hover {
+    background: #238276;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(42, 157, 143, 0.35);
+}
+
+.head-bar-send.is-stop {
+    background: #e63946 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(230, 57, 70, 0.35);
+    animation: pulseStop 1.5s infinite ease-in-out;
+}
+
+.head-bar-send.is-stop:hover {
+    background: #d62828 !important;
+    box-shadow: 0 3px 12px rgba(214, 40, 40, 0.5);
+}
+
+@keyframes pulseStop {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.08);
+    }
+}
+
+/* Nút Settings ⚙️ tròn nhỏ ngay giữa ngực/bụng cún */
+.pet-chest-settings-btn {
+    position: absolute;
+    top: 124px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 110;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    padding: 0;
+}
+
+.pet-chest-settings-btn:hover {
+    transform: translateX(-50%) scale(1.18) rotate(30deg);
+    background: #ffffff;
+    border-color: #2A9D8F;
+    box-shadow: 0 4px 10px rgba(42, 157, 143, 0.3);
+}
+
+.pet-chest-settings-btn:active {
+    transform: translateX(-50%) scale(0.95);
 }
 
 /* Mặc định: Mắt mở, mí mắt nhắm ẩn */

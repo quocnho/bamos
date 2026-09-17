@@ -22,6 +22,12 @@ export const $$ = (selector, root = document) =>
 export const els = {
     // Chú cún + bong bóng chat
     petWrapper: $("pet-wrapper"),
+    petHeadInputBar: $("pet-head-input-bar"),
+    headChatInput: $("head-chat-input"),
+    headBtnRecent: $("head-btn-recent"),
+    headBtnAttach: $("head-btn-attach"),
+    headBtnSend: $("head-btn-send"),
+    petChestSettingsBtn: $("pet-chest-settings-btn"),
     speechBubble: $("speech-bubble"),
     // PHẢI chỉ định trong #speech-bubble: trang có nhiều .bubble-header (bong bóng
     // nghỉ ngắn EyeLeo đứng trước trong DOM) nên querySelector đơn thuần sẽ bắt nhầm.

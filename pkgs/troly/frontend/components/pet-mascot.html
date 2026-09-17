@@ -1,9 +1,51 @@
             <!-- Chú cún con Mascot 3D Chibi (Original BamOS Mascot) -->
             <div
                 id="pet-wrapper"
-                class="pet-draggable"
-                title="Kéo để di chuyển • Bấm để trò chuyện cùng em"
+                class="pet-mascot-container"
+                title="Bấm để trò chuyện cùng em"
             >
+                <!-- Thanh input nhỏ gọn mờ trong suốt trên đầu cún -->
+                <div id="pet-head-input-bar" class="pet-head-input-bar">
+                    <button
+                        id="head-btn-recent"
+                        class="head-bar-btn"
+                        title="Hội thoại gần đây (Recent Sessions)"
+                    >
+                        🕘
+                    </button>
+                    <button
+                        id="head-btn-attach"
+                        class="head-bar-btn"
+                        title="Thêm file / hình ảnh (Attach File)"
+                    >
+                        ＋
+                    </button>
+                    <input
+                        type="text"
+                        id="head-chat-input"
+                        class="head-chat-input"
+                        placeholder="Hỏi em bất cứ điều gì..."
+                        autocomplete="off"
+                        spellcheck="false"
+                    />
+                    <button
+                        id="head-btn-send"
+                        class="head-bar-btn head-bar-send"
+                        title="Gửi yêu cầu"
+                    >
+                        ➤
+                    </button>
+                </div>
+
+                <!-- Nút Settings ⚙️ ngay giữa ngực/bụng cún -->
+                <button
+                    id="pet-chest-settings-btn"
+                    class="pet-chest-settings-btn"
+                    title="Cài đặt & Thiết lập hệ thống (Settings)"
+                >
+                    ⚙️
+                </button>
+
                 <div id="heart-burst" class="heart-effect">❤️</div>
                 <div id="zzz-bubble" class="zzz-effect">z Z Z</div>
 

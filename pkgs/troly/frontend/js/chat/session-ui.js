@@ -85,7 +85,7 @@ function renderList() {
     }
 }
 
-function openRecent() {
+export function openRecent() {
     renderList();
     show(els.recentSessionsModal);
 }
@@ -109,6 +109,13 @@ export function initSessionUi() {
 
     if (els.btnRecentChat) {
         els.btnRecentChat.addEventListener("click", (e) => {
+            e.stopPropagation();
+            openRecent();
+        });
+    }
+
+    if (els.headBtnRecent) {
+        els.headBtnRecent.addEventListener("click", (e) => {
             e.stopPropagation();
             openRecent();
         });
