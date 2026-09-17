@@ -2,9 +2,9 @@
 // features/profile-ui.js — Giao diện Hồ sơ người dùng (Slim)
 // ============================================================================
 
-import { els, show, hide, toggle } from "../core/dom.js";
-import { native } from "../core/native.js";
-import { handleQuizQuestions, submitQuiz, renderRoadmap } from "./profile/quiz-ui.js";
+import { els, show, hide, toggle } from "../../core/dom.js";
+import { native } from "../../core/native.js";
+import { handleQuizQuestions, submitQuiz, renderRoadmap } from "./quiz-ui.js";
 
 export { handleQuizQuestions };
 

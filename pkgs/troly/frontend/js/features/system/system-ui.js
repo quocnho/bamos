@@ -2,8 +2,8 @@
 // features/system-inspect.js — Bảng giám sát hệ thống, log NixOS và app ngầm
 // ============================================================================
 
-import { els, show, hide } from "../core/dom.js";
-import { native } from "../core/native.js";
+import { els, show, hide } from "../../core/dom.js";
+import { native } from "../../core/native.js";
 
 export function openSystemInspectModal() {
     show(els.systemInspectModal);

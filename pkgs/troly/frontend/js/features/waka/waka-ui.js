@@ -2,8 +2,8 @@
 // features/wakatracker-ui.js — Giao diện WakaTracker & Lịch nhắc việc
 // ============================================================================
 
-import { els, show, hide } from "../core/dom.js";
-import { native } from "../core/native.js";
+import { els, show, hide } from "../../core/dom.js";
+import { native } from "../../core/native.js";
 
 export function openWakaModal() {
     show(els.wakaModal);

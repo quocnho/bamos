@@ -32,7 +32,7 @@ import {
 import { initSessionUi } from "./chat/session-ui.js";
 import { restoreLatestSession } from "./chat/sessions.js";
 import { initBoneContext } from "./features/bone.js";
-import { initSuggestions } from "./features/suggestions.js";
+import { initSuggestions } from "./features/suggestions/suggestions.js";
 import { initEyeLeo } from "./features/eyeleo/controller.js";
 import {
     initRagSettings,
@@ -61,17 +61,17 @@ import {
 import {
     initSystemInspect,
     handleSystemInspected,
-} from "./features/system-inspect.js";
+} from "./features/system/system-ui.js";
 import {
     initWakaTrackerUI,
     handleWakaStats,
-} from "./features/wakatracker-ui.js";
+} from "./features/waka/waka-ui.js";
 import {
     initProfileUI,
     handleProfileLoaded,
     handleQuizQuestions,
     handleQuizSubmitted,
-} from "./features/profile-ui.js";
+} from "./features/profile/profile-ui.js";
 
 import {
     initSettingsPanels,
