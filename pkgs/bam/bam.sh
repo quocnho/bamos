@@ -539,14 +539,13 @@ cmd_ai() {
       else
         $SUDO systemctl start bamos-ai.service
       fi
-      # RAG (chromem-go) chạy NGAY TRONG tiến trình BamAI — không có dịch vụ riêng.
       sleep 2
       cmd_ai status
       ;;
     stop)
       info "Dừng bamos-ai service..."
       $SUDO systemctl stop bamos-ai.service
-      ok "Đã dừng dịch vụ BamAI (llama-server)."
+      ok "Đã dừng dịch vụ Local AI (llama-server)."
       ;;
     restart)
       info "Khởi động lại bamos-ai..."
@@ -556,9 +555,9 @@ cmd_ai() {
       ;;
     status)
       if systemctl is-active --quiet bamos-ai.service 2>/dev/null; then
-        ok "BamAI (llama-server) đang ${C_GREEN}CHẠY${C_RESET} (http://127.0.0.1:9090)"
+        ok "Local AI (llama-server) đang ${C_GREEN}CHẠY${C_RESET} (http://127.0.0.1:9090)"
       else
-        say "${C_YELLOW}[!]${C_RESET} BamAI (llama-server) đang ${C_RED}DỪNG${C_RESET}."
+        say "${C_YELLOW}[!]${C_RESET} Local AI (llama-server) đang ${C_RED}DỪNG${C_RESET}."
       fi
       ;;
     run)
@@ -567,16 +566,16 @@ cmd_ai() {
       ;;
     chat)
       if ! systemctl is-active --quiet bamos-ai.service 2>/dev/null; then
-        warn "BamAI chưa chạy! Đang tự động khởi động..."
+        warn "Local AI server chưa chạy! Đang tự động khởi động..."
         cmd_ai start
         if ! systemctl is-active --quiet bamos-ai.service 2>/dev/null; then
-          die "Không thể khởi động BamAI. Hãy kiểm tra: journalctl -u bamos-ai.service -n 20"
+          die "Không thể khởi động Local AI. Hãy kiểm tra: journalctl -u bamos-ai.service -n 20"
         fi
       fi
-      say "${C_BOLD}--- BamAI Chat Studio (Qwen2.5-1.5B) ---${C_RESET}"
+      say "${C_BOLD}--- Local AI Chat Studio (Qwen2.5-1.5B) ---${C_RESET}"
       say "Ngôn ngữ mặc định: ${C_GREEN}Tiếng Việt${C_RESET} (gõ 'exit' hoặc 'quit' để thoát)"
       say ""
-      local sys_prompt="Bạn là BamAI - trợ lý AI của hệ điều hành BamOS. Hãy luôn luôn suy nghĩ và trả lời hoàn toàn bằng Tiếng Việt một cách tự nhiên, chính xác, thân thiện."
+      local sys_prompt="Bạn là trợ lý AI của hệ điều hành BamOS. Hãy luôn luôn suy nghĩ và trả lời hoàn toàn bằng Tiếng Việt một cách tự nhiên, chính xác, thân thiện."
       while true; do
         printf "${C_CYAN}Bạn:${C_RESET} "
         local prompt
@@ -584,7 +583,7 @@ cmd_ai() {
         if [ "$prompt" = "exit" ] || [ "$prompt" = "quit" ]; then break; fi
         if [ -z "$(printf '%s' "$prompt" | tr -d '[:space:]')" ]; then continue; fi
 
-        printf "${C_GREEN}BamAI:${C_RESET} "
+        printf "${C_GREEN}AI:${C_RESET} "
         # Gọi chat completions với system prompt tiếng Việt bắt buộc
         local payload
         payload=$(jq -nc --arg s "$sys_prompt" --arg p "$prompt" '{
@@ -613,25 +612,8 @@ cmd_ai() {
         say ""
       done
       ;;
-    app|ui)
-      if ! systemctl is-active --quiet bamos-ai.service 2>/dev/null; then
-        warn "BamAI Local Server (llama-server) hiện chưa chạy."
-        info "Nếu bạn dùng Cloud (DeepSeek/OpenAI/Gemini), ứng dụng vẫn hoạt động bình thường."
-        info "Nếu muốn dùng Local AI, hãy bật qua: 'sudo systemctl start bamos-ai' hoặc 'sudo bam ai start'."
-      fi
-      info "Khởi chạy TroLy (Trợ lý) - BamOS AI Assistant..."
-      if command -v troly >/dev/null 2>&1; then
-        nohup troly >/dev/null 2>&1 &
-        ok "Đã mở TroLy (Trợ lý)!"
-      elif command -v bamos-assistant >/dev/null 2>&1; then
-        nohup bamos-assistant >/dev/null 2>&1 &
-        ok "Đã mở TroLy (Trợ lý)!"
-      else
-        die "Ứng dụng troly chưa được cài đặt vào hệ thống."
-      fi
-      ;;
     *)
-      say "Cách dùng: bam ai <pull|start|stop|restart|status|run|chat|app>"
+      say "Cách dùng: bam ai <pull|start|stop|restart|status|run|chat>"
       ;;
   esac
 }
@@ -659,7 +641,7 @@ cmd_help() {
       say "  info           Thông tin hệ thống (host, kernel, phần cứng...)"
       say "  doctor         Kiểm tra sức khỏe hệ thống"
       say "  publish \"msg\"   (máy dev) commit → merge develop→main → push GitHub"
-      say "  ai [subcmd]    Quản lý Local AI (pull, start, stop, status, chat; RAG đã nhúng sẵn trong BamAI)"
+      say "  ai [subcmd]    Quản lý Local AI (pull, start, stop, status, chat)"
       say "  version        Phiên bản bam CLI"
       say "  help [lệnh]    Hướng dẫn chi tiết từng lệnh"
       say ""

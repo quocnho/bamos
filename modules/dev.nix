@@ -62,14 +62,6 @@
       # air # live-reload khi phát triển server/binary Go (tuỳ chọn)
       # goreleaser # đóng gói & phát hành binary đa nền tảng (tuỳ chọn)
 
-      # Go + cgo: BamAI (pkgs/assistant) build bằng cgo + GTK/WebKit
-      #   (#cgo pkg-config: gtk+-3.0 webkit2gtk-4.1)
-      # Muốn `go build` TRỰC TIẾP ngoài Nix (không qua `nix build`) thì bỏ comment
-      # 2 dòng dưới để có header + file .pc, rồi trỏ pkg-config tới profile:
-      #   export PKG_CONFIG_PATH=/run/current-system/sw/lib/pkgconfig
-      # gtk3.dev # header + gtk+-3.0.pc
-      # webkitgtk_4_1.dev # header + webkit2gtk-4.1.pc
-
       # ---- Antigravity (Google — AI IDE + CLI, unfree) ----
       antigravity-ide
       antigravity-cli

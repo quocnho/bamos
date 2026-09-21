@@ -47,8 +47,11 @@ in
       STOP_CHARGE_THRESH_BAT0 = "100";
 
       # Ưu tiên PIN: EPP "power" khi chạy bằng pin (i5-10210U vẫn đủ mạnh
-      # cho Firefox + devenv). Nếu thấy máy ì, đổi lại "balance_power".
+      # cho Firefox + devenv), "balance_performance" khi cắm sạc.
       CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+      CPU_ENERGY_PERF_POLICY_ON_AC = "balance_performance";
+      CPU_BOOST_ON_BAT = 0;
+      CPU_BOOST_ON_AC = 1;
 
       # Không cho TLP can thiệp runtime-PM vào driver NVIDIA — tránh xung đột
       # với hardware.nvidia.powerManagement (RTD3) trong modules/gpu.nix.
