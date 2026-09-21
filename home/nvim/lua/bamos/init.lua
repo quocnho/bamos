@@ -47,6 +47,7 @@ for _, mod in ipairs({
     "notes",
     "todo",
     "extras",
+    "ai",
 }) do
     require("bamos.plugins." .. mod)
 end

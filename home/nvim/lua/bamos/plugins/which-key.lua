@@ -47,6 +47,7 @@ wk.add {
   { "<space>t", group = "terminal" },
   { "<space>z", group = "fold (ufo)" },
   { "<space>h", group = "hop (nhảy nhanh)" },
+  { "<space>a", group = "ai (deepseek / agy assistant)" },
 }
 
 -- Prefix leader `,`: g = git hunk, u = UI/theme, còn lại phím đơn.

@@ -1,0 +1,11 @@
+# Ignore heavy static assets & binary directories for AI / Gemini Assistant
+assets/images/
+assets/fonts/
+assets/icons/
+installer/calamares/
+flake.lock
+result
+result*
+.devenv/
+.git/
+__pycache__/
