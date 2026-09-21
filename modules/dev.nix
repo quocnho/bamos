@@ -22,74 +22,14 @@
       # ---- IDE & tooling ----
       zed-editor
       nil # Nix language server (extension "Nix" của Zed + nix-ide trong Antigravity)
-      devenv # devshell kiểu Nix, chạy cùng direnv
-
-      # ---- Python (môi trường lập trình) ----
-      python3
-      python3Packages.pip
-      python3Packages.virtualenv
-      uv
-
-      # ---- Node.js (JavaScript/TypeScript) ----
-      nodejs # Node LTS + npm đi kèm
-      pnpm # quản lý package nhanh, tiết kiệm dung lượng
-
-      # ---- TypeScript / Vue (frontend) ----
-      # Nguyên tắc giữ máy NHẸ: chỉ cài toàn cục những thứ EDITOR gọi qua PATH
-      # và ít phụ thuộc phiên bản (LSP + formatter/linter CLI). Mọi thứ theo
-      # phiên bản dự án (vue, vite, vitest, tailwind, thư viện…) để DEVENV +
-      # pnpm lo trong từng repo — không cài global để tránh lệch version.
-      typescript # tsc + tsserver (CLI + API cho editor)
-      typescript-language-server # LSP TS/JS cho Zed/Antigravity
-      vue-language-server # Volar — LSP cho .vue (SFC)
-      vscode-langservers-extracted # LSP HTML/CSS/JSON (Zed cũng cần)
-      eslint # lint CLI
-      prettier # format CLI (nvim: <space>f; Zed: format on save)
-      # tailwindcss-language-server # bỏ comment nếu dự án dùng Tailwind
-      # emmet-language-server # gõ nhanh HTML/Vue (tuỳ chọn)
-      # vtsls # LSP TS thay thế typescript-language-server (nhanh hơn, tuỳ chọn)
-
-      # ---- Go (Golang) ----
-      go # toolchain: go build/test/run, go mod, gofmt, go vet
-      gopls # language server cho Zed/Antigravity (gợi ý code, go to def, refactor)
-      gotools # goimports, godoc, guru... (golang.org/x/tools)
-      #     ^ lưu ý: KHÁC "go-tools" bên dưới (gotools = x/tools, go-tools = staticcheck)
-      delve # gỡ lỗi `dlv` (giao thức DAP — debug trực tiếp trong Zed/Antigravity)
-      golangci-lint # lint tổng hợp: govet, errcheck, ineffassign, revive...
-      go-tools # staticcheck + các phân tích tĩnh nâng cao
-      gotestsum # xuất kết quả `go test` dễ đọc hơn (tuỳ chọn, thay cho `go test`)
-      gofumpt # formatter chặt hơn gofmt (tuỳ chọn)
-      # air # live-reload khi phát triển server/binary Go (tuỳ chọn)
-      # goreleaser # đóng gói & phát hành binary đa nền tảng (tuỳ chọn)
+      devenv # devshell kiểu Nix, chạy cùng direnv (mọi môi trường Python, Node, Go... quản lý qua devenv)
 
       # ---- Antigravity (Google — AI IDE + CLI, unfree) ----
       antigravity-ide
       antigravity-cli
 
-      # ---- Container / hệ thống ----
-      distrobox
-      podman-compose
+      # ---- GPU diagnostic ----
       mesa-demos # glxinfo... (kiểm tra GPU)
-
-      # ---- Toolchain build (C/C++/CMake/node-gyp...) ----
-      # NixOS reproducible: hệ thống KHÔNG phơi bày compiler sẵn — máy dev cần
-      # build native (node-gyp, pip wheel, cmake project, cấu trúc C…) nên cài
-      # sẵn bộ toolchain. LƯU Ý glibc (runtime + headers) ĐÃ có qua /nix/store,
-      # gcc wrapper tự trỏ tới — không cần thêm glibc.dev vào systemPackages.
-      gcc # C/C++ (gcc + g++), kèm header libc chuẩn
-      binutils # ld, as, strip, ar...
-      gnumake # make
-      pkg-config # tìm thư viện/header khi build (CFLAGS/LDFLAGS)
-      cmake # build system phổ biến
-      ninja # build nhanh (cmake -G Ninja)
-      autoconf # build từ source (./configure) — autotools
-      automake
-      libtool
-      m4
-      patch
-      file # nhiều script ./configure cần xác định loại file
-      # clang # bỏ comment nếu build project cần clang (vd Rust bindgen, Zig...)
-      # openssl # bỏ comment nếu build native cần thư viện openssl (headers đi kèm dev)
     ];
 
     # direnv: nạp env theo thư mục (dev chạy devenv/nix-direnv).

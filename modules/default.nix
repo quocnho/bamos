@@ -21,7 +21,6 @@
     ./bluetooth.nix
     ./virtualisation.nix
     ./nix.nix
-    ./ai.nix
   ];
 }
 

@@ -501,123 +501,6 @@ cmd_publish() {
   ok "Đã commit, merge develop → main và push lên GitHub."
 }
 
-# ---------- Local AI (llama-server + Qwen2.5) ----------
-cmd_ai() {
-  local sub="${1:-status}"
-  if [ $# -gt 0 ]; then shift; fi
-
-  case "$sub" in
-    pull)
-      local model_dir="/var/lib/bamos/models"
-      local dest="$model_dir/qwen2.5-1.5b-instruct-q4_k_m.gguf"
-      local url="https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf"
-
-      $SUDO mkdir -p "$model_dir"
-      $SUDO chmod 777 "$model_dir" || true
-      info "Đang tải model Qwen2.5-1.5B-Instruct GGUF (~1.1GB)..."
-      if command -v curl >/dev/null 2>&1; then
-        curl -L -C - --progress-bar "$url" -o "$dest"
-      elif command -v wget >/dev/null 2>&1; then
-        wget -c -O "$dest" "$url"
-      else
-        die "Cần curl hoặc wget để tải model."
-      fi
-      ok "Đã tải xong model về: $dest"
-      ;;
-    start)
-      if [ ! -f "/var/lib/bamos/models/qwen2.5-1.5b-instruct-q4_k_m.gguf" ]; then
-        warn "Model chưa được tải về máy!"
-        info "Đang tự động tải model Qwen2.5-1.5B..."
-        cmd_ai pull
-      fi
-      info "Khởi động bamos-ai (llama-server)..."
-      if [ -n "$SUDO" ] && [ "$(id -u)" -ne 0 ]; then
-        # Khởi chạy user background process không cần quyền root/sudo nếu người dùng không muốn gõ pass
-        if ! curl -s http://127.0.0.1:9090/health >/dev/null 2>&1; then
-          nohup bamos-ai-server >/dev/null 2>&1 &
-        fi
-      else
-        $SUDO systemctl start bamos-ai.service
-      fi
-      sleep 2
-      cmd_ai status
-      ;;
-    stop)
-      info "Dừng bamos-ai service..."
-      $SUDO systemctl stop bamos-ai.service
-      ok "Đã dừng dịch vụ Local AI (llama-server)."
-      ;;
-    restart)
-      info "Khởi động lại bamos-ai..."
-      $SUDO systemctl restart bamos-ai.service
-      sleep 2
-      cmd_ai status
-      ;;
-    status)
-      if systemctl is-active --quiet bamos-ai.service 2>/dev/null; then
-        ok "Local AI (llama-server) đang ${C_GREEN}CHẠY${C_RESET} (http://127.0.0.1:9090)"
-      else
-        say "${C_YELLOW}[!]${C_RESET} Local AI (llama-server) đang ${C_RED}DỪNG${C_RESET}."
-      fi
-      ;;
-    run)
-      info "Chạy llama-server foreground (on-demand)..."
-      bamos-ai-server
-      ;;
-    chat)
-      if ! systemctl is-active --quiet bamos-ai.service 2>/dev/null; then
-        warn "Local AI server chưa chạy! Đang tự động khởi động..."
-        cmd_ai start
-        if ! systemctl is-active --quiet bamos-ai.service 2>/dev/null; then
-          die "Không thể khởi động Local AI. Hãy kiểm tra: journalctl -u bamos-ai.service -n 20"
-        fi
-      fi
-      say "${C_BOLD}--- Local AI Chat Studio (Qwen2.5-1.5B) ---${C_RESET}"
-      say "Ngôn ngữ mặc định: ${C_GREEN}Tiếng Việt${C_RESET} (gõ 'exit' hoặc 'quit' để thoát)"
-      say ""
-      local sys_prompt="Bạn là trợ lý AI của hệ điều hành BamOS. Hãy luôn luôn suy nghĩ và trả lời hoàn toàn bằng Tiếng Việt một cách tự nhiên, chính xác, thân thiện."
-      while true; do
-        printf "${C_CYAN}Bạn:${C_RESET} "
-        local prompt
-        if ! read -r prompt; then break; fi
-        if [ "$prompt" = "exit" ] || [ "$prompt" = "quit" ]; then break; fi
-        if [ -z "$(printf '%s' "$prompt" | tr -d '[:space:]')" ]; then continue; fi
-
-        printf "${C_GREEN}AI:${C_RESET} "
-        # Gọi chat completions với system prompt tiếng Việt bắt buộc
-        local payload
-        payload=$(jq -nc --arg s "$sys_prompt" --arg p "$prompt" '{
-          messages: [
-            {role: "system", content: $s},
-            {role: "user", content: $p}
-          ],
-          temperature: 0.3
-        }')
-        local resp
-        resp=$(curl -s -X POST http://127.0.0.1:9090/v1/chat/completions \
-          -H "Content-Type: application/json" \
-          -d "$payload" 2>/dev/null || echo "")
-
-        if [ -n "$resp" ]; then
-          local content
-          content=$(printf '%s' "$resp" | jq -r '.choices[0].message.content // empty' 2>/dev/null || true)
-          if [ -n "$content" ]; then
-            say "$content"
-          else
-            err "Không nhận được phản hồi hợp lệ: $resp"
-          fi
-        else
-          err "Không thể kết nối đến http://127.0.0.1:9090. Hãy kiểm tra 'bam ai status'."
-        fi
-        say ""
-      done
-      ;;
-    *)
-      say "Cách dùng: bam ai <pull|start|stop|restart|status|run|chat>"
-      ;;
-  esac
-}
-
 # ---------- Trợ giúp ----------
 cmd_help() {
   local topic="${1:-}"
@@ -641,15 +524,14 @@ cmd_help() {
       say "  info           Thông tin hệ thống (host, kernel, phần cứng...)"
       say "  doctor         Kiểm tra sức khỏe hệ thống"
       say "  publish \"msg\"   (máy dev) commit → merge develop→main → push GitHub"
-      say "  ai [subcmd]    Quản lý Local AI (pull, start, stop, status, chat)"
       say "  version        Phiên bản bam CLI"
       say "  help [lệnh]    Hướng dẫn chi tiết từng lệnh"
       say ""
       say "${C_BOLD}Môi trường:${C_RESET} BAM_FLAKE_DIR (thư mục flake) • BAM_HOST (tên host) • NO_COLOR (tắt màu)"
       say ""
-      say "Ví dụ: bam switch -u   •   bam ai chat   •   bam info"
+      say "Ví dụ: bam switch -u   •   bam info"
       ;;
-    switch | boot | build | dry | update | lock | iso | rollback | generations | gc | info | doctor | publish | ai)
+    switch | boot | build | dry | update | lock | iso | rollback | generations | gc | info | doctor | publish)
       say "${C_BOLD}Lệnh: bam $topic${C_RESET}"
       case "$topic" in
         switch) say "Rebuild + áp dụng ngay cấu hình mới. -u/--update: chạy nix flake update trước." ;;
@@ -665,7 +547,6 @@ cmd_help() {
         info) say "In thông tin hệ thống: host, phiên bản, kernel, GPU, RAM, disk, generation." ;;
         doctor) say "Kiểm tra: flake, dung lượng /nix/store, generation, flake.lock, git." ;;
         publish) say "Máy dev: git add → commit → checkout main → merge develop → push cả 2 branch (yêu cầu đang ở develop)." ;;
-        ai) say "Quản lý Local AI SLM (llama-server + Qwen2.5-1.5B): pull, start, stop, status, chat." ;;
       esac
       ;;
     *)
@@ -695,7 +576,6 @@ main() {
     info | systeminfo) cmd_info "$@" ;;
     doctor | health | check) cmd_doctor "$@" ;;
     publish) cmd_publish "$@" ;;
-    ai) cmd_ai "$@" ;;
     host) detect_host ;;
     version | -V | --version) say "bam $VERSION — BamOS CLI" ;;
     *)

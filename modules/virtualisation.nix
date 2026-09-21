@@ -1,9 +1,15 @@
 # Ảo hóa (podman) & zram.
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 
 {
-  virtualisation.podman.enable = true;
-  virtualisation.podman.dockerCompat = true;
+  virtualisation.podman = {
+    enable = true;
+    dockerCompat = true;
+    defaultNetwork.settings.dns_enabled = true;
+  };
+
+  # Cài đặt podman-compose cấp hệ thống để chạy docker-compose / podman-compose
+  environment.systemPackages = [ pkgs.podman-compose ];
 
   # ==== Tối ưu RAM & Swap nén (zram) ====
   # zstd nén nhanh và hiệu quả, giảm thiểu ghi đĩa SSD, giữ hệ thống phản hồi mượt mà
