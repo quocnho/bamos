@@ -120,6 +120,11 @@ in
       yaml-language-server
       vscode-langservers-extracted
       taplo
+      intelephense
+      gopls
+      clang-tools
+      sqls
+      tailwindcss-language-server
 
       # Formatters & Linters
       black
@@ -127,6 +132,7 @@ in
       stylua
       nixfmt
       prettier
+      blade-formatter
 
       # Tools
       fzf

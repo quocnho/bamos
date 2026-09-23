@@ -25,6 +25,10 @@
     git-lfs
     just
     ghq
+    cmake
+    ninja
+    act
+    sqlite
     # ---- BỘ MỞ RỘNG — bỏ comment khi cần ----
     # docker-compose
     # httpie
@@ -33,7 +37,6 @@
     # terraform
     # awscli2
     # google-cloud-sdk
-    # sqlite
     # postgresql
     # redis
   ];
