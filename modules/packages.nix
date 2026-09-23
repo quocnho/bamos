@@ -26,10 +26,17 @@
     unzip
     zip
     unrar
+    p7zip # giải nén & nén 7z/rar đa định dạng
     pciutils # lspci... (dò phần cứng, bam info)
+    usbutils # lsusb... (kiểm tra thiết bị cắm ngoài USB)
     gparted # chia ổ đĩa
     htop # xem CPU/RAM
     ffmpeg # xử lý âm thanh/video
+    tree # xem cây thư mục trực quan
+    jq # tiện ích xử lý JSON
+
+    # ---- Giao diện đồ họa tiện ích ----
+    file-roller # ứng dụng nén / giải nén đồ họa cho GNOME
 
     # ---- Terminal đẹp & tiện (fzf + starship + zoxide cài qua programs.* ở shell.nix) ----
     fd

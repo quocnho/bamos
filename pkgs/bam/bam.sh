@@ -131,6 +131,17 @@ rebuild() {
   flake_exists
   local action="$1" host tag
   host=$(detect_host)
+
+  # Nếu FLAKE_DIR là git repository, tự động đưa các file mới/thay đổi vào staging (git add)
+  # để Nix Flakes và Home-Manager luôn nhìn thấy toàn bộ file cấu hình của người dùng.
+  if [ -d "$FLAKE_DIR/.git" ] && command -v git >/dev/null 2>&1; then
+    # Kiểm tra xem có file untracked hoặc modified không
+    if [ -n "$(git -C "$FLAKE_DIR" status --porcelain 2>/dev/null || true)" ]; then
+      info "Phát hiện thay đổi trong $FLAKE_DIR — tự động cập nhật Git tracking..."
+      git -C "$FLAKE_DIR" add -A 2>/dev/null || $SUDO git -C "$FLAKE_DIR" add -A 2>/dev/null || true
+    fi
+  fi
+
   if [ "$action" = "switch" ] || [ "$action" = "boot" ]; then
     # Tự gắn tag "BamOS-YY.MM.DD-HH:MM" (nixpkgs chỉ cho ký tự [a-zA-Z0-9:_.-]
     # nên "/" → "." — profiles/common.nix đọc BAMOS_TAG qua system.nixos.tags).
@@ -178,6 +189,50 @@ lock_rev() {
       exit
     }
   ' "$FLAKE_DIR/flake.lock" 2>/dev/null || true
+}
+
+# Lấy revision mới nhất từ remote Git repository (refs/heads/main)
+remote_main_rev() {
+  local url="$1"
+  git ls-remote "$url" refs/heads/main 2>/dev/null | awk '{print substr($1, 1, 7)}' || true
+}
+
+# Kiểm tra nếu upstream bamos có commit mới trên GitHub và hỏi người dùng có muốn update không
+check_and_prompt_upstream_update() {
+  local cur_rev
+  cur_rev=$(lock_rev bamos)
+  # Nếu flake hiện tại không dùng input `bamos` (vd: máy dev repo gốc), không cần kiểm tra upstream
+  if [ -z "$cur_rev" ]; then
+    return 0
+  fi
+
+  # Kiểm tra mạng nhanh
+  if ! check_network; then
+    return 0
+  fi
+
+  info "Kiểm tra bản cập nhật từ upstream (github:quocnho/bamos/main)..."
+  local rem_rev
+  rem_rev=$(remote_main_rev "https://github.com/quocnho/bamos.git")
+
+  if [ -n "$rem_rev" ] && [ "$rem_rev" != "$cur_rev" ]; then
+    warn "Phát hiện bản cập nhật mới từ upstream: bamos ${cur_rev} → ${rem_rev} (main)"
+    printf "%s" "${C_YELLOW}[?] Bạn có muốn cập nhật trước khi switch không? [y/N/có]: ${C_RESET}"
+    local ans
+    read -r ans < /dev/tty 2>/dev/null || read -r ans || ans="n"
+    case "$ans" in
+      y | Y | yes | YES | co | CO | Có | CÓ | c | C)
+        update_lockfile
+        ;;
+      *)
+        info "Bỏ qua cập nhật upstream — tiếp tục switch với cấu hình hiện tại trong $FLAKE_DIR."
+        ;;
+    esac
+  else
+    if [ -n "$rem_rev" ]; then
+      ok "Cấu hình bamos đã ở phiên bản mới nhất (@ ${cur_rev})"
+    fi
+  fi
 }
 
 # ---------- Cập nhật flake.lock (tải cấu hình mới nhất từ GitHub) ----------
@@ -247,17 +302,23 @@ cmd_switch() {
   help_requested "$@" && { cmd_help switch; return; }
   need_root switch "$@"
   local update=0
+  local skip_check=0
   while [ $# -gt 0 ]; do
     case "$1" in
       -u | --update) update=1 ;;
+      --no-check | --skip-check) skip_check=1 ;;
       -h | --help) cmd_help switch; return ;;
       *) die "Tùy chọn không hợp lệ: $1 (xem: bam help switch)" ;;
     esac
     shift
   done
+
   if [ "$update" -eq 1 ]; then
     update_lockfile
+  elif [ "$skip_check" -eq 0 ]; then
+    check_and_prompt_upstream_update
   fi
+
   rebuild switch
 }
 
@@ -265,17 +326,23 @@ cmd_boot() {
   help_requested "$@" && { cmd_help boot; return; }
   need_root boot "$@"
   local update=0
+  local skip_check=0
   while [ $# -gt 0 ]; do
     case "$1" in
       -u | --update) update=1 ;;
+      --no-check | --skip-check) skip_check=1 ;;
       -h | --help) cmd_help boot; return ;;
       *) die "Tùy chọn không hợp lệ: $1 (xem: bam help boot)" ;;
     esac
     shift
   done
+
   if [ "$update" -eq 1 ]; then
     update_lockfile
+  elif [ "$skip_check" -eq 0 ]; then
+    check_and_prompt_upstream_update
   fi
+
   rebuild boot
 }
 
@@ -501,6 +568,113 @@ cmd_publish() {
   ok "Đã commit, merge develop → main và push lên GitHub."
 }
 
+# ---------- Quản lý Profile (bam profile [list|status|enable|disable]) ----------
+cmd_profile() {
+  help_requested "$@" && { cmd_help profile; return; }
+  flake_exists
+
+  local sub="${1:-status}"
+  shift || true
+
+  local feat_file=""
+  if [ -f "$FLAKE_DIR/customConfig/features.nix" ]; then
+    feat_file="$FLAKE_DIR/customConfig/features.nix"
+  elif [ -f "$FLAKE_DIR/hosts/lg.nix" ]; then
+    feat_file="$FLAKE_DIR/hosts/lg.nix"
+  fi
+
+  [ -n "$feat_file" ] || die "Không tìm thấy file cấu hình (features.nix hoặc hosts/lg.nix) trong $FLAKE_DIR."
+
+  case "$sub" in
+    list | ls)
+      say "${C_BOLD}Danh sách các Profile có sẵn trong BamOS:${C_RESET}"
+      say "  ${C_CYAN}standard${C_RESET} : Cấu hình cơ bản (Văn phòng, lướt web, học tập, giải trí nhẹ — mặc định)"
+      say "  ${C_CYAN}dev${C_RESET}      : Lập trình viên (Zed Editor, Antigravity, Devenv, Nil LSP, Podman/Docker)"
+      say "  ${C_CYAN}studio${C_RESET}   : Sáng tạo nội dung (OBS Studio, NVENC/VAAPI, V4L2 webcam, GIMP, Audacity, Fonts)"
+      say "  ${C_CYAN}gaming${C_RESET}   : Game thủ (Steam, GameMode, MangoHud, ProtonUp-Qt, tối ưu kernel sysctl)"
+      say ""
+      say "Dùng:  bam profile status         (Xem trạng thái hiện tại)"
+      say "       bam profile enable <tên>   (Bật profile)"
+      say "       bam profile disable <tên>  (Tắt profile)"
+      ;;
+
+    status)
+      say "${C_BOLD}Trạng thái Profile trên máy ($feat_file):${C_RESET}"
+      say "  • standard : [${C_GREEN}BẬT${C_RESET}] (Nền tảng mặc định của hệ thống)"
+
+      for prof in dev studio gaming; do
+        if grep -Eq "^[[:space:]]*my\.${prof}\.enable[[:space:]]*=[[:space:]]*true;" "$feat_file" 2>/dev/null; then
+          say "  • $prof      : [${C_GREEN}BẬT${C_RESET}]"
+        else
+          say "  • $prof      : [${C_YELLOW}TẮT${C_RESET}]"
+        fi
+      done
+      say ""
+      say "Chạy '${C_CYAN}bam profile enable <tên>${C_RESET}' để bật hoặc '${C_CYAN}bam profile disable <tên>${C_RESET}' để tắt."
+      say "Sau khi đổi, chạy '${C_CYAN}bam switch${C_RESET}' để áp dụng."
+      ;;
+
+    enable | on)
+      local target="${1:-}"
+      [ -n "$target" ] || die "Vui lòng chỉ định tên profile cần bật (dev, studio, gaming). Vd: bam profile enable dev"
+      case "$target" in
+        dev | studio | gaming) ;;
+        standard)
+          ok "Profile 'standard' là nền tảng mặc định luôn được bật."
+          return 0
+          ;;
+        *)
+          die "Profile không hợp lệ: $target (chọn: dev, studio, gaming)."
+          ;;
+      esac
+
+      need_root profile "$sub" "$target"
+
+      if grep -Eq "^[[:space:]]*my\.${target}\.enable[[:space:]]*=[[:space:]]*true;" "$feat_file"; then
+        ok "Profile '$target' đã được BẬT sẵn trong $feat_file."
+      elif grep -Eq "^[[:space:]]*#[[:space:]]*my\.${target}\.enable[[:space:]]*=[[:space:]]*true;" "$feat_file"; then
+        sed -i -E "s/^[[:space:]]*#[[:space:]]*(my\.${target}\.enable[[:space:]]*=[[:space:]]*true;)/\1/" "$feat_file"
+        ok "Đã BẬT profile '$target' trong $feat_file."
+      else
+        # Thêm dòng my.<target>.enable = true; vào trước dấu ngoặc đóng cuối cùng
+        sed -i -E "s/^[[:space:]]*\}[[:space:]]*$/  my.${target}.enable = true;\n}/" "$feat_file"
+        ok "Đã thêm và BẬT profile '$target' trong $feat_file."
+      fi
+
+      info "Chạy 'bam switch' để áp dụng các thay đổi cho profile '$target'."
+      ;;
+
+    disable | off)
+      local target="${1:-}"
+      [ -n "$target" ] || die "Vui lòng chỉ định tên profile cần tắt (dev, studio, gaming). Vd: bam profile disable dev"
+      case "$target" in
+        dev | studio | gaming) ;;
+        standard)
+          warn "Profile 'standard' là nền tảng cốt lõi của BamOS, không thể tắt."
+          return 0
+          ;;
+        *)
+          die "Profile không hợp lệ: $target (chọn: dev, studio, gaming)."
+          ;;
+      esac
+
+      need_root profile "$sub" "$target"
+
+      if grep -Eq "^[[:space:]]*my\.${target}\.enable[[:space:]]*=[[:space:]]*true;" "$feat_file"; then
+        sed -i -E "s/^[[:space:]]*(my\.${target}\.enable[[:space:]]*=[[:space:]]*true;)/  # \1/" "$feat_file"
+        ok "Đã TẮT profile '$target' trong $feat_file."
+        info "Chạy 'bam switch' để gỡ bỏ/thu gọn các gói của profile '$target'."
+      else
+        ok "Profile '$target' hiện đang tắt."
+      fi
+      ;;
+
+    *)
+      die "Lệnh con không hợp lệ: $sub (dùng: bam profile [list|status|enable|disable])"
+      ;;
+  esac
+}
+
 # ---------- Trợ giúp ----------
 cmd_help() {
   local topic="${1:-}"
@@ -522,6 +696,7 @@ cmd_help() {
       say "  generations    Danh sách generation + khác biệt 2 bản gần nhất"
       say "  gc [số ngày]   Dọn rác /nix/store (mặc định giữ 7 ngày)"
       say "  info           Thông tin hệ thống (host, kernel, phần cứng...)"
+      say "  profile        Quản lý profile chuyên dụng (standard, dev, studio, gaming)"
       say "  doctor         Kiểm tra sức khỏe hệ thống"
       say "  publish \"msg\"   (máy dev) commit → merge develop→main → push GitHub"
       say "  version        Phiên bản bam CLI"
@@ -529,13 +704,13 @@ cmd_help() {
       say ""
       say "${C_BOLD}Môi trường:${C_RESET} BAM_FLAKE_DIR (thư mục flake) • BAM_HOST (tên host) • NO_COLOR (tắt màu)"
       say ""
-      say "Ví dụ: bam switch -u   •   bam info"
+      say "Ví dụ: bam profile list   •   bam profile enable dev   •   bam switch"
       ;;
-    switch | boot | build | dry | update | lock | iso | rollback | generations | gc | info | doctor | publish)
+    switch | boot | build | dry | update | lock | iso | rollback | generations | gc | info | profile | doctor | publish)
       say "${C_BOLD}Lệnh: bam $topic${C_RESET}"
       case "$topic" in
-        switch) say "Rebuild + áp dụng ngay cấu hình mới. -u/--update: chạy nix flake update trước." ;;
-        boot) say "Rebuild nhưng chỉ áp dụng khi khởi động lại. -u/--update: cập nhật trước." ;;
+        switch) say "Rebuild + áp dụng ngay cấu hình mới. Tự kiểm tra và hỏi cập nhật nếu upstream có bản mới. -u: cập nhật luôn; --no-check: bỏ qua kiểm tra." ;;
+        boot) say "Rebuild nhưng chỉ áp dụng khi khởi động lại. Tự kiểm tra upstream. -u: cập nhật luôn; --no-check: bỏ qua kiểm tra." ;;
         build) say "Build thử cấu hình mới (không ảnh hưởng hệ thống)." ;;
         dry) say "Dry-build: xem trước thay đổi của generation mới." ;;
         update) say "Lệnh cập nhật chính thức: tải cấu hình mới nhất từ GitHub (nix flake update) rồi rebuild switch. --boot: chỉ rebuild boot, áp dụng khi khởi động lại (an toàn hơn)." ;;
@@ -545,6 +720,7 @@ cmd_help() {
         generations) say "Liệt kê generation + diff 2 bản gần nhất (giống glf-history)." ;;
         gc) say "Dọn rác /nix/store giữ N ngày (mặc định 7) + đồng bộ boot menu. Vd: bam gc 7" ;;
         info) say "In thông tin hệ thống: host, phiên bản, kernel, GPU, RAM, disk, generation." ;;
+        profile) say "Quản lý profile tính năng chuyên dụng (standard, dev, studio, gaming). Lệnh con: list, status, enable <tên>, disable <tên>." ;;
         doctor) say "Kiểm tra: flake, dung lượng /nix/store, generation, flake.lock, git." ;;
         publish) say "Máy dev: git add → commit → checkout main → merge develop → push cả 2 branch (yêu cầu đang ở develop)." ;;
       esac
@@ -574,6 +750,7 @@ main() {
     gen | generations | history) cmd_generations "$@" ;;
     gc | clean) cmd_gc "$@" ;;
     info | systeminfo) cmd_info "$@" ;;
+    profile | profiles) cmd_profile "$@" ;;
     doctor | health | check) cmd_doctor "$@" ;;
     publish) cmd_publish "$@" ;;
     host) detect_host ;;

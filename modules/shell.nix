@@ -12,8 +12,18 @@
 }:
 
 {
-  # Git có sẵn cho MỌI user (identity do home-manager quản lý theo từng user)
-  programs.git.enable = true;
+  # Git có sẵn cho MỌI user (identity do home-manager quản lý theo từng user).
+  # safe.directory cho /etc/nixos để tránh lỗi dubious ownership khi Flake hoặc user thường truy cập.
+  programs.git = {
+    enable = true;
+    config = {
+      safe.directory = [
+        "/etc/nixos"
+        "/etc/nixos/*"
+      ];
+      init.defaultBranch = "main";
+    };
+  };
 
   # Zsh là shell đăng nhập khả dụng (users.users.*.shell = pkgs.zsh).
   # Cấu hình tương tác của user nằm ở ~/.zshrc (home-manager).

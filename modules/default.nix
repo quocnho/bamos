@@ -17,6 +17,7 @@
     ./packages.nix
     ./dev.nix
     ./studio.nix
+    ./gaming.nix
     ./update.nix
     ./bluetooth.nix
     ./virtualisation.nix

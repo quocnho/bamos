@@ -58,6 +58,7 @@
     {
       nixosConfigurations.bamos = nixpkgs.lib.nixosSystem {
         inherit system;
+        specialArgs = { inherit bamos; };
         modules = [
           ./configuration.nix
           ./customConfig

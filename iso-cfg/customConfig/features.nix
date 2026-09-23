@@ -126,6 +126,19 @@
   # Nếu máy là LAPTOP mà khi cài chọn nhầm "Desktop", bật dòng dưới:
   # my.power.enable = true; # TLP + suspend sâu (s2idle) + thermald
 
+  # ----------------------------------------------------------------------------
+  # ★ CÁC PROFILE CHUYÊN DỤNG (Có thể dùng lệnh: bam profile enable <tên>)
+  #   Hoặc tự bỏ dấu # để BẬT, thêm # để TẮT:
+  # ----------------------------------------------------------------------------
+  # 1. Profile LẬP TRÌNH VIÊN (Dev): Zed, Antigravity, Devenv, Nil LSP, v.v.
+  # my.dev.enable = true;
+
+  # 2. Profile SÁNG TẠO NỘI DUNG (Studio): OBS Studio + NVENC/VAAPI, V4L2 loopback, fonts...
+  # my.studio.enable = true;
+
+  # 3. Profile CHƠI GAME (Gaming): Steam, GameMode, MangoHud, tối ưu sysctl...
+  # my.gaming.enable = true;
+
   # ---------------- Thông tin hệ thống ----------------
   # Tên máy MẶC ĐỊNH: bamos (đặt ở đây — ghi đè mkDefault của Calamares).
   # Đổi tên máy của bạn bằng cách sửa giá trị dưới, KHÔNG cần đụng nơi khác.

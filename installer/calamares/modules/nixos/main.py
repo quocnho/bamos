@@ -193,7 +193,28 @@ def run():
     except subprocess.CalledProcessError as e:
         return ("Không ghi được /etc/nixos", e.output.decode("utf8", "replace"))
 
-    # 4) Pre-generate flake.lock (cần mạng; thất bại chỉ cảnh báo — nixos-install tự lock)
+    # 4) Khởi tạo Git repository cho /etc/nixos để Flake & Home-Manager lưu lại
+    # mọi thay đổi cấu hình mà không bị lỗi untracked files
+    try:
+        subprocess.check_call(["pkexec", "git", "-C", nixos_dir, "init"])
+        subprocess.check_call(["pkexec", "git", "-C", nixos_dir, "config", "user.name", fullname or "BamOS User"])
+        subprocess.check_call(["pkexec", "git", "-C", nixos_dir, "config", "user.email", "root@bamos.local"])
+        subprocess.check_call(["pkexec", "git", "-C", nixos_dir, "config", "init.defaultBranch", "main"])
+        subprocess.check_call(["pkexec", "git", "-C", nixos_dir, "add", "-A"])
+        subprocess.check_call([
+            "pkexec",
+            "git",
+            "-C",
+            nixos_dir,
+            "commit",
+            "-m",
+            "Initial commit by BamOS installer",
+            "--allow-empty",
+        ])
+    except Exception as e:
+        libcalamares.utils.warning("Khởi tạo git tại /etc/nixos thất bại: {}".format(e))
+
+    # 5) Pre-generate flake.lock (cần mạng; thất bại chỉ cảnh báo — nixos-install tự lock)
     libcalamares.job.setprogress(0.15)
     try:
         subprocess.check_output(
@@ -201,10 +222,12 @@ def run():
             stderr=subprocess.STDOUT,
             timeout=900,
         )
+        # Stage flake.lock sau khi lock thành công
+        subprocess.call(["pkexec", "git", "-C", nixos_dir, "add", "flake.lock"])
     except Exception as e:
         libcalamares.utils.warning("nix flake lock thất bại (cần mạng): {}".format(e))
 
-    # 5) nixos-install --flake <root>/etc/nixos#bamos (có thể 15-40 phút)
+    # 6) nixos-install --flake <root>/etc/nixos#bamos (có thể 15-40 phút)
     libcalamares.job.setprogress(0.20)
     try:
         subprocess.check_output(
