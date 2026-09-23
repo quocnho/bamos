@@ -46,7 +46,10 @@
       # recursion với useUserPackages (home-manager #594).
       userProbe = nixpkgs.lib.nixosSystem {
         inherit system;
-        modules = [ ./configuration.nix ];
+        modules = [
+          bamos.nixosModules.default
+          ./configuration.nix
+        ];
       };
       normalUsers = builtins.attrNames (
         nixpkgs.lib.filterAttrs (_: u: u.isNormalUser) userProbe.config.users.users
