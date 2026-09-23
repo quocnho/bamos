@@ -17,6 +17,8 @@
   environment.systemPackages = with pkgs; [
     # BamOS CLI — 1 lệnh `bam` quản lý hệ thống (switch/update/iso/gc/info/doctor...)
     (callPackage ../pkgs/bam { })
+    # BamOS Customizer — công cụ đồ họa cấu hình & cá nhân hóa hệ điều hành
+    bam-customizer
 
     # ---- Công cụ hệ thống (mọi máy) ----
     git # quản lý mã nguồn / lấy config

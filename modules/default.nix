@@ -22,6 +22,7 @@
     ./bluetooth.nix
     ./virtualisation.nix
     ./nix.nix
+    ./features.nix
   ];
 }
 

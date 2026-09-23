@@ -1,11 +1,40 @@
-# Ignore heavy static assets & binary directories for AI code search/indexing
+# ==============================================================================
+# BamOS Ignore Configuration for Antigravity & AI Agents
+# (.antigravityignore, .geminiignore, .ignore)
+# ==============================================================================
+
+# Git internals
+.git/
+
+# Build outputs & derivations
+result
+result*
+result-*/
+
+# Development environments
+.devenv/
+.direnv/
+
+# Binary & heavy static assets
 assets/images/
 assets/fonts/
 assets/icons/
+
+# Installer assets & temporary build caches
 installer/calamares/
+installer/iso/
+*.iso
+
+# Flake lockfile & system state (tránh tốn tokens không cần thiết)
 flake.lock
-result
-result*
-.devenv/
-.git/
+hardware-configuration.nix
+
+# Python & shell caches
 __pycache__/
+*.pyc
+
+# Editor & IDE temporary caches
+.vscode/
+.idea/
+*.swp
+*~

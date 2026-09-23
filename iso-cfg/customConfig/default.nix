@@ -30,6 +30,7 @@
   imports = [
     ./apps.nix # ứng dụng
     ./features.nix # tính năng hệ điều hành
+    ./customized.nix # cấu hình đồng bộ từ Bam Customizer
     # ./hardware.nix # (tùy chọn) thông tin phần cứng riêng
   ];
 }
