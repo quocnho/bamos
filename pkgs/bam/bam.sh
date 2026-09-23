@@ -197,6 +197,57 @@ remote_main_rev() {
   git ls-remote "$url" refs/heads/main 2>/dev/null | awk '{print substr($1, 1, 7)}' || true
 }
 
+# Cập nhật riêng một input trong flake.lock
+update_input() {
+  local input_name="$1"
+  flake_exists
+  info "Cập nhật ứng dụng '${input_name}' trong flake.lock..."
+  local owner
+  owner=$(stat -c %U:%G "$FLAKE_DIR/flake.lock" 2>/dev/null || true)
+  nix --extra-experimental-features "$NIX_FLAGS" flake lock --update-input "$input_name" "$FLAKE_DIR"
+  if [ -n "$owner" ] && [ "$(id -u)" -eq 0 ]; then
+    chown "$owner" "$FLAKE_DIR/flake.lock" 2>/dev/null || true
+  fi
+  ok "Đã cập nhật input '${input_name}' thành công."
+}
+
+# Kiểm tra cập nhật cho các ứng dụng vệ tinh của BamOS (như bam-customizer)
+check_and_prompt_apps_update() {
+  if ! check_network; then
+    return 0
+  fi
+
+  # Danh sách các ứng dụng vệ tinh cần theo dõi cập nhật: tên_input|git_url
+  local apps=("bam-customizer|https://github.com/quocnho/bam-customizer.git")
+
+  for item in "${apps[@]}"; do
+    local app_name="${item%%|*}"
+    local app_url="${item##*|}"
+    local cur_rev
+    cur_rev=$(lock_rev "$app_name")
+
+    if [ -n "$cur_rev" ]; then
+      local rem_rev
+      rem_rev=$(remote_main_rev "$app_url")
+      if [ -n "$rem_rev" ] && [ "$rem_rev" != "$cur_rev" ]; then
+        warn "Phát hiện phiên bản mới cho ứng dụng [${app_name}]: ${cur_rev} → ${rem_rev} (main)"
+        info "Binary cache sẽ được tải tự động từ: https://bamos.cachix.org"
+        printf "%s" "${C_YELLOW}[?] Bạn có muốn cập nhật ứng dụng [${app_name}] không? [y/N/có]: ${C_RESET}"
+        local ans
+        read -r ans < /dev/tty 2>/dev/null || read -r ans || ans="n"
+        case "$ans" in
+          y | Y | yes | YES | co | CO | Có | CÓ | c | C)
+            update_input "$app_name"
+            ;;
+          *)
+            info "Bỏ qua cập nhật [${app_name}] — tiếp tục switch với phiên bản hiện tại."
+            ;;
+        esac
+      fi
+    fi
+  done
+}
+
 # Kiểm tra nếu upstream bamos có commit mới trên GitHub và hỏi người dùng có muốn update không
 check_and_prompt_upstream_update() {
   local cur_rev
@@ -317,6 +368,7 @@ cmd_switch() {
     update_lockfile
   elif [ "$skip_check" -eq 0 ]; then
     check_and_prompt_upstream_update
+    check_and_prompt_apps_update
   fi
 
   rebuild switch
@@ -341,6 +393,7 @@ cmd_boot() {
     update_lockfile
   elif [ "$skip_check" -eq 0 ]; then
     check_and_prompt_upstream_update
+    check_and_prompt_apps_update
   fi
 
   rebuild boot

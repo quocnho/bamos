@@ -24,6 +24,16 @@
     "flakes"
   ];
 
+  # Binary Cache cho BamOS Apps (bam-customizer, ...)
+  nix.settings.substituters = [
+    "https://cache.nixos.org"
+    "https://bamos.cachix.org"
+  ];
+  nix.settings.trusted-public-keys = [
+    "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+    "bamos.cachix.org-1:Q3aY2G0xWk+z4w9wV2iO3u4dKjN/7k/p6Y1uI=" # cachix public key placeholder
+  ];
+
   # nix-ld: cho phép chạy các binary động (prebuilt cho Linux thường) trên NixOS.
   # Cần cho `uv` (Python do uv tự quản lý) và nhiều binary vendor khác.
   # (GLF-OS cũng bật tùy chọn này — xem modules/default/system.nix của họ.)

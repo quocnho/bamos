@@ -8,11 +8,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790159125,
-        "narHash": "sha256-d/e1MRXKuZENPUdvASNhMNajSqUBzaAep5eI7xCmjcA=",
+        "lastModified": 1790160102,
+        "narHash": "sha256-S92GW8pNgyRC9opgUprSCKdnvcylOd2zTvKOH+iN7n4=",
         "ref": "main",
-        "rev": "861f9a61c6aadef2d497b73e44063cf6877af3dc",
-        "revCount": 3,
+        "rev": "e9033a93851501c42ab9255203c38bb4cf0398ec",
+        "revCount": 6,
         "type": "git",
         "url": "ssh://git@github.com/quocnho/bam-customizer.git"
       },
