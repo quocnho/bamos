@@ -59,10 +59,13 @@ need_root() {
     warn "Lệnh cần quyền root — chạy lại qua sudo..."
     local abs
     abs=$(readlink -f "$0" 2>/dev/null || true)
+    local env_args=()
+    [ -n "${BAM_FLAKE_DIR:-}" ] && env_args+=("BAM_FLAKE_DIR=$BAM_FLAKE_DIR")
+    [ -n "${BAM_HOST:-}" ] && env_args+=("BAM_HOST=$BAM_HOST")
     if [ -n "$abs" ] && [ "${abs#/}" != "$abs" ]; then
-      exec sudo bash "$abs" "$sub" "$@"
+      exec sudo "${env_args[@]}" bash "$abs" "$sub" "$@"
     else
-      exec sudo "$0" "$sub" "$@"
+      exec sudo "${env_args[@]}" "$0" "$sub" "$@"
     fi
   fi
 }
@@ -88,13 +91,13 @@ detect_host() {
   fi
   local h
   h=$(hostname 2>/dev/null || true)
-  case "$h" in
-    lg | bamos)
+  if [ -f "$FLAKE_DIR/flake.nix" ]; then
+    # 1. Nếu hostname hiện tại có trong flake.nix thì ưu tiên dùng
+    if [ -n "$h" ] && grep -qE "nixosConfigurations\.${h}\b" "$FLAKE_DIR/flake.nix" 2>/dev/null; then
       printf '%s\n' "$h"
       return
-      ;;
-  esac
-  if [ -f "$FLAKE_DIR/flake.nix" ]; then
+    fi
+    # 2. Ngược lại dò xem flake chứa cấu hình lg hay bamos
     local m
     m=$(grep -oE 'nixosConfigurations\.(lg|bamos)' "$FLAKE_DIR/flake.nix" 2>/dev/null | head -n 1 | cut -d. -f2 || true)
     if [ -n "$m" ]; then
@@ -129,8 +132,12 @@ system_uptime() {
 # ---------- Rebuild (switch/boot/build/dry-build) ----------
 rebuild() {
   flake_exists
-  local action="$1" host tag
-  host=$(detect_host)
+  local action="$1" host_override="${2:-}" host tag
+  if [ -n "$host_override" ]; then
+    host="$host_override"
+  else
+    host=$(detect_host)
+  fi
 
   # Nếu FLAKE_DIR là git repository, tự động đưa các file mới/thay đổi vào staging (git add)
   # để Nix Flakes và Home-Manager luôn nhìn thấy toàn bộ file cấu hình của người dùng.
@@ -354,12 +361,20 @@ cmd_switch() {
   need_root switch "$@"
   local update=0
   local skip_check=0
+  local target_host=""
   while [ $# -gt 0 ]; do
     case "$1" in
       -u | --update) update=1 ;;
       --no-check | --skip-check) skip_check=1 ;;
       -h | --help) cmd_help switch; return ;;
-      *) die "Tùy chọn không hợp lệ: $1 (xem: bam help switch)" ;;
+      -*) die "Tùy chọn không hợp lệ: $1 (xem: bam help switch)" ;;
+      *)
+        if [ -z "$target_host" ]; then
+          target_host="$1"
+        else
+          die "Đối số không hợp lệ: $1 (xem: bam help switch)"
+        fi
+        ;;
     esac
     shift
   done
@@ -371,7 +386,7 @@ cmd_switch() {
     check_and_prompt_apps_update
   fi
 
-  rebuild switch
+  rebuild switch "$target_host"
 }
 
 cmd_boot() {
@@ -379,12 +394,20 @@ cmd_boot() {
   need_root boot "$@"
   local update=0
   local skip_check=0
+  local target_host=""
   while [ $# -gt 0 ]; do
     case "$1" in
       -u | --update) update=1 ;;
       --no-check | --skip-check) skip_check=1 ;;
       -h | --help) cmd_help boot; return ;;
-      *) die "Tùy chọn không hợp lệ: $1 (xem: bam help boot)" ;;
+      -*) die "Tùy chọn không hợp lệ: $1 (xem: bam help boot)" ;;
+      *)
+        if [ -z "$target_host" ]; then
+          target_host="$1"
+        else
+          die "Đối số không hợp lệ: $1 (xem: bam help boot)"
+        fi
+        ;;
     esac
     shift
   done
@@ -396,15 +419,15 @@ cmd_boot() {
     check_and_prompt_apps_update
   fi
 
-  rebuild boot
+  rebuild boot "$target_host"
 }
 
 cmd_build() {
-  rebuild build
+  rebuild build "${1:-}"
 }
 
 cmd_dry() {
-  rebuild dry-build
+  rebuild dry-build "${1:-}"
 }
 
 cmd_iso() {
@@ -738,34 +761,34 @@ cmd_help() {
       say "Cách dùng: bam <lệnh> [tùy chọn]"
       say ""
       say "${C_BOLD}Lệnh chính:${C_RESET}"
-      say "  switch [-u]    Cập nhật hệ thống (rebuild switch, tự gắn tag BamOS-YY.MM.DD-HH:MM)"
-      say "  boot [-u]      Như switch nhưng giữ hệ thống đang chạy (áp dụng khi khởi động lại)"
-      say "  build          Build thử cấu hình mới, không áp dụng"
-      say "  dry            Xem trước những gì sẽ thay đổi (dry-build)"
-      say "  update [--boot] Tải cấu hình mới nhất từ GitHub + cập nhật hệ thống ngay"
-      say "  lock           Chỉ cập nhật flake.lock (không rebuild)"
-      say "  iso            Build file ISO cài đặt cho người dùng khác"
-      say "  rollback       Quay về generation trước"
-      say "  generations    Danh sách generation + khác biệt 2 bản gần nhất"
-      say "  gc [số ngày]   Dọn rác /nix/store (mặc định giữ 7 ngày)"
-      say "  info           Thông tin hệ thống (host, kernel, phần cứng...)"
-      say "  profile        Quản lý profile chuyên dụng (standard, dev, studio, gaming)"
-      say "  doctor         Kiểm tra sức khỏe hệ thống"
-      say "  publish \"msg\"   (máy dev) commit → merge develop→main → push GitHub"
-      say "  version        Phiên bản bam CLI"
-      say "  help [lệnh]    Hướng dẫn chi tiết từng lệnh"
+      say "  switch [host] [-u]    Cập nhật hệ thống (rebuild switch, tự gắn tag BamOS-YY.MM.DD-HH:MM)"
+      say "  boot [host] [-u]      Như switch nhưng giữ hệ thống đang chạy (áp dụng khi khởi động lại)"
+      say "  build [host]          Build thử cấu hình mới, không áp dụng"
+      say "  dry [host]            Xem trước những gì sẽ thay đổi (dry-build)"
+      say "  update [--boot]       Tải cấu hình mới nhất từ GitHub + cập nhật hệ thống ngay"
+      say "  lock                  Chỉ cập nhật flake.lock (không rebuild)"
+      say "  iso                   Build file ISO cài đặt cho người dùng khác"
+      say "  rollback              Quay về generation trước"
+      say "  generations           Danh sách generation + khác biệt 2 bản gần nhất"
+      say "  gc [số ngày]          Dọn rác /nix/store (mặc định giữ 7 ngày)"
+      say "  info                  Thông tin hệ thống (host, kernel, phần cứng...)"
+      say "  profile               Quản lý profile chuyên dụng (standard, dev, studio, gaming)"
+      say "  doctor                Kiểm tra sức khỏe hệ thống"
+      say "  publish \"msg\"         (máy dev) commit → merge develop→main → push GitHub"
+      say "  version               Phiên bản bam CLI"
+      say "  help [lệnh]           Hướng dẫn chi tiết từng lệnh"
       say ""
       say "${C_BOLD}Môi trường:${C_RESET} BAM_FLAKE_DIR (thư mục flake) • BAM_HOST (tên host) • NO_COLOR (tắt màu)"
       say ""
-      say "Ví dụ: bam profile list   •   bam profile enable dev   •   bam switch"
+      say "Ví dụ: bam switch   •   bam switch bamos   •   bam profile list"
       ;;
     switch | boot | build | dry | update | lock | iso | rollback | generations | gc | info | profile | doctor | publish)
       say "${C_BOLD}Lệnh: bam $topic${C_RESET}"
       case "$topic" in
-        switch) say "Rebuild + áp dụng ngay cấu hình mới. Tự kiểm tra và hỏi cập nhật nếu upstream có bản mới. -u: cập nhật luôn; --no-check: bỏ qua kiểm tra." ;;
-        boot) say "Rebuild nhưng chỉ áp dụng khi khởi động lại. Tự kiểm tra upstream. -u: cập nhật luôn; --no-check: bỏ qua kiểm tra." ;;
-        build) say "Build thử cấu hình mới (không ảnh hưởng hệ thống)." ;;
-        dry) say "Dry-build: xem trước thay đổi của generation mới." ;;
+        switch) say "Rebuild + áp dụng ngay cấu hình mới. Cho phép truyền tên host (vd: bam switch bamos). Tự kiểm tra và hỏi cập nhật nếu upstream có bản mới. -u: cập nhật luôn; --no-check: bỏ qua kiểm tra." ;;
+        boot) say "Rebuild nhưng chỉ áp dụng khi khởi động lại. Cho phép truyền tên host (vd: bam boot bamos). Tự kiểm tra upstream. -u: cập nhật luôn; --no-check: bỏ qua kiểm tra." ;;
+        build) say "Build thử cấu hình mới (không ảnh hưởng hệ thống). Cho phép truyền tên host (vd: bam build bamos)." ;;
+        dry) say "Dry-build: xem trước thay đổi của generation mới. Cho phép truyền tên host (vd: bam dry bamos)." ;;
         update) say "Lệnh cập nhật chính thức: tải cấu hình mới nhất từ GitHub (nix flake update) rồi rebuild switch. --boot: chỉ rebuild boot, áp dụng khi khởi động lại (an toàn hơn)." ;;
         lock) say "Chỉ cập nhật flake.lock (input nixpkgs, bamos...) — không rebuild. Dùng khi bạn tự rebuild thủ công." ;;
         iso) say "Build ISO cài đặt (nix build .#iso), in đường dẫn + cách ghi USB." ;;
