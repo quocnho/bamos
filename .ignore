@@ -1,19 +1,37 @@
 # ==============================================================================
-# BamOS Ignore Configuration for Antigravity & AI Agents
+# BamOS & BamApps Ignore Configuration for Antigravity & AI Agents
 # (.antigravityignore, .geminiignore, .ignore)
+# Giúp tiết kiệm tối đa Token AI và tăng tốc độ indexing
 # ==============================================================================
 
 # Git internals
 .git/
 
-# Build outputs & derivations
+# Build outputs, derivations & binaries
 result
 result*
 result-*/
+build/
+dist/
+bin/
+target/
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
 
-# Development environments
+# Development environments & Package Managers
 .devenv/
 .direnv/
+.devenv.flake.nix
+node_modules/
+.pnpm-store/
+Cargo.lock
+pnpm-lock.yaml
+devenv.lock
+flake.lock
 
 # Binary & heavy static assets
 assets/images/
@@ -25,9 +43,28 @@ installer/calamares/
 installer/iso/
 *.iso
 
-# Flake lockfile & system state (tránh tốn tokens không cần thiết)
-flake.lock
+# System hardware & machine state
 hardware-configuration.nix
+
+# Database, Vector DB, Logs & Caches
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+data/*.db
+data/cache/
+*.log
+logs/
+.cache/
+
+# AI Models & Large Weights
+*.gguf
+*.bin
+*.onnx
+*.pt
+*.safetensors
+models/
 
 # Python & shell caches
 __pycache__/
@@ -38,3 +75,5 @@ __pycache__/
 .idea/
 *.swp
 *~
+Thumbs.db
+.DS_Store

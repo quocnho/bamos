@@ -102,10 +102,47 @@
     └── bam/                          # Bam CLI tool (`bam switch`, `bam update`, etc.)
 ```
 
+### Subsystem Shorthand Prefixes (`?`, `@`, `/`)
+AI Agent PHẢI tự động định tuyến toàn bộ thao tác context/file/command vào đúng thư mục con khi user mở đầu prompt bằng các tiền tố:
+- `?os:` hoặc `@os:` (hoặc `?bamos:`, `@bamos:`) -> Trỏ vào [BamOS](file:///home/quocnho/Projects/Bam/BamOS)
+- `?customizer:` hoặc `@customizer:` -> Trỏ vào [BamApps/bam-customizer](file:///home/quocnho/Projects/Bam/BamApps/bam-customizer)
+- `?notes:` hoặc `@notes:` -> Trỏ vào [BamApps/bam-notes](file:///home/quocnho/Projects/Bam/BamApps/bam-notes)
+- `?installer:` hoặc `@installer:` (hoặc `?iso:`) -> Trỏ vào [profiles/installer](file:///home/quocnho/Projects/Bam/BamOS/profiles/installer)
+- `?nvim:` hoặc `@nvim:` -> Trỏ vào [home/dev/nvim](file:///home/quocnho/Projects/Bam/BamOS/home/dev/nvim)
+- Khi nhận tiền tố, Agent luôn gắn tag `[Target: <subsystem>]` ở đầu câu trả lời và cô lập hoàn toàn thao tác vào subsystem đó.
+
 ## 2. Token Saving Guidelines for AI
-- **Sửa Neovim/LSP/Plugins**: Mở trực tiếp thư mục `home/dev/nvim/` và `home/nvim/lua/bamos/*`.
-- **Sửa Shell/Aliases/Prompt**: Mở trực tiếp `home/programs/shell/aliases.nix` hoặc `zsh.nix`.
-- **Sửa Desktop/GNOME**: Mở `modules/gnome/dconf.nix`, `extensions.nix`, `keybindings.nix`.
-- **Sửa Audio/PipeWire**: Mở `modules/audio/noise-suppression.nix` hoặc `low-latency.nix`.
-- **Sửa Power/TLP**: Mở `modules/power/tlp.nix`.
-- **Tuyệt đối không đọc**: `assets/images/`, `assets/fonts/`, `flake.lock`.
+- **Targeted Reading**: Sử dụng `grep_search` và `view_file` với `StartLine`/`EndLine` cụ thể. Không đọc file lướt trên diện rộng.
+- **Targeted Edits**: Ưu tiên sử dụng `replace_file_content` thay vì ghi đè lại toàn bộ file.
+- **Định tuyến chuyên biệt**:
+  - **Sửa Neovim/LSP/Plugins**: Mở trực tiếp thư mục `home/dev/nvim/` và `home/nvim/lua/bamos/*`.
+  - **Sửa Shell/Aliases/Prompt**: Mở trực tiếp `home/programs/shell/aliases.nix` hoặc `zsh.nix`.
+  - **Sửa Desktop/GNOME**: Mở `modules/gnome/dconf.nix`, `extensions.nix`, `keybindings.nix`.
+  - **Sửa Audio/PipeWire**: Mở `modules/audio/noise-suppression.nix` hoặc `low-latency.nix`.
+  - **Sửa Power/TLP**: Mở `modules/power/tlp.nix`.
+- **Tuyệt đối không đọc**: `assets/images/`, `assets/fonts/`, `assets/icons/`, `flake.lock`, `Cargo.lock`, `target/`, file nhị phân.
+
+## 3. Clean Architecture & Micro-Modules Rules
+- **Ngưỡng trần giới hạn dòng (Strict Ceiling)**:
+  - Mọi file cấu hình NixOS / Home-Manager: **TỐI ĐA < 80 dòng/file**. Khi đạt ~70 dòng, chủ động tách thành micro-module con và dùng `default.nix` làm aggregator.
+  - Mọi file mã nguồn Rust / C++ / Shell: **TỐI ĐA < 100 dòng/file**. Proactively tách nhỏ structs, helpers, components.
+- **Strict FOSS & No Commercial License (Phi thương mại & Tự do 100%)**:
+  - Mọi gói phần mềm, phông chữ và thư viện đồ họa tích hợp vào BamOS BẮT BUỘC có bản quyền nguồn mở tự do (GPL-3.0, MIT, Apache 2.0, BSD, SIL OFL).
+  - Tuyệt đối không tích hợp thư viện, font hay theme có điều khoản bản quyền thương mại có phí.
+
+## 4. Versioning Standard (`AA.BB.CC`) & Git Workflow
+- **Định dạng**: `AA.BB.CC`
+  - **`AA` (Năm)**: 2 chữ số cuối của năm hiện tại (ví dụ: năm 2026 -> `AA = 26`).
+  - **`BB` (Milestone kiến trúc)**: Bắt đầu từ `01`. Tăng khi có tái cấu trúc nền tảng lớn toàn hệ thống.
+  - **`CC` (Sprint / Release cycle)**: Bắt đầu từ `01`. Tăng sau mỗi lần hoàn thành sprint hoặc phát hành ISO/App mới (`v26.01.01` -> `v26.01.02`).
+- **Quy định Nhánh Git**:
+  - `develop`: Nhánh làm việc chính hàng ngày cho toàn bộ commit tính năng.
+  - `main`: Nhánh ổn định (production/release). CHỈ merge từ `develop` vào `main` khi xong sprint kèm cập nhật `CC` và gắn Git Tag `vAA.BB.CC`.
+- **Commit Standard**: Conventional Commits (`feat(...)`, `fix(...)`, `refactor(...)`, `docs(...)`, `chore(...)`).
+- **Zero Bloat Invariant**: Không bao giờ commit file build derivations (`result`, `result-*`), ISO images, `.direnv`, `.devenv`, `target/`.
+
+## 5. Agile Vibe Coding Pipeline (idea.md ➔ bk_idea.md)
+Khi người dùng đưa ra yêu cầu mới (qua đoạn chat hoặc viết trong `idea.md`):
+1. **Refine & Reframe**: AI Agent chủ động đọc hiểu, tinh chỉnh, cấu trúc hóa yêu cầu theo phong cách kỹ thuật chuẩn mực (Bối cảnh, Mục tiêu, Subsystem tác động, Thiết kế giải pháp đề xuất, Acceptance Criteria).
+2. **Xác thực (Verification)**: Hỏi lại người dùng để đối soát và xác nhận nội dung diễn đạt đã đúng ý định và đầy đủ hay chưa.
+3. **Lưu trữ & Đồng bộ**: Sau khi người dùng xác nhận, chuyển ý tưởng đã chuẩn hóa vào `bk_idea.md`, dọn sạch `idea.md` và tiến hành hiện thực hóa code.

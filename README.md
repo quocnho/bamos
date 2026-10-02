@@ -276,3 +276,18 @@ Bật sẵn trên máy LG (`my.studio.enable` trong `hosts/lg.nix`), tham khảo
 - **Branding riêng**: hiện dùng branding `nixos` của package — có thể thêm
   `installer/calamares/branding/bamos/` và đổi `branding:` trong settings.conf.
 - **Binary cache (Attic)**: đẩy closure lên cache riêng để `nixos-install` tải nhanh hơn (GLF-OS dùng Attic + CI).
+
+---
+
+## 🎋 Quản Trị Phát Triển & Vibe Coding với AI Agent
+
+Hệ sinh thái BamOS & BamApps áp dụng phương thức phối hợp **Solo Maintainer + AI Agent** chuyên nghiệp:
+- **Tiếp nhận ý tưởng**: Ghi nhanh yêu cầu hoặc tính năng mới vào [idea.md](file:///home/quocnho/Projects/Bam/BamOS/idea.md) ➔ AI tinh chỉnh, đối chiếu kiến trúc ➔ Lưu trữ tại [bk_idea.md](file:///home/quocnho/Projects/Bam/BamOS/bk_idea.md).
+- **Quy chuẩn Git & Versioning (`AA.BB.CC`)**:
+  - Phát triển tính năng trên nhánh `develop`.
+  - Kết thúc mỗi Sprint, nghiệm thu Definition of Done (DoD) và merge sang `main` kèm tag `vAA.BB.CC` (Baseline hiện tại: `v26.01.01`).
+- **Tiết kiệm Token AI & Tối ưu Tốc độ**:
+  - Cấu hình ignore nghiêm ngặt qua `.antigravityignore`, `.geminiignore`, `.ignore` để loại trừ `result`, `.direnv`, `target/`, assets nhị phân nặng.
+  - Định tuyến nhanh qua các tiền tố shorthand: `?os:`, `?customizer:`, `?notes:`, `?installer:`, `?nvim:`, `?audio:`, `?desktop:`.
+  - Tuân thủ nghiêm ngặt triết lý Atomic Micro-Modules (< 80 dòng/file Nix, < 100 dòng/file Rust/C++).
+

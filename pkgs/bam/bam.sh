@@ -345,6 +345,7 @@ cmd_update() {
   done
   check_network
   update_lockfile
+  check_and_prompt_apps_update
   check_disk
   if [ "$boot_only" -eq 1 ]; then
     rebuild boot
