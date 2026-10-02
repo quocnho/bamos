@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../BamApps/bam-customizer"
+		}
+	],
+	"settings": {
+		"clangd.arguments": [
+			"--compile-commands-dir=${workspaceFolder}/pkgs/troly/build",
+			"--background-index",
+			"--header-insertion=never"
+		],
+		"direnv.restart.automatic": true,
+		"files.associations": {
+			"*.nix": "nix"
+		}
+	}
+}
