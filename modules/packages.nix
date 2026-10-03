@@ -19,6 +19,8 @@
     (callPackage ../pkgs/bam { })
     # BamOS Customizer — công cụ đồ họa cấu hình & cá nhân hóa hệ điều hành
     bam-customizer
+    # Bam Trợ Lý (AI Assistant) — trợ lý ảo linh vật & chat ReAct native
+    bam-troly
 
     # ---- Công cụ hệ thống (mọi máy) ----
     git # quản lý mã nguồn / lấy config

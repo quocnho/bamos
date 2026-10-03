@@ -11,6 +11,10 @@
       url = "git+ssh://git@github.com/quocnho/bam-customizer.git?ref=main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    bam-troly = {
+      url = "git+ssh://git@github.com/quocnho/bam-notes.git?ref=main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -19,13 +23,15 @@
       nixpkgs,
       home-manager,
       bam-customizer,
+      bam-troly,
       ...
     }:
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
-      bamCustomizerOverlay = final: prev: {
+      bamOverlay = final: prev: {
         bam-customizer = bam-customizer.packages.${system}.default;
+        bam-troly = bam-troly.packages.${system}.default;
       };
     in
     {
@@ -50,7 +56,7 @@
         lg = lib.nixosSystem {
           inherit system;
           modules = [
-            { nixpkgs.overlays = [ bamCustomizerOverlay ]; }
+            { nixpkgs.overlays = [ bamOverlay ]; }
             ./configuration.nix
             home-manager.nixosModules.home-manager
             {
@@ -67,7 +73,7 @@
         installer = lib.nixosSystem {
           inherit system;
           modules = [
-            { nixpkgs.overlays = [ bamCustomizerOverlay ]; }
+            { nixpkgs.overlays = [ bamOverlay ]; }
             "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-graphical-calamares-gnome.nix"
             ./hosts/installer.nix
           ];
@@ -77,6 +83,7 @@
       packages.${system} = {
         bam = nixpkgs.legacyPackages.${system}.callPackage ./pkgs/bam { };
         bam-customizer = bam-customizer.packages.${system}.default;
+        bam-troly = bam-troly.packages.${system}.default;
         iso = self.nixosConfigurations.installer.config.system.build.isoImage;
         default = self.nixosConfigurations.lg.config.system.build.toplevel;
       };
