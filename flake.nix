@@ -12,7 +12,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     bam-troly = {
-      url = "git+ssh://git@github.com/quocnho/bam-notes.git?ref=main";
+      url = "git+ssh://git@github.com/quocnho/bam-troly.git?ref=main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };

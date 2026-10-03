@@ -30,18 +30,18 @@
         ]
       },
       "locked": {
-        "lastModified": 1791005477,
-        "narHash": "sha256-X5LO2tnmZnN1xJI/mbFIca2lEbi+mMhF613AJICnZuo=",
+        "lastModified": 1791033147,
+        "narHash": "sha256-0gi0y1OW/ISfjPNkL9nuBlq+79Ad8SJBP2SwMrRy3z8=",
         "ref": "main",
-        "rev": "e5a51b11eb15bc813ee14d8993e9b6074aa6c752",
-        "revCount": 28,
+        "rev": "ed8ccb05cf9e5b6835a50243b2a417b270b4e692",
+        "revCount": 30,
         "type": "git",
-        "url": "ssh://git@github.com/quocnho/bam-notes.git"
+        "url": "ssh://git@github.com/quocnho/bam-troly.git"
       },
       "original": {
         "ref": "main",
         "type": "git",
-        "url": "ssh://git@github.com/quocnho/bam-notes.git"
+        "url": "ssh://git@github.com/quocnho/bam-troly.git"
       }
     },
     "flake-utils": {
