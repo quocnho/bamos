@@ -13,8 +13,16 @@ set -euo pipefail
 PROG="bam"
 VERSION="1.1.0"
 
-# Thư mục chứa flake (mặc định: /etc/nixos — repo bamos hoặc flake máy đích)
-FLAKE_DIR="${BAM_FLAKE_DIR:-/etc/nixos}"
+# Thư mục chứa flake: ưu tiên env BAM_FLAKE_DIR, hoặc thư mục hiện tại nếu có flake.nix, hoặc /etc/nixos
+if [ -n "${BAM_FLAKE_DIR:-}" ]; then
+  FLAKE_DIR="$BAM_FLAKE_DIR"
+elif [ -f "$(pwd)/flake.nix" ] && grep -q "nixosConfigurations" "$(pwd)/flake.nix" 2>/dev/null; then
+  FLAKE_DIR="$(pwd)"
+elif [ -f "/home/quocnho/Projects/Bam/BamOS/flake.nix" ]; then
+  FLAKE_DIR="/home/quocnho/Projects/Bam/BamOS"
+else
+  FLAKE_DIR="/etc/nixos"
+fi
 
 # ---------- Màu (tắt khi không phải terminal hoặc NO_COLOR) ----------
 if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
