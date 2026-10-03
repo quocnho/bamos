@@ -67,9 +67,12 @@ need_root() {
     warn "Lệnh cần quyền root — chạy lại qua sudo..."
     local abs
     abs=$(readlink -f "$0" 2>/dev/null || true)
-    local env_args=()
-    [ -n "${BAM_FLAKE_DIR:-}" ] && env_args+=("BAM_FLAKE_DIR=$BAM_FLAKE_DIR")
-    [ -n "${BAM_HOST:-}" ] && env_args+=("BAM_HOST=$BAM_HOST")
+    local host_val
+    host_val=$(detect_host)
+    local env_args=(
+      "BAM_FLAKE_DIR=${FLAKE_DIR}"
+      "BAM_HOST=${host_val}"
+    )
     if [ -n "$abs" ] && [ "${abs#/}" != "$abs" ]; then
       exec sudo "${env_args[@]}" bash "$abs" "$sub" "$@"
     else
